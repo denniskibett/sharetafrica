@@ -29,8 +29,6 @@
     @vite([
         'resources/css/app.css',
         'resources/js/app.js',
-        'resources/js/bootstrap.js',
-        'resources/js/index.js',
     ])
 
     <style>
