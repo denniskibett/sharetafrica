@@ -117,7 +117,7 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::middleware('role:admin|super_admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/waiting-list', [UserController::class, 'index'])->name('waiting_list');
+        Route::get('/waiting-list', [UserController::class, 'waitingList'])->name('waiting_list');
         Route::post('/waiting-list/{user}/invite', [UserController::class, 'invite'])->name('waiting_list.invite');
     });
 });
@@ -128,4 +128,4 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-require __DIR__ . '/auth.php';              
+require __DIR__ . '/auth.php';
