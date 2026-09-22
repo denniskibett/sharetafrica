@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\PhoneHelper;
 use App\Models\Company;
 use App\Models\DeveloperApplication;
 use App\Models\Enquiry;
 use App\Models\TradeApplication;
 use App\Models\User;
 use App\Models\WaitingListEntry;
+use App\Rules\ValidKenyanPhone;
+use App\Services\SmsService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class HomeController extends Controller
@@ -39,7 +43,7 @@ class HomeController extends Controller
         $data = $request->validate([
             'name'    => 'required|string|max:120',
             'email'   => 'required|email|max:190',
-            'phone'   => 'nullable|string|max:32',
+            'phone'   => ['nullable', 'string', 'max:32', new ValidKenyanPhone()],
             'country' => 'nullable|string|size:2',
         ]);
 
@@ -60,7 +64,7 @@ class HomeController extends Controller
             'name'     => 'required|string|max:120',
             'business' => 'required|string|max:190',
             'email'    => 'required|email|max:190',
-            'phone'    => 'required|string|max:32',
+            'phone'    => ['required', 'string', 'max:32', new ValidKenyanPhone()],
             'country'  => 'nullable|string|size:2',
             'rails'    => 'nullable|string|max:255',
             'volume'   => 'nullable|string|max:60',
@@ -89,7 +93,7 @@ class HomeController extends Controller
             'name'                => 'required|string|max:120',
             'business'            => 'required|string|max:190',
             'email'               => 'required|email|max:190',
-            'phone'               => 'required|string|max:32',
+            'phone'               => ['required', 'string', 'max:32', new ValidKenyanPhone()],
             'trade_type'          => 'required|in:importer,exporter,both,diaspora,intra_africa',
             'corridor'            => 'nullable|string|max:190',
             'corridor_other'      => 'nullable|string|max:190|required_if:corridor,OTHER',
@@ -206,7 +210,7 @@ class HomeController extends Controller
             'name'     => 'required|string|max:120',
             'business' => 'nullable|string|max:190',
             'email'    => 'required|email|max:190',
-            'phone'    => 'nullable|string|max:32',
+            'phone'    => ['nullable', 'string', 'max:32', new ValidKenyanPhone()],
             'country'  => 'nullable|string|max:60',
             'brief'    => 'required|string|max:3000',
         ]);
@@ -258,8 +262,15 @@ class HomeController extends Controller
             $user->status            = true;
         }
 
+        // Normalize incoming phone to 254XXXXXXXXX before storing.
+        // If the user already has a phone, don't overwrite it.
+        $incomingPhone = $data['phone'] ?? null;
+        if ($incomingPhone) {
+            $incomingPhone = PhoneHelper::format($incomingPhone);
+        }
+
         $user->name    = $user->name    ?: ($data['name']  ?? null);
-        $user->phone   = $user->phone   ?: ($data['phone'] ?? null);
+        $user->phone   = $user->phone   ?: $incomingPhone;
         $user->country = $user->country ?: ($data['country'] ?? null);
 
         // First intent wins
@@ -295,12 +306,19 @@ class HomeController extends Controller
         );
     }
 
+    /**
+     * Attach a waiting-list entry for the given user.
+     *
+     * Redirects explicitly to /personal (instead of back()) so the response
+     * is deterministic — never falls back to a POST-only URL from stale
+     * session state.
+     */
     protected function attachWaitingList(User $user, string $intent, string $source, array $meta = [])
     {
         $existing = WaitingListEntry::where('user_id', $user->id)->first();
 
         if ($existing) {
-            return back()
+            return redirect()->route('personal')
                 ->with('waitlist_received', true)
                 ->with('waitlist_message', 'You are already on the Sharet waiting list. We will be in touch when it is your turn.');
         }
@@ -315,15 +333,54 @@ class HomeController extends Controller
                 'ip_address' => request()->ip(),
                 'user_agent' => substr((string) request()->userAgent(), 0, 500),
             ]);
+
+            // Send welcome SMS (Safaricom only, non-blocking)
+            $this->sendWelcomeSms($user);
+
         } catch (QueryException $e) {
-            return back()
+            return redirect()->route('personal')
                 ->with('waitlist_received', true)
                 ->with('waitlist_message', 'You are already on the Sharet waiting list. We will be in touch when it is your turn.');
         }
 
-        return back()
+        return redirect()->route('personal')
             ->with('waitlist_received', true)
             ->with('waitlist_message', 'You are on the list. We will be in touch when it is your turn — usually within a few weeks.');
+    }
+
+    /**
+     * Send the "welcome to the waitlist" SMS to a new signup.
+     * Only fires for Safaricom numbers with a valid phone — other cases are logged and skipped.
+     */
+    protected function sendWelcomeSms(User $user): void
+    {
+        if (empty($user->phone)) {
+            Log::info('Welcome SMS skipped — no phone on record', ['user_id' => $user->id]);
+            return;
+        }
+
+        if (!PhoneHelper::isSafaricom($user->phone)) {
+            Log::info('Welcome SMS skipped — not Safaricom', [
+                'user_id' => $user->id,
+                'phone'   => $user->phone,
+            ]);
+            return;
+        }
+
+        $firstName = explode(' ', trim((string) $user->name))[0] ?: $user->name;
+
+        $message = "Hi {$firstName}, thanks for joining the Sharet Africa waiting list! "
+                 . "We'll text you when your wallet is ready. Reply STOP to opt out.";
+
+        $result = app(SmsService::class)->send($user->phone, $message, 'transactional');
+
+        if (!($result['success'] ?? false)) {
+            Log::warning('Welcome SMS failed', [
+                'user_id' => $user->id,
+                'phone'   => $user->phone,
+                'error'   => $result['error'] ?? 'unknown',
+            ]);
+        }
     }
 
     protected function intentFromAudience(string $audience): string
