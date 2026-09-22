@@ -244,7 +244,15 @@
                       <label for="p-phone">Phone number</label>
                       <input id="p-phone" name="phone" type="tel"
                             value="{{ old('phone') }}"
-                            placeholder="+254 712 XXX XXX" />
+                            placeholder="0712 345 678"
+                            pattern="(?:\+?254|0)?[17][0-9]{8}"
+                            maxlength="16"
+                            inputmode="tel"
+                            autocomplete="tel"
+                            title="Enter a valid Kenyan number: 0712 345 678, +254 712 345 678, or 254712345678" />
+                      <small style="display:block; margin-top:4px; color: var(--fg-mute); font-size: 12px;">
+                          Kenyan number only — e.g., 0712 345 678 or +254 712 345 678
+                      </small>
                       @error('phone')<span class="form-error">{{ $message }}</span>@enderror
                   </div>
               </div>

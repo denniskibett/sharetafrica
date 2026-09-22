@@ -62,7 +62,8 @@ class SmsService
         try {
             $response = Http::withHeaders($headers)
                 ->withoutVerifying()
-                ->timeout(30)
+                ->connectTimeout(5)
+                ->timeout(10)
                 ->post($this->baseUrl . '/sms/send', $payload);
 
             $body = $response->json() ?? [];
