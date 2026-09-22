@@ -434,11 +434,12 @@ document.addEventListener('alpine:init', () => {
                         permission: 'admin.users',
                         icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z',
                         children: [
-                            { label: 'Users',     link: '/users', page: 'users',     permission: 'admin.users' },
-                            { label: 'Companies', link: '#',       page: 'companies', permission: 'admin.companies' },
-                            { label: 'Roles',     link: '#',       page: 'roles',     permission: 'admin.roles' },
-                            { label: 'Audit Log', link: '#',       page: 'audit',     permission: 'admin.audit' },
-                            { label: 'System',    link: '#',       page: 'system',    permission: 'admin.system' }
+                            { label: 'Users',     link: '/users',           page: 'users',     permission: 'admin.users' },
+                            { label: 'Companies', link: '#',                 page: 'companies', permission: 'admin.companies' },
+                            { label: 'Roles',     link: '#',                 page: 'roles',     permission: 'admin.roles' },
+                            { label: 'SMS Logs',  link: '/admin/sms-logs',   page: 'smsLogs',   permission: 'admin.users' },
+                            { label: 'Audit Log', link: '#',                 page: 'audit',     permission: 'admin.audit' },
+                            { label: 'System',    link: '#',                 page: 'system',    permission: 'admin.system' }
                         ]
                     }
                 ]
@@ -537,6 +538,7 @@ document.addEventListener('alpine:init', () => {
                 '/wallet/transfer': 'walletTransfer',
                 '/wallet/transactions': 'walletTransactions',
                 '/admin/waiting-list': 'waitingList',
+                '/admin/sms-logs': 'smsLogs',
                 '/users': 'users'
             };
             const page = exactMatches[path] ?? 'dashboard';

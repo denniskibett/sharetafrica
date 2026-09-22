@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\WaitingListEntry;
 use App\Services\SmsService;
-use App\Helpers\PhoneHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -305,15 +304,15 @@ class UserController extends Controller
 
     /**
      * Send the "you're approved" SMS to a user who just got invited.
-     * Only fires for Safaricom numbers — other networks are skipped.
+     *
+     * The Safaricom filter and the sms_logs table write both live inside
+     * SmsService::sendToSafaricom() — so this method just builds the
+     * message and delegates.
      */
     protected function notifyInvitedUser(User $user): void
     {
-        if (!PhoneHelper::isSafaricom($user->phone)) {
-            Log::info('Invite SMS skipped — not Safaricom', [
-                'user_id' => $user->id,
-                'phone'   => $user->phone,
-            ]);
+        if (empty($user->phone)) {
+            Log::info('Invite SMS skipped — no phone on record', ['user_id' => $user->id]);
             return;
         }
 
@@ -323,14 +322,12 @@ class UserController extends Controller
         $message = "Hi {$firstName}, great news — you've been approved for Sharet. "
                  . "Log in to start onboarding: {$onboardingUrl}";
 
-        $result = app(SmsService::class)->send($user->phone, $message, 'transactional');
-
-        if (!($result['success'] ?? false)) {
-            Log::warning('Invite SMS failed', [
-                'user_id' => $user->id,
-                'phone'   => $user->phone,
-                'error'   => $result['error'] ?? 'unknown',
-            ]);
-        }
+        app(SmsService::class)->sendToSafaricom(
+            $user->phone,
+            $message,
+            'transactional',
+            'waitlist_invite',
+            $user->id
+        );
     }
 }

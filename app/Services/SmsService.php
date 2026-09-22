@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Helpers\PhoneHelper;
+use App\Models\SmsLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -24,29 +25,78 @@ class SmsService
     }
 
     /**
-     * Send an SMS via KenyaSMS.
+     * Send an SMS via KenyaSMS and persist every attempt to `sms_logs`.
      *
+     * @param  string|null $phone
+     * @param  string      $message
+     * @param  string|null $type     transactional | promotional
+     * @param  string|null $context  short tag like 'waitlist_welcome', 'invite'
+     * @param  int|null    $userId   optionally link to a user record
      * @return array{success: bool, message_id?: string, status?: string, error?: string}
      */
-    public function send(?string $phone, string $message, ?string $type = null): array
-    {
-        $normalized = PhoneHelper::format($phone);
+    public function send(
+        ?string $phone,
+        string $message,
+        ?string $type = null,
+        ?string $context = null,
+        ?int $userId = null
+    ): array {
+        $messageType = $type ?: $this->defaultType;
+        $normalized  = PhoneHelper::format($phone);
 
+        // ---- 1. Invalid phone: log and bail -------------------------------
         if (!$normalized) {
             Log::warning('SmsService: invalid phone number', ['phone' => $phone]);
+
+            SmsLog::create([
+                'user_id'      => $userId,
+                'recipient'    => (string) $phone,
+                'message'      => $message,
+                'message_type' => $messageType,
+                'provider'     => 'kenyasms',
+                'status'       => SmsLog::STATUS_SKIPPED,
+                'error'        => 'Invalid phone number',
+                'context'      => $context,
+            ]);
+
             return ['success' => false, 'error' => 'Invalid phone number'];
         }
 
+        // ---- 2. Missing API key: log and bail -----------------------------
         if (empty($this->apiKey)) {
             Log::error('SmsService: KENYASMS_KEY is not configured');
+
+            SmsLog::create([
+                'user_id'      => $userId,
+                'recipient'    => $normalized,
+                'message'      => $message,
+                'message_type' => $messageType,
+                'provider'     => 'kenyasms',
+                'status'       => SmsLog::STATUS_FAILED,
+                'error'        => 'SMS provider not configured',
+                'context'      => $context,
+            ]);
+
             return ['success' => false, 'error' => 'SMS provider not configured'];
         }
 
+        // ---- 3. Create the log row in "queued" state ----------------------
+        $logRow = SmsLog::create([
+            'user_id'      => $userId,
+            'recipient'    => $normalized,
+            'message'      => $message,
+            'message_type' => $messageType,
+            'provider'     => 'kenyasms',
+            'status'       => SmsLog::STATUS_QUEUED,
+            'context'      => $context,
+        ]);
+
+        // ---- 4. Build the request -----------------------------------------
         $payload = [
             'sender_id'    => $this->senderId,
             'recipient'    => $normalized,
             'message'      => $message,
-            'message_type' => $type ?: $this->defaultType,
+            'message_type' => $messageType,
         ];
 
         $headers = [
@@ -59,6 +109,7 @@ class SmsService
             $headers['X-Sandbox-Mode'] = 'true';
         }
 
+        // ---- 5. Send ------------------------------------------------------
         try {
             $response = Http::withHeaders($headers)
                 ->withoutVerifying()
@@ -68,14 +119,24 @@ class SmsService
 
             $body = $response->json() ?? [];
 
+            // 5a. Success path
             if ($response->successful()) {
                 $messageId = $body['data']['message_id'] ?? $body['message_id'] ?? null;
                 $status    = $body['data']['status'] ?? $body['status'] ?? 'queued';
+                $cost      = $body['data']['cost'] ?? $body['cost'] ?? null;
+
+                $logRow->update([
+                    'status'              => $status === 'queued' ? SmsLog::STATUS_QUEUED : SmsLog::STATUS_SENT,
+                    'provider_message_id' => $messageId,
+                    'provider_response'   => $body,
+                    'cost'                => $cost,
+                ]);
 
                 Log::info('SmsService: SMS sent', [
                     'phone'      => $normalized,
                     'message_id' => $messageId,
                     'status'     => $status,
+                    'context'    => $context,
                 ]);
 
                 return [
@@ -85,20 +146,40 @@ class SmsService
                 ];
             }
 
+            // 5b. API rejected (4xx/5xx)
+            $errorMessage = $body['message'] ?? $body['error'] ?? 'SMS provider rejected the request';
+
+            $logRow->update([
+                'status'            => SmsLog::STATUS_REJECTED,
+                'provider_response' => $body,
+                'error'             => $errorMessage,
+                'failed_at'         => now(),
+            ]);
+
             Log::error('SmsService: KenyaSMS API error', [
                 'status' => $response->status(),
                 'body'   => $response->body(),
                 'phone'  => $normalized,
+                'context'=> $context,
             ]);
 
             return [
                 'success' => false,
-                'error'   => $body['message'] ?? $body['error'] ?? 'SMS provider rejected the request',
+                'error'   => $errorMessage,
             ];
+
         } catch (\Throwable $e) {
+            // 5c. Network / timeout / exception
+            $logRow->update([
+                'status'    => SmsLog::STATUS_FAILED,
+                'error'     => $e->getMessage(),
+                'failed_at' => now(),
+            ]);
+
             Log::error('SmsService: exception', [
-                'phone' => $normalized,
-                'error' => $e->getMessage(),
+                'phone'   => $normalized,
+                'error'   => $e->getMessage(),
+                'context' => $context,
             ]);
 
             return [
@@ -110,14 +191,29 @@ class SmsService
 
     /**
      * Send only if the recipient is a Safaricom number.
-     * Returns a skipped response for non-Safaricom numbers.
      */
-    public function sendToSafaricom(?string $phone, string $message, ?string $type = null): array
-    {
+    public function sendToSafaricom(
+        ?string $phone,
+        string $message,
+        ?string $type = null,
+        ?string $context = null,
+        ?int $userId = null
+    ): array {
         if (!PhoneHelper::isSafaricom($phone)) {
+            SmsLog::create([
+                'user_id'      => $userId,
+                'recipient'    => (string) $phone,
+                'message'      => $message,
+                'message_type' => $type ?: $this->defaultType,
+                'provider'     => 'kenyasms',
+                'status'       => SmsLog::STATUS_SKIPPED,
+                'error'        => 'not_safaricom',
+                'context'      => $context,
+            ]);
+
             return ['success' => false, 'skipped' => true, 'error' => 'not_safaricom'];
         }
 
-        return $this->send($phone, $message, $type);
+        return $this->send($phone, $message, $type, $context, $userId);
     }
 }

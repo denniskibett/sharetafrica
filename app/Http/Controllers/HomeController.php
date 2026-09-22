@@ -334,7 +334,8 @@ class HomeController extends Controller
                 'user_agent' => substr((string) request()->userAgent(), 0, 500),
             ]);
 
-            // Send welcome SMS (Safaricom only, non-blocking)
+            // Send welcome SMS. Safaricom filtering + sms_logs persistence
+            // are handled inside SmsService::sendToSafaricom().
             $this->sendWelcomeSms($user);
 
         } catch (QueryException $e) {
@@ -350,7 +351,10 @@ class HomeController extends Controller
 
     /**
      * Send the "welcome to the waitlist" SMS to a new signup.
-     * Only fires for Safaricom numbers with a valid phone — other cases are logged and skipped.
+     *
+     * The Safaricom filter and the sms_logs table write both live inside
+     * SmsService::sendToSafaricom() — so this method just builds the
+     * message and delegates.
      */
     protected function sendWelcomeSms(User $user): void
     {
@@ -359,28 +363,18 @@ class HomeController extends Controller
             return;
         }
 
-        if (!PhoneHelper::isSafaricom($user->phone)) {
-            Log::info('Welcome SMS skipped — not Safaricom', [
-                'user_id' => $user->id,
-                'phone'   => $user->phone,
-            ]);
-            return;
-        }
-
         $firstName = explode(' ', trim((string) $user->name))[0] ?: $user->name;
 
         $message = "Hi {$firstName}, thanks for joining the Sharet Africa waiting list! "
                  . "We'll text you when your wallet is ready. Reply STOP to opt out.";
 
-        $result = app(SmsService::class)->send($user->phone, $message, 'transactional');
-
-        if (!($result['success'] ?? false)) {
-            Log::warning('Welcome SMS failed', [
-                'user_id' => $user->id,
-                'phone'   => $user->phone,
-                'error'   => $result['error'] ?? 'unknown',
-            ]);
-        }
+        app(SmsService::class)->sendToSafaricom(
+            $user->phone,
+            $message,
+            'transactional',
+            'waitlist_welcome',
+            $user->id
+        );
     }
 
     protected function intentFromAudience(string $audience): string
