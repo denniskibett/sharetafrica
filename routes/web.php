@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SmsLogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -112,13 +113,15 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Admin — waiting list management
+    | Admin — waiting list management + SMS logs
     |--------------------------------------------------------------------------
     */
 
     Route::middleware('role:admin|super_admin')->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/waiting-list', [UserController::class, 'index'])->name('waiting_list');
+        Route::get('/waiting-list', [UserController::class, 'waitingList'])->name('waiting_list');
         Route::post('/waiting-list/{user}/invite', [UserController::class, 'invite'])->name('waiting_list.invite');
+
+        Route::get('/sms-logs', [SmsLogController::class, 'index'])->name('sms_logs');
     });
 });
 
@@ -128,4 +131,4 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-require __DIR__ . '/auth.php';              
+require __DIR__ . '/auth.php';

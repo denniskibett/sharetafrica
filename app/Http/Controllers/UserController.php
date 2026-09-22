@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\WaitingListEntry;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -57,7 +61,8 @@ class UserController extends Controller
 
     /**
      * Invite a waiting-list user to start onboarding.
-     * Sets onboarding_status = 'invited', records the inviter + timestamp.
+     * Updates BOTH the User and its WaitingListEntry so the two stay in sync.
+     * Sends an SMS notification to Safaricom numbers.
      */
     public function invite(User $user)
     {
@@ -71,17 +76,32 @@ class UserController extends Controller
             abort(403, 'Only administrators can invite users.');
         }
 
-        $user->update([
-            'onboarding_status' => 'invited',
-            'invited_at'        => now(),
-            'invited_by'        => auth()->id(),
-        ]);
+        // Atomic: update User AND WaitingListEntry together
+        DB::transaction(function () use ($user) {
+            $user->update([
+                'onboarding_status' => 'invited',
+                'invited_at'        => now(),
+                'invited_by'        => auth()->id(),
+            ]);
+
+            WaitingListEntry::where('user_id', $user->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status'     => 'invited',
+                    'invited_at' => now(),
+                    'invited_by' => auth()->id(),
+                ]);
+        });
+
+        // Send invitation SMS (Safaricom only, non-blocking)
+        $this->notifyInvitedUser($user);
 
         return back()->with('success', "{$user->name} has been invited to onboarding.");
     }
 
     /**
      * Revoke an invite. Sends the user back to the waiting list.
+     * Syncs both User and WaitingListEntry back to their waiting-list state.
      */
     public function uninvite(User $user)
     {
@@ -93,11 +113,21 @@ class UserController extends Controller
             abort(403, 'Only administrators can revoke invites.');
         }
 
-        $user->update([
-            'onboarding_status' => 'waiting_list',
-            'invited_at'        => null,
-            'invited_by'        => null,
-        ]);
+        DB::transaction(function () use ($user) {
+            $user->update([
+                'onboarding_status' => 'waiting_list',
+                'invited_at'        => null,
+                'invited_by'        => null,
+            ]);
+
+            WaitingListEntry::where('user_id', $user->id)
+                ->where('status', 'invited')
+                ->update([
+                    'status'     => 'pending',
+                    'invited_at' => null,
+                    'invited_by' => null,
+                ]);
+        });
 
         return back()->with('success', "{$user->name}'s invite has been revoked.");
     }
@@ -161,6 +191,7 @@ class UserController extends Controller
     /**
      * Bulk-invite multiple users at once.
      * POST with user_ids[].
+     * Syncs User + WaitingListEntry for each user, then SMSes each Safaricom number.
      */
     public function bulkInvite(Request $request)
     {
@@ -173,13 +204,32 @@ class UserController extends Controller
             abort(403);
         }
 
-        $count = User::whereIn('id', $request->user_ids)
+        $users = User::whereIn('id', $request->user_ids)
             ->where('onboarding_status', 'waiting_list')
-            ->update([
-                'onboarding_status' => 'invited',
-                'invited_at'        => now(),
-                'invited_by'        => auth()->id(),
-            ]);
+            ->get();
+
+        $count = 0;
+
+        foreach ($users as $user) {
+            DB::transaction(function () use ($user) {
+                $user->update([
+                    'onboarding_status' => 'invited',
+                    'invited_at'        => now(),
+                    'invited_by'        => auth()->id(),
+                ]);
+
+                WaitingListEntry::where('user_id', $user->id)
+                    ->where('status', 'pending')
+                    ->update([
+                        'status'     => 'invited',
+                        'invited_at' => now(),
+                        'invited_by' => auth()->id(),
+                    ]);
+            });
+
+            $this->notifyInvitedUser($user);
+            $count++;
+        }
 
         return back()->with('success', "{$count} users invited to onboarding.");
     }
@@ -244,5 +294,40 @@ class UserController extends Controller
         // $user->update(['rejection_reason' => $request->reason]);
 
         return back()->with('success', "{$user->name}'s onboarding has been rejected.");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NOTIFICATIONS — SMS
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Send the "you're approved" SMS to a user who just got invited.
+     *
+     * The Safaricom filter and the sms_logs table write both live inside
+     * SmsService::sendToSafaricom() — so this method just builds the
+     * message and delegates.
+     */
+    protected function notifyInvitedUser(User $user): void
+    {
+        if (empty($user->phone)) {
+            Log::info('Invite SMS skipped — no phone on record', ['user_id' => $user->id]);
+            return;
+        }
+
+        $firstName = $user->first_name ?: $user->name;
+        $onboardingUrl = route('onboarding.welcome');
+
+        $message = "Hi {$firstName}, great news — you've been approved for Sharet. "
+                 . "Log in to start onboarding: {$onboardingUrl}";
+
+        app(SmsService::class)->sendToSafaricom(
+            $user->phone,
+            $message,
+            'transactional',
+            'waitlist_invite',
+            $user->id
+        );
     }
 }
