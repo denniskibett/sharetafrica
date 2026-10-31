@@ -108,7 +108,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <pre class="code-block" style="height: 100%; display: flex; flex-direction: column; justify-content: center; border-radius: var(--radius-lg);"><span class="c"># Check the API is live</span>
+          <pre class="code-block" style="height: 100%; display: flex; align-items: center; border-radius: var(--radius-lg);"><code><span class="c"># Check the API is live</span>
 $ <span class="k">curl</span> https://api.sharet.africa/v1/health
 
 <span class="c"># → 200 OK</span>
@@ -120,7 +120,7 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
     <span class="s">"mtn_ug"</span>
   ],
   <span class="s">"ts"</span>: <span class="s">"2026-09-16T10:42:00Z"</span>
-}</pre>
+}</code></pre>
         </div>
       </div>
     </div>
@@ -144,10 +144,10 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
           <tr><td>Base URL</td><td>https://api.sharet.africa/v1</td></tr>
           <tr><td>Sandbox URL</td><td>https://sandbox.api.sharet.africa/v1</td></tr>
           <tr><td>Auth</td><td>Bearer JWT (short-lived, 15 min) + HMAC-SHA256 signed request body</td></tr>
-          <tr><td>Idempotency</td><td>Required on all POST/PUT. Header: <code style="color:var(--paper)">Idempotency-Key</code>. 24-hour window.</td></tr>
-          <tr><td>Content-Type</td><td><code style="color:var(--paper)">application/json</code></td></tr>
-          <tr><td>Rate limits</td><td>100 req/s standard · 1,000 req/s on Tier 03. Headers: <code style="color:var(--paper)">X-RateLimit-Remaining</code>.</td></tr>
-          <tr><td>Errors</td><td>RFC 7807 <code style="color:var(--paper)">problem+json</code></td></tr>
+          <tr><td>Idempotency</td><td>Required on all POST/PUT. Header: <code>Idempotency-Key</code>. 24-hour window.</td></tr>
+          <tr><td>Content-Type</td><td><code>application/json</code></td></tr>
+          <tr><td>Rate limits</td><td>100 req/s standard · 1,000 req/s on Tier 03. Headers: <code>X-RateLimit-Remaining</code>.</td></tr>
+          <tr><td>Errors</td><td>RFC 7807 <code>problem+json</code></td></tr>
           <tr><td>Webhooks</td><td>HMAC-SHA256 signed · retried 24h with exponential backoff</td></tr>
           <tr><td>SLA</td><td>99.9% uptime target (contractual on Tier 03)</td></tr>
           <tr><td>Status page</td><td><a href="#" style="color:var(--lime)">status.sharet.africa</a></td></tr>
@@ -319,7 +319,7 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
           <h2>RFC 7807<br/>problem+json.</h2>
         </div>
         <p class="lede">
-          Every error response follows the same shape. No HTML. No stack traces. No surprises. Parse <code style="color:var(--paper)">type</code> to branch, <code style="color:var(--paper)">detail</code> to show the user.
+          Every error response follows the same shape. No HTML. No stack traces. No surprises. Parse <code>type</code> to branch, <code>detail</code> to show the user.
         </p>
       </div>
 
@@ -333,7 +333,7 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
           <tr><td>403</td><td>Insufficient permissions</td><td>No</td></tr>
           <tr><td>409</td><td>Idempotency conflict — key reused with different body</td><td>No</td></tr>
           <tr><td>422</td><td>Business rule violation (insufficient balance, over limit)</td><td>No</td></tr>
-          <tr><td>429</td><td>Rate limit exceeded — see <code style="color:var(--paper)">Retry-After</code></td><td>Yes</td></tr>
+          <tr><td>429</td><td>Rate limit exceeded — see <code>Retry-After</code></td><td>Yes</td></tr>
           <tr><td>502</td><td>Upstream rail unavailable</td><td>Yes, with backoff</td></tr>
           <tr><td>503</td><td>Sharet temporarily unavailable</td><td>Yes, with backoff</td></tr>
         </tbody>
@@ -369,13 +369,13 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
           <tr><th>Rail</th><th>Status</th><th>Notes</th></tr>
         </thead>
         <tbody>
-          <tr><td>mpesa_ke</td><td style="color:var(--lime)">● Live</td><td>Full simulation: success, failure, delay</td></tr>
-          <tr><td>mtn_ug</td><td style="color:var(--lime)">● Live</td><td>Full simulation</td></tr>
-          <tr><td>vodacom_tz</td><td style="color:var(--lime-soft)">● In integration</td><td>Expected Q4 2026</td></tr>
-          <tr><td>airtel_tz</td><td style="color:var(--fg-mute)">○ Planned</td><td>Q1 2027</td></tr>
-          <tr><td>airtel_ug</td><td style="color:var(--fg-mute)">○ Planned</td><td>Q1 2027</td></tr>
-          <tr><td>card</td><td style="color:var(--fg-mute)">○ Planned</td><td>Q1 2027</td></tr>
-          <tr><td>bank_ke</td><td style="color:var(--fg-mute)">○ Planned</td><td>Q1 2027</td></tr>
+          <tr><td>mpesa_ke</td><td class="status status--live">● Live</td><td>Full simulation: success, failure, delay</td></tr>
+          <tr><td>mtn_ug</td><td class="status status--live">● Live</td><td>Full simulation</td></tr>
+          <tr><td>vodacom_tz</td><td class="status status--soon">◐ In integration</td><td>Expected Q4 2026</td></tr>
+          <tr><td>airtel_tz</td><td class="status status--planned">○ Planned</td><td>Q1 2027</td></tr>
+          <tr><td>airtel_ug</td><td class="status status--planned">○ Planned</td><td>Q1 2027</td></tr>
+          <tr><td>card</td><td class="status status--planned">○ Planned</td><td>Q1 2027</td></tr>
+          <tr><td>bank_ke</td><td class="status status--planned">○ Planned</td><td>Q1 2027</td></tr>
         </tbody>
       </table>
 
@@ -390,7 +390,7 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
         <article class="cap-card cap-card--std">
           <span class="cap-num">Test data</span>
           <h3>Documented<br/>scenarios.</h3>
-          <p>Every test phone number is documented. <code style="color:var(--paper)">+254700000001</code> succeeds. <code style="color:var(--paper)">+254700000002</code> fails. <code style="color:var(--paper)">+254700000003</code> delays by 30 seconds.</p>
+          <p>Every test phone number is documented. <code>+254700000001</code> succeeds. <code>+254700000002</code> fails. <code>+254700000003</code> delays by 30 seconds.</p>
         </article>
 
         <article class="cap-card cap-card--std">

@@ -248,7 +248,7 @@ Route::middleware(['auth', 'permission:integrations.manage'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'permission:api_keys.manage'])
+Route::middleware(['auth', 'permission:developer.api_keys'])
     ->prefix('api-keys')->name('api-keys.')->controller(ApiKeyController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
@@ -264,7 +264,7 @@ Route::middleware(['auth', 'permission:api_keys.manage'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'permission:roles.manage'])
+Route::middleware(['auth', 'permission:admin.roles'])
     ->prefix('admin/roles')->name('admin.roles.')->controller(RoleController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
@@ -294,11 +294,11 @@ Route::middleware(['auth', 'permission:analytics.view'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'permission:system.settings'])->controller(EmailDesignController::class)->group(function () {
+Route::middleware(['auth', 'permission:admin.system'])->controller(EmailDesignController::class)->group(function () {
     Route::get('/admin/emails', 'index')->name('admin.emails.index');
     Route::get('/admin/emails/{key}', 'show')->name('admin.emails.show')->where('key', '[a-z-]+');
 });
-Route::middleware(['auth', 'permission:waiting_list.manage'])
+Route::middleware(['auth', 'permission:waiting_list.invite'])
     ->get('/admin/contact-messages', [EmailDesignController::class, 'messages'])->name('admin.contact.index');
 
 /*

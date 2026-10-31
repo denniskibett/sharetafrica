@@ -10,6 +10,45 @@
 
     <a href="{{ route('dashboard') }}" class="lg:hidden" aria-label="Dashboard"><x-brand :size="28" /></a>
 
+    {{-- Search the dashboard menu (same items as the sidebar). ⌘K / Ctrl+K focuses it; ↑ ↓ Enter to pick. --}}
+    @php
+        $searchItems = collect(\App\Support\DashboardNav::for($user))->flatMap(fn ($g) => collect($g['items'])->map(fn ($i) => [
+            'label' => $i['label'], 'group' => $g['title'], 'url' => $i['url'], 'ready' => $i['ready'], 'icon' => $i['icon'],
+        ]))->unique('label')->values();
+    @endphp
+    <div class="relative hidden sm:block sm:w-72 lg:w-96"
+         x-data="{
+            q: '', open: false, i: 0, items: @js($searchItems),
+            get results() {
+                const q = this.q.trim().toLowerCase();
+                if (!q) return this.items.filter(x => x.ready).slice(0, 8);
+                return this.items.filter(x => (x.label + ' ' + x.group).toLowerCase().includes(q)).slice(0, 10);
+            },
+            go(item) { if (item?.ready) location.href = item.url },
+         }"
+         @keydown.window.meta.k.prevent="$refs.q.focus()" @keydown.window.ctrl.k.prevent="$refs.q.focus()"
+         @click.outside="open = false">
+      <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+      <input x-ref="q" x-model="q" type="search" placeholder="Search the dashboard…" autocomplete="off" aria-label="Search the dashboard"
+             @focus="open = true" @input="open = true; i = 0"
+             @keydown.down.prevent="i = Math.min(i + 1, results.length - 1)" @keydown.up.prevent="i = Math.max(i - 1, 0)"
+             @keydown.enter.prevent="go(results[i])" @keydown.escape="open = false; $el.blur()"
+             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-14 text-sm text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-800 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:bg-gray-900">
+      <kbd class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[11px] text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">⌘K</kbd>
+
+      <div x-show="open" x-cloak x-transition class="absolute left-0 right-0 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        <template x-for="(item, n) in results" :key="item.label">
+          <a :href="item.ready ? item.url : null" @mouseenter="i = n"
+             class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
+             :class="[n === i ? 'bg-gray-100 dark:bg-white/5' : '', item.ready ? 'cursor-pointer text-gray-800 dark:text-gray-200' : 'cursor-default text-gray-400 dark:text-gray-500']">
+            <span x-text="item.label"></span>
+            <span class="text-xs text-gray-400" x-text="item.ready ? item.group : 'Coming soon'"></span>
+          </a>
+        </template>
+        <p x-show="!results.length" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">Nothing matches "<span x-text="q"></span>".</p>
+      </div>
+    </div>
+
     <div class="ml-auto flex items-center gap-2 sm:gap-3">
       {{-- Light / dark --}}
       <button type="button" @click="darkMode = !darkMode"

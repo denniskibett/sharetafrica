@@ -1227,3 +1227,24 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; pointer-events: none
 .form-row--full { grid-template-columns: minmax(0, 1fr); }
 .form-field, .form-field select, .form-field input, .form-field textarea { min-width: 0; max-width: 100%; }
 @media (max-width: 720px) { .form-row { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Light (tile) sections: cards and tables follow the section ----------
+   Dark cards inside a light section got dark headings (invisible) and lime text on paper. */
+.tile-section .cap-card { background: #FFFFFF; border-color: rgba(10,10,12,0.12); }
+.tile-section .cap-card:hover { background: #FFFFFF; border-color: rgba(10,10,12,0.35); }
+.tile-section .cap-card p { color: #2A2A28; }
+.tile-section .cap-card .cap-num { color: #3F6212; }
+.tile-section .cap-card code { color: var(--ink-000); background: var(--paper-tile-2); padding: 1px 6px; border-radius: 4px; }
+.tile-section .spec-table { border-color: rgba(10,10,12,0.15); background: #FFFFFF; }
+.tile-section .spec-table th { background: var(--paper-tile-2); color: var(--fg-on-tile-mute); border-bottom-color: rgba(10,10,12,0.15); }
+.tile-section .spec-table td { color: #2A2A28; border-bottom-color: rgba(10,10,12,0.1); }
+.tile-section .spec-table td:first-child { color: var(--ink-000); font-weight: 600; }
+
+/* Rail status, readable on both dark and light sections */
+.status { white-space: nowrap; font-weight: 600; }
+.status--live { color: var(--lime); }
+.status--soon { color: var(--lime-soft); }
+.status--planned { color: var(--fg-mute); }
+.tile-section .status--live { color: #3F6212; }
+.tile-section .status--soon { color: #A16207; }
+.tile-section .status--planned { color: #5A5A55; }

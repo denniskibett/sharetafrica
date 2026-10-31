@@ -13,11 +13,11 @@ return new class extends Migration
 {
     protected array $grants = [
         'integrations.manage' => ['admin', 'merchant', 'business'],
-        'api_keys.manage' => ['admin', 'techie', 'merchant', 'business'],
-        'roles.manage' => ['admin'],
-        'users.manage' => ['admin', 'support'],
-        'waiting_list.manage' => ['admin', 'support'],
-        'system.settings' => ['admin'],
+        'developer.api_keys' => ['admin', 'techie', 'merchant', 'business'],
+        'admin.roles' => ['admin'],
+        'admin.users' => ['admin', 'support'],
+        'waiting_list.invite' => ['admin', 'support'],
+        'admin.system' => ['admin'],
     ];
 
     public function up(): void
@@ -36,7 +36,8 @@ return new class extends Migration
 
     public function down(): void
     {
-        Permission::whereIn('name', array_keys($this->grants))->delete();
+        // Only remove what this migration introduced; the others existed before it
+        Permission::where('name', 'integrations.manage')->delete();
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 };
