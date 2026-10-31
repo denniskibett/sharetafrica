@@ -109,6 +109,16 @@ class DashboardPagesTest extends TestCase
         $this->assertSame('<p>Hi <strong>there</strong> <a href="https://sharet.africa" rel="noopener" target="_blank">site</a></p>', $clean);
     }
 
+    public function test_customers_get_the_sharet_app_and_staff_the_admin_dashboard(): void
+    {
+        $this->actingAs(User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant']));
+        $this->get('/dashboard')->assertOk()->assertSee('class="sharet-app', false)->assertSee('TOTAL BALANCE')->assertDontSee('Admin overview');
+        $this->get('/profile')->assertOk()->assertSee('class="sharet-app', false);
+
+        $this->actingAs($this->admin());
+        $this->get('/dashboard')->assertOk()->assertSee('Admin overview')->assertDontSee('class="sharet-app', false);
+    }
+
     public function test_people_lists_need_permission(): void
     {
         $this->actingAs(User::factory()->create(['onboarding_status' => 'active', 'intent' => 'individual']));

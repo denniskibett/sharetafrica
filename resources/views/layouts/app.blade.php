@@ -1,4 +1,6 @@
-{{--resources/views/layouts/app.blade.php--}}
+{{-- Dashboard layout. Staff get the admin dashboard; customers (personal, merchant, business, developer) get the
+     Sharet app look: always dark, landing-page fonts (Boldonse, Inter Tight, Geist Mono), lime on black, phone tab bar. --}}
+@php $customer = \App\Support\DashboardNav::isCustomer(auth()->user()); @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -29,6 +31,7 @@
     {{-- Light/dark before first paint: saved choice, else the device setting (no white flash on dark phones) --}}
     <script>
         (function () {
+            @if ($customer) document.documentElement.classList.add('dark'); return; @endif
             var saved = null;
             try { saved = JSON.parse(localStorage.getItem('darkMode')); } catch (e) {}
             var dark = saved === null ? window.matchMedia('(prefers-color-scheme: dark)').matches : saved;
@@ -37,6 +40,9 @@
     </script>
     <style>[x-cloak]{display:none!important}</style>
 
+    @if ($customer)
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&family=Inter+Tight:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+    @endif
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
@@ -323,6 +329,21 @@
 
 </head>
 
+@if ($customer)
+<body class="sharet-app min-h-screen bg-[#0A0A0C] text-[#F4F4F0] antialiased" x-data="{ darkMode: true, sidebarToggle: false }">
+<a href="#main" class="sr-only z-[100003] rounded-lg bg-[#D4FF3D] px-4 py-2 text-sm font-semibold text-[#050507] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
+<div class="flex min-h-screen">
+    @include('partials.customer.sidebar')
+    <div class="flex min-w-0 flex-1 flex-col">
+        @include('partials.customer.topbar')
+        <main id="main" class="flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-10 md:pt-7" tabindex="-1">
+            @yield('content')
+            {{ $slot ?? '' }}
+        </main>
+    </div>
+</div>
+@include('partials.customer.tabbar')
+@else
 {{-- sidebarToggle: from tablet width up the sidebar is a column beside the content (true = collapsed to icons; tablets
      start collapsed, the choice is remembered on desktop). On phones it is a drawer (true = open).
      Content width: one standard width for every page; it grows when the sidebar is collapsed. --}}
@@ -356,12 +377,14 @@
     </div>
 </div>
 
+@endif
+
 @include('partials.modal.alert-modal')
 
 {{-- Toasts from sharet.toast() / sharet.send() --}}
 <div x-data="{ toasts: [] }"
      @toast.window="const t = { id: Date.now() + Math.random(), ...$event.detail }; toasts.push(t); setTimeout(() => toasts = toasts.filter(x => x.id !== t.id), 4500)"
-     class="pointer-events-none fixed bottom-4 right-4 z-[100000] flex w-[min(380px,calc(100vw-2rem))] flex-col gap-2" aria-live="polite">
+     class="pointer-events-none fixed bottom-24 right-4 z-[100000] md:bottom-4 flex w-[min(380px,calc(100vw-2rem))] flex-col gap-2" aria-live="polite">
     <template x-for="t in toasts" :key="t.id">
         <div x-transition class="pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"
              :class="t.type === 'error'

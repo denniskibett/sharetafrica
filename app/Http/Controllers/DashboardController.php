@@ -28,7 +28,10 @@ class DashboardController extends Controller
             return redirect()->route('onboarding.welcome');
         }
 
-        return view('dashboard', ['lane' => $this->lane($user), 'user' => $user]);
+        $lane = $this->lane($user);
+
+        // Customers get the Sharet app home (canvas "Mobile home" / "Web dashboard"); staff the admin overview
+        return view(in_array($lane, ['admin', 'ops'], true) ? 'dashboard' : 'dashboard.customer', ['lane' => $lane, 'user' => $user]);
     }
 
     public function data(Request $request): JsonResponse
@@ -188,6 +191,7 @@ class DashboardController extends Controller
         return [
             'type' => 'bar',
             'series' => [['name' => 'Money in', 'data' => $sum('deposit')], ['name' => 'Money out', 'data' => $sum('withdraw')]],
+            'colors' => ['#D4FF3D', '#80807A'],
             'xaxis' => ['categories' => $months->map->format('M')->values()],
         ];
     }

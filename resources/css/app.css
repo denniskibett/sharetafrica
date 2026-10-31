@@ -557,3 +557,40 @@ span.flatpickr-weekday,
 .prose-sharet blockquote { border-left: 3px solid #D4FF3D; padding-left: 1em; color: #6B7280; margin: 0 0 1em; }
 .prose-sharet pre { background: rgba(127,127,127,.12); border-radius: .5rem; padding: .8em 1em; font-family: ui-monospace, Menlo, monospace; font-size: .875rem; overflow-x: auto; }
 .prose-sharet a { text-decoration: underline; }
+
+/* ===== Customer app (body.sharet-app): the landing page's look for personal, merchant, business and developer
+   accounts. Shared dashboard components keep their markup; these rules swap their dark greys for the brand
+   neutrals (#0A0A0C page, #111114 card, #18181C tile), the fonts for Inter Tight / Boldonse / Geist Mono, and
+   blues and violets for lime. ===== */
+.sharet-app { font-family: 'Inter Tight', system-ui, sans-serif; }
+.sharet-app .app-mono, .sharet-app code, .sharet-app pre { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; }
+.sharet-app .app-display, .sharet-app main h1 { font-family: 'Boldonse', 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: 0; line-height: 1.45; }
+.sharet-app main h1 { font-size: 22px; }
+@media (min-width: 768px) { .sharet-app main h1 { font-size: 26px; } }
+.sharet-app main h4 { font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 500; letter-spacing: -0.01em; }
+
+/* Surfaces */
+.sharet-app .dark\:bg-white\/\[0\.03\], .sharet-app .dark\:bg-gray-900, .sharet-app .dark\:bg-gray-800 { background-color: #111114 !important; }
+.sharet-app .dark\:bg-white\/5, .sharet-app .dark\:bg-white\/\[0\.06\], .sharet-app .dark\:hover\:bg-white\/5:hover, .sharet-app .dark\:hover\:bg-white\/\[0\.02\]:hover { background-color: #18181C !important; }
+.sharet-app thead.dark\:bg-gray-900, .sharet-app .dark\:bg-gray-950 { background-color: #0A0A0C !important; }
+.sharet-app .dark\:border-gray-800, .sharet-app .dark\:border-gray-700, .sharet-app .dark\:divide-gray-800 > * + * { border-color: rgba(244, 244, 240, 0.08) !important; }
+.sharet-app .rounded-2xl { border-radius: 16px; }
+
+/* Text */
+.sharet-app .dark\:text-white, .sharet-app .dark\:text-white\/90 { color: #F4F4F0 !important; }
+.sharet-app .dark\:text-gray-300, .sharet-app .dark\:text-gray-400 { color: #C9C9C2 !important; }
+.sharet-app .text-gray-500 { color: #80807A !important; }
+
+/* Accents: lime instead of violet/blue; lime surfaces always carry dark text */
+.sharet-app .bg-primary, .sharet-app .dark\:bg-\[\#D4FF3D\] { background-color: #D4FF3D !important; color: #050507 !important; }
+.sharet-app .focus\:border-violet-300:focus, .sharet-app .focus\:border-violet-400:focus { border-color: #D4FF3D !important; }
+.sharet-app .focus\:ring-violet-500\/10:focus { --tw-ring-color: rgba(212, 255, 61, 0.15) !important; }
+.sharet-app input, .sharet-app select, .sharet-app textarea { color-scheme: dark; }
+
+/* Phones: comfortable tap targets and no zoom-on-focus in iOS */
+@media (max-width: 767px) {
+  .sharet-app input:not([type=checkbox]):not([type=radio]), .sharet-app select, .sharet-app textarea { font-size: 16px; }
+  .sharet-app main .rounded-2xl { border-radius: 20px; }
+}
+.sharet-app .bg-gray-900:not(.dark\:bg-\[\#D4FF3D\]) { background-color: #232328; }
+.sharet-app .shadow-theme-xs { box-shadow: none; }

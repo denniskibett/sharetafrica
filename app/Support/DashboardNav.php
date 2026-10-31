@@ -126,6 +126,23 @@ class DashboardNav
         ];
     }
 
+    /** Customers (personal, merchant, business, developer accounts) get the Sharet app look; staff get the admin dashboard. */
+    public static function isCustomer(?User $user): bool
+    {
+        return $user !== null && ! $user->hasAnyRole(self::OPS);
+    }
+
+    /** The lane's main action for the phone tab bar: [label, route, icon]. */
+    public static function laneAction(?User $user): array
+    {
+        return match ($user?->intent) {
+            'merchant' => ['Accept', 'merchant.accept', 'banknotes'],
+            'business' => ['Pay', 'business.pay', 'paper-airplane'],
+            'techie' => ['API', 'api-keys.index', 'key'],
+            default => ['Send', 'wallet.transfer', 'paper-airplane'],
+        };
+    }
+
     /** Groups this user may see, each item resolved to url/active/ready. */
     public static function for(?User $user): array
     {
