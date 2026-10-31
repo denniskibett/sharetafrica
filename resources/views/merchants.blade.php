@@ -35,7 +35,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1200&q=80" alt="A Nairobi merchant accepting a mobile money payment at their shop — customer pays from M-PESA, funds land in the merchant's Sharet wallet." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1200&q=80" alt="A Nairobi merchant accepting a mobile money payment at their shop — customer pays from M-PESA, funds land in the merchant's Sharet wallet." />
           <div class="floating-tag ft-top">
             <span class="pill">Merchant</span>
             NAIROBI · KILIMANI
@@ -101,7 +101,7 @@
         </article>
 
         <article class="cap-card cap-card--tall">
-          <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1000&q=80" alt="A merchant dashboard showing transactions from multiple rails in one view." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1000&q=80" alt="A merchant dashboard showing transactions from multiple rails in one view." />
           <div class="cap-tall-meta">
             <span class="cap-num lime-text">04 / Merchant tools</span>
             <h3>Built for operators.</h3>
@@ -154,7 +154,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1000&q=80" alt="A merchant checking their Sharet wallet balance — one number covering every rail." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1000&q=80" alt="A merchant checking their Sharet wallet balance — one number covering every rail." />
           <span class="ft-corner">One balance · all rails</span>
         </div>
       </div>

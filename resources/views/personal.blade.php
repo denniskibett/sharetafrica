@@ -35,7 +35,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet user sending money from their phone in Nairobi." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet user sending money from their phone in Nairobi." />
           <div class="floating-tag ft-top">
             <span class="pill">Send</span>
             TO +255 · VODACOM

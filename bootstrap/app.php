@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Mail goes out through the company's (or platform's) SMTP saved in Integrations
         $middleware->web(append: [\App\Http\Middleware\ApplyIntegrations::class]);
+        // Analytics beacons are anonymous and carry no state change worth forging
+        $middleware->validateCsrfTokens(except: ['t']);
 
         // Spatie Permission middleware aliases
         $middleware->alias([

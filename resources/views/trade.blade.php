@@ -35,7 +35,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1200&q=80" alt="A container port in Mombasa — the trade corridor between Africa and the world." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1200&q=80" alt="A container port in Mombasa — the trade corridor between Africa and the world." />
           <div class="floating-tag ft-top">
             <span class="pill">Corridor</span>
             MOMBASA · DUBAI · GUANGZHOU
@@ -101,7 +101,7 @@
         </article>
 
         <article class="cap-card cap-card--tall">
-          <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map showing East Africa and the trade corridors connecting Africa to global markets." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map showing East Africa and the trade corridors connecting Africa to global markets." />
           <div class="cap-tall-meta">
             <span class="cap-num lime-text">04 / Diaspora</span>
             <h3>Send home from anywhere.</h3>
@@ -157,7 +157,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1000&q=80" alt="A container ship at port — the physical movement of goods that Sharet finances end to end." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1000&q=80" alt="A container ship at port — the physical movement of goods that Sharet finances end to end." />
           <span class="ft-corner">Order · finance · ship · repay</span>
         </div>
       </div>
@@ -198,7 +198,7 @@
         </article>
 
         <article class="cap-card cap-card--tall">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80" alt="A container port with goods in transit — Sharet carries the credit risk while goods move." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80" alt="A container port with goods in transit — Sharet carries the credit risk while goods move." />
           <div class="cap-tall-meta">
             <span class="cap-num lime-text">03 / Risk</span>
             <h3>Sharet carries it.</h3>

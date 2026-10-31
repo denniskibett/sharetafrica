@@ -33,7 +33,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="The Sharet founding team in their Nairobi office." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="The Sharet founding team in their Nairobi office." />
           <div class="floating-tag ft-top">
             <span class="pill">Nairobi</span>
             HEADQUARTERS
@@ -205,42 +205,42 @@
 
       <div class="team-grid">
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet CEO." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet CEO." /></div>
           <h3>David Mwangi</h3>
           <div class="t-role">Co-founder · CEO · ex-Safaricom M-PESA</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet CTO." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet CTO." /></div>
           <h3>Sarah Achieng</h3>
           <div class="t-role">Co-founder · CTO · ex-Equity Bank</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Treasury." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Treasury." /></div>
           <h3>Michael Ochieng</h3>
           <div class="t-role">Co-founder · Head of Treasury · ex-KCB</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Operations." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Operations." /></div>
           <h3>Grace Namugga</h3>
           <div class="t-role">Co-founder · Head of Operations · ex-Flutterwave</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Lead Engineer." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Lead Engineer." /></div>
           <h3>Brian Otieno</h3>
           <div class="t-role">Lead Engineer · ex-M-KOPA</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Compliance." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Compliance." /></div>
           <h3>Aisha Mohammed</h3>
           <div class="t-role">Head of Compliance · ex-CBK</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Regional Lead for Tanzania." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Regional Lead for Tanzania." /></div>
           <h3>Joseph Mwakasege</h3>
           <div class="t-role">Regional Lead · Tanzania · ex-Vodacom</div>
         </div>
         <div class="team-card">
-          <div class="t-img"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Partnerships." /></div>
+          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Partnerships." /></div>
           <h3>Fatima Abdi</h3>
           <div class="t-role">Head of Partnerships · ex-Cellulant</div>
         </div>
@@ -350,7 +350,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa showing Sharet markets." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa showing Sharet markets." />
           <span class="ft-corner">Nairobi HQ · regional by appointment</span>
         </div>
       </div>

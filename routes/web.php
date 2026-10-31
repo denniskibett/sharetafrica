@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\SeoController;
+use App\Http\Controllers\TrackController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OnboardingController;
@@ -24,6 +27,17 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/company', 'company')->name('company');
     Route::get('/contact', 'contact')->name('contact');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Website analytics beacon + SEO files (sitemap, llms.txt)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/t', TrackController::class)->middleware('throttle:240,1')
+    ->withoutMiddleware([\App\Http\Middleware\ApplyIntegrations::class])->name('track');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
 /*
 |--------------------------------------------------------------------------
@@ -254,6 +268,20 @@ Route::middleware(['auth', 'permission:roles.manage'])
         Route::get('/{role}/data', 'getRole')->name('data');
         Route::put('/{role}', 'update')->name('update');
         Route::delete('/{role}', 'destroy')->name('destroy');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Website analytics (reports + click heatmap)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:analytics.view'])
+    ->prefix('admin/analytics')->name('admin.analytics.')->controller(AnalyticsController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/heatmap', 'heatmap')->name('heatmap');
+        Route::get('/clicks', 'clicks')->name('clicks');
     });
 
 /*

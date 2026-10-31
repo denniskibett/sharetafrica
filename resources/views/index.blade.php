@@ -35,7 +35,7 @@
           </div>
         </div>
         <div class="hero-media reveal">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet user in Nairobi sending money from their phone — the recipient receives it directly on their M-PESA, no Sharet account needed." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet user in Nairobi sending money from their phone — the recipient receives it directly on their M-PESA, no Sharet account needed." />
           <div class="floating-tag ft-top">
             <span class="pill">Send · 0%</span>
             KES 10,000 → +255 Vodacom
@@ -99,7 +99,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=1000&q=80" alt="A Vodacom M-PESA agent in Dar es Salaam — the recipient receives the payout in their existing wallet without needing a Sharet account." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=1000&q=80" alt="A Vodacom M-PESA agent in Dar es Salaam — the recipient receives the payout in their existing wallet without needing a Sharet account." />
           <span class="ft-corner">Recipient side · Vodacom M-Pesa</span>
         </div>
       </div>
@@ -121,7 +121,7 @@
 
       <div class="cap-bento">
         <article class="cap-card cap-card--tall">
-          <img src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1000&q=80" alt="A merchant in Nairobi accepting a mobile money payment." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1000&q=80" alt="A merchant in Nairobi accepting a mobile money payment." />
           <div class="cap-tall-meta">
             <span class="cap-num lime-text">01 / Merchants</span>
             <h3>Accept from any rail.<br/>Settle anywhere.</h3>
@@ -200,7 +200,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1000&q=80" alt="A container port in Mombasa — the trade corridor between Africa and the world." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1000&q=80" alt="A container port in Mombasa — the trade corridor between Africa and the world." />
           <span class="ft-corner">Trade corridor · in and out of Africa</span>
         </div>
       </div>
@@ -223,7 +223,7 @@
       <div class="work-grid">
         <a class="work-item work-item--xl reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1400&q=80" alt="A Safaricom M-PESA agent kiosk in Nairobi with a customer completing a deposit." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1400&q=80" alt="A Safaricom M-PESA agent kiosk in Nairobi with a customer completing a deposit." />
             <span class="wm-pill">Kenya</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -240,7 +240,7 @@
 
         <a class="work-item work-item--sm reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=900&q=80" alt="A Vodacom M-Pesa agent point in Dar es Salaam, Tanzania." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=900&q=80" alt="A Vodacom M-Pesa agent point in Dar es Salaam, Tanzania." />
             <span class="wm-pill">Tanzania</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -257,7 +257,7 @@
 
         <a class="work-item work-item--md reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1100&q=80" alt="An MTN Mobile Money kiosk in Kampala, Uganda." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1100&q=80" alt="An MTN Mobile Money kiosk in Kampala, Uganda." />
             <span class="wm-pill">Uganda</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -274,7 +274,7 @@
 
         <a class="work-item work-item--md reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1100&q=80" alt="An Airtel Money agent in East Africa." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1100&q=80" alt="An Airtel Money agent in East Africa." />
             <span class="wm-pill">Tanzania · Uganda</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -291,7 +291,7 @@
 
         <a class="work-item work-item--sm reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=900&q=80" alt="A bank branch in Nairobi — Sharet connects to KES, TZS, and UGX bank accounts." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=900&q=80" alt="A bank branch in Nairobi — Sharet connects to KES, TZS, and UGX bank accounts." />
             <span class="wm-pill">Banking</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -308,7 +308,7 @@
 
         <a class="work-item work-item--lg reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1556742393-d75f468bfcb0?auto=format&fit=crop&w=1200&q=80" alt="A point-of-sale card terminal at a Nairobi merchant." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742393-d75f468bfcb0?auto=format&fit=crop&w=1200&q=80" alt="A point-of-sale card terminal at a Nairobi merchant." />
             <span class="wm-pill">Cards</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -325,7 +325,7 @@
 
         <a class="work-item work-item--sm reveal" href="{{ route('developers') }}">
           <div class="wm">
-            <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=900&q=80" alt="A stylised map of Africa showing future Sharet rail integrations." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=900&q=80" alt="A stylised map of Africa showing future Sharet rail integrations." />
             <span class="wm-pill">Phase 2+</span>
             <span class="wm-arrow" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -385,7 +385,7 @@
       <div class="journal-grid">
         <article class="journal-card">
           <div class="j-img">
-            <img src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=900&q=80" alt="A stylised diagram of a Sharet internal transaction — two ledger entries, zero external rails." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=900&q=80" alt="A stylised diagram of a Sharet internal transaction — two ledger entries, zero external rails." />
           </div>
           <div class="j-meta"><span>Ledger</span><span aria-hidden="true">·</span><span>04 Oct 2026</span></div>
           <h3>Why the recipient never needs an account.</h3>
@@ -395,7 +395,7 @@
 
         <article class="journal-card">
           <div class="j-img">
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80" alt="A stylised view of country-level liquidity pools connected by one Sharet ledger." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80" alt="A stylised view of country-level liquidity pools connected by one Sharet ledger." />
           </div>
           <div class="j-meta"><span>Treasury</span><span aria-hidden="true">·</span><span>22 Sep 2026</span></div>
           <h3>Liquidity pools, not cross-border hops.</h3>
@@ -405,7 +405,7 @@
 
         <article class="journal-card">
           <div class="j-img">
-            <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80" alt="A container port at dawn — the trade corridor between Africa and the world." />
+            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80" alt="A container port at dawn — the trade corridor between Africa and the world." />
           </div>
           <div class="j-meta"><span>Trade</span><span aria-hidden="true">·</span><span>09 Aug 2026</span></div>
           <h3>The Mombasa–Dubai corridor in numbers.</h3>

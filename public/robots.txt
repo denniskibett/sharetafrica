@@ -1,2 +1,29 @@
+# Sharet Africa — search engines and AI assistants are welcome on the public site.
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /integrations
+Disallow: /api-keys
+Disallow: /profile
+Disallow: /wallet$
+Disallow: /merchant$
+Disallow: /business$
+Disallow: /developer$
+Disallow: /ops
+Disallow: /t
+
+# AI assistants (ChatGPT, Claude, Perplexity, Gemini) may read and cite the public pages
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Google-Extended
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+
+Sitemap: https://sharet.africa/sitemap.xml

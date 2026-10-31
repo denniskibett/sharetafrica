@@ -77,6 +77,8 @@ class DashboardNav
                 'roles' => self::OPS,
                 'items' => [
                     ['label' => 'Operations desk', 'route' => 'dashboard.ops', 'icon' => 'lifebuoy', 'tone' => 'sky'],
+                    ['label' => 'Website analytics', 'route' => 'admin.analytics.index', 'icon' => 'chart-bar', 'tone' => 'teal', 'can' => 'analytics.view',
+                        'roles' => ['support', 'operations'], 'active' => ['admin.analytics.*']],
                     ['label' => 'Reconciliation', 'route' => 'ops.reconciliation.index', 'icon' => 'scale', 'tone' => 'indigo'],
                     ['label' => 'Treasury pools', 'route' => 'ops.treasury.index', 'icon' => 'circle-stack', 'tone' => 'emerald'],
                     ['label' => 'Live rails', 'route' => 'ops.rails.index', 'icon' => 'signal', 'tone' => 'teal'],
@@ -87,6 +89,8 @@ class DashboardNav
                 'title' => 'Administration',
                 'roles' => self::ADMIN,
                 'items' => [
+                    ['label' => 'Website analytics', 'route' => 'admin.analytics.index', 'icon' => 'chart-bar', 'tone' => 'sky', 'can' => 'analytics.view',
+                        'active' => ['admin.analytics.*']],
                     ['label' => 'Waiting list', 'route' => 'admin.waiting_list', 'icon' => 'queue-list', 'tone' => 'amber'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'api_keys.manage'],

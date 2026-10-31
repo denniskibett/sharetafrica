@@ -33,7 +33,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet operations desk with a laptop, a reconciliation sheet, and a Nairobi coffee cup." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet operations desk with a laptop, a reconciliation sheet, and a Nairobi coffee cup." />
           <div class="floating-tag ft-top">
             <span class="pill">Inbox</span>
             HELLO @ SHARET.AFRICA
@@ -190,7 +190,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa with Sharet's three offices marked." />
+          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa with Sharet's three offices marked." />
           <span class="ft-corner">Nairobi · Kampala · Dar es Salaam</span>
         </div>
       </div>

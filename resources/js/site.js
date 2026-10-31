@@ -67,3 +67,58 @@
     }, { passive: true });
   }
 })();
+
+/*
+ * First-party analytics (TrackController): page view, time on page + scroll depth on leave, and click
+ * positions for the heatmap. No cookies; sent with sendBeacon so it never slows the page down.
+ * Honours "Do Not Track" / Global Privacy Control.
+ */
+(function () {
+  'use strict';
+  if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl) return;
+  if (window.self !== window.top) return; // the heatmap preview loads pages in a frame: don't count those
+
+  var url = '/t';
+  var started = Date.now();
+  var maxScroll = 0;
+  var key = Array.from(crypto.getRandomValues(new Uint8Array(12)), function (b) { return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'[b % 62]; }).join('').slice(0, 16);
+  while (key.length < 16) key += 'x';
+
+  function send(payload) {
+    payload.path = location.pathname;
+    payload.vw = window.innerWidth;
+    var body = JSON.stringify(payload);
+    if (navigator.sendBeacon) navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }));
+    else fetch(url, { method: 'POST', body: body, keepalive: true, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  var q = new URLSearchParams(location.search);
+  send({ type: 'view', key: key, ref: document.referrer, utm: { source: q.get('utm_source'), medium: q.get('utm_medium'), campaign: q.get('utm_campaign') } });
+
+  window.addEventListener('scroll', function () {
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    if (h > 0) maxScroll = Math.max(maxScroll, Math.round(window.scrollY / h * 100));
+  }, { passive: true });
+
+  var left = false;
+  function leave() {
+    if (left) return;
+    left = true;
+    send({ type: 'leave', key: key, ms: Date.now() - started, scroll: maxScroll });
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') leave(); });
+  window.addEventListener('pagehide', leave);
+
+  document.addEventListener('click', function (e) {
+    var doc = document.documentElement;
+    var el = e.target.closest('a, button, [role="button"], input, label, summary') || e.target;
+    var label = (el.getAttribute('aria-label') || el.innerText || el.value || el.alt || el.tagName || '').trim().slice(0, 120);
+    send({
+      type: 'click',
+      x: Math.round(e.pageX / doc.scrollWidth * 1000),
+      y: Math.round(e.pageY),
+      ph: doc.scrollHeight,
+      t: label,
+    });
+  }, { passive: true, capture: true });
+})();
