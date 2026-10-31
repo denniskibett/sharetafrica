@@ -1,6 +1,6 @@
 {{-- Phone tab bar (the canvas mobile app): Home, Activity, Send (centre), Receive, Account. Send and Receive open the
      dashboard's money panel (from other pages they go to the dashboard first).
-     "Account" (or the avatar in the top bar) opens a sheet with the theme, transactions, website, profile, settings,
+     "Account" opens a sheet with the theme, transactions, website, profile, settings,
      verification and sign out. Hidden from tablet width up. --}}
 @php
     $tabs = [
@@ -13,7 +13,7 @@
 @endphp
 {{-- The Account sheet adds a history entry too, so the phone's back button closes it instead of leaving the page --}}
 <div x-data="{ sheet: false }" class="md:hidden"
-     x-init="$watch('sheet', v => v && history.pushState({ sheet: true }, ''))" @popstate.window="sheet = false" @account-sheet.window="sheet = true">
+     x-init="$watch('sheet', v => v && history.pushState({ sheet: true }, ''))" @popstate.window="sheet = false">
   <nav class="fixed inset-x-0 bottom-0 z-[1000] flex items-center justify-around border-t border-app-line bg-app-panel/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 backdrop-blur" aria-label="App">
     @foreach (array_slice($tabs, 0, 2) as [$label, $url, $icon, $current])
       <a href="{{ $url }}" @if ($current) aria-current="page" @endif @class(['flex h-[52px] w-16 flex-col items-center justify-center gap-1 text-[11px]', 'text-app-ink font-semibold' => $current, 'text-app-muted' => ! $current])>
