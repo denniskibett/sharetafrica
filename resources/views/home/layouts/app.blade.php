@@ -42,7 +42,7 @@
 
   <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}" />
   <link rel="alternate icon" href="{{ asset('favicon.ico') }}" />
-  <link rel="apple-touch-icon" href="{{ asset('images/logo/logo-icon.svg') }}" />
+  <link rel="apple-touch-icon" href="{{ asset('images/logo/apple-touch-icon.png') }}" />
   <meta name="theme-color" content="#0A0A0C" />
 
   <script type="application/ld+json">@json(\App\Support\Seo::graph($seoTitle, $seoDescription), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)</script>
