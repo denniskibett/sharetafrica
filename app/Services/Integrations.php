@@ -36,10 +36,14 @@ class Integrations
     public static function applyMail(?int $companyId = null): void
     {
         $c = self::credentials('smtp', $companyId);
-        if (! $c || empty($c['host'])) {
-            return;
+        if ($c && ! empty($c['host'])) {
+            self::useSmtp($c);
         }
+    }
 
+    /** Point the mailer at these SMTP settings for the rest of this request. */
+    public static function useSmtp(array $c): void
+    {
         config([
             'mail.default' => 'smtp',
             'mail.mailers.smtp.host' => $c['host'],

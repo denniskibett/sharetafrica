@@ -115,4 +115,9 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    | Where website contact-form messages go (reply-to is the sender).
+    */
+    'contact_to' => env('MAIL_CONTACT_TO', 'hello@sharet.africa'),
+
 ];

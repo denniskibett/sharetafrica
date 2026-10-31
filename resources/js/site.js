@@ -122,3 +122,56 @@
     });
   }, { passive: true, capture: true });
 })();
+
+/*
+ * Forms marked data-async-form send in the background: no page reload, the server's reply
+ * appears in .form-status, and field errors show under each field. Without JS they post normally.
+ */
+(function () {
+  'use strict';
+  document.querySelectorAll('form[data-async-form]').forEach(function (form) {
+    var status = form.querySelector('.form-status');
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (form.getAttribute('aria-busy') === 'true') return;
+      form.setAttribute('aria-busy', 'true');
+      form.querySelectorAll('.field-error').forEach(function (el) { el.remove(); });
+      try {
+        var res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+        var body = await res.json().catch(function () { return {}; });
+        if (res.ok) {
+          show(body.message || 'Thank you.', false);
+          form.querySelectorAll('input:not([type=hidden]):not([name=_token]), textarea').forEach(function (el) { el.value = ''; });
+          form.querySelectorAll('select').forEach(function (el) { el.selectedIndex = 0; });
+        } else if (res.status === 422 && body.errors) {
+          Object.keys(body.errors).forEach(function (name) {
+            var field = form.querySelector('[name="' + name + '"]');
+            if (!field) return;
+            var err = document.createElement('span');
+            err.className = 'field-error';
+            err.textContent = body.errors[name][0];
+            field.insertAdjacentElement('afterend', err);
+          });
+          show('Please check the highlighted fields.', true);
+        } else if (res.status === 429) {
+          show('You have sent a few notes already. Please wait a few minutes and try again.', true);
+        } else if (res.status === 419) {
+          show('This page was open a long time. Reload it and send again.', true);
+        } else {
+          show('Something went wrong on our side. Please email hello@sharet.africa instead.', true);
+        }
+      } catch (err) {
+        show('You seem to be offline. Check your connection and try again.', true);
+      }
+      form.removeAttribute('aria-busy');
+    });
+
+    function show(text, isError) {
+      if (!status) return;
+      status.hidden = false;
+      status.textContent = text;
+      status.classList.toggle('is-error', isError);
+      status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+})();

@@ -21,11 +21,14 @@ class RegistrationTest extends TestCase
         $response = $this->post('/register', [
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'phone' => '+254700000001',
             'password' => 'password',
             'password_confirmation' => 'password',
         ]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
+        // Sign-ups always start on the waiting list, whatever the form sends
+        $this->assertTrue(\App\Models\User::where('email', 'test@example.com')->first()->hasRole('waiting_list'));
     }
 }

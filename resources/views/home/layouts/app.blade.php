@@ -52,6 +52,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&family=Inter+Tight:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" />
   @vite(['resources/css/styles.css', 'resources/js/site.js'])
+  {{-- Instant page changes: the browser fetches a link's page when you hover it (Chrome/Edge; others ignore) --}}
+  <script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/logout","/t","/*\\?*","/admin/emails/*"]}},{"not":{"selector_matches":"[data-no-prefetch], [target=_blank]"}}]},"eagerness":"moderate"}]}</script>
+
   @stack('head')
 </head>
 <body>

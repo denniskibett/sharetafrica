@@ -25,6 +25,12 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        // Account emails use the Sharet email design (App\Mail\SharetMail)
+        \Illuminate\Auth\Notifications\ResetPassword::toMailUsing(fn ($user, $token) => \App\Mail\SharetMail::passwordReset(
+            url(route('password.reset', ['token' => $token, 'email' => $user->getEmailForPasswordReset()], false))
+        )->to($user->email));
+        \Illuminate\Auth\Notifications\VerifyEmail::toMailUsing(fn ($user, $url) => \App\Mail\SharetMail::verifyEmail($url)->to($user->email));
+
         // System model event listener
         if (class_exists(System::class)) {
             System::updated(function ($system) {

@@ -100,11 +100,15 @@
         </p>
       </div>
 
-      <form class="form-card" onsubmit="event.preventDefault(); this.querySelector('button[type=submit]').textContent='Thank you — we will be in touch.';">
+      {{-- Posts to ContactController; site.js sends it in the background (no reload) and shows the reply here --}}
+      <form class="form-card" method="POST" action="{{ route('contact.store') }}" data-async-form>
+        @csrf
+        <div class="hp-field" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <div class="form-status" role="status" aria-live="polite" @if (! session('contact_status')) hidden @endif>{{ session('contact_status') }}</div>
         <div class="form-row form-row--full">
           <div class="form-field">
             <label for="c-audience">I am a…</label>
-            <select id="c-audience" name="audience" required>
+            <select id="c-audience" name="audience" required data-error-for="audience">
               <option value="">Select one</option>
               <option>Merchant — I want to accept payments from any rail</option>
               <option>Individual — I want to send money across East Africa</option>

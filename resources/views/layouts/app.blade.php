@@ -35,7 +35,13 @@
     </script>
     <style>[x-cloak]{display:none!important}</style>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Instant page changes: the browser fetches a link's page when you hover it (Chrome/Edge; others ignore) --}}
+    <script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/logout","/t","/*\\?*","/admin/emails/*"]}},{"not":{"selector_matches":"[data-no-prefetch], [target=_blank]"}}]},"eagerness":"moderate"}]}</script>
+
 
 
     <style>    

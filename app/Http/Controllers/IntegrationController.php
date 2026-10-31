@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SharetMail;
 use App\Models\Company;
 use App\Models\Integration;
 use App\Services\Integrations;
 use App\Support\DashboardNav;
+use App\Support\Outbox;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -88,6 +90,22 @@ class IntegrationController extends Controller
         [$ok, $message] = Integrations::test($row);
 
         return response()->json(['ok' => $ok, 'message' => $message, 'provider' => $this->state($provider, $row->fresh())], $ok ? 200 : 422);
+    }
+
+    /** Email (SMTP) only: send a real branded email through these settings to the signed-in person. */
+    public function sendTestEmail(Request $request)
+    {
+        $row = $this->row($request, 'smtp');
+        Integrations::useSmtp($row->credentials ?? []);
+
+        $ok = Outbox::now($request->user()->email, SharetMail::test($request->user(), $row->credentials['host'] ?? 'SMTP'));
+        $row->forceFill(['last_tested_at' => now(), 'last_test_ok' => $ok,
+            'last_test_message' => $ok ? 'Test email sent to '.$request->user()->email.'.' : 'The mail server did not accept the test email. Check the log for details.'])->save();
+
+        return response()->json([
+            'message' => $row->last_test_message,
+            'provider' => $this->state('smtp', $row->fresh()),
+        ], $ok ? 200 : 422);
     }
 
     public function destroy(Request $request, string $provider)

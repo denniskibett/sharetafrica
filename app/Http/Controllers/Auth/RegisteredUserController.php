@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SharetMail;
 use App\Models\User;
+use App\Support\Outbox;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,19 +35,22 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User ::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phone' => ['required', 'string', 'max:15', 'unique:'.User ::class], // Add phone validation
-            'role' => ['required', 'string', 'in:admin,user'], // Add role validation (adjust as needed)
+            'phone' => ['required', 'string', 'max:15', 'unique:'.User ::class],
         ]);
-    
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'phone' => $request->phone, // Add phone to user creation
-            'role' => $request->role, // Add role to user creation
+            'phone' => $request->phone,
         ]);
-    
+
+        // Everyone starts on the waiting list; the team assigns a lane (individual, merchant…) later.
+        // The role is never taken from the form.
+        $user->assignRole(\Spatie\Permission\Models\Role::findOrCreate('waiting_list', 'web'));
+
         event(new Registered($user));
+        Outbox::later($user->email, SharetMail::waitingList($user));
     
         Auth::login($user);
     

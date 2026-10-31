@@ -53,18 +53,6 @@
           @enderror
         </div>
 
-        <div class="form-field">
-          <label for="role">Role</label>
-          <select id="role" name="role" required>
-            <option value="borrower">Borrower</option>
-            <option value="teller">Teller</option>
-            <option value="broker">Broker</option>
-            <option value="admin">Admin</option>
-          </select>
-          @error('role')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
       </div>
 
       <div class="form-row">

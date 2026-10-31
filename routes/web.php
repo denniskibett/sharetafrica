@@ -1,14 +1,16 @@
 <?php
 
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\EmailDesignController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\WaitingListController;
 use App\Http\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +38,7 @@ Route::controller(HomeController::class)->group(function () {
 
 Route::post('/t', TrackController::class)->middleware('throttle:240,1')
     ->withoutMiddleware([\App\Http\Middleware\ApplyIntegrations::class])->name('track');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,10')->name('contact.store');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
@@ -92,7 +95,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/waiting-list', [UserController::class, 'show'])->name('waiting_list.show');
+    Route::get('/waiting-list', [WaitingListController::class, 'show'])->name('waiting_list.show');
 
     /*
     |--------------------------------------------------------------------------
@@ -201,8 +204,8 @@ Route::middleware(['auth', 'role:admin|super_admin'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/admin/waiting-list', [UserController::class, 'index'])->name('admin.waiting_list');
-    Route::post('/admin/waiting-list/{user}/invite', [UserController::class, 'invite'])->name('admin.waiting_list.invite');
+    Route::get('/admin/waiting-list', [WaitingListController::class, 'index'])->name('admin.waiting_list');
+    Route::post('/admin/waiting-list/{user}/assign', [WaitingListController::class, 'assign'])->name('admin.waiting_list.assign');
 });
 
 /*
@@ -235,6 +238,7 @@ Route::middleware(['auth', 'permission:integrations.manage'])
         Route::put('/{provider}', 'update')->name('update')->where('provider', $provider);
         Route::patch('/{provider}/toggle', 'toggle')->name('toggle')->where('provider', $provider);
         Route::post('/{provider}/test', 'test')->name('test')->where('provider', $provider);
+        Route::post('/smtp/send-test', 'sendTestEmail')->name('smtp.send-test');
         Route::delete('/{provider}', 'destroy')->name('destroy')->where('provider', $provider);
     });
 
@@ -283,6 +287,19 @@ Route::middleware(['auth', 'permission:analytics.view'])
         Route::get('/heatmap', 'heatmap')->name('heatmap');
         Route::get('/clicks', 'clicks')->name('clicks');
     });
+
+/*
+|--------------------------------------------------------------------------
+| Email designs + contact form inbox
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:system.settings'])->controller(EmailDesignController::class)->group(function () {
+    Route::get('/admin/emails', 'index')->name('admin.emails.index');
+    Route::get('/admin/emails/{key}', 'show')->name('admin.emails.show')->where('key', '[a-z-]+');
+});
+Route::middleware(['auth', 'permission:waiting_list.manage'])
+    ->get('/admin/contact-messages', [EmailDesignController::class, 'messages'])->name('admin.contact.index');
 
 /*
 |--------------------------------------------------------------------------
