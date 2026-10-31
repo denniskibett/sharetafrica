@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Send money</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; padding: 56px 20px 32px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; gap: 12px">
+<a href="MobHome.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 12px; background: #18181C; color: #F4F4F0; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<div style="font-size: 18px; font-weight: 600">Send money</div>
+</div>
+<a href="MobRecipient.dc.html" style="display: flex; align-items: center; gap: 12px; background: #18181C; border-radius: 16px; padding: 14px 16px; text-decoration: none; color: #F4F4F0">
+<span style="width: 40px; height: 40px; border-radius: 50%; background: #232328; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600">[IN]</span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #80807A">To</span><span style="font-size: 15px; font-weight: 600">[RECIPIENT] · Kampala</span></span>
+<span style="font-size: 13px; color: #D4FF3D">Change</span>
+</a>
+<div style="background: #18181C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<label for="m-send" style="font-size: 13px; color: #80807A">You send</label>
+<div style="display: flex; align-items: center; gap: 10px">
+<input id="m-send" value="[AMOUNT]" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: #F4F4F0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 28px; padding: 0">
+<button style="height: 40px; padding: 0 12px; border-radius: 999px; border: 0; background: #232328; color: #F4F4F0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">KES ▾</button>
+</div>
+</div>
+<div style="display: flex; justify-content: center; margin: -12px 0">
+<button aria-label="Swap currencies" style="width: 44px; height: 44px; border-radius: 12px; border: 3px solid #0A0A0C; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4v16"></path><path d="M4 16l4 4 4-4"></path><path d="M16 20V4"></path><path d="M12 8l4-4 4 4"></path></svg></button>
+</div>
+<div style="background: #18181C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<label for="m-recv" style="font-size: 13px; color: #80807A">They receive</label>
+<div style="display: flex; align-items: center; gap: 10px">
+<input id="m-recv" value="[AMOUNT]" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 28px; padding: 0">
+<button style="height: 40px; padding: 0 12px; border-radius: 999px; border: 0; background: #232328; color: #F4F4F0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">UGX ▾</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; padding: 4px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Rate</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">1 KES = [RATE] UGX</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[FEE]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Arrives</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[TIME]</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: #80807A">Pay with</div>
+<div style="display: flex; gap: 8px">
+<button style="flex: 1 1 0; height: 48px; border-radius: 12px; border: 1px solid #D4FF3D; background: rgba(212,255,61,.08); color: #F4F4F0; font-size: 14px">KES wallet</button>
+<button style="flex: 1 1 0; height: 48px; border-radius: 12px; border: 1px solid rgba(244,244,240,.16); background: transparent; color: #C9C9C2; font-size: 14px">M-Pesa</button>
+<button style="flex: 1 1 0; height: 48px; border-radius: 12px; border: 1px solid rgba(244,244,240,.16); background: transparent; color: #C9C9C2; font-size: 14px">Bank</button>
+</div>
+</div>
+<div style="flex-grow: 1"></div>
+<a href="MobReview.dc.html" style="height: 56px; border-radius: 14px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Review transfer</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

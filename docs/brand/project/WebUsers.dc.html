@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet Admin – Users</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0;background:#F4F4F0}
+a{color:#111114}a:hover{color:#5A5A55}
+</style>
+</helmet>
+<div style="background: #F4F4F0; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-wrap: wrap; min-height: 1080px">
+<aside style="flex: 1 1 232px; max-width: 100%; background: #FFFFFF; border-right: 1px solid #E5E5DE; padding: 26px 16px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 10px; padding-left: 8px"><img src="../assets/4e5588085a38dac56cdd1ae9b11d484e.svg" alt="Sharet" style="width: 100px"><span style="padding: 3px 8px; border-radius: 6px; background: #111114; color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px">ADMIN</span></div>
+<nav style="display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<a href="#" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Overview</a>
+<a href="WebUsers.dc.html" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; background: #D4FF3D; color: #050507; font-weight: 600">Users</a>
+<a href="WebBusiness.dc.html" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Merchants &amp; suppliers</a>
+<a href="#" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55; display: flex; justify-content: space-between">KYC queue <span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">1,204</span></a>
+<a href="#" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Transactions</a>
+<a href="WebTrade.dc.html" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Trade finance</a>
+<a href="#" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Limits &amp; tiers</a>
+<a href="#" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Roles &amp; access</a>
+<a href="#" style="padding: 11px 12px; border-radius: 10px; text-decoration: none; color: #5A5A55">Audit log</a>
+</nav>
+<div style="margin-top: auto; padding: 12px; border-radius: 12px; background: #F4F4F0; font-size: 13px; display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600">Faith Mutua</span><span style="color: #5A5A55">Compliance lead</span></div>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; padding: 26px clamp(16px, 3vw, 36px); display: flex; flex-direction: column; gap: 20px; box-sizing: border-box">
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.5">Users</h1>
+<div style="display: flex; gap: 10px"><button style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #D9D9D2; background: #FFFFFF; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 600">Export CSV</button><button style="height: 44px; padding: 0 16px; border-radius: 12px; border: 0; background: #111114; color: #D4FF3D; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 600">Invite team member</button></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; color: #5A5A55">Total users</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">48,210</span><span style="font-size: 12px; color: #3B5200">+1,382 this week</span></div>
+<div style="background: #FFFFFF; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; color: #5A5A55">Verified</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">41,876</span><span style="font-size: 12px; color: #5A5A55">86.9%</span></div>
+<div style="background: #FFFFFF; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; color: #5A5A55">Pending KYC</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">1,204</span><span style="font-size: 12px; color: #7A4F00">212 over 24h SLA</span></div>
+<div style="background: #FFFFFF; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 12px; color: #5A5A55">Flagged</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">37</span><span style="font-size: 12px; color: #B42318">9 need action today</span></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
+<div style="flex: 3 1 520px; min-width: 0; background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; gap: 10px">
+<label for="u-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search users</label><input id="u-q" placeholder="Search name, phone, tag, ID number" style="flex: 1 1 240px; height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid #E5E5DE; background: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; color: #111114">
+<label for="u-s" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Status</label><select id="u-s" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E5E5DE; background: #FFFFFF; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; color: #111114"><option>All statuses</option><option>Verified</option><option>Pending</option><option>Flagged</option></select>
+<label for="u-c" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Country</label><select id="u-c" style="height: 42px; padding: 0 10px; border-radius: 10px; border: 1px solid #E5E5DE; background: #FFFFFF; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; color: #111114"><option>All countries</option><option>Kenya</option><option>Tanzania</option><option>Uganda</option><option>Rwanda</option></select>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13px">
+<thead><tr style="text-align: left; color: #5A5A55; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px"><th style="padding: 8px; font-weight: 500">USER</th><th style="padding: 8px; font-weight: 500">COUNTRY</th><th style="padding: 8px; font-weight: 500">TYPE</th><th style="padding: 8px; font-weight: 500">KYC</th><th style="padding: 8px; font-weight: 500">TIER</th><th style="padding: 8px; font-weight: 500">LAST ACTIVE</th></tr></thead>
+<tbody>
+<sc-for list="{{ users }}" as="u" hint-placeholder-count="8">
+<tr onClick="{{ u.pick }}" style="border-top: 1px solid #E5E5DE; background: {{ u.rowBg }}; cursor: pointer">
+<td style="padding: 11px 8px"><div style="display: flex; align-items: center; gap: 10px"><span style="width: 32px; height: 32px; border-radius: 50%; background: #F4F4F0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600">{{ u.ini }}</span><span style="display: flex; flex-direction: column"><button onClick="{{ u.pick }}" style="border: 0; background: transparent; padding: 0; text-align: left; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 600; color: #111114; cursor: pointer">{{ u.name }}</button><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: #5A5A55">{{ u.tag }}</span></span></div></td>
+<td style="padding: 11px 8px; font-family: 'Geist Mono', ui-monospace, monospace">{{ u.cc }}</td>
+<td style="padding: 11px 8px">{{ u.type }}</td>
+<td style="padding: 11px 8px"><span style="padding: 4px 9px; border-radius: 999px; background: {{ u.kBg }}; color: {{ u.kTx }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px">{{ u.kyc }}</span></td>
+<td style="padding: 11px 8px; font-family: 'Geist Mono', ui-monospace, monospace">{{ u.tier }}</td>
+<td style="padding: 11px 8px; color: #5A5A55">{{ u.seen }}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</div>
+<div style="flex: 1 1 300px; background: #FFFFFF; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px"><span style="width: 48px; height: 48px; border-radius: 50%; background: #D4FF3D; display: flex; align-items: center; justify-content: center; font-weight: 600">{{ sel.ini }}</span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 600">{{ sel.name }}</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #5A5A55">{{ sel.tag }} · {{ sel.cc }}</span></span></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span style="padding: 4px 9px; border-radius: 999px; background: {{ sel.kBg }}; color: {{ sel.kTx }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px">KYC {{ sel.kyc }}</span><span style="padding: 4px 9px; border-radius: 999px; background: #F4F4F0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px">{{ sel.tier }}</span></div>
+<div style="display: flex; flex-direction: column; font-size: 13px">
+<div style="display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #E5E5DE"><span style="color: #5A5A55">Phone</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{ sel.phone }}</span></div>
+<div style="display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #E5E5DE"><span style="color: #5A5A55">ID</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{ sel.idno }}</span></div>
+<div style="display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #E5E5DE"><span style="color: #5A5A55">Daily limit</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{ sel.limit }}</span></div>
+<div style="display: flex; justify-content: space-between; padding: 9px 0"><span style="color: #5A5A55">30-day volume</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{ sel.vol }}</span></div>
+</div>
+<div style="padding: 12px; border-radius: 12px; background: {{ sel.noteBg }}; color: {{ sel.noteTx }}; font-size: 13px; line-height: 1.5">{{ sel.note }}</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button style="height: 42px; border-radius: 10px; border: 0; background: #111114; color: #D4FF3D; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 600">Approve KYC</button>
+<button style="height: 42px; border-radius: 10px; border: 1px solid #D9D9D2; background: #FFFFFF; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 600">Change tier</button>
+<button style="height: 42px; border-radius: 10px; border: 1px solid #D9D9D2; background: #FFFFFF; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 600">Reset PIN</button>
+<button style="height: 42px; border-radius: 10px; border: 1px solid #F4B4AE; background: #FDECEA; color: #B42318; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 600">Freeze account</button>
+</div>
+<div style="font-size: 11px; color: #5A5A55">Every action is recorded in the audit log with your name.</div>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+renderVals() {
+const K = { VERIFIED: ['#F3FFD0', '#3B5200'], PENDING: ['#FFF4DB', '#7A4F00'], FLAGGED: ['#FDECEA', '#B42318'], REVIEW: ['#EAF1FD', '#1E4FB8'] };
+const raw = [
+['AW', 'Amina Wanjiru', '@amina', 'KE', 'Personal', 'VERIFIED', 'Tier 2', '2 min ago', '+254 722 ••• 104', '2938••••', 'KES 300,000', 'KES 412,800', 'Regular cross-border payer. No open issues.'],
+['KF', 'Kilimo Fresh Exports Ltd', '@kilimofresh', 'KE', 'Business', 'VERIFIED', 'Business+', '11 min ago', '+254 711 ••• 220', 'PVT-AAB7K29Q', 'KES 5,000,000', 'KES 8,914,300', 'LPO financing active: MSL/LPO/00918.'],
+['JM', 'Juma Mwinyi', '@juma.tz', 'TZ', 'Personal', 'PENDING', 'Tier 1', '1 h ago', '+255 754 ••• 889', 'NIDA 1987••••', 'TZS 1,000,000', 'TZS 640,000', 'Selfie submitted 26 h ago. Over SLA.'],
+['GA', 'Grace Achieng', '@grace.a', 'KE', 'Personal', 'VERIFIED', 'Tier 2', '3 h ago', '+254 733 ••• 562', '3104••••', 'KES 300,000', 'KES 96,250', 'No open issues.'],
+['MS', 'Mama Shiku Stores', '@mamashiku', 'KE', 'Merchant', 'REVIEW', 'Merchant', '5 h ago', '+254 720 ••• 918', 'BN-9K2X41', 'KES 1,000,000', 'KES 1,206,400', 'Business permit expires in 12 days.'],
+['OB', 'Okello Brian', '@okello.b', 'UG', 'Personal', 'FLAGGED', 'Tier 1', '6 h ago', '+256 772 ••• 330', 'CM90••••', 'UGX 4,000,000', 'UGX 19,800,000', '14 incoming transfers from new senders in 2 days. Review before releasing funds.'],
+['NI', 'Nshuti Imena', '@nshuti', 'RW', 'Personal', 'VERIFIED', 'Tier 2', 'Yesterday', '+250 788 ••• 415', '1199••••', 'RWF 2,000,000', 'RWF 1,140,000', 'No open issues.'],
+['HA', 'Hengli Agri-Machinery', '@hengli.cn', 'CN', 'Supplier', 'VERIFIED', 'Payee', '2 days ago', '+86 20 ••• 7710', 'USCC 9144••••', 'Receive only', 'USD 38,500', 'Beneficiary on LC SHR-LC-2026-0187.']
+];
+const selIdx = (this.state && this.state.sel) || 0;
+const users = raw.map((r, i) => ({ ini: r[0], name: r[1], tag: r[2], cc: r[3], type: r[4], kyc: r[5], tier: r[6], seen: r[7], phone: r[8], idno: r[9], limit: r[10], vol: r[11], note: r[12], kBg: K[r[5]][0], kTx: K[r[5]][1], rowBg: i === selIdx ? '#FAFFE8' : 'transparent', pick: () => this.setState({ sel: i }) }));
+const sel = users[selIdx];
+sel.noteBg = sel.kyc === 'FLAGGED' ? '#FDECEA' : sel.kyc === 'PENDING' ? '#FFF4DB' : '#F4F4F0';
+sel.noteTx = sel.kyc === 'FLAGGED' ? '#B42318' : sel.kyc === 'PENDING' ? '#7A4F00' : '#5A5A55';
+return { users, sel };
+}
+}
+</script>
+</body>
+</html>

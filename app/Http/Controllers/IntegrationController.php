@@ -25,9 +25,11 @@ class IntegrationController extends Controller
         $isAdmin = $request->user()->hasAnyRole(DashboardNav::ADMIN);
 
         $providers = collect(config('integrations'))->map(fn ($p, $key) => $this->state($key, $rows->get($key)));
+        if ($request->wantsJson()) {
+            return response()->json(['providers' => $providers->values()]);
+        }
 
         return view('integrations.index', [
-            'providers' => $providers->values(),
             'scope' => $companyId ? Company::find($companyId) : null,
             'companies' => $isAdmin ? Company::orderBy('name')->get(['id', 'name']) : collect(),
             'isAdmin' => $isAdmin,
@@ -72,16 +74,32 @@ class IntegrationController extends Controller
             $row->enabled = true;
         }
         $row->save();
+        Integrations::exclusive($row);
 
-        return response()->json(['message' => "{$definition['name']} saved.", 'provider' => $this->state($provider, $row)]);
+        return response()->json(['message' => "{$definition['name']} saved.", 'provider' => $this->state($provider, $row), 'siblings' => $this->siblings($request, $provider)]);
     }
 
     public function toggle(Request $request, string $provider)
     {
         $row = $this->row($request, $provider);
         $row->update(['enabled' => ! $row->enabled, 'updated_by' => $request->user()->id]);
+        Integrations::exclusive($row);
+        $others = config("integrations.$provider.group") && $row->enabled ? ' The other M-Pesa connection is now off.' : '';
 
-        return response()->json(['message' => $row->enabled ? 'Turned on.' : 'Turned off.', 'provider' => $this->state($provider, $row)]);
+        return response()->json(['message' => ($row->enabled ? 'Turned on.' : 'Turned off.').$others, 'provider' => $this->state($provider, $row), 'siblings' => $this->siblings($request, $provider)]);
+    }
+
+    /** Fresh state of the other providers in the same group (so the page can flip their switches). */
+    protected function siblings(Request $request, string $provider): array
+    {
+        $group = config("integrations.$provider.group");
+        if (! $group) {
+            return [];
+        }
+        $companyId = $this->companyId($request);
+
+        return collect(config('integrations'))->filter(fn ($p, $k) => ($p['group'] ?? null) === $group && $k !== $provider)
+            ->map(fn ($p, $k) => $this->state($k, Integration::where('company_id', $companyId)->where('provider', $k)->first()))->values()->all();
     }
 
     public function test(Request $request, string $provider)
@@ -126,6 +144,8 @@ class IntegrationController extends Controller
             'category' => $d['category'],
             'description' => $d['description'],
             'color' => $d['color'],
+            'group' => $d['group'] ?? null,
+            'environment' => $d['environment'] ?? null,
             'fields' => collect($d['fields'])->map(fn ($f, $k) => $f + ['key' => $k, 'type' => $f['type'] ?? 'text'])->values(),
             'connected' => (bool) $row?->exists,
             'enabled' => (bool) $row?->enabled,

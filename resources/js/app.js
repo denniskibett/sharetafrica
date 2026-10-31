@@ -3,7 +3,8 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
 import focus from '@alpinejs/focus';
-import { dataTable, chart, alertModal, profile, installHelpers } from './dashboard';
+import collapse from '@alpinejs/collapse';
+import { dataTable, chart, alertModal, profile, kycCamera, signaturePad, checkPhoto, installHelpers } from './dashboard';
 
 /**
  * Dashboard forms save in the background: sharet.send() returns the JSON reply, shows a toast,
@@ -82,7 +83,11 @@ Alpine.data('dataTable', dataTable);
 Alpine.data('chart', chart);
 Alpine.data('alertModal', alertModal);
 Alpine.data('profile', profile);
+Alpine.data('kycCamera', kycCamera);
+Alpine.data('signaturePad', signaturePad);
+window.sharet.checkPhoto = checkPhoto;
 Alpine.plugin(persist);
 Alpine.plugin(focus);
+Alpine.plugin(collapse);
 window.Alpine = Alpine;
 Alpine.start();

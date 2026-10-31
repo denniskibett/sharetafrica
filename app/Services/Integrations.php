@@ -27,6 +27,32 @@ class Integrations
         }
     }
 
+    /**
+     * The M-Pesa connection to use: the live one when it is on and has keys, else the sandbox.
+     * Returns [Integration|null, 'live'|'sandbox'|null].
+     */
+    public static function mpesa(?int $companyId = null): array
+    {
+        $live = self::find('mpesa', $companyId);
+        if ($live && filled($live->credentials['consumer_key'] ?? null)) {
+            return [$live, 'live'];
+        }
+        $sandbox = self::find('mpesa_sandbox', $companyId);
+
+        return $sandbox ? [$sandbox, 'sandbox'] : [null, null];
+    }
+
+    /** Providers in one group (e.g. M-Pesa live / sandbox) are exclusive: turning one on turns the others off. */
+    public static function exclusive(Integration $row): void
+    {
+        $group = config("integrations.{$row->provider}.group");
+        if (! $group || ! $row->enabled) {
+            return;
+        }
+        $siblings = collect(config('integrations'))->filter(fn ($p, $k) => ($p['group'] ?? null) === $group && $k !== $row->provider)->keys();
+        Integration::where('company_id', $row->company_id)->whereIn('provider', $siblings)->update(['enabled' => false]);
+    }
+
     public static function credentials(string $provider, ?int $companyId = null): ?array
     {
         return self::find($provider, $companyId)?->credentials;
@@ -61,11 +87,11 @@ class Integrations
     public static function test(Integration $integration): array
     {
         $c = $integration->credentials ?? [];
-        $live = ($c['environment'] ?? 'sandbox') === 'live';
+        $live = (config("integrations.{$integration->provider}.environment") ?? $c['environment'] ?? 'sandbox') === 'live';
 
         try {
             [$ok, $message] = match ($integration->provider) {
-                'mpesa' => self::ok(Http::timeout(10)->withBasicAuth($c['consumer_key'] ?? '', $c['consumer_secret'] ?? '')
+                'mpesa', 'mpesa_sandbox' => self::ok(Http::timeout(10)->withBasicAuth($c['consumer_key'] ?? '', $c['consumer_secret'] ?? '')
                     ->get(($live ? 'https://api.safaricom.co.ke' : 'https://sandbox.safaricom.co.ke').'/oauth/v1/generate', ['grant_type' => 'client_credentials']),
                     'Daraja accepted the consumer key and secret.'),
                 'mtn_momo' => self::ok(Http::timeout(10)->withBasicAuth($c['api_user'] ?? '', $c['api_key'] ?? '')

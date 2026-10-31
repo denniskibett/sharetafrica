@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet Africa – Product UI</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="width: 1360px; height: 1040px; box-sizing: border-box; padding: 64px; background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; align-items: baseline; justify-content: space-between">
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 34px; font-weight: 400; line-height: 1.4">Product UI</h1>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.2em; color: #80807A">10 / APPLICATIONS</div>
+</div>
+<div style="display: flex; gap: 32px; flex-grow: 1">
+<div style="width: 340px; height: 760px; box-sizing: border-box; background: #050507; border: 1px solid rgba(244,244,240,.16); border-radius: 40px; padding: 28px 20px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="28" height="24" viewBox="0 0 76 64" aria-hidden="true"><polygon points="0,0 58,0 76,15 58,30 0,30" fill="#D4FF3D"></polygon><polygon points="76,34 18,34 0,49 18,64 76,64" fill="#F4F4F0"></polygon></svg>
+<div style="font-size: 17px; font-weight: 600">Send money</div>
+</div>
+<button aria-label="Close" style="width: 44px; height: 44px; border-radius: 12px; border: 0; background: #18181C; color: #F4F4F0; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6L6 18"></path></svg></button>
+</div>
+<div style="background: #18181C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<label for="send-amt" style="font-size: 13px; color: #80807A">You send</label>
+<div style="display: flex; align-items: center; gap: 10px">
+<input id="send-amt" value="1,250,000" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: #F4F4F0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 26px; padding: 0">
+<div style="padding: 8px 12px; border-radius: 999px; background: #232328; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">KES</div>
+</div>
+</div>
+<div style="display: flex; justify-content: center; margin: -10px 0">
+<div style="width: 40px; height: 40px; border-radius: 12px; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4v16"></path><path d="M4 16l4 4 4-4"></path><path d="M16 20V4"></path><path d="M12 8l4-4 4 4"></path></svg></div>
+</div>
+<div style="background: #18181C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<label for="recv-amt" style="font-size: 13px; color: #80807A">They receive</label>
+<div style="display: flex; align-items: center; gap: 10px">
+<input id="recv-amt" value="[AMOUNT]" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 26px; padding: 0">
+<div style="padding: 8px 12px; border-radius: 999px; background: #232328; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">USD</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 4px 4px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Rate</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">1 USD = [RATE] KES</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[FEE]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Arrives</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[TIME]</span></div>
+</div>
+<div style="flex-grow: 1"></div>
+<button style="height: 56px; border-radius: 14px; border: 0; background: #D4FF3D; color: #050507; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 16px; font-weight: 600">Review transfer</button>
+</div>
+<div style="width: 340px; height: 760px; box-sizing: border-box; background: #050507; border: 1px solid rgba(244,244,240,.16); border-radius: 40px; padding: 28px 20px; display: flex; flex-direction: column; gap: 22px; align-items: stretch">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding-top: 30px">
+<div style="width: 84px; height: 84px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></div>
+<div style="font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 30px; line-height: 1.4">Sent.</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 18px; color: #C9C9C2">KES 1,250,000.00</div>
+<div style="padding: 6px 12px; border-radius: 999px; background: #232328; color: #C9C9C2; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">IN TRANSIT</div>
+</div>
+<div style="background: #18181C; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 12px; height: 12px; border-radius: 50%; background: #D4FF3D"></div>
+<div style="flex-grow: 1; font-size: 14px">Paid in</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">[TIME]</div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 12px; height: 12px; border-radius: 50%; background: #D4FF3D"></div>
+<div style="flex-grow: 1; font-size: 14px">Converted to USD</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">[TIME]</div>
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid #5A5A55; box-sizing: border-box"></div>
+<div style="flex-grow: 1; font-size: 14px; color: #80807A">Delivered to [RECIPIENT]</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #5A5A55">[ETA]</div>
+</div>
+</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A; text-align: center">REF [REFERENCE]</div>
+<div style="flex-grow: 1"></div>
+<button style="height: 56px; border-radius: 14px; border: 1px solid rgba(244,244,240,.16); background: transparent; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 16px; font-weight: 600">Share receipt</button>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 20px">
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.2em; color: #80807A">BALANCES</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="background: #18181C; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">KES</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px">[AMOUNT]</span></div>
+<div style="background: #18181C; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">USD</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px">[AMOUNT]</span></div>
+<div style="background: #18181C; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">UGX</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px">[AMOUNT]</span></div>
+<div style="background: #18181C; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">TZS</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px">[AMOUNT]</span></div>
+</div>
+</div>
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.2em; color: #80807A">TRADE FINANCE</div>
+<div style="padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(244,244,240,.16); color: #C9C9C2; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px">AWAITING DOCS</div>
+</div>
+<div style="font-size: 18px; font-weight: 600">Letter of credit · [SUPPLIER]</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; color: #C9C9C2">[REF] · USD [AMOUNT]</div>
+<div style="display: flex; gap: 6px">
+<div style="flex: 1 1 0; height: 10px; background: #D4FF3D; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)"></div>
+<div style="flex: 1 1 0; height: 10px; background: #D4FF3D; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)"></div>
+<div style="flex: 1 1 0; height: 10px; background: #232328; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)"></div>
+<div style="flex: 1 1 0; height: 10px; background: #232328; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%)"></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: #80807A">
+<span style="color: #D4FF3D">ISSUED</span><span style="color: #D4FF3D">SHIPPED</span><span>DOCS</span><span>PAID</span>
+</div>
+</div>
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.2em; color: #80807A">RECENT</div>
+<div style="display: flex; align-items: center; gap: 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h12"></path><path d="M13 7l5 5-5 5"></path></svg><span style="flex-grow: 1; font-size: 14px">To [RECIPIENT]</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px">−[AMOUNT]</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4F4F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H7"></path><path d="M11 7l-5 5 5 5"></path></svg><span style="flex-grow: 1; font-size: 14px">From [SENDER]</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; color: #D4FF3D">+[AMOUNT]</span></div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

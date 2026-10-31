@@ -9,7 +9,7 @@
     $input = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30';
 @endphp
 
-<div x-data="integrationsPage(@js($providers), @js($base), @js($scopeParam))">
+<div x-data="integrationsPage('{{ $base }}', '{{ $scopeParam }}')">
   <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Integrations</h1>
@@ -53,7 +53,8 @@
                   :style="`background:${p.color}`" x-text="initials(p.name)"></span>
             <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300" x-text="p.category"></span>
           </div>
-          <h3 class="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90" x-text="p.name"></h3>
+          <h3 class="mb-2 flex items-center gap-2 text-lg font-semibold text-gray-800 dark:text-white/90"><span x-text="p.name"></span>
+            <span x-show="p.environment" :class="sharet.pill(p.environment === 'live' ? 'success' : 'info')" x-text="p.environment === 'live' ? 'Live' : 'Sandbox'"></span></h3>
           <p class="text-sm text-gray-500 dark:text-gray-400" x-text="p.description"></p>
 
           <p class="mt-4 flex items-center gap-2 text-xs font-medium">
@@ -78,10 +79,16 @@
             </button>
             <button type="button" x-show="p.connected" @click="details = p" class="inline-flex h-10 items-center rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Details</button>
           </div>
-          <button type="button" role="switch" :aria-checked="p.enabled" :disabled="!p.connected" @click="toggle(p)"
+          {{-- Grouped providers (M-Pesa live / sandbox): a radio, only one can be in use --}}
+          <label x-show="p.group" class="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300" :class="!p.connected && 'cursor-not-allowed opacity-40'">
+            <input type="radio" :name="'group-' + p.group" :checked="p.enabled" :disabled="!p.connected" @click.prevent="!p.enabled && toggle(p)"
+                   class="h-5 w-5 border-gray-300 text-gray-900 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-900 dark:checked:bg-[#D4FF3D]">
+            <span x-text="p.enabled ? 'In use' : 'Use this one'"></span>
+          </label>
+          <button type="button" x-show="!p.group" role="switch" :aria-checked="p.enabled" :disabled="!p.connected" @click="toggle(p)"
                   :title="p.connected ? (p.enabled ? 'Turn off' : 'Turn on') : 'Connect first'"
                   class="relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-40"
-                  :class="p.enabled ? 'bg-violet-500' : 'bg-gray-200 dark:bg-white/10'">
+                  :class="p.enabled ? 'bg-gray-900 dark:bg-[#D4FF3D]' : 'bg-gray-200 dark:bg-white/10'">
             <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition" :class="p.enabled && 'translate-x-5'"></span>
           </button>
         </div>
@@ -197,9 +204,11 @@
 
 @push('scripts')
 <script>
-  function integrationsPage(providers, base, scope) {
+  function integrationsPage(base, scope) {
     return {
-      providers, filter: 'All', editing: null, details: null, removing: null, form: {}, errors: {}, busy: false,
+      providers: [],
+      async init() { this.providers = (await (await fetch(`${base}?company=${scope}`, { headers: { Accept: 'application/json' } })).json()).providers; },
+      filter: 'All', editing: null, details: null, removing: null, form: {}, errors: {}, busy: false,
       get categories() { return [...new Set(this.providers.map(p => p.category))]; },
       get shown() { return this.filter === 'All' ? this.providers : this.providers.filter(p => p.category === this.filter); },
       url(p, tail = '') { return `${base}/${p.key}${tail}?company=${scope}`; },
@@ -211,8 +220,8 @@
         if (p.last_test_ok === false) return 'On · last test failed';
         return p.last_test_ok ? 'On · tested ' + p.last_tested_at : 'On · not tested yet';
       },
-      replace(updated) {
-        this.providers = this.providers.map(p => p.key === updated.key ? updated : p);
+      replace(updated, siblings = []) {
+        [updated, ...siblings].forEach(u => { this.providers = this.providers.map(p => p.key === u.key ? u : p); });
         if (this.editing?.key === updated.key) this.editing = updated;
       },
       openSettings(p) {
@@ -229,7 +238,7 @@
         this.busy = true; this.errors = {};
         try {
           const r = await sharet.send('PUT', this.url(this.editing), { values: this.form });
-          this.replace(r.provider);
+          this.replace(r.provider, r.siblings);
           Object.keys(this.form).forEach(k => { if (r.provider.saved_secrets.includes(k)) this.form[k] = ''; });
         } catch (e) { this.errors = e.errors || {}; }
         this.busy = false;
@@ -248,7 +257,7 @@
       },
       async toggle(p) {
         if (!p.connected) return;
-        try { const r = await sharet.send('PATCH', this.url(p, '/toggle')); this.replace(r.provider); } catch (e) {}
+        try { const r = await sharet.send('PATCH', this.url(p, '/toggle')); this.replace(r.provider, r.siblings); } catch (e) {}
       },
       confirmRemove(p) { this.removing = p; },
       async remove() {

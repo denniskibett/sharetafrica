@@ -27,7 +27,10 @@
       </select>
     </x-slot:filters>
     <x-slot:actions>
-      <x-ui.button variant="secondary" class="!h-9" icon="eye" @click="sharet.panel('enquiry', row)">Read</x-ui.button>
+      <x-ui.row-menu>
+        <x-ui.row-menu-item icon="eye" @click="sharet.panel('enquiry', row)">Read</x-ui.row-menu-item>
+        <x-ui.row-menu-item icon="arrow-uturn-left" x-bind:href="'mailto:' + (row.person?.email || '') + '?subject=' + encodeURIComponent('Re: your note to Sharet')">Reply by email</x-ui.row-menu-item>
+      </x-ui.row-menu>
     </x-slot:actions>
     <x-slot:empty>No messages yet.</x-slot:empty>
   </x-ui.table>

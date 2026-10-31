@@ -1,25 +1,29 @@
-{{-- Verification (KYC). Section 1 = Basic (M-Pesa grade). Section 2 = Full (bank grade). Stored encrypted. --}}
+{{-- Verification. Basic = name + M-Pesa number. Bank grade = the details below + photos and signature. Stored encrypted. --}}
 @php
     $select = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 @endphp
-<form @submit.prevent="submit('PUT', '{{ route('profile.verification') }}', data.kyc)" class="space-y-6">
-  <x-ui.card title="Basic · M-Pesa grade" subtitle="The same details a mobile money agent asks for. Enough to send and receive across East Africa.">
-    <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Complete' : 'Needed'"></span></x-slot:actions>
-    <div class="grid gap-5 md:grid-cols-3">
-      <x-ui.field label="ID document" name="id_type" required>
-        <select id="f-id_type" x-model="data.kyc.id_type" required class="{{ $select }}">
-          <option value="">Choose</option><option value="national_id">National ID</option><option value="passport">Passport</option><option value="alien_id">Alien ID</option><option value="military_id">Military ID</option>
-        </select>
-      </x-ui.field>
-      <x-ui.field label="ID number" name="id_number" model="data.kyc.id_number" required autocomplete="off" />
-      <x-ui.field label="Date of birth" name="date_of_birth" type="date" model="data.kyc.date_of_birth" required autocomplete="bday" />
-    </div>
-    <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Your mobile number comes from Personal details: <span class="font-medium" x-text="data.user.phone || 'not added yet'"></span>.</p>
-  </x-ui.card>
+<x-ui.card title="Basic · M-Pesa account" subtitle="Your name and M-Pesa number. Enough to send and receive across East Africa." class="mb-6">
+  <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Active' : 'Add your M-Pesa number'"></span></x-slot:actions>
+  <dl class="grid gap-4 text-sm sm:grid-cols-2">
+    <div><dt class="text-gray-500">Name</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.user.name"></dd></div>
+    <div><dt class="text-gray-500">M-Pesa number</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.user.phone || 'Not added yet'"></dd></div>
+  </dl>
+  <button type="button" x-show="!data.user.phone" @click="tab = 'personal'" class="mt-4 text-sm font-medium underline">Add it in Personal details</button>
+</x-ui.card>
 
-  <x-ui.card title="Full · bank grade" subtitle="What a bank asks when you open an account. Unlocks higher limits, trade payments and cards.">
-    <x-slot:actions><span :class="sharet.pill(data.level.standard.complete ? 'success' : 'neutral')" x-text="data.level.standard.complete ? 'Complete' : 'Optional'"></span></x-slot:actions>
+<form @submit.prevent="submit('PUT', '{{ route('profile.verification') }}', data.kyc)" class="space-y-6">
+  <x-ui.card title="Bank grade" subtitle="What a bank asks when you open an account. Needed for loans, cards, trade payments, higher limits and to register a business.">
+    <x-slot:actions><span :class="sharet.pill(data.level.standard.complete ? 'success' : 'neutral')" x-text="data.level.standard.complete ? 'Complete' : (data.level.standard.fields?.[0] ?? 0) + ' of ' + (data.level.standard.fields?.[1] ?? 0) + ' details'"></span></x-slot:actions>
     <div class="space-y-6">
+      <div class="grid gap-5 md:grid-cols-3">
+        <x-ui.field label="ID document" name="id_type" required>
+          <select id="f-id_type" x-model="data.kyc.id_type" required class="{{ $select }}">
+            <option value="">Choose</option><option value="national_id">National ID</option><option value="passport">Passport</option><option value="alien_id">Alien ID</option><option value="military_id">Military ID</option>
+          </select>
+        </x-ui.field>
+        <x-ui.field label="ID / passport number" name="id_number" model="data.kyc.id_number" required autocomplete="off" />
+        <x-ui.field label="Date of birth" name="date_of_birth" type="date" model="data.kyc.date_of_birth" required autocomplete="bday" />
+      </div>
       <div class="grid gap-5 md:grid-cols-2">
         <x-ui.field label="KRA PIN" name="kra_pin" model="data.kyc.kra_pin" placeholder="A012345678Z" class="uppercase" />
         <x-ui.field label="Nationality" name="nationality" model="data.kyc.nationality" placeholder="Kenyan" />
@@ -66,6 +70,8 @@
 
   <div class="flex items-center justify-between gap-4">
     <p class="text-xs text-gray-500 dark:text-gray-400">Encrypted at rest and only seen by our compliance team.</p>
-    <x-ui.button type="submit" icon="shield-check" x-bind:disabled="busy">Send for review</x-ui.button>
+    <x-ui.button type="submit" icon="check" x-bind:disabled="busy">Save details</x-ui.button>
   </div>
 </form>
+
+<div class="mt-6">@include('profile.partials.documents')</div>

@@ -4,8 +4,8 @@
     <li class="rounded-xl border p-4" :class="data.level.basic.complete ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-500/5' : 'border-gray-200 dark:border-gray-800'">
       <div class="flex items-center justify-between gap-3">
         <div>
-          <p class="font-medium text-gray-900 dark:text-white">Basic · M-Pesa grade</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Phone, ID document, date of birth. Send and receive across East Africa.</p>
+          <p class="font-medium text-gray-900 dark:text-white">Basic · M-Pesa account</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Your name and M-Pesa number. Send and receive across East Africa.</p>
         </div>
         <span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Done' : data.level.basic.done + ' of ' + data.level.basic.of"></span>
       </div>
@@ -14,8 +14,8 @@
     <li class="rounded-xl border p-4" :class="data.level.standard.complete ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-500/5' : 'border-gray-200 dark:border-gray-800'">
       <div class="flex items-center justify-between gap-3">
         <div>
-          <p class="font-medium text-gray-900 dark:text-white">Full · bank grade</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">KRA PIN, address, work and income, next of kin. Higher limits, trade payments and cards.</p>
+          <p class="font-medium text-gray-900 dark:text-white">Bank grade</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">ID, KRA PIN, address, income, ID photos, selfies and signature. Loans, cards, trade and registering a business.</p>
         </div>
         <span :class="sharet.pill(data.level.standard.complete ? 'success' : 'neutral')" x-text="data.level.standard.complete ? 'Done' : data.level.standard.done + ' of ' + data.level.standard.of"></span>
       </div>
@@ -25,7 +25,7 @@
       <div class="flex items-center justify-between gap-3">
         <div>
           <p class="font-medium text-gray-900 dark:text-white">Business · bank grade</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Registration, directors, KRA PIN and settlement account for your business.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">For directors with a personal account. Registration, directors, KRA PIN and settlement account.</p>
         </div>
         <x-ui.button variant="secondary" class="!h-9" href="{{ route('settings.company') }}">Open</x-ui.button>
       </div>

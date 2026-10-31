@@ -26,3 +26,4 @@ yarn-error.log
 *.sql
 *.zip
 .DS_Store
+/.claude/

@@ -351,7 +351,7 @@
     </div>
 </div>
 
-<x-ui.alert-modal />
+@include('partials.modal.alert-modal')
 
 {{-- Toasts from sharet.toast() / sharet.send() --}}
 <div x-data="{ toasts: [] }"

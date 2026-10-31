@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet (dark) – KYC</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 2310px; height: 1100px; box-sizing: border-box; padding: 60px; background: #050507; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: row; gap: 80px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 40px; border-radius: 32px; background: {{ t.surf }}">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.2em; color: {{ t.muted }}">{{ t.label }} MODE</div>
+<div style="display: flex; gap: 40px">
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="FlowOnboard.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="flex-grow: 1; display: flex; gap: 4px"><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.surf2 }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.surf2 }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.surf2 }}"></span></div></div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: {{ t.muted }}">STEP 1 OF 4</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5">What's your phone number?</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}">We'll send a code to confirm it's you.</p>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<label for="k-phone-{{ t.id }}" style="font-size: 13px; font-weight: 600">Phone number</label>
+<div style="display: flex; gap: 8px">
+<button style="height: 56px; padding: 0 14px; border-radius: 14px; border: 1px solid {{ t.line }}; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 15px">KE +254 ▾</button>
+<input id="k-phone-{{ t.id }}" value="712 345 678" style="flex-grow: 1; min-width: 0; height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 2px solid {{ t.focus }}; background: {{ t.bg }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px">
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="padding: 8px 12px; border-radius: 999px; background: {{ t.surf }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">KE +254</span>
+<span style="padding: 8px 12px; border-radius: 999px; background: {{ t.surf }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">UG +256</span>
+<span style="padding: 8px 12px; border-radius: 999px; background: {{ t.surf }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">TZ +255</span>
+<span style="padding: 8px 12px; border-radius: 999px; background: {{ t.surf }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">RW +250</span>
+</div>
+<div style="flex-grow: 1"></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Send code</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="flex-grow: 1; display: flex; gap: 4px"><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.surf2 }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.surf2 }}"></span></div></div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: {{ t.muted }}">STEP 2 OF 4</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5">Enter the 6-digit code</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}">Sent by SMS to <span style="font-family: 'Geist Mono', ui-monospace, monospace; color: {{ t.text }}">+254 712 345 678</span></p>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+<div style="height: 60px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 24px">4</div>
+<div style="height: 60px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 24px">8</div>
+<div style="height: 60px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 24px">2</div>
+<div style="height: 60px; box-sizing: border-box; border-radius: 14px; border: 2px solid {{ t.focus }}; background: {{ t.bg }}"></div>
+<div style="height: 60px; border-radius: 14px; background: {{ t.surf }}"></div>
+<div style="height: 60px; border-radius: 14px; background: {{ t.surf }}"></div>
+</div>
+<div style="font-size: 14px; color: {{ t.muted }}">Resend code in <span style="font-family: 'Geist Mono', ui-monospace, monospace; color: {{ t.text }}">0:42</span></div>
+<div style="flex-grow: 1"></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: {{ t.surf2 }}; color: {{ t.muted }}; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Verify</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="flex-grow: 1; display: flex; gap: 4px"><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.surf2 }}"></span></div></div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: {{ t.muted }}">STEP 3 OF 4</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5">Verify your ID</h1>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<label style="display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 0 16px; border-radius: 16px; border: 2px solid {{ t.focus }}; font-size: 15px; font-weight: 600"><input type="radio" name="doc-{{ t.id }}" checked="" style="width: 20px; height: 20px; accent-color: #050507">National ID</label>
+<label style="display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 0 16px; border-radius: 16px; background: {{ t.surf }}; font-size: 15px"><input type="radio" name="doc-{{ t.id }}" style="width: 20px; height: 20px">Passport</label>
+<label style="display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 0 16px; border-radius: 16px; background: {{ t.surf }}; font-size: 15px"><input type="radio" name="doc-{{ t.id }}" style="width: 20px; height: 20px">Alien / refugee ID</label>
+</div>
+<div style="height: 190px; border-radius: 20px; border: 2px dashed {{ t.btn2Border }}; background: {{ t.surf }}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="11" r="2.5"></circle><path d="M14 10h4"></path><path d="M14 14h3"></path></svg>
+<div style="font-size: 14px; color: {{ t.muted }}">Front of ID, inside the frame</div>
+</div>
+<div style="font-size: 13px; line-height: 1.5; color: {{ t.muted }}">Good light · no glare · all four corners visible</div>
+<div style="flex-grow: 1"></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Scan front of ID</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="flex-grow: 1; display: flex; gap: 4px"><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span><span style="flex: 1; height: 4px; border-radius: 2px; background: {{ t.text }}"></span></div></div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: {{ t.muted }}">STEP 4 OF 4</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5">Take a quick selfie</h1>
+<div style="flex-grow: 1; border-radius: 28px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center">
+<div style="width: 210px; height: 270px; border-radius: 50%; border: 3px solid #D4FF3D; box-shadow: 0 0 0 8px {{ t.surf2 }}"></div>
+</div>
+<div style="display: flex; justify-content: space-around; font-size: 13px; color: {{ t.muted }}"><span>Remove glasses</span><span>Face the light</span><span>Look straight</span></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Take selfie</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding-top: 50px">
+<div style="width: 96px; height: 96px; border-radius: 50%; background: {{ t.infoBg }}; color: {{ t.infoTx }}; display: flex; align-items: center; justify-content: center"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5; text-align: center">We're checking your details</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}; text-align: center">Usually done in [TIME]. We'll notify you.</p>
+</div>
+<div style="border-radius: 20px; background: {{ t.surf }}; padding: 6px 18px">
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid {{ t.line }}"><span style="width: 24px; height: 24px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span style="flex-grow: 1; font-size: 15px">Phone number</span></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid {{ t.line }}"><span style="width: 24px; height: 24px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span style="flex-grow: 1; font-size: 15px">ID document</span></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px 0"><span style="width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 2px solid {{ t.infoTx }}"></span><span style="flex-grow: 1; font-size: 15px">Selfie match</span><span style="font-size: 13px; color: {{ t.infoTx }}">In review</span></div>
+</div>
+<div style="display: flex; gap: 12px; padding: 14px 16px; border-radius: 16px; background: {{ t.infoBg }}; border: 1px solid {{ t.infoBd }}; color: {{ t.infoTx }}; font-size: 14px; line-height: 1.5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg>You can add money while we finish. Sending unlocks once you're verified.</div>
+<div style="flex-grow: 1"></div>
+<a href="FlowDeposit.dc.html" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Add money</a>
+</div>
+
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2310,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = { id: 'l', label: 'LIGHT', bg: '#FFFFFF', surf: '#F4F4F0', surf2: '#E5E5DE', line: '#E5E5DE', text: '#111114', muted: '#5A5A55', focus: '#111114', btn2Border: '#D9D9D2', infoBg: '#EAF1FD', infoBd: '#B3CBF6', infoTx: '#1E4FB8' };
+const D = { id: 'd', label: 'DARK', bg: '#0A0A0C', surf: '#18181C', surf2: '#232328', line: 'rgba(244,244,240,.08)', text: '#F4F4F0', muted: '#C9C9C2', focus: '#D4FF3D', btn2Border: 'rgba(244,244,240,.16)', infoBg: 'rgba(46,107,230,.14)', infoBd: 'rgba(110,155,255,.4)', infoTx: '#9DBBFF' };
+return { themes: [D] };
+}
+}
+</script>
+</body>
+</html>

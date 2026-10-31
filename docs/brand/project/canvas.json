@@ -1,0 +1,1043 @@
+{
+ "v": 3,
+ "attachments": {},
+ "boards": {
+  "BrandColourType.dc.html": {
+   "h": 1040,
+   "page": "explore",
+   "title": "Brand \u00b7 Colour & type",
+   "w": 1360,
+   "x": 2880,
+   "y": 7040
+  },
+  "BrandLogo.dc.html": {
+   "h": 1040,
+   "page": "explore",
+   "title": "Brand \u00b7 Logo system",
+   "w": 1360,
+   "x": 0,
+   "y": 7040
+  },
+  "BrandSymbol.dc.html": {
+   "h": 1040,
+   "page": "explore",
+   "title": "Brand \u00b7 Symbol & favicon",
+   "w": 1360,
+   "x": 1440,
+   "y": 7040
+  },
+  "DocInvoice.dc.html": {
+   "h": 1123,
+   "page": "docs",
+   "paper": "a4",
+   "title": "Invoice",
+   "w": 794,
+   "x": 0,
+   "y": 0
+  },
+  "DocLC.dc.html": {
+   "h": 1123,
+   "page": "docs",
+   "paper": "a4",
+   "title": "Letter of credit (LC)",
+   "w": 794,
+   "x": 1748,
+   "y": 0
+  },
+  "DocLPO.dc.html": {
+   "h": 1123,
+   "page": "docs",
+   "paper": "a4",
+   "title": "Local purchase order (LPO)",
+   "w": 794,
+   "x": 874,
+   "y": 0
+  },
+  "DocReceipt.dc.html": {
+   "h": 1123,
+   "page": "docs",
+   "paper": "a4",
+   "title": "Payment receipt",
+   "w": 794,
+   "x": 2622,
+   "y": 0
+  },
+  "Domain.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "4 \u00b7 Domain Wordmark",
+   "w": 640,
+   "x": 0,
+   "y": 920
+  },
+  "Exchange.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "2 \u00b7 Exchange Loop",
+   "w": 640,
+   "x": 720,
+   "y": 0
+  },
+  "FlowAlerts.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Alerts \u00b7 Light",
+   "w": 1880,
+   "x": 0,
+   "y": 14900
+  },
+  "FlowAlertsDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Alerts \u00b7 Dark",
+   "w": 1880,
+   "x": 1960,
+   "y": 14900
+  },
+  "FlowDeposit.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Add money (bank, STK push) \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 6080
+  },
+  "FlowDepositDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Add money (bank, STK push) \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 6080
+  },
+  "FlowKyc.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 KYC \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 3560
+  },
+  "FlowKycDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 KYC \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 3560
+  },
+  "FlowMerchant.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Merchant application & till \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 12380
+  },
+  "FlowMerchantDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Merchant application & till \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 12380
+  },
+  "FlowOnboard.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Splash & welcome \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 2300
+  },
+  "FlowOnboardDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Splash & welcome \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 2300
+  },
+  "FlowPay.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Paybill & Till \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 7340
+  },
+  "FlowPayDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Paybill & Till \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 7340
+  },
+  "FlowTag.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Sharet tag (P2P) \u00b7 Light",
+   "w": 1880,
+   "x": 0,
+   "y": 8600
+  },
+  "FlowTagDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Sharet tag (P2P) \u00b7 Dark",
+   "w": 1880,
+   "x": 1960,
+   "y": 8600
+  },
+  "FlowTradeApp.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Trade finance (LPO, LC) \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 13640
+  },
+  "FlowTradeAppDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Trade finance (LPO, LC) \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 13640
+  },
+  "FlowTxns.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Transactions & statements \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 4820
+  },
+  "FlowTxnsDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Transactions & statements \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 4820
+  },
+  "FlowWithdraw.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Wakala (TZ) & other number \u00b7 Light",
+   "w": 1880,
+   "x": 0,
+   "y": 9860
+  },
+  "FlowWithdrawDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Wakala (TZ) & other number \u00b7 Dark",
+   "w": 1880,
+   "x": 1960,
+   "y": 9860
+  },
+  "FlowWithdrawOut.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Withdraw to M-Pesa & bank \u00b7 Light",
+   "w": 2310,
+   "x": 0,
+   "y": 11120
+  },
+  "FlowWithdrawOutDark.dc.html": {
+   "h": 1100,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "Flow \u00b7 Withdraw to M-Pesa & bank \u00b7 Dark",
+   "w": 2310,
+   "x": 2390,
+   "y": 11120
+  },
+  "HybridA.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "1+3 A \u00b7 Origin Arrow",
+   "w": 640,
+   "x": 0,
+   "y": 2200
+  },
+  "HybridB.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "1+3 B \u00b7 Point to Point",
+   "w": 640,
+   "x": 720,
+   "y": 2200
+  },
+  "HybridC.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "1+3 C \u00b7 Route Through",
+   "w": 640,
+   "x": 1440,
+   "y": 2200
+  },
+  "Lane.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "3 \u00b7 Trade Lane",
+   "w": 640,
+   "x": 1440,
+   "y": 0
+  },
+  "Lanes.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "6 \u00b7 Two Lanes",
+   "w": 640,
+   "x": 1440,
+   "y": 920
+  },
+  "LanesColourType.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "Two Lanes \u00b7 Colour & type",
+   "w": 1360,
+   "x": 4320,
+   "y": 0
+  },
+  "LanesFoundations.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "05 \u00b7 Brand foundations",
+   "w": 1360,
+   "x": 0,
+   "y": 1500
+  },
+  "LanesGraphics.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "06 \u00b7 Graphic language",
+   "w": 1360,
+   "x": 1440,
+   "y": 1500
+  },
+  "LanesLogo.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "Two Lanes \u00b7 Logo system",
+   "w": 1360,
+   "x": 0,
+   "y": 0
+  },
+  "LanesMisuse.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "07 \u00b7 Logo misuse",
+   "w": 1360,
+   "x": 2880,
+   "y": 1500
+  },
+  "LanesProduct.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "10 \u00b7 Product UI",
+   "w": 1360,
+   "x": 1440,
+   "y": 2660
+  },
+  "LanesSocial.dc.html": {
+   "h": 1040,
+   "page": "social",
+   "title": "08 \u00b7 Social media",
+   "w": 1360,
+   "x": 0,
+   "y": 0
+  },
+  "LanesSplit.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "Two Lanes \u00b7 Symbol & type logo",
+   "w": 1360,
+   "x": 1440,
+   "y": 0
+  },
+  "LanesStationery.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "09 \u00b7 Stationery & email",
+   "w": 1360,
+   "x": 0,
+   "y": 2660
+  },
+  "LanesWeb.dc.html": {
+   "h": 1040,
+   "page": "brand",
+   "title": "Two Lanes \u00b7 Web & favicon",
+   "w": 1360,
+   "x": 2880,
+   "y": 0
+  },
+  "Main.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "1 \u00b7 Border Crossing",
+   "w": 640,
+   "x": 0,
+   "y": 0
+  },
+  "MktAds.dc.html": {
+   "h": 1040,
+   "page": "marketing",
+   "title": "Display ads",
+   "w": 1360,
+   "x": 3760,
+   "y": 0
+  },
+  "MktCampaign.dc.html": {
+   "expand": "fill",
+   "h": 3000,
+   "is_interactive": true,
+   "page": "marketing",
+   "title": "Campaign landing \u00b7 Trade finance",
+   "w": 1440,
+   "x": 0,
+   "y": 0
+  },
+  "MktEmail.dc.html": {
+   "h": 1700,
+   "page": "marketing",
+   "title": "Email campaign",
+   "w": 640,
+   "x": 3040,
+   "y": 0
+  },
+  "MktJourney.dc.html": {
+   "h": 820,
+   "page": "marketing",
+   "title": "Sales journey (UX)",
+   "w": 1360,
+   "x": 3760,
+   "y": 1160
+  },
+  "MktMerch.dc.html": {
+   "h": 1040,
+   "page": "marketing",
+   "title": "Merchandise",
+   "w": 1360,
+   "x": 0,
+   "y": 3400
+  },
+  "MktOOH.dc.html": {
+   "h": 1040,
+   "page": "marketing",
+   "title": "Out-of-home & ads",
+   "w": 1360,
+   "x": 1440,
+   "y": 3400
+  },
+  "MktOnePager.dc.html": {
+   "h": 1123,
+   "page": "marketing",
+   "paper": "a4",
+   "title": "Sales one-pager \u00b7 A4",
+   "w": 794,
+   "x": 5200,
+   "y": 0
+  },
+  "MktPricing.dc.html": {
+   "expand": "fill",
+   "h": 2300,
+   "is_interactive": true,
+   "page": "marketing",
+   "title": "Pricing & corridors",
+   "w": 1440,
+   "x": 1520,
+   "y": 0
+  },
+  "MktStationery.dc.html": {
+   "h": 1040,
+   "page": "marketing",
+   "title": "Stationery suite",
+   "w": 1360,
+   "x": 4320,
+   "y": 3400
+  },
+  "MktTone.dc.html": {
+   "h": 1040,
+   "page": "marketing",
+   "title": "Tone of voice",
+   "w": 1360,
+   "x": 2880,
+   "y": 3400
+  },
+  "MobHome.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "02 \u00b7 Home",
+   "w": 390,
+   "x": 470,
+   "y": 0
+  },
+  "MobRates.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "08 \u00b7 Rates & alerts",
+   "w": 390,
+   "x": 1410,
+   "y": 964
+  },
+  "MobRecipient.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "04 \u00b7 Choose recipient",
+   "w": 390,
+   "x": 1410,
+   "y": 0
+  },
+  "MobReview.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "05 \u00b7 Review & confirm",
+   "w": 390,
+   "x": 0,
+   "y": 964
+  },
+  "MobSend.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "03 \u00b7 Send money",
+   "w": 390,
+   "x": 940,
+   "y": 0
+  },
+  "MobSplash.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "01 \u00b7 Welcome",
+   "w": 390,
+   "x": 0,
+   "y": 0
+  },
+  "MobSuccess.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "06 \u00b7 Sent",
+   "w": 390,
+   "x": 470,
+   "y": 964
+  },
+  "MobTrade.dc.html": {
+   "h": 844,
+   "is_interactive": true,
+   "page": "mobile",
+   "title": "07 \u00b7 Trade finance",
+   "w": 390,
+   "x": 940,
+   "y": 964
+  },
+  "PickDomain.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "P2 \u00b7 Border + Domain (1+4)",
+   "w": 640,
+   "x": 720,
+   "y": 5660
+  },
+  "PickDot.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "P3 \u00b7 Mark as the Dot (1+4)",
+   "w": 640,
+   "x": 1440,
+   "y": 5660
+  },
+  "PickGate.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "P1 \u00b7 Gate Lanes (1+6)",
+   "w": 640,
+   "x": 0,
+   "y": 5660
+  },
+  "ShSocialKit.dc.html": {
+   "h": 1040,
+   "page": "social",
+   "title": "Social \u00b7 Profiles, pillars & templates",
+   "w": 1360,
+   "x": 1440,
+   "y": 0
+  },
+  "TArrow.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "5 \u00b7 T-Arrow",
+   "w": 640,
+   "x": 720,
+   "y": 920
+  },
+  "WebBusiness.dc.html": {
+   "expand": "fill",
+   "h": 1080,
+   "is_interactive": true,
+   "page": "web",
+   "title": "Business \u00b7 Merchants & suppliers",
+   "w": 1440,
+   "x": 6080,
+   "y": 0
+  },
+  "WebDashboard.dc.html": {
+   "expand": "fill",
+   "h": 1080,
+   "is_interactive": true,
+   "page": "web",
+   "title": "Dashboard \u00b7 Overview",
+   "w": 1440,
+   "x": 1520,
+   "y": 0
+  },
+  "WebLanding.dc.html": {
+   "expand": "fill",
+   "h": 4000,
+   "is_interactive": true,
+   "page": "web",
+   "title": "Website \u00b7 Home",
+   "w": 1440,
+   "x": 0,
+   "y": 0
+  },
+  "WebTrade.dc.html": {
+   "expand": "fill",
+   "h": 1080,
+   "is_interactive": true,
+   "page": "web",
+   "title": "Dashboard \u00b7 Trade finance",
+   "w": 1440,
+   "x": 3040,
+   "y": 0
+  },
+  "WebUsers.dc.html": {
+   "expand": "fill",
+   "h": 1080,
+   "is_interactive": true,
+   "page": "web",
+   "title": "Admin \u00b7 User management",
+   "w": 1440,
+   "x": 4560,
+   "y": 0
+  },
+  "WildA.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "W1 \u00b7 Kicked Barrier",
+   "w": 640,
+   "x": 0,
+   "y": 3480
+  },
+  "WildB.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "W2 \u00b7 S Corridor",
+   "w": 640,
+   "x": 720,
+   "y": 3480
+  },
+  "WildC.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "W3 \u00b7 Speed Pass",
+   "w": 640,
+   "x": 1440,
+   "y": 3480
+  },
+  "WildD.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "W4 \u00b7 Breakout Globe",
+   "w": 640,
+   "x": 0,
+   "y": 4400
+  },
+  "WildE.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "W5 \u00b7 Route Grid",
+   "w": 640,
+   "x": 720,
+   "y": 4400
+  },
+  "WildF.dc.html": {
+   "h": 800,
+   "page": "explore",
+   "title": "W6 \u00b7 Split Coin",
+   "w": 640,
+   "x": 1440,
+   "y": 4400
+  },
+  "BrandChecklist.dc.html": {
+   "x": 0,
+   "y": -1960,
+   "w": 1360,
+   "h": 1360,
+   "page": "brand",
+   "title": "00 \u00b7 Identity checklist"
+  },
+  "BrandLocal.dc.html": {
+   "x": 1440,
+   "y": -1960,
+   "w": 1360,
+   "h": 1040,
+   "page": "brand",
+   "title": "13 \u00b7 Market localisation"
+  },
+  "BrandPattern.dc.html": {
+   "x": 2880,
+   "y": 2660,
+   "w": 1360,
+   "h": 1040,
+   "page": "brand",
+   "title": "11 \u00b7 Lane pattern"
+  },
+  "BrandAssetKit.dc.html": {
+   "x": 4320,
+   "y": 2660,
+   "w": 1360,
+   "h": 1040,
+   "page": "brand",
+   "title": "12 \u00b7 Digital asset kit"
+  },
+  "EnvOffice.dc.html": {
+   "x": 0,
+   "y": 4860,
+   "w": 1360,
+   "h": 1040,
+   "page": "marketing",
+   "title": "Office & premises"
+  },
+  "EnvVehicle.dc.html": {
+   "x": 1440,
+   "y": 4860,
+   "w": 1360,
+   "h": 1040,
+   "page": "marketing",
+   "title": "Vehicle livery"
+  },
+  "EnvUniform.dc.html": {
+   "x": 2880,
+   "y": 4860,
+   "w": 1360,
+   "h": 1040,
+   "page": "marketing",
+   "title": "Uniforms & embroidery"
+  },
+  "EnvEvents.dc.html": {
+   "x": 4320,
+   "y": 4860,
+   "w": 1360,
+   "h": 1120,
+   "page": "marketing",
+   "title": "Events & exhibition"
+  }
+ },
+ "createdOnFiles": {
+  "at": "2026-10-08T13:00:00Z",
+  "v": 1
+ },
+ "designSystems": [],
+ "launch": {
+  "view": "canvas"
+ },
+ "notes": {
+  "brand": {
+   "kind": "title1",
+   "maxW": 4240,
+   "page": "explore",
+   "text": "sharet africa \u2014 brand identity (Trade Lane)",
+   "w": 240,
+   "x": 0,
+   "y": 6700
+  },
+  "docsTitle": {
+   "kind": "title1",
+   "maxW": 3416,
+   "page": "docs",
+   "text": "sharet africa \u2014 documents",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "flowsTitle": {
+   "kind": "title1",
+   "maxW": 4700,
+   "page": "mobile",
+   "text": "user flows \u2014 light (left) \u00b7 dark (right)",
+   "w": 240,
+   "x": 0,
+   "y": 1960
+  },
+  "hybrids": {
+   "kind": "title1",
+   "maxW": 2080,
+   "page": "explore",
+   "text": "1 + 3 \u2014 border crossing meets trade lane",
+   "w": 240,
+   "x": 0,
+   "y": 1900
+  },
+  "lanesApps": {
+   "kind": "title1",
+   "maxW": 5680,
+   "page": "brand",
+   "text": "sharet africa \u2014 guidelines & applications",
+   "w": 240,
+   "x": 0,
+   "y": 1160
+  },
+  "lanesBrand": {
+   "kind": "title1",
+   "maxW": 5680,
+   "page": "brand",
+   "text": "sharet africa \u2014 brand identity (Two Lanes)",
+   "w": 240,
+   "x": 0,
+   "y": -340
+  },
+  "mktRow2": {
+   "kind": "title1",
+   "maxW": 5680,
+   "page": "marketing",
+   "text": "branding all around",
+   "w": 240,
+   "x": 0,
+   "y": 3080
+  },
+  "mktTitle": {
+   "kind": "title1",
+   "maxW": 5994,
+   "page": "marketing",
+   "text": "sharet \u2014 marketing & sales",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "mobTitle": {
+   "kind": "title1",
+   "maxW": 1800,
+   "page": "mobile",
+   "text": "sharet \u2014 mobile app",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "picks": {
+   "kind": "title1",
+   "maxW": 2080,
+   "page": "explore",
+   "text": "narrowing down \u2014 1 with 4 and 6",
+   "w": 240,
+   "x": 0,
+   "y": 5360
+  },
+  "socialT": {
+   "kind": "title1",
+   "maxW": 2800,
+   "page": "social",
+   "text": "sharet africa \u2014 social media identity",
+   "w": 240,
+   "x": 0,
+   "y": -340
+  },
+  "title": {
+   "kind": "title1",
+   "maxW": 2080,
+   "page": "explore",
+   "text": "sharet africa \u2014 logo concepts",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "webTitle": {
+   "kind": "title1",
+   "maxW": 4480,
+   "page": "web",
+   "text": "sharet \u2014 website & web dashboard",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "wild": {
+   "kind": "title1",
+   "maxW": 2080,
+   "page": "explore",
+   "text": "going wilder",
+   "w": 240,
+   "x": 0,
+   "y": 3180
+  },
+  "startHere": {
+   "kind": "title1",
+   "maxW": 2800,
+   "page": "brand",
+   "text": "start here \u2014 what the identity covers",
+   "w": 240,
+   "x": 0,
+   "y": -2240
+  },
+  "physicalT": {
+   "kind": "title1",
+   "maxW": 5680,
+   "page": "marketing",
+   "text": "spaces, fleet, apparel & events",
+   "w": 240,
+   "x": 0,
+   "y": 4580
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Exchange.dc.html",
+  "Lane.dc.html",
+  "Domain.dc.html",
+  "TArrow.dc.html",
+  "Lanes.dc.html",
+  "HybridA.dc.html",
+  "HybridB.dc.html",
+  "HybridC.dc.html",
+  "WildA.dc.html",
+  "WildB.dc.html",
+  "WildC.dc.html",
+  "WildD.dc.html",
+  "WildE.dc.html",
+  "WildF.dc.html",
+  "PickGate.dc.html",
+  "PickDomain.dc.html",
+  "PickDot.dc.html",
+  "BrandLogo.dc.html",
+  "BrandSymbol.dc.html",
+  "BrandColourType.dc.html",
+  "LanesLogo.dc.html",
+  "LanesSplit.dc.html",
+  "LanesWeb.dc.html",
+  "LanesColourType.dc.html",
+  "LanesFoundations.dc.html",
+  "LanesGraphics.dc.html",
+  "LanesMisuse.dc.html",
+  "LanesSocial.dc.html",
+  "LanesStationery.dc.html",
+  "LanesProduct.dc.html",
+  "MobSplash.dc.html",
+  "MobHome.dc.html",
+  "MobSend.dc.html",
+  "MobRecipient.dc.html",
+  "MobReview.dc.html",
+  "MobSuccess.dc.html",
+  "MobTrade.dc.html",
+  "MobRates.dc.html",
+  "WebLanding.dc.html",
+  "WebDashboard.dc.html",
+  "WebTrade.dc.html",
+  "MktCampaign.dc.html",
+  "MktPricing.dc.html",
+  "MktEmail.dc.html",
+  "MktAds.dc.html",
+  "MktJourney.dc.html",
+  "MktOnePager.dc.html",
+  "FlowOnboard.dc.html",
+  "FlowKyc.dc.html",
+  "FlowDeposit.dc.html",
+  "FlowPay.dc.html",
+  "FlowWithdraw.dc.html",
+  "FlowTag.dc.html",
+  "FlowAlerts.dc.html",
+  "FlowTxns.dc.html",
+  "FlowWithdrawOut.dc.html",
+  "FlowMerchant.dc.html",
+  "FlowTradeApp.dc.html",
+  "WebUsers.dc.html",
+  "WebBusiness.dc.html",
+  "MktMerch.dc.html",
+  "MktOOH.dc.html",
+  "MktTone.dc.html",
+  "MktStationery.dc.html",
+  "DocInvoice.dc.html",
+  "DocLPO.dc.html",
+  "DocLC.dc.html",
+  "DocReceipt.dc.html",
+  "FlowOnboardDark.dc.html",
+  "FlowKycDark.dc.html",
+  "FlowTxnsDark.dc.html",
+  "FlowDepositDark.dc.html",
+  "FlowPayDark.dc.html",
+  "FlowTagDark.dc.html",
+  "FlowWithdrawDark.dc.html",
+  "FlowWithdrawOutDark.dc.html",
+  "FlowMerchantDark.dc.html",
+  "FlowTradeAppDark.dc.html",
+  "FlowAlertsDark.dc.html",
+  "ShSocialKit.dc.html",
+  "BrandChecklist.dc.html",
+  "BrandLocal.dc.html",
+  "BrandPattern.dc.html",
+  "BrandAssetKit.dc.html",
+  "EnvOffice.dc.html",
+  "EnvVehicle.dc.html",
+  "EnvUniform.dc.html",
+  "EnvEvents.dc.html"
+ ],
+ "pages": [
+  {
+   "id": "explore",
+   "name": "1 \u00b7 Logo explorations"
+  },
+  {
+   "id": "mobile",
+   "name": "2 \u00b7 Mobile app"
+  },
+  {
+   "id": "web",
+   "name": "3 \u00b7 Website & dashboard"
+  },
+  {
+   "id": "brand",
+   "name": "4 \u00b7 Sharet Africa brand"
+  },
+  {
+   "id": "marketing",
+   "name": "5 \u00b7 Marketing & sales"
+  },
+  {
+   "id": "docs",
+   "name": "6 \u00b7 Documents"
+  },
+  {
+   "id": "social",
+   "name": "7 \u00b7 Social media identity"
+  }
+ ],
+ "title": "Sharet Africa Logo"
+}

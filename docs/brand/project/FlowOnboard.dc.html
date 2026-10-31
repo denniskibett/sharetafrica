@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Splash and welcome</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 2310px; height: 1100px; box-sizing: border-box; padding: 60px; background: #ECECE6; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: row; gap: 80px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 40px; border-radius: 32px; background: {{ t.surf }}">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.2em; color: {{ t.muted }}">{{ t.label }} MODE</div>
+<div style="display: flex; gap: 40px">
+
+<div style="width: 390px; height: 844px; border-radius: 40px; overflow: hidden; background: {{ t.splashBg }}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<img src="{{ t.splashLogo }}" alt="Sharet" style="width: 170px">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.2em; color: {{ t.splashSub }}">PAYMENTS · TRADE</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 64px 24px 36px; display: flex; flex-direction: column; gap: 28px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; justify-content: flex-end"><a href="#" style="font-size: 15px; color: {{ t.muted }}; text-decoration: none; padding: 10px">Skip</a></div>
+<div style="height: 340px; border-radius: 28px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center">
+<svg width="260" height="200" viewBox="0 0 260 200" aria-hidden="true"><path d="M50 140 C110 140 150 60 210 60" fill="none" stroke="{{ t.symA }}" stroke-width="3"></path><path d="M50 140 C120 150 160 150 210 150" fill="none" stroke="{{ t.symB }}" stroke-width="3" stroke-dasharray="5 7"></path><circle cx="50" cy="140" r="16" fill="#D4FF3D" stroke="#050507" stroke-width="2"></circle><circle cx="210" cy="60" r="12" fill="none" stroke="{{ t.text }}" stroke-width="4"></circle><circle cx="210" cy="150" r="12" fill="none" stroke="{{ t.text }}" stroke-width="4"></circle></svg>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.45">Send across borders</h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: {{ t.muted }}">Pay anyone in Kenya, Uganda, Tanzania, Rwanda and beyond, at a rate you see first.</p>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; gap: 6px"><span style="width: 24px; height: 6px; border-radius: 3px; background: {{ t.text }}"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: {{ t.surf2 }}"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: {{ t.surf2 }}"></span></div>
+<a href="#" aria-label="Next" style="width: 56px; height: 56px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h12"></path><path d="M13 7l5 5-5 5"></path></svg></a>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 64px 24px 36px; display: flex; flex-direction: column; gap: 28px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; justify-content: flex-end"><a href="#" style="font-size: 15px; color: {{ t.muted }}; text-decoration: none; padding: 10px">Skip</a></div>
+<div style="height: 340px; border-radius: 28px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center">
+<div style="display: grid; grid-template-columns: repeat(2, 110px); gap: 14px">
+<div style="height: 84px; border-radius: 18px; background: {{ t.bg }}; display: flex; flex-direction: column; justify-content: center; padding: 0 14px; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">PAYBILL</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px">888 880</span></div>
+<div style="height: 84px; border-radius: 18px; background: #D4FF3D; color: #050507; display: flex; flex-direction: column; justify-content: center; padding: 0 14px; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px">TILL</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px">52 41 07</span></div>
+<div style="height: 84px; border-radius: 18px; background: {{ t.bg }}; display: flex; flex-direction: column; justify-content: center; padding: 0 14px; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">WAKALA</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px">TZ agent</span></div>
+<div style="height: 84px; border-radius: 18px; background: {{ t.bg }}; display: flex; flex-direction: column; justify-content: center; padding: 0 14px; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">TAG</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px">@amina</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.45">Pay the way people pay</h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: {{ t.muted }}">Paybill, Till, agents, any phone number, or a Sharet tag. One app.</p>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div style="display: flex; gap: 6px"><span style="width: 6px; height: 6px; border-radius: 3px; background: {{ t.surf2 }}"></span><span style="width: 24px; height: 6px; border-radius: 3px; background: {{ t.text }}"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: {{ t.surf2 }}"></span></div>
+<a href="#" aria-label="Next" style="width: 56px; height: 56px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h12"></path><path d="M13 7l5 5-5 5"></path></svg></a>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 64px 24px 36px; display: flex; flex-direction: column; gap: 28px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; justify-content: flex-end"><a href="#" style="font-size: 15px; color: {{ t.muted }}; text-decoration: none; padding: 10px">Skip</a></div>
+<div style="height: 340px; border-radius: 28px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center">
+<div style="width: 130px; height: 130px; border-radius: 40px; background: #D4FF3D; display: flex; align-items: center; justify-content: center"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#050507" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.45">Safe at every step</h2>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: {{ t.muted }}">Verified accounts, PIN on every payment, and a live tracker until the money lands.</p>
+</div>
+<div style="flex-grow: 1"></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Get started</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 72px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<img src="{{ t.logo }}" alt="Sharet Africa" style="width: 150px">
+<div style="flex-grow: 1; display: flex; align-items: center">
+<svg width="342" height="220" viewBox="0 0 342 220" aria-hidden="true"><polygon points="0,20 220,20 248,50 220,80 0,80" fill="#D4FF3D"></polygon><polygon points="342,100 110,100 82,130 110,160 342,160" fill="{{ t.surf2 }}"></polygon><polygon points="0,180 150,180 170,200 150,220 0,220" fill="{{ t.surf }}"></polygon></svg>
+</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 28px; font-weight: 400; line-height: 1.45">Karibu.<br>Money moves here.</h1>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: {{ t.muted }}">Open your Sharet account in a few minutes. All you need is your phone and ID.</p>
+<a href="FlowKyc.dc.html" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; margin-top: 8px">Create account</a>
+<a href="MobHome.dc.html" style="height: 56px; box-sizing: border-box; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; color: {{ t.text }}; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">I have an account</a>
+<div style="font-size: 12px; line-height: 1.5; color: {{ t.muted }}; text-align: center">By continuing you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</div>
+</div>
+
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2310,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = { label: 'LIGHT', bg: '#FFFFFF', surf: '#F4F4F0', surf2: '#E5E5DE', line: '#E5E5DE', text: '#111114', muted: '#5A5A55', accText: '#111114', symA: '#050507', symB: '#80807A', btn2Border: '#D9D9D2', logo: '../assets/a7c83bb711a5185761e22e808c4f19b0.svg', splashBg: '#D4FF3D', splashLogo: '../assets/cd37c3e66fc639c439f7d8b5223b5fb2.svg', splashSub: '#050507' };
+const D = { label: 'DARK', bg: '#0A0A0C', surf: '#18181C', surf2: '#232328', line: 'rgba(244,244,240,.08)', text: '#F4F4F0', muted: '#C9C9C2', accText: '#D4FF3D', symA: '#D4FF3D', symB: '#C9C9C2', btn2Border: 'rgba(244,244,240,.16)', logo: '../assets/0cdeb515754bd0687fd21718d180de14.svg', splashBg: '#0A0A0C', splashLogo: '../assets/03498101a58167efb08fb5441cc2a056.svg', splashSub: '#C9C9C2' };
+return { themes: [L] };
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Trade finance dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0C}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-wrap: wrap; min-height: 1080px">
+<aside style="flex: 1 1 240px; max-width: 100%; background: #111114; border-right: 1px solid rgba(244,244,240,.08); padding: 28px 18px; display: flex; flex-direction: column; gap: 28px; box-sizing: border-box">
+<img src="../assets/759a77d38069c6004cba1d5199854cce.svg" alt="Sharet" style="width: 116px; margin-left: 8px">
+<nav style="display: flex; flex-direction: column; gap: 4px; font-size: 15px">
+<a href="WebDashboard.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #C9C9C2; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"></path></svg>Overview</a>
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #C9C9C2; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14"></path><path d="M15 4l4 4-4 4"></path><path d="M20 16H6"></path><path d="M9 12l-4 4 4 4"></path></svg>Payments</a>
+<a href="WebTrade.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; background: rgba(212,255,61,.12); color: #D4FF3D; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="11" rx="1"></rect><path d="M8 8l2-3h4l2 3"></path></svg>Trade finance</a>
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #C9C9C2; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg>Wallets</a>
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #C9C9C2; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M15 3v4h4"></path></svg>Documents</a>
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; color: #C9C9C2; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3"></path><path d="M12 19v3"></path><path d="M2 12h3"></path><path d="M19 12h3"></path></svg>Settings</a>
+</nav>
+<div style="margin-top: auto; background: #18181C; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 14px; font-weight: 600">Your trade manager</div>
+<div style="font-size: 13px; color: #C9C9C2">[MANAGER NAME]</div>
+<a href="#" style="font-size: 13px; text-decoration: none">Book a call</a>
+</div>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px clamp(16px, 3vw, 40px); display: flex; flex-direction: column; gap: 24px; box-sizing: border-box">
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between">
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 26px; font-weight: 400; line-height: 1.45">Trade finance</h1>
+<div style="display: flex; gap: 10px">
+<a href="#" style="height: 46px; padding: 0 18px; border-radius: 12px; border: 1px solid rgba(244,244,240,.16); color: #F4F4F0; text-decoration: none; display: flex; align-items: center; font-size: 14px; font-weight: 600; box-sizing: border-box">Upload documents</a>
+<a href="#" style="height: 46px; padding: 0 18px; border-radius: 12px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; font-size: 14px; font-weight: 600">New application</a>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">CREDIT LIMIT</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">USD [AMOUNT]</span></div>
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">IN USE</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">USD [AMOUNT]</span><div style="height: 6px; border-radius: 999px; background: #232328; overflow: hidden"><div style="width: 58%; height: 6px; background: #D4FF3D"></div></div></div>
+<div style="background: #D4FF3D; color: #050507; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">AVAILABLE</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">USD [AMOUNT]</span></div>
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">NEXT REPAYMENT</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">[DATE]</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 16px; font-weight: 600">Pipeline</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px">
+<div style="background: #111114; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A"><span>APPLIED</span><span>1</span></div>
+<div style="background: #18181C; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; font-weight: 600">Invoice financing</span><span style="font-size: 12px; color: #80807A">[BUYER]</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">KES [AMOUNT]</span></div>
+</div>
+<div style="background: #111114; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A"><span>ISSUED</span><span>1</span></div>
+<div style="background: #18181C; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; font-weight: 600">Letter of credit</span><span style="font-size: 12px; color: #80807A">[SUPPLIER] · Shanghai</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">USD [AMOUNT]</span></div>
+</div>
+<div style="background: #111114; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #D4FF3D"><span>DOCS NEEDED</span><span>1</span></div>
+<div style="background: #18181C; border: 1px solid rgba(212,255,61,.4); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; font-weight: 600">Letter of credit</span><span style="font-size: 12px; color: #80807A">[SUPPLIER] · Dubai</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">USD [AMOUNT]</span><a href="#" style="font-size: 13px; text-decoration: none">Upload bill of lading</a></div>
+</div>
+<div style="background: #111114; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A"><span>SETTLED</span><span>2</span></div>
+<div style="background: #18181C; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; font-weight: 600">Supplier payment</span><span style="font-size: 12px; color: #80807A">[SUPPLIER] · Kampala</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">UGX [AMOUNT]</span></div>
+<div style="background: #18181C; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; font-weight: 600">Invoice financing</span><span style="font-size: 12px; color: #80807A">[BUYER]</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">KES [AMOUNT]</span></div>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 16px">
+<div style="flex: 2 1 420px; min-width: 0; background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 16px; font-weight: 600">Facilities</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 560px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; color: #80807A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px"><th style="padding: 10px 8px; font-weight: 500">REFERENCE</th><th style="padding: 10px 8px; font-weight: 500">TYPE</th><th style="padding: 10px 8px; font-weight: 500">EXPIRES</th><th style="padding: 10px 8px; font-weight: 500; text-align: right">AMOUNT</th></tr></thead>
+<tbody>
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 14px 8px; font-family: 'Geist Mono', ui-monospace, monospace">[LC-REF]</td><td style="padding: 14px 8px">Letter of credit</td><td style="padding: 14px 8px; color: #80807A">[DATE]</td><td style="padding: 14px 8px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">USD [AMOUNT]</td></tr>
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 14px 8px; font-family: 'Geist Mono', ui-monospace, monospace">[IF-REF]</td><td style="padding: 14px 8px">Invoice financing</td><td style="padding: 14px 8px; color: #80807A">[DATE]</td><td style="padding: 14px 8px; text-align: right; font-family: 'Geist Mono', ui-monospace, monospace">KES [AMOUNT]</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div style="flex: 1 1 280px; background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 12px">
+<div style="font-size: 16px; font-weight: 600">Documents · [LC-REF]</div>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px"><input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #D4FF3D">Commercial invoice</label>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px"><input type="checkbox" checked style="width: 20px; height: 20px; accent-color: #D4FF3D">Packing list</label>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px"><input type="checkbox" style="width: 20px; height: 20px; accent-color: #D4FF3D">Bill of lading</label>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px"><input type="checkbox" style="width: 20px; height: 20px; accent-color: #D4FF3D">Certificate of origin</label>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

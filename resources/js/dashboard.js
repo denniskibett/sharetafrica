@@ -125,9 +125,9 @@ export function chart({ url = null, options = null, params = {}, height = 300 } 
 /** One alert modal for the whole dashboard. confirm() resolves true/false; alert() resolves when closed. */
 export function alertModal() {
     return {
-        open: false, title: '', message: '', tone: 'info', confirmText: 'OK', cancelText: 'Cancel', cancel: false, resolve: null,
+        open: false, title: '', message: '', tone: 'info', details: [], confirmText: 'OK', cancelText: 'Cancel', cancel: false, resolve: null,
         show(detail) {
-            Object.assign(this, { title: '', message: '', tone: 'info', confirmText: 'OK', cancelText: 'Cancel', cancel: false }, detail);
+            Object.assign(this, { title: '', message: '', tone: 'info', details: [], confirmText: 'OK', cancelText: 'Cancel', cancel: false }, detail);
             this.resolve = detail.resolve; this.open = true;
             this.$nextTick(() => this.$refs.confirm?.focus());
         },
@@ -158,5 +158,99 @@ export function profile(url) {
             finally { this.busy = false; }
         },
         percent(part) { return part?.of ? Math.round((part.done / part.of) * 100) : 0; },
+        docError: {},
+        /** Upload one verification photo: a File (checked for clarity first) or a data: URL. */
+        async uploadDoc(type, source, check = { minWidth: 1000, minHeight: 600 }) {
+            this.docError = { ...this.docError, [type]: '' };
+            if (source instanceof File) {
+                const q = await checkPhoto(source, check).catch((e) => ({ ok: false, reason: e.message }));
+                if (!q.ok) { this.docError = { ...this.docError, [type]: q.reason }; return false; }
+                const f = new FormData(); f.append('file', source); source = f;
+            } else { source = { image: source }; }
+            try { await window.sharet.send('POST', `/profile/documents/${type}`, source); await this.load(); return true; }
+            catch (e) { this.docError = { ...this.docError, [type]: Object.values(e.errors || {})[0]?.[0] || e.body?.message || 'Upload failed. Try again.' }; return false; }
+        },
+    };
+}
+
+/**
+ * Verification photos. checkPhoto() rejects images that are too small, too dark/bright or blurry
+ * (variance of a Laplacian on a downscaled greyscale copy), so ID pictures arrive clear and readable.
+ * kycCamera() drives the selfie camera; signaturePad() the drawn signature. Both produce data: URLs.
+ */
+export async function checkPhoto(source, { minWidth = 1000, minHeight = 600 } = {}) {
+    const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error('That file is not a photo we can read.'));
+        i.src = typeof source === 'string' ? source : URL.createObjectURL(source);
+    });
+    const w = img.naturalWidth, h = img.naturalHeight;
+    if (Math.max(w, h) < minWidth || Math.min(w, h) < minHeight) {
+        return { ok: false, reason: `Too small (${w}×${h}). Use your camera at full resolution so the text is readable.` };
+    }
+    const scale = 400 / Math.max(w, h), cw = Math.round(w * scale), ch = Math.round(h * scale);
+    const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+    const ctx = c.getContext('2d', { willReadFrequently: true }); ctx.drawImage(img, 0, 0, cw, ch);
+    const px = ctx.getImageData(0, 0, cw, ch).data, g = new Float32Array(cw * ch);
+    let sum = 0;
+    for (let i = 0; i < g.length; i++) { g[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]; sum += g[i]; }
+    const mean = sum / g.length;
+    if (mean < 55) return { ok: false, reason: 'Too dark. Move to better light and try again.' };
+    if (mean > 225) return { ok: false, reason: 'Too bright or washed out. Avoid glare and direct flash.' };
+    let n = 0, m = 0, m2 = 0;
+    for (let y = 1; y < ch - 1; y++) for (let x = 1; x < cw - 1; x++) {
+        const i = y * cw + x, l = 4 * g[i] - g[i - 1] - g[i + 1] - g[i - cw] - g[i + cw];
+        n++; const d = l - m; m += d / n; m2 += d * (l - m);
+    }
+    const sharpness = m2 / n;
+    if (sharpness < 40) return { ok: false, reason: 'Blurry. Hold the phone steady, tap to focus and try again.' };
+    return { ok: true, width: w, height: h };
+}
+
+export function kycCamera() {
+    return {
+        stream: null, error: '', shot: null, facing: 'user',
+        async start() {
+            this.error = ''; this.shot = null;
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: this.facing, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+                this.$refs.video.srcObject = this.stream; await this.$refs.video.play();
+            } catch (e) { this.error = 'We could not open your camera. Allow camera access in your browser, or upload a photo instead.'; }
+        },
+        stop() { this.stream?.getTracks().forEach((t) => t.stop()); this.stream = null; },
+        async capture() {
+            const v = this.$refs.video, c = document.createElement('canvas');
+            c.width = v.videoWidth; c.height = v.videoHeight;
+            const ctx = c.getContext('2d'); ctx.translate(c.width, 0); ctx.scale(-1, 1); ctx.drawImage(v, 0, 0);
+            const url = c.toDataURL('image/jpeg', 0.92);
+            const check = await checkPhoto(url, { minWidth: 640, minHeight: 480 });
+            if (!check.ok) { this.error = check.reason; return; }
+            this.shot = url; this.stop();
+        },
+        destroy() { this.stop(); },
+    };
+}
+
+export function signaturePad() {
+    return {
+        drawing: false, last: null, signed: false, ctx: null,
+        init() {
+            const c = this.$refs.pad, r = c.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+            c.width = r.width * d; c.height = r.height * d;
+            this.ctx = c.getContext('2d'); this.ctx.scale(d, d);
+            Object.assign(this.ctx, { lineWidth: 2.4, lineCap: 'round', lineJoin: 'round', strokeStyle: '#0A0A0C' });
+        },
+        pos(e) { const r = this.$refs.pad.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; },
+        down(e) { this.drawing = true; this.last = this.pos(e); this.$refs.pad.setPointerCapture(e.pointerId); },
+        move(e) { if (!this.drawing) return; const p = this.pos(e); this.ctx.beginPath(); this.ctx.moveTo(this.last.x, this.last.y); this.ctx.lineTo(p.x, p.y); this.ctx.stroke(); this.last = p; this.signed = true; },
+        up() { this.drawing = false; },
+        clear() { const c = this.$refs.pad; this.ctx.clearRect(0, 0, c.width, c.height); this.signed = false; },
+        image() {
+            // White background so the PNG reads on any viewer
+            const c = this.$refs.pad, out = document.createElement('canvas'); out.width = c.width; out.height = c.height;
+            const o = out.getContext('2d'); o.fillStyle = '#fff'; o.fillRect(0, 0, out.width, out.height); o.drawImage(c, 0, 0);
+            return out.toDataURL('image/png');
+        },
     };
 }

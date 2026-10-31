@@ -70,6 +70,14 @@ class DashboardController extends Controller
         ], [], ['date' => 'created_at', 'amount' => 'amount']);
     }
 
+    /** Menu items for the header search (same as the sidebar). */
+    public function menu(Request $request): JsonResponse
+    {
+        return response()->json(collect(\App\Support\DashboardNav::for($request->user()))->flatMap(fn ($g) => collect($g['items'])->map(fn ($i) => [
+            'label' => $i['label'], 'group' => $g['title'], 'url' => $i['url'], 'ready' => $i['ready'],
+        ]))->unique('label')->values());
+    }
+
     /** admin | ops | individual | merchant | business | techie */
     protected function lane(User $user): string
     {

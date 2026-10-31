@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
     Route::get('/dashboard/chart/{name}', [DashboardController::class, 'chart'])->name('dashboard.chart')->where('name', '[a-z]+');
     Route::get('/dashboard/activity', [DashboardController::class, 'activity'])->name('dashboard.activity');
+    Route::get('/dashboard/menu', [DashboardController::class, 'menu'])->name('dashboard.menu');
 
     // Waiting list status page (user side)
     Route::get('/waiting-list', [WaitingListController::class, 'show'])->name('waiting_list.show');
@@ -95,6 +96,8 @@ Route::middleware('auth')->group(function () {
     // Profile (overview) and account settings: personal details, verification (KYC tiers), security
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile/verification', [ProfileController::class, 'updateVerification'])->name('profile.verification');
+    Route::post('/profile/documents/{type}', [ProfileController::class, 'uploadDocument'])->name('profile.document.upload')->where('type', '[a-z_]+');
+    Route::get('/kyc-documents/{user}/{type}', [ProfileController::class, 'document'])->name('profile.document')->where('type', '[a-z_]+');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -114,6 +117,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
         Route::view('/reports', 'reports.index')->name('reports.index');
     });
 
@@ -121,6 +125,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin|super_admin')->group(function () {
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+        Route::put('/users/{user}/roles', [UserController::class, 'roles'])->name('users.roles');
 
         Route::get('/admin/waiting-list', [WaitingListController::class, 'index'])->name('admin.waiting_list');
         Route::post('/admin/waiting-list/{user}/invite', [WaitingListController::class, 'invite'])->name('admin.waiting_list.invite');
@@ -214,7 +219,7 @@ Route::middleware(['auth', 'permission:waiting_list.invite'])
 Route::middleware(['auth', 'permission:admin.system'])->group(function () {
     Route::get('/admin/system', [SystemController::class, 'index'])->name('admin.system.index');
     Route::put('/admin/system', [SystemController::class, 'update'])->name('system.update');
-    Route::get('/admin/system/clear-cache', [SystemController::class, 'clearCache'])->name('system.clear-cache');
+    Route::post('/admin/system/clear-cache', [SystemController::class, 'clearCache'])->name('system.clear-cache');
     Route::post('/admin/system/maintenance', [SystemController::class, 'toggleMaintenance'])->name('system.toggle-maintenance');
 
     Route::prefix('admin/team')->name('admin.team.')->controller(TeamController::class)->group(function () {

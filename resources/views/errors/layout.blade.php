@@ -35,8 +35,8 @@
   <main>
     <a class="brand" href="{{ url('/') }}">
       <picture>
-        <source srcset="{{ asset('images/brand/sharet-logo-on-dark.svg') }}" media="(prefers-color-scheme: dark)">
-        <img src="{{ asset('images/brand/sharet-logo-on-light.svg') }}" alt="Sharet Africa" height="44" style="display:block;height:44px;width:auto">
+        <source srcset="{{ asset('images/brand/sharet-logo-colour-on-dark.svg') }}" media="(prefers-color-scheme: dark)">
+        <img src="{{ asset('images/brand/sharet-logo-colour-on-light.svg') }}" alt="Sharet Africa" height="44" style="display:block;height:44px;width:auto">
       </picture>
     </a>
 

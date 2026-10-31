@@ -27,11 +27,13 @@
       </select>
     </x-slot:filters>
     <x-slot:actions>
-      <a x-show="row.url" :href="row.url" target="_blank" title="View" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"><x-heroicon-o-eye class="h-5 w-5" /></a>
-      <a :href="row.title.url" title="Edit" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5"><x-heroicon-o-pencil-square class="h-5 w-5" /></a>
-      <button type="button" title="Delete" class="rounded-lg p-2 text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
-              @click="sharet.confirm({ title: 'Delete “' + row.title.label + '”?', message: 'This cannot be undone.', tone: 'error', confirmText: 'Delete' })
-                .then(ok => ok && sharet.send('DELETE', '{{ url('admin/blog') }}/' + row.id).then(() => load()).catch(() => {}))"><x-heroicon-o-trash class="h-5 w-5" /></button>
+      <x-ui.row-menu>
+        <x-ui.row-menu-item icon="pencil-square" x-bind:href="row.title.url">Edit</x-ui.row-menu-item>
+        <x-ui.row-menu-item icon="arrow-top-right-on-square" x-show="row.url" x-bind:href="row.url" target="_blank">View on blog</x-ui.row-menu-item>
+        <x-ui.row-menu-item icon="trash" danger
+            @click="sharet.confirm({ title: 'Delete this post?', message: 'This cannot be undone.', tone: 'error', confirmText: 'Delete', details: [['Title', row.title.label], ['Status', row.status.label], ['Date', row.date]] })
+              .then(ok => ok && sharet.send('DELETE', '{{ url('admin/blog') }}/' + row.id).then(() => load()).catch(() => {}))">Delete</x-ui.row-menu-item>
+      </x-ui.row-menu>
     </x-slot:actions>
     <x-slot:empty>No posts yet. Write the first one.</x-slot:empty>
   </x-ui.table>

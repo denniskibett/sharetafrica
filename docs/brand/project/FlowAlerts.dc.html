@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Alerts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 1880px; height: 1100px; box-sizing: border-box; padding: 60px; background: #ECECE6; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: row; gap: 80px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 40px; border-radius: 32px; background: {{ t.surf }}">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.2em; color: {{ t.muted }}">{{ t.label }} MODE</div>
+<div style="display: flex; gap: 40px">
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 56px 16px 36px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: {{ t.muted }}; padding: 0 8px 6px">TOASTS</div>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: {{ t.okBg }}; border: 1px solid {{ t.okBd }}"><span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600; color: {{ t.okTx }}">Payment sent</span><span style="font-size: 13px; line-height: 1.45; color: {{ t.text }}">KES 850 to Mama Shiku Stores.</span></span><button aria-label="Dismiss" style="width: 32px; height: 32px; border: 0; background: transparent; color: {{ t.muted }}; font-size: 18px">×</button></div>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: {{ t.errBg }}; border: 1px solid {{ t.errBd }}"><span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: {{ t.errFill }}; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10"></path><path d="M17 7L7 17"></path></svg></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600; color: {{ t.errTx }}">Payment failed</span><span style="font-size: 13px; line-height: 1.45; color: {{ t.text }}">Not enough balance. <a href="FlowDeposit.dc.html" style="font-weight: 600">Add money</a></span></span><button aria-label="Dismiss" style="width: 32px; height: 32px; border: 0; background: transparent; color: {{ t.muted }}; font-size: 18px">×</button></div>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: {{ t.infoBg }}; border: 1px solid {{ t.infoBd }}"><span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: {{ t.infoFill }}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px; font-weight: 500">i</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600; color: {{ t.infoTx }}">Rate updated</span><span style="font-size: 13px; line-height: 1.45; color: {{ t.text }}">KES to UGX is now [RATE].</span></span><button aria-label="Dismiss" style="width: 32px; height: 32px; border: 0; background: transparent; color: {{ t.muted }}; font-size: 18px">×</button></div>
+<div style="display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 18px; background: {{ t.warnBg }}; border: 1px solid {{ t.warnBd }}"><span style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: {{ t.warnFill }}; color: #050507; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px; font-weight: 500">!</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600; color: {{ t.warnTx }}">Daily limit almost reached</span><span style="font-size: 13px; line-height: 1.45; color: {{ t.text }}">KES [AMOUNT] left today.</span></span><button aria-label="Dismiss" style="width: 32px; height: 32px; border: 0; background: transparent; color: {{ t.muted }}; font-size: 18px">×</button></div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: {{ t.muted }}; padding: 18px 8px 6px">INLINE</div>
+<div style="padding: 0 8px; display: flex; flex-direction: column; gap: 8px">
+<label for="a-till-{{ t.id }}" style="font-size: 13px; font-weight: 600">Till number</label>
+<input id="a-till-{{ t.id }}" value="52410" aria-invalid="true" style="height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 2px solid {{ t.errFill }}; background: {{ t.bg }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px">
+<div style="display: flex; gap: 6px; align-items: center; font-size: 13px; color: {{ t.errTx }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16h.01"></path></svg>Till numbers have 6 or 7 digits.</div>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+<div style="width: 96px; height: 96px; border-radius: 50%; background: {{ t.errFill }}; color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 14px {{ t.errBg }}"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M7 7l10 10"></path><path d="M17 7L7 17"></path></svg></div>
+<h1 style="margin: 14px 0 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5; text-align: center">Payment didn't go through</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}; text-align: center; max-width: 300px">The M-Pesa prompt timed out. No money left your account.</p>
+</div>
+<div style="border-radius: 18px; background: {{ t.surf }}; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Amount</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">KES 2,500</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Error code</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[CODE]</span></div>
+</div>
+<a href="FlowDeposit.dc.html" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Try again</a>
+<a href="#" style="height: 48px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; text-decoration: none">Contact support</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.scrim }}; color: {{ t.text }}; display: flex; flex-direction: column; justify-content: flex-end; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="background: {{ t.bg }}; border-radius: 28px 28px 0 0; padding: 14px 24px 32px; display: flex; flex-direction: column; gap: 16px">
+<div style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: {{ t.surf2 }}"></div>
+<div style="width: 56px; height: 56px; border-radius: 18px; background: {{ t.warnBg }}; color: {{ t.warnTx }}; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3z"></path><path d="M12 10v4"></path><path d="M12 17h.01"></path></svg></div>
+<h2 style="margin: 0; font-size: 20px; font-weight: 600">Check the name</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}">This number is registered to <span style="color: {{ t.text }}; font-weight: 600">JUMA M.</span>, not the contact you picked. Payments can't be reversed once sent.</p>
+<a href="#" style="height: 56px; border-radius: 16px; background: {{ t.text }}; color: {{ t.bg }}; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Yes, send to Juma</a>
+<a href="#" style="height: 56px; box-sizing: border-box; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Change number</a>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 56px 20px 36px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 0 4px"><h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5">Notifications</h1><a href="#" style="font-size: 14px; color: {{ t.muted }}">Mark all read</a></div>
+<div style="display: flex; gap: 12px; padding: 14px; border-radius: 18px; background: {{ t.surf }}"><span style="width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: #9CCB1F; flex-shrink: 0"></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600">Money received</span><span style="font-size: 13px; color: {{ t.muted }}">@amina sent you KES 1,200</span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">2m</span></div>
+<div style="display: flex; gap: 12px; padding: 14px; border-radius: 18px; background: {{ t.surf }}"><span style="width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: {{ t.errFill }}; flex-shrink: 0"></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600">Bank deposit returned</span><span style="font-size: 13px; color: {{ t.muted }}">Reference missing. <a href="#" style="color: {{ t.text }}; font-weight: 600">See fix</a></span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">1h</span></div>
+<div style="display: flex; gap: 12px; padding: 14px; border-radius: 18px; background: {{ t.surf }}"><span style="width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: {{ t.warnFill }}; flex-shrink: 0"></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600">Withdrawal code expires soon</span><span style="font-size: 13px; color: {{ t.muted }}">Code 482 913 · 2 min left</span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">3h</span></div>
+<div style="display: flex; gap: 12px; padding: 14px; border-radius: 18px; border: 1px solid {{ t.line }}"><span style="width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: {{ t.infoFill }}; flex-shrink: 0"></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600">You're verified</span><span style="font-size: 13px; color: {{ t.muted }}">All payment types are now open.</span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">1d</span></div>
+<div style="display: flex; gap: 12px; padding: 14px; border-radius: 18px; border: 1px solid {{ t.line }}"><span style="width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: #9CCB1F; flex-shrink: 0"></span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 15px; font-weight: 600">KPLC token ready</span><span style="font-size: 13px; color: {{ t.muted }}">Token [TOKEN] for meter •••381</span></span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: {{ t.muted }}">2d</span></div>
+</div>
+
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1880,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = { id: 'l', label: 'LIGHT', bg: '#FFFFFF', surf: '#F4F4F0', surf2: '#E5E5DE', line: '#E5E5DE', text: '#111114', muted: '#5A5A55', btn2Border: '#D9D9D2', scrim: '#9A9A94', okBg: '#F3FFD0', okBd: '#C9EC6A', okTx: '#3B5200', errBg: '#FDECEA', errBd: '#F4B4AE', errTx: '#B42318', errFill: '#D92D20', warnBg: '#FFF4DB', warnBd: '#F5C66A', warnTx: '#7A4F00', warnFill: '#F5A524', infoBg: '#EAF1FD', infoBd: '#B3CBF6', infoTx: '#1E4FB8', infoFill: '#2E6BE6' };
+const D = { id: 'd', label: 'DARK', bg: '#0A0A0C', surf: '#18181C', surf2: '#232328', line: 'rgba(244,244,240,.08)', text: '#F4F4F0', muted: '#C9C9C2', btn2Border: 'rgba(244,244,240,.16)', scrim: '#000000', okBg: 'rgba(212,255,61,.12)', okBd: 'rgba(212,255,61,.4)', okTx: '#D4FF3D', errBg: 'rgba(240,68,56,.14)', errBd: 'rgba(240,68,56,.45)', errTx: '#FF8A80', errFill: '#F04438', warnBg: 'rgba(245,165,36,.12)', warnBd: 'rgba(245,165,36,.4)', warnTx: '#FFC46B', warnFill: '#F5A524', infoBg: 'rgba(46,107,230,.14)', infoBd: 'rgba(110,155,255,.4)', infoTx: '#9DBBFF', infoFill: '#5B8DEF' };
+return { themes: [L] };
+}
+}
+</script>
+</body>
+</html>

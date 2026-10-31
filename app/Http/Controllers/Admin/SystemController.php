@@ -12,66 +12,25 @@ use Illuminate\Support\Facades\Storage;
 
 class SystemController extends Controller
 {
-    public function index()
+    /** System settings (platform admins). The page is a shell; values and option lists come as JSON. */
+    public function index(Request $request)
     {
-    $system = System::settings();
-    $timezones = \DateTimeZone::listIdentifiers(\DateTimeZone::ALL);
-    
-    // Get currencies from CountryHelper
-    try {
-        $currencies = CountryHelper::currencyOptions(false);
-    } catch (\Exception $e) {
-        // Fallback currencies
-        $currencies = [
-            'KES' => 'Kenyan Shilling (KSh)',
-            'USD' => 'US Dollar ($)',
-            'EUR' => 'Euro (€)',
-            'GBP' => 'British Pound (£)',
-            'JPY' => 'Japanese Yen (¥)',
-            'CAD' => 'Canadian Dollar (C$)',
-        ];
-    }
-
-        // Get countries for location - use countryOptions() method
-        try {
-            $countries = CountryHelper::countryOptions(false);
-        } catch (\Exception $e) {
-            $countries = [
-                'KE' => 'Kenya',
-                'US' => 'United States',
-                'GB' => 'United Kingdom',
-                'CA' => 'Canada',
-            ];
+        if (! $request->wantsJson()) {
+            return view('admin.system.index');
         }
 
-        // Get all social media platforms from system settings
-        $socialPlatforms = [
-            'facebook' => ['color' => '#1877F2', 'icon' => 'ri-facebook-fill'],
-            'twitter' => ['color' => '#1DA1F2', 'icon' => 'ri-twitter-fill'],
-            'instagram' => ['color' => '#E4405F', 'icon' => 'ri-instagram-fill'],
-            'linkedin' => ['color' => '#0A66C2', 'icon' => 'ri-linkedin-fill'],
-            'youtube' => ['color' => '#FF0000', 'icon' => 'ri-youtube-fill'],
-            'whatsapp' => ['color' => '#25D366', 'icon' => 'ri-whatsapp-fill'],
-            'tiktok' => ['color' => '#000000', 'icon' => 'ri-tiktok-fill'],
-            'telegram' => ['color' => '#26A5E4', 'icon' => 'ri-telegram-fill'],
-            'github' => ['color' => '#181717', 'icon' => 'ri-github-fill'],
-            'discord' => ['color' => '#5865F2', 'icon' => 'ri-discord-fill'],
-            'slack' => ['color' => '#4A154B', 'icon' => 'ri-slack-fill'],
-            'reddit' => ['color' => '#FF4500', 'icon' => 'ri-reddit-fill'],
-            'pinterest' => ['color' => '#BD081C', 'icon' => 'ri-pinterest-fill'],
-            'snapchat' => ['color' => '#FFFC00', 'icon' => 'ri-snapchat-fill'],
-            'skype' => ['color' => '#00AFF0', 'icon' => 'ri-skype-fill'],
-        ];
+        $system = System::settings();
+        $file = fn ($path) => $path ? (str_starts_with($path, 'http') ? $path : asset('storage/'.$path)) : null;
 
-        return view('admin.system.simple', compact(
-            'system', 
-            'timezones', 
-            'currencies',
-            'countries',
-            'socialPlatforms'
-        ));
+        return response()->json([
+            'values' => $system->only(['name', 'slogan', 'timezone', 'date_format', 'time_format', 'currency', 'currency_symbol', 'primary_color',
+                'secondary_color', 'contact_email', 'contact_phone', 'address', 'meta_description', 'meta_keywords', 'pagination_limit', 'custom_css', 'custom_js']),
+            'files' => ['logo' => $file($system->logo), 'logo_dark' => $file($system->logo_dark), 'logo_icon' => $file($system->logo_icon), 'favicon' => $file($system->favicon)],
+            'maintenance' => (bool) $system->maintenance_mode,
+            'timezones' => \DateTimeZone::listIdentifiers(\DateTimeZone::AFRICA),
+            'currencies' => ['KES' => 'Kenyan shilling', 'UGX' => 'Ugandan shilling', 'TZS' => 'Tanzanian shilling', 'RWF' => 'Rwandan franc', 'USD' => 'US dollar', 'EUR' => 'Euro'],
+        ]);
     }
-
 
     public function update(Request $request)
     {
@@ -155,7 +114,10 @@ class SystemController extends Controller
         $system->update($data);
         Cache::forget('system_settings');
         SystemHelper::clearCache();
-        return back()->with('success', 'System settings updated successfully!');
+
+        return $request->wantsJson()
+            ? response()->json(['message' => 'System settings saved.'])
+            : back()->with('success', 'System settings updated successfully!');
     }   
     
     public function clearCache()
@@ -164,7 +126,8 @@ class SystemController extends Controller
 
         
         SystemHelper::clearCache();
-        return back()->with('success', 'Cache cleared successfully!');
+
+        return request()->wantsJson() ? response()->json(['message' => 'Cache cleared.']) : back()->with('success', 'Cache cleared successfully!');
     }
 
     public function toggleMaintenance()
@@ -176,6 +139,9 @@ class SystemController extends Controller
         
         Cache::forget('system_settings');
         SystemHelper::clearCache();
-        return back()->with('success', 'Maintenance mode updated!');
+
+        return request()->wantsJson()
+            ? response()->json(['message' => $system->maintenance_mode ? 'Maintenance mode is on.' : 'Maintenance mode is off.', 'maintenance' => (bool) $system->maintenance_mode])
+            : back()->with('success', 'Maintenance mode updated!');
     }
 }

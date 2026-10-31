@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet (dark) – Add money</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 2310px; height: 1100px; box-sizing: border-box; padding: 60px; background: #050507; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: row; gap: 80px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 40px; border-radius: 32px; background: {{ t.surf }}">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.2em; color: {{ t.muted }}">{{ t.label }} MODE</div>
+<div style="display: flex; gap: 40px">
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="MobHome.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">Add money</div></div>
+<div style="font-size: 14px; color: {{ t.muted }}">To your KES wallet</div>
+<a href="#" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; border: 2px solid {{ t.focus }}; text-decoration: none">
+<span style="width: 48px; height: 48px; border-radius: 14px; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"></rect><path d="M11 18h2"></path></svg></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">M-Pesa</span><span style="font-size: 13px; color: {{ t.muted }}">Instant · prompt on your phone</span></span>
+<span style="padding: 5px 9px; border-radius: 999px; background: {{ t.okBg }}; color: {{ t.okTx }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px">FASTEST</span>
+</a>
+<a href="#" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: {{ t.surf }}; text-decoration: none">
+<span style="width: 48px; height: 48px; border-radius: 14px; background: {{ t.bg }}; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"></rect><path d="M11 18h2"></path></svg></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">Airtel Money</span><span style="font-size: 13px; color: {{ t.muted }}">Instant · prompt on your phone</span></span>
+</a>
+<a href="#" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: {{ t.surf }}; text-decoration: none">
+<span style="width: 48px; height: 48px; border-radius: 14px; background: {{ t.bg }}; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6"></path><path d="M5 10v8"></path><path d="M10 10v8"></path><path d="M14 10v8"></path><path d="M19 10v8"></path><path d="M3 20h18"></path></svg></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">Bank transfer</span><span style="font-size: 13px; color: {{ t.muted }}">From any bank · [TIME]</span></span>
+</a>
+<a href="#" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: {{ t.surf }}; text-decoration: none">
+<span style="width: 48px; height: 48px; border-radius: 14px; background: {{ t.bg }}; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 16px; font-weight: 600">Cash at an agent</span><span style="font-size: 13px; color: {{ t.muted }}">Show your code to the agent</span></span>
+</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">Bank transfer</div></div>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}">Send money from your bank app to these details. Your wallet updates when it arrives.</p>
+<div style="border-radius: 20px; background: {{ t.surf }}; padding: 4px 18px">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid {{ t.line }}"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; color: {{ t.muted }}">Bank</span><span style="font-size: 15px">[BANK NAME]</span></span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid {{ t.line }}"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; color: {{ t.muted }}">Account name</span><span style="font-size: 15px">Sharet Africa Ltd</span></span></div>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid {{ t.line }}"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; color: {{ t.muted }}">Account number</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 15px">[ACCOUNT NUMBER]</span></span><button style="height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px">Copy</button></div>
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0"><span style="display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; color: {{ t.muted }}">Your reference</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px; font-weight: 500">SHR 7Q2K 81</span></span><button style="height: 36px; padding: 0 12px; border-radius: 10px; border: 0; background: #D4FF3D; color: #050507; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 13px; font-weight: 600">Copy</button></div>
+</div>
+<div style="display: flex; gap: 12px; padding: 14px 16px; border-radius: 16px; background: {{ t.warnBg }}; border: 1px solid {{ t.warnBd }}; color: {{ t.warnTx }}; font-size: 14px; line-height: 1.5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M12 3l9 16H3z"></path><path d="M12 10v4"></path><path d="M12 17h.01"></path></svg>Add your reference exactly, or the deposit may be delayed.</div>
+<div style="flex-grow: 1"></div>
+<button style="height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 16px; font-weight: 600">Share details</button>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">Add with M-Pesa</div></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 26px 0 8px">
+<label for="d-amt-{{ t.id }}" style="font-size: 13px; color: {{ t.muted }}">Amount</label>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px; color: {{ t.muted }}">KES</span><input id="d-amt-{{ t.id }}" value="2,500" style="width: 160px; background: transparent; border: 0; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 46px; text-align: center; padding: 0"></div>
+</div>
+<div style="display: flex; justify-content: center; gap: 8px">
+<button style="height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">500</button>
+<button style="height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">1,000</button>
+<button style="height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: {{ t.text }}; color: {{ t.bg }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">2,500</button>
+<button style="height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">5,000</button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px">
+<label for="d-ph-{{ t.id }}" style="font-size: 13px; font-weight: 600">M-Pesa number</label>
+<input id="d-ph-{{ t.id }}" value="+254 712 345 678" style="height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 1px solid {{ t.line }}; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 16px">
+</div>
+<div style="border-radius: 16px; background: {{ t.surf }}; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[FEE]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">You'll receive</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">KES [AMOUNT]</span></div>
+</div>
+<div style="flex-grow: 1"></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Send prompt to my phone</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; align-items: center; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="flex-grow: 1"></div>
+<div style="width: 170px; height: 280px; box-sizing: border-box; border-radius: 30px; border: 3px solid {{ t.text }}; padding: 40px 12px 12px; display: flex; flex-direction: column; justify-content: center">
+<div style="border-radius: 14px; background: {{ t.surf }}; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 11px; line-height: 1.4">Pay KES 2,500 to SHARET AFRICA?</div>
+<div style="height: 26px; border-radius: 6px; background: {{ t.bg }}; border: 1px solid {{ t.line }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; display: flex; align-items: center; padding: 0 8px; color: {{ t.muted }}">Enter PIN</div>
+<div style="height: 22px; border-radius: 6px; background: #D4FF3D"></div>
+</div>
+</div>
+<h1 style="margin: 12px 0 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5; text-align: center">Check your phone</h1>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}; text-align: center">Enter your M-Pesa PIN in the prompt to add KES 2,500.</p>
+<div style="display: flex; align-items: center; gap: 10px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; color: {{ t.muted }}"><span style="width: 10px; height: 10px; border-radius: 50%; background: #D4FF3D; box-shadow: 0 0 0 5px rgba(212,255,61,.3)"></span>Waiting · 0:48</div>
+<div style="flex-grow: 1"></div>
+<button style="width: 100%; height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 16px; font-weight: 600">Resend prompt</button>
+<a href="#" style="font-size: 14px; color: {{ t.muted }}; padding: 8px">Pay by Paybill instead</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px">
+<div style="width: 96px; height: 96px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 14px {{ t.okBg }}"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></div>
+<h1 style="margin: 14px 0 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.5">Money added</h1>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 32px">+KES 2,500</div>
+<div style="font-size: 14px; color: {{ t.muted }}">New KES balance <span style="font-family: 'Geist Mono', ui-monospace, monospace; color: {{ t.text }}">[AMOUNT]</span></div>
+</div>
+<div style="border-radius: 18px; background: {{ t.surf }}; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">From</span><span>M-Pesa · 0712 ••• 678</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">M-Pesa ref</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[MPESA REF]</span></div>
+</div>
+<div style="display: flex; gap: 10px">
+<button style="flex: 1; height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600">Receipt</button>
+<a href="FlowPay.dc.html" style="flex: 1; height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">Pay now</a>
+</div>
+</div>
+
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2310,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = { id: 'l', label: 'LIGHT', bg: '#FFFFFF', surf: '#F4F4F0', surf2: '#E5E5DE', line: '#E5E5DE', text: '#111114', muted: '#5A5A55', focus: '#111114', btn2Border: '#D9D9D2', okBg: '#F3FFD0', okTx: '#3B5200', warnBg: '#FFF4DB', warnBd: '#F5C66A', warnTx: '#7A4F00' };
+const D = { id: 'd', label: 'DARK', bg: '#0A0A0C', surf: '#18181C', surf2: '#232328', line: 'rgba(244,244,240,.08)', text: '#F4F4F0', muted: '#C9C9C2', focus: '#D4FF3D', btn2Border: 'rgba(244,244,240,.16)', okBg: 'rgba(212,255,61,.14)', okTx: '#D4FF3D', warnBg: 'rgba(245,165,36,.12)', warnBd: 'rgba(245,165,36,.4)', warnTx: '#FFC46B' };
+return { themes: [D] };
+}
+}
+</script>
+</body>
+</html>

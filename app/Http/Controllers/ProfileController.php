@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Support\Kyc;
 use App\Support\People;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,17 +18,11 @@ use Illuminate\Validation\Rules\Password;
 /**
  * Profile (overview) and Account settings. Pages are shells that read GET /profile/data.
  *
- * Account levels, from what the person has given us (users.kyc, encrypted):
- *   basic    M-Pesa grade: legal name, phone, ID document and date of birth
- *   standard bank grade: adds KRA PIN, address, occupation, income and source of funds, next of kin
- * Business accounts (bank-grade KYB) live in Business settings (CompanySettingsController).
+ * Account levels (App\Support\Kyc): basic = name + M-Pesa number; standard (bank grade) = full details,
+ * clear ID photos, three selfies and a signature. Business accounts live in Business settings.
  */
 class ProfileController extends Controller
 {
-    public const BASIC = ['id_type', 'id_number', 'date_of_birth'];
-
-    public const STANDARD = ['kra_pin', 'nationality', 'county', 'town', 'address', 'occupation', 'income_band', 'source_of_funds', 'next_of_kin_name', 'next_of_kin_phone'];
-
     public function show()
     {
         return view('profile.index');
@@ -40,9 +36,10 @@ class ProfileController extends Controller
     public function getUserData(Request $request): JsonResponse
     {
         $user = $request->user();
-        $kyc = $this->kyc($user);
-        $done = fn (array $keys) => collect($keys)->filter(fn ($k) => filled($kyc[$k] ?? null))->count();
-        $basicDone = filled($user->name) && filled($user->phone) && $done(self::BASIC) === count(self::BASIC);
+        $kyc = Kyc::data($user);
+        unset($kyc['documents']);
+        $progress = Kyc::progress($user);
+        $level = Kyc::refreshLevel($user);
 
         return response()->json([
             'user' => $user->only(['name', 'first_name', 'last_name', 'email', 'phone', 'bio', 'country', 'city']) + [
@@ -57,13 +54,12 @@ class ProfileController extends Controller
                 'has_company' => in_array($user->intent, ['merchant', 'business'], true) || $user->company_id,
             ],
             'kyc' => $kyc,
-            'level' => [
-                'key' => $user->kyc_level ?? 'none',
-                'label' => ['none' => 'Not verified', 'basic' => 'Basic · M-Pesa grade', 'standard' => 'Full · bank grade'][$user->kyc_level ?? 'none'] ?? 'Not verified',
-                'basic' => ['done' => $done(self::BASIC) + (filled($user->phone) ? 1 : 0), 'of' => count(self::BASIC) + 1, 'complete' => $basicDone],
-                'standard' => ['done' => $done(self::STANDARD), 'of' => count(self::STANDARD), 'complete' => $basicDone && $done(self::STANDARD) === count(self::STANDARD)],
+            'level' => $progress + [
+                'key' => $level,
+                'label' => ['none' => 'Not verified', 'basic' => 'Basic · M-Pesa', 'standard' => 'Bank grade'][$level],
                 'submitted' => $user->kyc_submitted_at?->timezone('Africa/Nairobi')->format('j M Y'),
             ],
+            'documents' => Kyc::documents($user, 'profile.document'),
             'wallet' => ['balance' => $user->getWalletBalance()],
         ]);
     }
@@ -94,6 +90,7 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
         $user->save();
+        Kyc::refreshLevel($user);
 
         return $request->expectsJson()
             ? response()->json(['message' => 'Your details are saved.', 'avatar' => $user->avatar ? asset('storage/'.$user->avatar) : null])
@@ -127,18 +124,46 @@ class ProfileController extends Controller
         ]);
 
         $data['kra_pin'] = isset($data['kra_pin']) ? strtoupper($data['kra_pin']) : null;
-        $basic = filled($user->phone) && collect(self::BASIC)->every(fn ($k) => filled($data[$k] ?? null));
-        $standard = $basic && collect(self::STANDARD)->every(fn ($k) => filled($data[$k] ?? null));
+        $data['pep'] = (bool) ($data['pep'] ?? false);
+        Kyc::save($user, $data + ['documents' => Kyc::data($user)['documents'] ?? []]);
+        $p = Kyc::progress($user->fresh())['standard'];
 
-        $user->forceFill([
-            'kyc' => encrypt($data),
-            'kyc_level' => $standard ? 'standard' : ($basic ? 'basic' : 'none'),
-            'kyc_submitted_at' => now(),
-        ])->save();
+        return response()->json(['message' => $p['complete']
+            ? 'Thanks. Your bank-grade details are in for review.'
+            : "Details saved. {$p['documents'][0]} of {$p['documents'][1]} photos are in: add the rest below to finish bank-grade verification."]);
+    }
 
-        return response()->json(['message' => $standard
-            ? 'Thanks. Your full (bank-grade) details are in for review.'
-            : ($basic ? 'Thanks. Basic verification is in for review. Add the rest to unlock bank-grade services.' : 'Saved. Add your phone number in Personal details to finish basic verification.')]);
+    /** One verification photo: an uploaded image (ID) or a data: URL from the camera / signature pad. */
+    public function uploadDocument(Request $request, string $type): JsonResponse
+    {
+        abort_unless(isset(Kyc::DOCUMENTS[$type]), 404);
+        $kind = Kyc::DOCUMENTS[$type][2];
+
+        if ($request->hasFile('file')) {
+            $request->validate(['file' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240',
+                $kind === 'signature' ? 'dimensions:min_width=300,min_height=100' : 'dimensions:min_width=800,min_height=600']],
+                ['file.dimensions' => $kind === 'signature' ? 'That signature image is too small.' : 'That photo is too small to read. Use the camera at full resolution (at least 800 × 600).']);
+            Kyc::storeDocument($request->user(), $type, $request->file('file'));
+        } else {
+            $data = $request->validate(['image' => ['required', 'string', 'max:14000000', 'regex:#^data:image/(jpeg|png);base64,[A-Za-z0-9+/=]+$#']])['image'];
+            $size = @getimagesizefromstring(base64_decode(explode(',', $data, 2)[1]));
+            $min = $kind === 'signature' ? [300, 100] : [640, 480];
+            if (! $size || $size[0] < $min[0] || $size[1] < $min[1]) {
+                return response()->json(['message' => 'That image is too small or unreadable. Try again.', 'errors' => ['image' => ['Image too small.']]], 422);
+            }
+            Kyc::storeDocument($request->user(), $type, $data);
+        }
+
+        return response()->json(['message' => Kyc::DOCUMENTS[$type][0].' saved.']);
+    }
+
+    /** Streams a verification photo to its owner or to staff who manage people. */
+    public function document(Request $request, User $user, string $type)
+    {
+        abort_unless($request->user()->is($user) || $request->user()->can('admin.users'), 403);
+        $path = Kyc::data($user)['documents'][$type]['path'] ?? abort(404);
+
+        return response()->file(Storage::disk('local')->path($path), ['Cache-Control' => 'private, max-age=300', 'X-Robots-Tag' => 'noindex']);
     }
 
     public function updatePassword(Request $request): JsonResponse
@@ -176,14 +201,5 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
-    }
-
-    protected function kyc($user): array
-    {
-        try {
-            return $user->kyc ? (array) decrypt($user->kyc) : [];
-        } catch (\Throwable) {
-            return [];
-        }
     }
 }

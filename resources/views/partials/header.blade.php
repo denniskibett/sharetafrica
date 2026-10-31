@@ -1,6 +1,6 @@
 {{-- Dashboard top bar: menu toggle, logo on phones, light/dark switch, notifications, account menu. --}}
 @php $user = auth()->user(); @endphp
-<header class="sticky top-0 z-[999] flex h-[72px] w-full items-center border-b border-gray-200 bg-white/90 px-4 backdrop-blur dark:border-gray-800 dark:bg-gray-900/90 md:px-6">
+<header class="sticky top-0 z-[999] flex h-[72px] w-full shrink-0 items-center border-b border-gray-200 bg-white/90 px-4 backdrop-blur dark:border-gray-800 dark:bg-gray-900/90 md:px-6">
   <div class="flex w-full items-center gap-3">
     <button type="button" @click.stop="sidebarToggle = !sidebarToggle"
             class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5"
@@ -11,14 +11,10 @@
     <a href="{{ route('dashboard') }}" class="lg:hidden" aria-label="Dashboard"><x-brand :size="28" /></a>
 
     {{-- Search the dashboard menu (same items as the sidebar). ⌘K / Ctrl+K focuses it; ↑ ↓ Enter to pick. --}}
-    @php
-        $searchItems = collect(\App\Support\DashboardNav::for($user))->flatMap(fn ($g) => collect($g['items'])->map(fn ($i) => [
-            'label' => $i['label'], 'group' => $g['title'], 'url' => $i['url'], 'ready' => $i['ready'], 'icon' => $i['icon'],
-        ]))->unique('label')->values();
-    @endphp
     <div class="relative hidden sm:block sm:w-72 lg:w-96"
          x-data="{
-            q: '', open: false, i: 0, items: @js($searchItems),
+            q: '', open: false, i: 0, items: [],
+            async load() { if (!this.items.length) this.items = await (await fetch('{{ route('dashboard.menu') }}', { headers: { Accept: 'application/json' } })).json() },
             get results() {
                 const q = this.q.trim().toLowerCase();
                 if (!q) return this.items.filter(x => x.ready).slice(0, 8);
@@ -30,7 +26,7 @@
          @click.outside="open = false">
       <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
       <input x-ref="q" x-model="q" type="search" placeholder="Search the dashboard…" autocomplete="off" aria-label="Search the dashboard"
-             @focus="open = true" @input="open = true; i = 0"
+             @focus="open = true; load()" @input="open = true; i = 0"
              @keydown.down.prevent="i = Math.min(i + 1, results.length - 1)" @keydown.up.prevent="i = Math.max(i - 1, 0)"
              @keydown.enter.prevent="go(results[i])" @keydown.escape="open = false; $el.blur()"
              class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-14 text-sm text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-800 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:bg-gray-900">

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet Africa – Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0C}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif">
+<header style="border-bottom: 1px solid rgba(244,244,240,.08)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<a href="WebLanding.dc.html" aria-label="Sharet Africa home"><img src="../assets/759a77d38069c6004cba1d5199854cce.svg" alt="Sharet" style="width: 132px; display: block"></a>
+<nav style="display: flex; flex-wrap: wrap; align-items: center; gap: 24px; font-size: 15px">
+<a href="#payments" style="color: #C9C9C2; text-decoration: none">Payments</a>
+<a href="#trade" style="color: #C9C9C2; text-decoration: none">Trade finance</a>
+<a href="#corridors" style="color: #C9C9C2; text-decoration: none">Corridors</a>
+<a href="MktPricing.dc.html" style="color: #C9C9C2; text-decoration: none">Pricing</a>
+<a href="WebDashboard.dc.html" style="color: #F4F4F0; text-decoration: none">Log in</a>
+<a href="WebDashboard.dc.html" style="background: #D4FF3D; color: #050507; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-weight: 600">Open account</a>
+</nav>
+</div>
+</header>
+<section style="max-width: 1200px; margin: 0 auto; padding: 88px 24px 72px; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
+<div style="flex: 1 1 480px; display: flex; flex-direction: column; gap: 24px">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.2em; color: #D4FF3D">CROSS-BORDER PAYMENTS · TRADE FINANCE</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(2rem, 4.2vw, 3.4rem); font-weight: 400; line-height: 1.35">Move money across Africa <span style="color: #D4FF3D">and the world.</span></h1>
+<p style="margin: 0; font-size: 19px; line-height: 1.6; color: #C9C9C2; max-width: 34rem">Pay suppliers in Kampala, get paid from London, and finance the goods in between, all from one Sharet account.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<a href="WebDashboard.dc.html" style="background: #D4FF3D; color: #050507; text-decoration: none; padding: 16px 24px; border-radius: 12px; font-weight: 600; font-size: 16px">Open a free account</a>
+<a href="MktCampaign.dc.html" style="border: 1px solid rgba(244,244,240,.16); color: #F4F4F0; text-decoration: none; padding: 15px 24px; border-radius: 12px; font-weight: 600; font-size: 16px">Talk to sales</a>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: #80807A">
+<span>[LICENCE / REGULATOR]</span><span>[CUSTOMER COUNT]</span><span>[CORRIDOR COUNT] corridors</span>
+</div>
+</div>
+<div style="flex: 1 1 380px; max-width: 440px; background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="font-size: 16px; font-weight: 600">See what you'd pay</div>
+<div style="background: #18181C; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+<label for="w-send" style="font-size: 13px; color: #80807A">You send</label>
+<div style="display: flex; gap: 10px; align-items: center"><input id="w-send" value="[AMOUNT]" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: #F4F4F0; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 24px"><span style="padding: 8px 12px; border-radius: 999px; background: #232328; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">KES</span></div>
+</div>
+<div style="background: #18181C; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+<label for="w-recv" style="font-size: 13px; color: #80807A">They receive</label>
+<div style="display: flex; gap: 10px; align-items: center"><input id="w-recv" value="[AMOUNT]" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 24px"><span style="padding: 8px 12px; border-radius: 999px; background: #232328; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">USD</span></div>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 14px; padding: 0 4px"><span style="color: #80807A">Rate</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">1 USD = [RATE] KES</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 14px; padding: 0 4px"><span style="color: #80807A">Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[FEE]</span></div>
+<a href="WebDashboard.dc.html" style="height: 52px; border-radius: 12px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600">Send money</a>
+</div>
+</section>
+<section style="border-top: 1px solid rgba(244,244,240,.08); border-bottom: 1px solid rgba(244,244,240,.08)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 32px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px 40px">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.2em; color: #80807A">TRUSTED BY</span>
+<span style="padding: 10px 20px; border: 1px dashed rgba(244,244,240,.16); border-radius: 8px; color: #80807A; font-size: 14px">[PARTNER LOGO]</span>
+<span style="padding: 10px 20px; border: 1px dashed rgba(244,244,240,.16); border-radius: 8px; color: #80807A; font-size: 14px">[PARTNER LOGO]</span>
+<span style="padding: 10px 20px; border: 1px dashed rgba(244,244,240,.16); border-radius: 8px; color: #80807A; font-size: 14px">[PARTNER LOGO]</span>
+<span style="padding: 10px 20px; border: 1px dashed rgba(244,244,240,.16); border-radius: 8px; color: #80807A; font-size: 14px">[PARTNER LOGO]</span>
+</div>
+</section>
+<section id="payments" style="max-width: 1200px; margin: 0 auto; padding: 96px 24px; display: flex; flex-direction: column; gap: 40px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; line-height: 1.4; max-width: 46rem">One account for every lane your business uses.</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px">
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14"></path><path d="M15 4l4 4-4 4"></path><path d="M20 16H6"></path><path d="M9 12l-4 4 4 4"></path></svg>
+<h3 style="margin: 0; font-size: 22px; font-weight: 600">Cross-border payments</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Send to banks and mobile money across East Africa, and to accounts worldwide.</p>
+<a href="#" style="font-size: 15px; text-decoration: none; font-weight: 600">Explore payments</a>
+</div>
+<div id="trade" style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="11" rx="1"></rect><path d="M7 8v11"></path><path d="M11 8v11"></path><path d="M15 8v11"></path><path d="M8 8l2-3h4l2 3"></path></svg>
+<h3 style="margin: 0; font-size: 22px; font-weight: 600">Trade finance</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Letters of credit, invoice financing and supplier payments for importers and exporters.</p>
+<a href="MktCampaign.dc.html" style="font-size: 15px; text-decoration: none; font-weight: 600">Explore trade finance</a>
+</div>
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path><path d="M16 15h2"></path></svg>
+<h3 style="margin: 0; font-size: 22px; font-weight: 600">Multi-currency wallets</h3>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Hold, convert and pay out in KES, UGX, TZS, USD and more, at rates shown up front.</p>
+<a href="#" style="font-size: 15px; text-decoration: none; font-weight: 600">Explore wallets</a>
+</div>
+</div>
+</section>
+<section id="corridors" style="background: #111114">
+<div style="max-width: 1200px; margin: 0 auto; padding: 96px 24px; display: flex; flex-wrap: wrap; gap: 56px; align-items: center">
+<div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 20px">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.2em; color: #D4FF3D">CORRIDORS</div>
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; line-height: 1.4">East Africa at the centre.</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.6; color: #C9C9C2">Local payouts across the region, with direct lanes to the markets your trade depends on.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="padding: 8px 14px; border-radius: 999px; background: rgba(212,255,61,.2); color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">KENYA</span>
+<span style="padding: 8px 14px; border-radius: 999px; background: rgba(212,255,61,.2); color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">UGANDA</span>
+<span style="padding: 8px 14px; border-radius: 999px; background: rgba(212,255,61,.2); color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">TANZANIA</span>
+<span style="padding: 8px 14px; border-radius: 999px; background: rgba(212,255,61,.2); color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">RWANDA</span>
+<span style="padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(244,244,240,.16); color: #C9C9C2; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">[GLOBAL CORRIDORS]</span>
+</div>
+</div>
+<div style="flex: 1 1 420px; display: flex; justify-content: center">
+<svg width="100%" viewBox="0 0 520 300" style="max-width: 520px" aria-hidden="true" font-family="'Geist Mono', ui-monospace, monospace" font-size="13">
+<path d="M90 160 C200 150 300 60 440 60" fill="none" stroke="#D4FF3D" stroke-width="2"></path>
+<path d="M90 160 C220 170 320 150 440 150" fill="none" stroke="#D4FF3D" stroke-width="2"></path>
+<path d="M90 160 C200 200 300 250 440 240" fill="none" stroke="#5A5A55" stroke-width="2" stroke-dasharray="4 6"></path>
+<path d="M90 160 L50 230" stroke="#C9C9C2" stroke-width="2"></path>
+<path d="M90 160 L140 250" stroke="#C9C9C2" stroke-width="2"></path>
+<path d="M90 160 L40 110" stroke="#C9C9C2" stroke-width="2"></path>
+<circle cx="90" cy="160" r="10" fill="#D4FF3D"></circle>
+<circle cx="50" cy="230" r="6" fill="#F4F4F0"></circle>
+<circle cx="140" cy="250" r="6" fill="#F4F4F0"></circle>
+<circle cx="40" cy="110" r="6" fill="#F4F4F0"></circle>
+<circle cx="440" cy="60" r="8" fill="none" stroke="#F4F4F0" stroke-width="3"></circle>
+<circle cx="440" cy="150" r="8" fill="none" stroke="#F4F4F0" stroke-width="3"></circle>
+<circle cx="440" cy="240" r="8" fill="none" stroke="#F4F4F0" stroke-width="3"></circle>
+<text x="72" y="140" fill="#D4FF3D">NBO</text><text x="10" y="252" fill="#C9C9C2">DAR</text><text x="124" y="278" fill="#C9C9C2">KGL</text><text x="20" y="96" fill="#C9C9C2">KLA</text>
+<text x="460" y="65" fill="#F4F4F0">LON</text><text x="460" y="155" fill="#F4F4F0">DXB</text><text x="460" y="245" fill="#F4F4F0">SHA</text>
+</svg>
+</div>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 96px 24px; display: flex; flex-direction: column; gap: 40px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; line-height: 1.4">Three steps. No surprises.</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px">
+<div style="border-top: 2px solid #D4FF3D; padding-top: 20px; display: flex; flex-direction: column; gap: 10px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; color: #D4FF3D">01</span><h3 style="margin: 0; font-size: 20px; font-weight: 600">Open your account</h3><p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Sign up online and verify your business in [TIME].</p></div>
+<div style="border-top: 2px solid #D4FF3D; padding-top: 20px; display: flex; flex-direction: column; gap: 10px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; color: #D4FF3D">02</span><h3 style="margin: 0; font-size: 20px; font-weight: 600">See the full price</h3><p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Rate and fee shown before you pay, and the rate locks when you confirm.</p></div>
+<div style="border-top: 2px solid #D4FF3D; padding-top: 20px; display: flex; flex-direction: column; gap: 10px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; color: #D4FF3D">03</span><h3 style="margin: 0; font-size: 20px; font-weight: 600">Track every step</h3><p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Live status from payment to delivery, with receipts you can share.</p></div>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 0 24px 96px">
+<div style="background: #D4FF3D; color: #050507; border-radius: 28px; padding: clamp(32px, 5vw, 64px); display: flex; flex-wrap: wrap; gap: 40px; align-items: center">
+<div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.2em">TRADE FINANCE</div>
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; line-height: 1.4">Keep goods moving while you wait to get paid.</h2>
+<a href="MktCampaign.dc.html" style="align-self: flex-start; background: #050507; color: #D4FF3D; text-decoration: none; padding: 16px 24px; border-radius: 12px; font-weight: 600">Talk to the trade team</a>
+</div>
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 14px; font-size: 17px">
+<div style="display: flex; gap: 12px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid rgba(5,5,7,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Letters of credit</div>
+<div style="display: flex; gap: 12px; align-items: center; padding-bottom: 14px; border-bottom: 1px solid rgba(5,5,7,.15)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Invoice financing</div>
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Supplier payments on terms</div>
+</div>
+</div>
+</section>
+<section style="background: #111114">
+<div style="max-width: 1200px; margin: 0 auto; padding: 72px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 10px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg><h3 style="margin: 0; font-size: 18px; font-weight: 600">Regulated</h3><p style="margin: 0; font-size: 15px; line-height: 1.6; color: #C9C9C2">[LICENCE DETAILS AND REGULATOR NAMES]</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><h3 style="margin: 0; font-size: 18px; font-weight: 600">Funds protected</h3><p style="margin: 0; font-size: 15px; line-height: 1.6; color: #C9C9C2">[SAFEGUARDING DETAILS]</p></div>
+<div style="display: flex; flex-direction: column; gap: 10px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg><h3 style="margin: 0; font-size: 18px; font-weight: 600">Real people, real time</h3><p style="margin: 0; font-size: 15px; line-height: 1.6; color: #C9C9C2">[SUPPORT HOURS AND CHANNELS]</p></div>
+</div>
+</section>
+<footer style="border-top: 1px solid rgba(244,244,240,.08)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 56px 24px 40px; display: flex; flex-direction: column; gap: 40px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px">
+<img src="../assets/0cdeb515754bd0687fd21718d180de14.svg" alt="Sharet Africa" style="width: 170px; height: fit-content">
+<div style="display: flex; flex-wrap: wrap; gap: 56px; font-size: 15px">
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: #80807A">PRODUCT</span><a href="#payments" style="color: #C9C9C2; text-decoration: none">Payments</a><a href="#trade" style="color: #C9C9C2; text-decoration: none">Trade finance</a><a href="MktPricing.dc.html" style="color: #C9C9C2; text-decoration: none">Pricing</a></div>
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: #80807A">COMPANY</span><a href="#" style="color: #C9C9C2; text-decoration: none">About</a><a href="#" style="color: #C9C9C2; text-decoration: none">Careers</a><a href="#" style="color: #C9C9C2; text-decoration: none">Contact</a></div>
+<div style="display: flex; flex-direction: column; gap: 12px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.16em; color: #80807A">LEGAL</span><a href="#" style="color: #C9C9C2; text-decoration: none">Terms</a><a href="#" style="color: #C9C9C2; text-decoration: none">Privacy</a><a href="#" style="color: #C9C9C2; text-decoration: none">Licences</a></div>
+</div>
+</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A">© [YEAR] Sharet Africa · [COMPANY REGISTRATION]</div>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4000}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

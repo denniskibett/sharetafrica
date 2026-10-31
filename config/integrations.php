@@ -11,20 +11,38 @@
 $env = ['type' => 'select', 'options' => ['sandbox' => 'Sandbox (testing)', 'live' => 'Live'], 'required' => true];
 
 return [
+    // M-Pesa has two connections. Only one is on at a time (same `group`); when the live one is on and
+    // filled in it is the one used (App\Services\Integrations::mpesa()).
     'mpesa' => [
-        'name' => 'M-Pesa (Daraja)',
+        'name' => 'M-Pesa · Live',
         'category' => 'Payments',
-        'description' => 'Safaricom M-Pesa STK push, C2B and B2C payouts through the Daraja API.',
+        'group' => 'mpesa',
+        'environment' => 'live',
+        'description' => 'Your production Daraja app: real STK push, C2B and B2C payouts. Takes over from the sandbox when it is on.',
         'color' => '#00A651',
         'fields' => [
-            'environment' => ['label' => 'Environment'] + $env,
-            'consumer_key' => ['label' => 'Consumer key', 'secret' => true, 'required' => true],
+            'consumer_key' => ['label' => 'Consumer key', 'secret' => true, 'required' => true, 'help' => 'From your production app on developer.safaricom.co.ke (Go Live).'],
             'consumer_secret' => ['label' => 'Consumer secret', 'secret' => true, 'required' => true],
-            'consumer_key' => ['label' => 'Consumer key', 'secret' => true, 'required' => true, 'help' => 'From your app on developer.safaricom.co.ke (sandbox apps are free).'],
-            'shortcode' => ['label' => 'Paybill / till number', 'required' => true, 'sandbox' => '174379'],
-            'passkey' => ['label' => 'Lipa na M-Pesa passkey', 'secret' => true, 'help' => 'Needed for STK push.', 'sandbox' => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'],
-            'initiator_name' => ['label' => 'Initiator name', 'help' => 'Needed for B2C payouts.', 'sandbox' => 'testapi'],
+            'shortcode' => ['label' => 'Paybill / till number', 'required' => true],
+            'passkey' => ['label' => 'Lipa na M-Pesa passkey', 'secret' => true, 'help' => 'Safaricom emails it after Go Live. Needed for STK push.'],
+            'initiator_name' => ['label' => 'Initiator name', 'help' => 'Needed for B2C payouts.'],
             'security_credential' => ['label' => 'Security credential', 'secret' => true, 'help' => 'Needed for B2C payouts.'],
+        ],
+    ],
+    'mpesa_sandbox' => [
+        'name' => 'M-Pesa · Sandbox',
+        'category' => 'Payments',
+        'group' => 'mpesa',
+        'environment' => 'sandbox',
+        'description' => 'Safaricom test environment: try STK push and payouts without moving real money. Comes with the public test paybill.',
+        'color' => '#00A651',
+        'fields' => [
+            'consumer_key' => ['label' => 'Consumer key', 'secret' => true, 'required' => true, 'help' => 'From a sandbox app on developer.safaricom.co.ke (free).'],
+            'consumer_secret' => ['label' => 'Consumer secret', 'secret' => true, 'required' => true],
+            'shortcode' => ['label' => 'Test paybill', 'required' => true, 'sandbox' => '174379'],
+            'passkey' => ['label' => 'Test passkey', 'secret' => true, 'sandbox' => 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'],
+            'initiator_name' => ['label' => 'Test initiator', 'sandbox' => 'testapi'],
+            'security_credential' => ['label' => 'Security credential', 'secret' => true, 'help' => 'Generate it on the portal with the sandbox certificate.'],
         ],
     ],
     'mtn_momo' => [

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Payment receipt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#111114}
+</style>
+</helmet>
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #FFFFFF; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 12px; display: flex; flex-direction: column">
+<svg width="794" height="14" viewBox="0 0 794 14" aria-hidden="true" style="display: block"><rect width="400" height="14" fill="#D4FF3D"></rect><rect x="400" width="394" height="14" fill="#111114"></rect></svg>
+<div style="padding: 40px 56px 32px; display: flex; flex-direction: column; gap: 22px; flex-grow: 1">
+<div style="display: flex; justify-content: space-between; align-items: center"><img src="../assets/a7c83bb711a5185761e22e808c4f19b0.svg" alt="Sharet Africa" style="width: 150px"><div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 20px; line-height: 1.5">Payment receipt</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #5A5A55">SHR-TX-8K2Q71</span></div></div>
+<div style="display: flex; gap: 20px; align-items: stretch">
+<div style="flex: 1; padding: 22px; border-radius: 14px; background: #F4F4F0; display: flex; flex-direction: column; gap: 8px"><span style="display: inline-flex; align-self: flex-start; padding: 5px 10px; border-radius: 999px; background: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .12em">COMPLETED</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px">KES 3,000.00</span><span style="color: #5A5A55">Recipient got TZS 58,140.00 · 07 Oct 2026, 16:07 EAT</span></div>
+<div style="width: 150px; padding: 14px; border-radius: 14px; border: 1px solid #E5E5DE; display: flex; flex-direction: column; align-items: center; gap: 8px"><svg width="96" height="96" viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="Verification QR"><rect width="21" height="21" fill="#FFFFFF"></rect><rect x="1" y="1" width="6" height="6" fill="#111114"></rect><rect x="2" y="2" width="4" height="4" fill="#FFFFFF"></rect><rect x="3" y="3" width="2" height="2" fill="#111114"></rect><rect x="14" y="1" width="6" height="6" fill="#111114"></rect><rect x="15" y="2" width="4" height="4" fill="#FFFFFF"></rect><rect x="16" y="3" width="2" height="2" fill="#111114"></rect><rect x="1" y="14" width="6" height="6" fill="#111114"></rect><rect x="2" y="15" width="4" height="4" fill="#FFFFFF"></rect><rect x="3" y="16" width="2" height="2" fill="#111114"></rect><rect x="9" y="1" width="3" height="3" fill="#111114"></rect><rect x="9" y="8" width="2" height="5" fill="#111114"></rect><rect x="13" y="9" width="5" height="2" fill="#111114"></rect><rect x="9" y="15" width="4" height="2" fill="#111114"></rect><rect x="15" y="14" width="3" height="5" fill="#111114"></rect></svg><span style="font-size: 10px; color: #5A5A55; text-align: center">Scan to verify</span></div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .12em; color: #5A5A55">FROM</span><span style="font-size: 14px; font-weight: 600">Wanjiru Kamau</span><span style="color: #5A5A55">KES wallet · @wanjiru.k · +254 712 ••• 678</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .12em; color: #5A5A55">TO</span><span style="font-size: 14px; font-weight: 600">Juma Mwinyi</span><span style="color: #5A5A55">Vodacom M-Pesa TZ · +255 754 ••• 889</span></div>
+</div>
+<div style="border-top: 1px solid #E5E5DE">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+<div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #E5E5DE; font-size: 13px"><span style="color: #5A5A55">{{ r.k }}</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">{{ r.v }}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; gap: 28px; align-items: flex-start">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 8px; color: #5A5A55; line-height: 1.6"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: .12em">NEED HELP?</span>Quote reference SHR-TX-8K2Q71 at help.sharet.africa or call [SUPPORT NUMBER]. Disputes can be raised within 30 days.</div>
+<div style="width: 230px; box-sizing: border-box; padding: 18px 16px; background: #FAFAF7; border: 1px dashed #C9C9C2; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; line-height: 1.7; display: flex; flex-direction: column; gap: 2px">
+<div style="text-align: center; font-size: 12px">KILIMO FRESH · TILL 702118</div>
+<div style="text-align: center; color: #5A5A55">PAID WITH SHARET</div>
+<div style="border-top: 1px dashed #C9C9C2; margin: 6px 0"></div>
+<div style="display: flex; justify-content: space-between"><span>AMOUNT</span><span>KES 2,350.00</span></div>
+<div style="display: flex; justify-content: space-between"><span>FROM</span><span>PETER N.</span></div>
+<div style="display: flex; justify-content: space-between"><span>REF</span><span>SHR-TL-7Y3M</span></div>
+<div style="display: flex; justify-content: space-between"><span>TIME</span><span>08/10/26 16:42</span></div>
+<div style="border-top: 1px dashed #C9C9C2; margin: 6px 0"></div>
+<div style="text-align: center">ASANTE · THANK YOU</div>
+<div style="text-align: center; color: #5A5A55">POS SLIP · 80 MM</div>
+</div>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; color: #5A5A55; font-size: 10px; border-top: 1px solid #E5E5DE; padding-top: 12px"><span>Sharet Africa Ltd · [ADDRESS] · [LICENCE / REGULATOR]</span><span>sharet.africa</span></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+renderVals() {
+const r = (k, v) => ({ k, v });
+return { rows: [
+r('Type', 'Cross-border transfer · mobile money'),
+r('Amount sent', 'KES 3,000.00'),
+r('Fee', 'KES 45.00'),
+r('Total debited', 'KES 3,045.00'),
+r('Exchange rate', '1 KES = 19.3800 TZS'),
+r('Amount received', 'TZS 58,140.00'),
+r('Partner reference', 'VDC-TZ-61QX0482'),
+r('Initiated / completed', '16:02 / 16:07 EAT')
+] };
+}
+}
+</script>
+</body>
+</html>

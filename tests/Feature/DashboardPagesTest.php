@@ -61,13 +61,15 @@ class DashboardPagesTest extends TestCase
 
     public function test_business_settings_create_a_company(): void
     {
-        $this->actingAs($user = User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant']));
+        $this->actingAs($user = User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant', 'phone' => null]));
+        $this->putJson('/settings/business', ['name' => 'Duka Ltd'])->assertStatus(422); // needs a personal account first
+        $user->update(['phone' => '+254711000222']);
 
         $this->putJson('/settings/business', ['name' => 'Duka Ltd', 'tax_id' => 'p051234567x', 'directors' => [['name' => 'Jane Wanjiku', 'id_number' => '22334455']], 'settlement' => ['method' => 'bank', 'account_number' => '0123456789']])->assertOk();
         $company = $user->fresh()->company;
         $this->assertSame('Duka Ltd', $company->name);
         $this->assertSame('P051234567X', $company->tax_id);
-        $this->getJson('/settings/business')->assertOk()->assertJsonPath('company.directors.0.name', 'Jane Wanjiku')->assertJsonPath('company.settlement.account_number', '0123456789');
+        $this->getJson('/settings/business')->assertOk()->assertJsonPath('company.directors.0.name', $user->name)->assertJsonPath('company.directors.0.self', true)->assertJsonPath('company.directors.1.name', 'Jane Wanjiku')->assertJsonPath('company.settlement.account_number', '0123456789');
     }
 
     public function test_team_shows_on_the_company_page_and_blog_publishes(): void

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet Africa – Tone of voice</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#111114}
+</style>
+</helmet>
+<div style="width: 1360px; height: 1040px; box-sizing: border-box; padding: 56px 64px; background: #FFFFFF; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 30px; font-weight: 400; line-height: 1.4">Tone of voice</h1><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: .2em; color: #5A5A55">ONE VOICE · FOUR TONES</span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<sc-for list="{{ tones }}" as="a" hint-placeholder-count="4">
+<div style="border-radius: 18px; background: {{ a.bg }}; color: {{ a.fg }}; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: .16em; opacity: .75">{{ a.who }}</span><span style="font-size: 20px; font-weight: 600">{{ a.tone }}</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 11px">
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; opacity: .75"><span>Formal</span><span>Casual</span></div><div style="height: 6px; border-radius: 3px; background: {{ a.track }}; position: relative"><div style="position: absolute; top: -3px; left: {{ a.casual }}; width: 12px; height: 12px; border-radius: 50%; background: {{ a.dot }}"></div></div></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><div style="display: flex; justify-content: space-between; opacity: .75"><span>Simple</span><span>Technical</span></div><div style="height: 6px; border-radius: 3px; background: {{ a.track }}; position: relative"><div style="position: absolute; top: -3px; left: {{ a.tech }}; width: 12px; height: 12px; border-radius: 50%; background: {{ a.dot }}"></div></div></div>
+</div>
+<div style="font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 15px; line-height: 1.55">{{ a.headline }}</div>
+<div style="border-radius: 12px; background: {{ a.card }}; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; line-height: 1.45"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; opacity: .7">PUSH</span>{{ a.push }}</div>
+<div style="border-radius: 12px; background: {{ a.card }}; padding: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; line-height: 1.45"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; opacity: .7">SMS</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px">{{ a.sms }}</span></div>
+</div>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; flex-grow: 1">
+<div style="border-radius: 18px; background: #F4F4F0; padding: 20px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 16px; font-weight: 600">Words we use · words we avoid</span>
+<sc-for list="{{ words }}" as="w" hint-placeholder-count="6">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid #E5E5DE; font-size: 13px"><span style="display: flex; gap: 8px; align-items: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: #9CCB1F"></span>{{ w.yes }}</span><span style="display: flex; gap: 8px; align-items: center; color: #5A5A55; text-decoration: line-through">{{ w.no }}</span></div>
+</sc-for>
+</div>
+<div style="border-radius: 18px; background: #111114; color: #F4F4F0; padding: 20px; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 16px; font-weight: 600">Bilingual by default</span>
+<sc-for list="{{ sw }}" as="s" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; padding: 8px 0; border-bottom: 1px solid rgba(244,244,240,.12); font-size: 13px"><span>{{ s.en }}</span><span style="color: #D4FF3D">{{ s.sw }}</span></div>
+</sc-for>
+<span style="font-size: 12px; line-height: 1.5; color: #C9C9C2">Swahili copy is written by native speakers in Nairobi and Dar, not machine-translated. Use Tanzanian forms (e.g. "Wakala") in TZ.</span>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1040}}'>
+class Component extends DCLogic {
+renderVals() {
+const t = (o) => o;
+return {
+tones: [
+t({ who: 'EVERYDAY USERS', tone: 'Warm & quick', bg: '#D4FF3D', fg: '#050507', card: 'rgba(5,5,7,.08)', track: 'rgba(5,5,7,.15)', dot: '#050507', casual: '80%', tech: '10%', headline: 'Send home in seconds. Keep the change.', push: 'Amina sent you KES 1,200 for "Lunch on Friday". Say asante?', sms: 'Sharet: KES 1,200 received from @amina. Bal KES 6,480.' }),
+t({ who: 'MERCHANTS', tone: 'Practical & upbeat', bg: '#F4F4F0', fg: '#111114', card: '#FFFFFF', track: '#E5E5DE', dot: '#111114', casual: '60%', tech: '35%', headline: 'Every shilling in, counted for you.', push: 'Busy day! 47 payments, KES 86,420 so far. Sweep to NCBA at 5 pm.', sms: 'Sharet Till 702118: KES 2,350 from PETER N. Ref SHR-TL-7Y3M.' }),
+t({ who: 'TRADERS & IMPORTERS', tone: 'Expert & exact', bg: '#111114', fg: '#F4F4F0', card: '#232328', track: '#232328', dot: '#D4FF3D', casual: '30%', tech: '75%', headline: 'Your LC, issued in 48 hours. Your supplier, paid at sight.', push: 'LC SHR-LC-2026-0187: 1 discrepancy found in invoice. Review now.', sms: 'Sharet: LC 0187 docs received 07/10. Check due 09/10.' }),
+t({ who: 'PARTNERS & REGULATORS', tone: 'Formal & clear', bg: '#FFFFFF', fg: '#111114', card: '#F4F4F0', track: '#E5E5DE', dot: '#5A5A55', casual: '10%', tech: '60%', headline: 'Licensed cross-border payments for East African trade.', push: 'Monthly compliance pack for September is ready for review.', sms: 'Sharet: Settlement report 30/09 available on the partner portal.' })
+],
+words: [
+{ yes: 'Send, pay, get paid', no: 'Remit, disburse' },
+{ yes: 'Fee: KES 45', no: 'Low fees*' },
+{ yes: 'Arrives in about 5 minutes', no: 'Instant (when it isn\u2019t)' },
+{ yes: 'Your supplier, your buyer', no: 'Counterparty, beneficiary (in app copy)' },
+{ yes: 'Check the name before you send', no: 'Transactions are irreversible' },
+{ yes: 'We couldn\u2019t reach M-Pesa. Try again.', no: 'Error 502: upstream timeout' }
+],
+sw: [
+{ en: 'Send money', sw: 'Tuma pesa' },
+{ en: 'Withdraw at an agent', sw: 'Toa pesa kwa wakala' },
+{ en: 'We accept Sharet', sw: 'Tunakubali Sharet' },
+{ en: 'Pay with your tag', sw: 'Lipa na tag yako' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

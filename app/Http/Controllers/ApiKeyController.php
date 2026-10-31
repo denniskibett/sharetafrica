@@ -14,12 +14,11 @@ class ApiKeyController extends Controller
 {
     public function index(Request $request)
     {
-        $keys = $this->visible($request)->with('user:id,name', 'company:id,name')->latest()->get();
+        if ($request->wantsJson()) {
+            return response()->json(['keys' => $this->visible($request)->with('user:id,name', 'company:id,name')->latest()->get()->map(fn ($k) => $this->present($k))->values()]);
+        }
 
-        return view('api-keys.index', [
-            'keys' => $keys->map(fn ($k) => $this->present($k))->values(),
-            'isAdmin' => $request->user()->hasAnyRole(DashboardNav::ADMIN),
-        ]);
+        return view('api-keys.index', ['isAdmin' => $request->user()->hasAnyRole(DashboardNav::ADMIN)]);
     }
 
     public function store(Request $request)

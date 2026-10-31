@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet Africa – Trade finance campaign</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0C}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif">
+<header style="max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between">
+<a href="WebLanding.dc.html" aria-label="Sharet Africa home"><img src="../assets/0cdeb515754bd0687fd21718d180de14.svg" alt="Sharet Africa" style="width: 150px; display: block"></a>
+<a href="#lead" style="background: #D4FF3D; color: #050507; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-weight: 600">Talk to the trade team</a>
+</header>
+<section style="max-width: 1200px; margin: 0 auto; padding: 64px 24px 88px; display: flex; flex-wrap: wrap; gap: 56px; align-items: flex-start">
+<div style="flex: 1 1 480px; display: flex; flex-direction: column; gap: 24px; padding-top: 24px">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.2em; color: #D4FF3D">FOR IMPORTERS &amp; EXPORTERS</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 400; line-height: 1.35">Ship now.<br><span style="color: #D4FF3D">Pay on terms.</span></h1>
+<p style="margin: 0; font-size: 19px; line-height: 1.6; color: #C9C9C2; max-width: 32rem">Trade finance built for East African businesses: letters of credit, invoice financing and supplier payments, with one team that knows your corridors.</p>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 16px">
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Decision in [TIME]</div>
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Facilities from USD [MIN] to [MAX]</div>
+<div style="display: flex; gap: 12px; align-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4FF3D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>Pay suppliers in [CORRIDOR COUNT] corridors</div>
+</div>
+</div>
+<div id="lead" style="flex: 1 1 380px; max-width: 460px; background: #F4F4F0; color: #111114; border-radius: 24px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+<sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 20px; line-height: 1.45">Get a trade finance quote</div>
+<div style="font-size: 14px; color: #5A5A55">A trade specialist replies within [RESPONSE TIME].</div>
+<label for="l-name" style="font-size: 13px; font-weight: 600">Full name</label>
+<input id="l-name" style="height: 48px; border-radius: 10px; border: 1px solid #C9C9C2; background: #FFFFFF; padding: 0 12px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px">
+<label for="l-company" style="font-size: 13px; font-weight: 600">Company</label>
+<input id="l-company" style="height: 48px; border-radius: 10px; border: 1px solid #C9C9C2; background: #FFFFFF; padding: 0 12px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px">
+<label for="l-email" style="font-size: 13px; font-weight: 600">Work email</label>
+<input id="l-email" type="email" style="height: 48px; border-radius: 10px; border: 1px solid #C9C9C2; background: #FFFFFF; padding: 0 12px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px">
+<label for="l-need" style="font-size: 13px; font-weight: 600">What do you need?</label>
+<select id="l-need" style="height: 48px; border-radius: 10px; border: 1px solid #C9C9C2; background: #FFFFFF; padding: 0 12px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px"><option>Letter of credit</option><option>Invoice financing</option><option>Supplier payments</option><option>Not sure yet</option></select>
+<label for="l-vol" style="font-size: 13px; font-weight: 600">Monthly trade volume (USD)</label>
+<select id="l-vol" style="height: 48px; border-radius: 10px; border: 1px solid #C9C9C2; background: #FFFFFF; padding: 0 12px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px"><option>[BAND 1]</option><option>[BAND 2]</option><option>[BAND 3]</option></select>
+<button onClick="{{ submit }}" style="height: 52px; border-radius: 12px; border: 0; background: #050507; color: #D4FF3D; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 16px; font-weight: 600; margin-top: 4px">Request my quote</button>
+<div style="font-size: 12px; color: #5A5A55">By submitting you agree to our <a href="#" style="color: #111114">privacy policy</a>.</div>
+</div>
+</sc-if>
+<sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start; padding: 24px 0">
+<div style="width: 64px; height: 64px; border-radius: 50%; background: #D4FF3D; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#050507" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></div>
+<div style="font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; line-height: 1.45">Thanks, we're on it.</div>
+<div style="font-size: 15px; line-height: 1.55; color: #5A5A55">A trade specialist will email you within [RESPONSE TIME]. Want to skip the wait?</div>
+<a href="#" style="background: #050507; color: #D4FF3D; text-decoration: none; padding: 14px 20px; border-radius: 12px; font-weight: 600">Book a call now</a>
+<button onClick="{{ reset }}" style="height: 44px; border: 0; background: transparent; color: #5A5A55; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; text-decoration: underline; padding: 0">Start again</button>
+</div>
+</sc-if>
+</div>
+</section>
+<section style="background: #111114">
+<div style="max-width: 1200px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 36px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.5rem, 2.8vw, 2.2rem); font-weight: 400; line-height: 1.4">Pick the lane that fits your deal.</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px">
+<div style="background: #18181C; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #D4FF3D">IMPORTING</span><h3 style="margin: 0; font-size: 22px; font-weight: 600">Letters of credit</h3><p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Give overseas suppliers payment certainty, so they ship before you pay in full.</p></div>
+<div style="background: #18181C; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #D4FF3D">EXPORTING</span><h3 style="margin: 0; font-size: 22px; font-weight: 600">Invoice financing</h3><p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">Get paid on your invoices now, instead of waiting out your buyer's terms.</p></div>
+<div style="background: #18181C; border-radius: 20px; padding: 28px; display: flex; flex-direction: column; gap: 12px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #D4FF3D">BOTH</span><h3 style="margin: 0; font-size: 22px; font-weight: 600">Supplier payments</h3><p style="margin: 0; font-size: 16px; line-height: 1.6; color: #C9C9C2">We pay your supplier today; you repay us on agreed terms.</p></div>
+</div>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 36px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.5rem, 2.8vw, 2.2rem); font-weight: 400; line-height: 1.4">From application to shipment.</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+<div style="background: #D4FF3D; color: #050507; padding: 22px 30px 22px 22px; clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">01</span><span style="font-size: 17px; font-weight: 600">Apply online</span></div>
+<div style="background: #F4F4F0; color: #050507; padding: 22px 30px 22px 22px; clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">02</span><span style="font-size: 17px; font-weight: 600">Get your terms</span></div>
+<div style="background: #C9C9C2; color: #050507; padding: 22px 30px 22px 22px; clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">03</span><span style="font-size: 17px; font-weight: 600">Supplier is paid</span></div>
+<div style="background: #232328; color: #F4F4F0; padding: 22px 30px 22px 22px; clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); display: flex; flex-direction: column; gap: 6px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #D4FF3D">04</span><span style="font-size: 17px; font-weight: 600">Repay on terms</span></div>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 0 24px 88px; display: flex; flex-wrap: wrap; gap: 40px">
+<figure style="flex: 1 1 420px; margin: 0; background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 20px; padding: 32px; display: flex; flex-direction: column; gap: 18px">
+<blockquote style="margin: 0; font-size: 22px; line-height: 1.5">“[CUSTOMER QUOTE]”</blockquote>
+<figcaption style="font-size: 14px; color: #80807A">[NAME], [ROLE] · [COMPANY], [CITY]</figcaption>
+</figure>
+<div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0 0 8px; font-size: 22px; font-weight: 600">Questions</h2>
+<details style="border-bottom: 1px solid rgba(244,244,240,.08); padding: 14px 0"><summary style="font-size: 16px; cursor: pointer; min-height: 28px">Who can apply?</summary><p style="margin: 10px 0 0; font-size: 15px; line-height: 1.6; color: #C9C9C2">[ELIGIBILITY CRITERIA]</p></details>
+<details style="border-bottom: 1px solid rgba(244,244,240,.08); padding: 14px 0"><summary style="font-size: 16px; cursor: pointer; min-height: 28px">What documents do I need?</summary><p style="margin: 10px 0 0; font-size: 15px; line-height: 1.6; color: #C9C9C2">[DOCUMENT LIST]</p></details>
+<details style="border-bottom: 1px solid rgba(244,244,240,.08); padding: 14px 0"><summary style="font-size: 16px; cursor: pointer; min-height: 28px">How much does it cost?</summary><p style="margin: 10px 0 0; font-size: 15px; line-height: 1.6; color: #C9C9C2">[PRICING SUMMARY] · <a href="MktPricing.dc.html">See pricing</a></p></details>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 0 24px 88px">
+<div style="background: #D4FF3D; color: #050507; border-radius: 28px; padding: clamp(32px, 5vw, 56px); display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 400; line-height: 1.4">Your next shipment, financed.</h2>
+<a href="#lead" style="background: #050507; color: #D4FF3D; text-decoration: none; padding: 16px 24px; border-radius: 12px; font-weight: 600">Get a quote</a>
+</div>
+</section>
+<footer style="border-top: 1px solid rgba(244,244,240,.08)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 28px 24px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: #80807A"><span>© [YEAR] Sharet Africa</span><span>[LICENCE / REGULATOR]</span></div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3000}}'>
+class Component extends DCLogic {
+renderVals() {
+const s = !!(this.state && this.state.submitted);
+return {
+submitted: s,
+notSubmitted: !s,
+submit: () => this.setState({ submitted: true }),
+reset: () => this.setState({ submitted: false })
+};
+}
+}
+</script>
+</body>
+</html>

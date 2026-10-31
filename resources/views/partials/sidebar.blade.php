@@ -19,13 +19,23 @@
 
   <nav class="no-scrollbar flex-1 overflow-y-auto px-4 pb-8" aria-label="Dashboard">
     @foreach ($nav as $group)
+      <div @if (! empty($group['soon'])) x-data="{ open: $persist(false).as('sidebarSoonOpen') }" class="mt-6 border-t border-gray-100 pt-1 dark:border-gray-800" @endif>
+      @if (! empty($group['soon']))
+        <button type="button" @click="open = !open" :aria-expanded="open"
+                class="mb-2 mt-4 flex w-full items-center justify-between px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                :class="sidebarToggle ? 'lg:justify-center' : ''">
+          <span :class="sidebarToggle ? 'lg:hidden' : ''">{{ $group['title'] }} ({{ count($group['items']) }})</span>
+          <x-heroicon-o-chevron-down class="h-4 w-4 transition" x-bind:class="open && 'rotate-180'" />
+        </button>
+      @else
       <h3 class="mb-2 mt-5 px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500"
           :class="sidebarToggle ? 'lg:text-center' : ''">
         <span :class="sidebarToggle ? 'lg:hidden' : ''">{{ $group['title'] }}</span>
         <span x-show="sidebarToggle" x-cloak class="hidden lg:inline">•••</span>
       </h3>
+      @endif
 
-      <ul class="flex flex-col gap-1">
+      <ul class="flex flex-col gap-1" @if (! empty($group['soon'])) x-show="open" x-collapse x-cloak @endif>
         @foreach ($group['items'] as $item)
           @php $tag = $item['ready'] ? 'a' : 'span'; @endphp
           <li>
@@ -56,6 +66,7 @@
           </li>
         @endforeach
       </ul>
+      </div>
     @endforeach
   </nav>
 </aside>

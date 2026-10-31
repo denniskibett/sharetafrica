@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\User;
+use App\Support\Kyc;
 use App\Support\People;
 use App\Support\Table;
 use Spatie\Permission\Models\Role;
@@ -109,14 +110,70 @@ class UserController extends Controller
         return response()->json(['success' => true, 'message' => "{$user->name} added as ".str_replace('_', ' ', $role->name).'.']);
     }
 
-    /**
-     * Show a single user profile.
-     */
-    public function show(User $user)
+    /** One person: the page is a shell; details, verification and documents come as JSON. */
+    public function show(Request $request, User $user)
     {
-        $user->load(['company', 'roles', 'inviter', 'verifier']);
+        if (! $request->wantsJson()) {
+            return view('admin.users.show', ['user' => $user]);
+        }
 
-        return view('admin.users.show', compact('user'));
+        $user->load(['company:id,name', 'roles:id,name']);
+        $kyc = Kyc::data($user);
+        $progress = Kyc::progress($user);
+        $mask = fn ($v) => $v ? str_repeat('•', max(0, strlen($v) - 4)).substr($v, -4) : null;
+
+        return response()->json([
+            'person' => Table::person($user) + ['phone' => $user->phone, 'bio' => $user->bio],
+            'lane' => People::lane($user->intent),
+            'status' => People::status($user->onboarding_status),
+            'roles' => $user->roles->map(fn ($r) => ['id' => $r->id, 'name' => str_replace('_', ' ', $r->name)]),
+            'company' => $user->company?->name,
+            'self' => $user->id === $request->user()->id,
+            'waiting' => $user->onboarding_status === 'waiting_list',
+            'level' => ['key' => Kyc::refreshLevel($user), 'label' => ['none' => 'Not verified', 'basic' => 'Basic · M-Pesa', 'standard' => 'Bank grade'][$user->kyc_level ?? 'none']] + $progress,
+            'details' => collect([
+                ['Phone (M-Pesa)', $user->phone], ['Email', $user->email], ['Country', $user->country], ['Town', $user->city],
+                ['ID document', isset($kyc['id_type']) ? ucwords(str_replace('_', ' ', $kyc['id_type'])) : null], ['ID number', $mask($kyc['id_number'] ?? null)],
+                ['Date of birth', $kyc['date_of_birth'] ?? null], ['KRA PIN', $mask($kyc['kra_pin'] ?? null)],
+                ['Address', collect([$kyc['address'] ?? null, $kyc['town'] ?? null, $kyc['county'] ?? null])->filter()->implode(', ') ?: null],
+                ['Occupation', $kyc['occupation'] ?? null], ['Source of funds', isset($kyc['source_of_funds']) ? ucfirst($kyc['source_of_funds']) : null],
+                ['Next of kin', collect([$kyc['next_of_kin_name'] ?? null, $kyc['next_of_kin_phone'] ?? null])->filter()->implode(' · ') ?: null],
+                ['Politically exposed', array_key_exists('pep', $kyc) ? ($kyc['pep'] ? 'Yes' : 'No') : null],
+            ])->values(),
+            'documents' => Kyc::documents($user, 'profile.document'),
+            'stats' => [
+                'balance' => $user->getWalletBalance(),
+                'transactions' => $user->getOrCreateWallet()->transactions()->count(),
+                'keys' => \App\Models\ApiKey::where('user_id', $user->id)->count(),
+                'joined' => $user->created_at?->timezone('Africa/Nairobi')->format('j M Y'),
+            ],
+            'timeline' => collect([
+                ['Joined', $user->created_at], ['Invited', $user->invited_at], ['Onboarded', $user->onboarded_at], ['Sent verification', $user->kyc_submitted_at],
+            ])->filter(fn ($t) => $t[1])->sortBy(fn ($t) => $t[1])->map(fn ($t) => [$t[0], $t[1]->timezone('Africa/Nairobi')->format('j M Y, H:i')])->values(),
+            'all_roles' => \Spatie\Permission\Models\Role::orderBy('name')->get(['id', 'name'])->map(fn ($r) => ['id' => $r->id, 'name' => str_replace('_', ' ', $r->name)]),
+        ]);
+    }
+
+    /** Wallet transactions for one person (table JSON). */
+    public function activity(Request $request, User $user)
+    {
+        return Table::respond($request, $user->getOrCreateWallet()->transactions()->getQuery(), fn ($tx) => [
+            'id' => $tx->id,
+            'type' => Table::pill($tx->type === 'deposit' ? 'Money in' : 'Money out', $tx->type === 'deposit' ? 'success' : 'info'),
+            'amount' => abs($tx->amount) / 100,
+            'status' => Table::pill($tx->confirmed ? 'Completed' : 'Pending', $tx->confirmed ? 'success' : 'warning'),
+            'date' => $tx->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+        ], [], ['date' => 'created_at', 'amount' => 'amount']);
+    }
+
+    /** Replace a person's roles (admins only). */
+    public function roles(Request $request, User $user)
+    {
+        $data = $request->validate(['roles' => 'array', 'roles.*' => 'integer|exists:roles,id']);
+        abort_if($user->id === $request->user()->id && ! \Spatie\Permission\Models\Role::whereIn('id', $data['roles'] ?? [])->whereIn('name', ['admin', 'super_admin'])->exists(), 422, 'You cannot remove your own admin role.');
+        $user->syncRoles(\Spatie\Permission\Models\Role::whereIn('id', $data['roles'] ?? [])->get());
+
+        return response()->json(['message' => "{$user->name}'s roles are updated."]);
     }
 
     /**

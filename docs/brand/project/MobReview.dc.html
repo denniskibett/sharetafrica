@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Review and confirm</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; padding: 56px 20px 32px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 12px">
+<a href="MobSend.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 12px; background: #18181C; color: #F4F4F0; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a>
+<div style="font-size: 18px; font-weight: 600">Review transfer</div>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 0">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: #80807A">[RECIPIENT] RECEIVES</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px; color: #D4FF3D">UGX [AMOUNT]</div>
+<div style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(212,255,61,.2); color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>RATE LOCKED · [DURATION]</div>
+</div>
+<div style="background: #18181C; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">You send</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">KES [AMOUNT]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">KES [FEE]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Rate</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">1 KES = [RATE] UGX</span></div>
+<div style="height: 1px; background: rgba(244,244,240,.08)"></div>
+<div style="display: flex; justify-content: space-between; font-weight: 600"><span>Total to pay</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">KES [TOTAL]</span></div>
+</div>
+<div style="background: #18181C; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">To</span><span>[RECIPIENT]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Account</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">•••• [LAST 4]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #80807A">Arrives</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[TIME]</span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="m-ref" style="font-size: 13px; color: #80807A">Reference (optional)</label>
+<input id="m-ref" placeholder="e.g. Invoice [NUMBER]" style="height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid rgba(244,244,240,.16); background: transparent; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px">
+</div>
+<div style="flex-grow: 1"></div>
+<a href="MobSuccess.dc.html" style="height: 56px; border-radius: 14px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; font-weight: 600"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a5 5 0 0 1 5 5v3"></path><path d="M7 11V8a5 5 0 0 1 2-4"></path><path d="M12 11v10"></path><path d="M8 15v4"></path><path d="M16 15v4"></path></svg>Confirm and send</a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

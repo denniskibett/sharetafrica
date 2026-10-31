@@ -129,6 +129,7 @@ class DashboardNav
     public static function for(?User $user): array
     {
         $out = [];
+        $soon = [];
 
         foreach (self::groups() as $group) {
             if (! self::allowed($user, $group['roles'] ?? null)) {
@@ -149,9 +150,18 @@ class DashboardNav
                 ];
             }
 
-            if ($items) {
-                $out[] = ['title' => $group['title'], 'items' => $items];
+            // Pages not built yet are collected into one "Coming soon" group at the bottom
+            $live = array_values(array_filter($items, fn ($i) => $i['ready']));
+            foreach (array_filter($items, fn ($i) => ! $i['ready']) as $item) {
+                $soon[$item['label']] ??= $item;
             }
+            if ($live) {
+                $out[] = ['title' => $group['title'], 'items' => $live];
+            }
+        }
+
+        if (! empty($soon)) {
+            $out[] = ['title' => 'Coming soon', 'items' => array_values($soon), 'soon' => true];
         }
 
         return $out;

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet Africa – Pricing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0;background:#0A0A0C}
+a{color:#D4FF3D}a:hover{color:#E2FF73}
+</style>
+</helmet>
+<div style="background: #0A0A0C; color: #F4F4F0; font-family: 'Inter Tight', system-ui, sans-serif">
+<header style="border-bottom: 1px solid rgba(244,244,240,.08)">
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between">
+<a href="WebLanding.dc.html" aria-label="Sharet Africa home"><img src="../assets/759a77d38069c6004cba1d5199854cce.svg" alt="Sharet" style="width: 132px; display: block"></a>
+<nav style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center; font-size: 15px">
+<a href="WebLanding.dc.html#payments" style="color: #C9C9C2; text-decoration: none">Payments</a>
+<a href="MktCampaign.dc.html" style="color: #C9C9C2; text-decoration: none">Trade finance</a>
+<a href="MktPricing.dc.html" style="color: #F4F4F0; text-decoration: none">Pricing</a>
+<a href="WebDashboard.dc.html" style="background: #D4FF3D; color: #050507; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-weight: 600">Open account</a>
+</nav>
+</div>
+</header>
+<section style="max-width: 1200px; margin: 0 auto; padding: 80px 24px 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; letter-spacing: 0.2em; color: #D4FF3D">PRICING</div>
+<h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; line-height: 1.35">Every fee, up front.</h1>
+<p style="margin: 0; font-size: 18px; line-height: 1.6; color: #C9C9C2; max-width: 36rem">One plan for your account, plus a clear fee per transfer. The rate you see is the rate you get.</p>
+<div style="display: flex; padding: 4px; border-radius: 999px; background: #18181C; gap: 4px">
+<button onClick="{{ setMonthly }}" style="height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: {{ monthlyBg }}; color: {{ monthlyFg }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 600">Monthly</button>
+<button onClick="{{ setYearly }}" style="height: 44px; padding: 0 20px; border-radius: 999px; border: 0; background: {{ yearlyBg }}; color: {{ yearlyFg }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 600">Yearly · save [X]%</button>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 24px 24px 88px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: stretch">
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 18px">
+<div style="font-size: 20px; font-weight: 600">Starter</div>
+<div style="font-size: 15px; color: #C9C9C2">For freelancers and small traders.</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px">Free</div>
+<div style="height: 1px; background: rgba(244,244,240,.08)"></div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; color: #C9C9C2; flex-grow: 1">
+<div>KES, UGX, TZS and USD wallets</div><div>Payouts to bank and mobile money</div><div>[N] free transfers a month</div>
+</div>
+<a href="WebDashboard.dc.html" style="height: 52px; border-radius: 12px; border: 1px solid rgba(244,244,240,.16); color: #F4F4F0; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; box-sizing: border-box">Start free</a>
+</div>
+<div style="background: #D4FF3D; color: #050507; border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 18px; position: relative">
+<div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 20px; font-weight: 600">Business</span><span style="padding: 6px 12px; border-radius: 999px; background: #050507; color: #D4FF3D; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px">MOST POPULAR</span></div>
+<div style="font-size: 15px">For SMEs paying suppliers across borders.</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px">{{ businessPrice }}</div>
+<div style="height: 1px; background: rgba(5,5,7,.15)"></div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; flex-grow: 1">
+<div>Everything in Starter</div><div>Team access and approvals</div><div>Bulk payouts and invoicing</div><div>Lower FX margin</div>
+</div>
+<a href="WebDashboard.dc.html" style="height: 52px; border-radius: 12px; background: #050507; color: #D4FF3D; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600">Choose Business</a>
+</div>
+<div style="background: #111114; border: 1px solid rgba(244,244,240,.08); border-radius: 24px; padding: 32px; display: flex; flex-direction: column; gap: 18px">
+<div style="font-size: 20px; font-weight: 600">Trade</div>
+<div style="font-size: 15px; color: #C9C9C2">For importers and exporters who need finance.</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 34px">Custom</div>
+<div style="height: 1px; background: rgba(244,244,240,.08)"></div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px; color: #C9C9C2; flex-grow: 1">
+<div>Everything in Business</div><div>Letters of credit and invoice financing</div><div>Dedicated trade manager</div><div>API access</div>
+</div>
+<a href="MktCampaign.dc.html" style="height: 52px; border-radius: 12px; border: 1px solid rgba(244,244,240,.16); color: #F4F4F0; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 600; box-sizing: border-box">Talk to sales</a>
+</div>
+</section>
+<section style="background: #111114">
+<div style="max-width: 1200px; margin: 0 auto; padding: 88px 24px; display: flex; flex-direction: column; gap: 28px">
+<h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.5rem, 2.8vw, 2.2rem); font-weight: 400; line-height: 1.4">Transfer fees by corridor</h2>
+<div style="overflow-x: auto; border: 1px solid rgba(244,244,240,.08); border-radius: 16px">
+<table style="width: 100%; min-width: 720px; border-collapse: collapse; font-size: 15px">
+<thead><tr style="text-align: left; background: #18181C; color: #80807A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px"><th style="padding: 16px 20px; font-weight: 500">FROM</th><th style="padding: 16px 20px; font-weight: 500">TO</th><th style="padding: 16px 20px; font-weight: 500">PAYOUT</th><th style="padding: 16px 20px; font-weight: 500">SPEED</th><th style="padding: 16px 20px; font-weight: 500; text-align: right">FEE</th></tr></thead>
+<tbody style="font-family: 'Geist Mono', ui-monospace, monospace">
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 16px 20px">KES</td><td style="padding: 16px 20px">UGX</td><td style="padding: 16px 20px; font-family: 'Inter Tight', system-ui, sans-serif">Bank, mobile money</td><td style="padding: 16px 20px">[TIME]</td><td style="padding: 16px 20px; text-align: right; color: #D4FF3D">[FEE]</td></tr>
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 16px 20px">KES</td><td style="padding: 16px 20px">TZS</td><td style="padding: 16px 20px; font-family: 'Inter Tight', system-ui, sans-serif">Bank, mobile money</td><td style="padding: 16px 20px">[TIME]</td><td style="padding: 16px 20px; text-align: right; color: #D4FF3D">[FEE]</td></tr>
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 16px 20px">KES</td><td style="padding: 16px 20px">RWF</td><td style="padding: 16px 20px; font-family: 'Inter Tight', system-ui, sans-serif">Bank</td><td style="padding: 16px 20px">[TIME]</td><td style="padding: 16px 20px; text-align: right; color: #D4FF3D">[FEE]</td></tr>
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 16px 20px">USD</td><td style="padding: 16px 20px">KES</td><td style="padding: 16px 20px; font-family: 'Inter Tight', system-ui, sans-serif">Bank, mobile money</td><td style="padding: 16px 20px">[TIME]</td><td style="padding: 16px 20px; text-align: right; color: #D4FF3D">[FEE]</td></tr>
+<tr style="border-top: 1px solid rgba(244,244,240,.08)"><td style="padding: 16px 20px">KES</td><td style="padding: 16px 20px">[GLOBAL CCY]</td><td style="padding: 16px 20px; font-family: 'Inter Tight', system-ui, sans-serif">SWIFT</td><td style="padding: 16px 20px">[TIME]</td><td style="padding: 16px 20px; text-align: right; color: #D4FF3D">[FEE]</td></tr>
+</tbody>
+</table>
+</div>
+<div style="font-size: 14px; color: #80807A">FX margin on top of the mid-market rate: [MARGIN BY PLAN]. Shown before every transfer.</div>
+</div>
+</section>
+<section style="max-width: 1200px; margin: 0 auto; padding: 88px 24px">
+<div style="background: #18181C; border-radius: 28px; padding: clamp(32px, 5vw, 56px); display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 10px"><h2 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: clamp(1.3rem, 2.4vw, 1.8rem); font-weight: 400; line-height: 1.4">Moving large volumes?</h2><p style="margin: 0; font-size: 16px; color: #C9C9C2">Get volume pricing and a dedicated account manager.</p></div>
+<a href="MktCampaign.dc.html" style="background: #D4FF3D; color: #050507; text-decoration: none; padding: 16px 24px; border-radius: 12px; font-weight: 600">Talk to sales</a>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2300}}'>
+class Component extends DCLogic {
+renderVals() {
+const yearly = !!(this.state && this.state.yearly);
+return {
+monthlyBg: yearly ? 'transparent' : '#D4FF3D',
+monthlyFg: yearly ? '#C9C9C2' : '#050507',
+yearlyBg: yearly ? '#D4FF3D' : 'transparent',
+yearlyFg: yearly ? '#050507' : '#C9C9C2',
+businessPrice: yearly ? '[YEARLY PRICE]/yr' : '[MONTHLY PRICE]/mo',
+setMonthly: () => this.setState({ yearly: false }),
+setYearly: () => this.setState({ yearly: true })
+};
+}
+}
+</script>
+</body>
+</html>

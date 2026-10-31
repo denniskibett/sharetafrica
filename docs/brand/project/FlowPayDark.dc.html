@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet (dark) – Paybill and Till</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 2310px; height: 1100px; box-sizing: border-box; padding: 60px; background: #050507; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: row; gap: 80px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 40px; border-radius: 32px; background: {{ t.surf }}">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.2em; color: {{ t.muted }}">{{ t.label }} MODE</div>
+<div style="display: flex; gap: 40px">
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; justify-content: space-between"><h1 style="margin: 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 22px; font-weight: 400; line-height: 1.5">Pay</h1><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: {{ t.muted }}">KES [BALANCE]</span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<a href="#" style="height: 104px; border-radius: 20px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"></path><path d="M9 8h6"></path><path d="M9 12h6"></path></svg>Paybill</a>
+<a href="#" style="height: 104px; border-radius: 20px; background: {{ t.surf }}; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9l2-5h12l2 5"></path><path d="M4 9h16v11H4z"></path><path d="M9 20v-6h6v6"></path></svg>Till</a>
+<a href="FlowWithdraw.dc.html" style="height: 104px; border-radius: 20px; background: {{ t.surf }}; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"></rect><path d="M11 18h2"></path></svg>Phone</a>
+<a href="FlowWithdraw.dc.html" style="height: 104px; border-radius: 20px; background: {{ t.surf }}; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>Wakala</a>
+<a href="FlowTag.dc.html" style="height: 104px; border-radius: 20px; background: {{ t.surf }}; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px; line-height: 24px">@</span>Sharet tag</a>
+<a href="#" style="height: 104px; border-radius: 20px; background: {{ t.surf }}; text-decoration: none; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-size: 14px; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6"></path><path d="M5 10v8"></path><path d="M19 10v8"></path><path d="M12 10v8"></path><path d="M3 20h18"></path></svg>Bank</a>
+</div>
+<div style="font-size: 16px; font-weight: 600; margin-top: 6px">Saved</div>
+<div style="display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid {{ t.line }}"><span style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">KP</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px">KPLC Prepaid</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">PAYBILL [NUMBER]</span></span></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid {{ t.line }}"><span style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">MS</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px">Mama Shiku Stores</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">TILL [NUMBER]</span></span></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 0"><span style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 15px">@</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px">Amina W.</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">@amina</span></span></div>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">Pay bill</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="p-biz-{{ t.id }}" style="font-size: 13px; font-weight: 600">Business number</label><input id="p-biz-{{ t.id }}" value="888880" style="height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 1px solid {{ t.line }}; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; background: {{ t.okBg }}; color: {{ t.okTx }}; font-size: 14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>KPLC Prepaid · verified business</div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="p-acc-{{ t.id }}" style="font-size: 13px; font-weight: 600">Account number</label><input id="p-acc-{{ t.id }}" value="54 1029 3381" style="height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 2px solid {{ t.focus }}; background: {{ t.bg }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px"></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="p-amt-{{ t.id }}" style="font-size: 13px; font-weight: 600">Amount (KES)</label><input id="p-amt-{{ t.id }}" value="1,500" style="height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 1px solid {{ t.line }}; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px"></div>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px"><input type="checkbox" checked="" style="width: 20px; height: 20px; accent-color: #9CCB1F">Save this bill</label>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; justify-content: space-between; font-size: 14px; color: {{ t.muted }}"><span>Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[FEE]</span></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Continue</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">Buy goods · Till</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="p-till-{{ t.id }}" style="font-size: 13px; font-weight: 600">Till number</label><input id="p-till-{{ t.id }}" value="524107" style="height: 56px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 1px solid {{ t.line }}; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 17px"></div>
+<div style="display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; border: 1px solid {{ t.line }}"><span style="width: 44px; height: 44px; border-radius: 14px; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">MS</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Mama Shiku Stores</span><span style="font-size: 12px; color: {{ t.muted }}">Kasarani, Nairobi</span></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ t.okTx }}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 30px 0">
+<label for="p-tamt-{{ t.id }}" style="font-size: 13px; color: {{ t.muted }}">Amount</label>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px; color: {{ t.muted }}">KES</span><input id="p-tamt-{{ t.id }}" value="850" style="width: 120px; background: transparent; border: 0; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 46px; text-align: center; padding: 0"></div>
+</div>
+<button style="height: 44px; border-radius: 12px; border: 1px dashed {{ t.btn2Border }}; background: transparent; color: {{ t.muted }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px">Scan merchant QR instead</button>
+<div style="flex-grow: 1"></div>
+<a href="#" style="height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600">Continue</a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.scrim }}; color: {{ t.text }}; display: flex; flex-direction: column; justify-content: flex-end; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="background: {{ t.bg }}; border-radius: 28px 28px 0 0; padding: 14px 24px 30px; display: flex; flex-direction: column; gap: 16px">
+<div style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: {{ t.surf2 }}"></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><span style="font-size: 14px; color: {{ t.muted }}">Pay Mama Shiku Stores</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 30px">KES 850</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">TILL 524107 · FEE [FEE]</span></div>
+<div style="font-size: 14px; text-align: center; font-weight: 600">Enter your Sharet PIN</div>
+<div style="display: flex; justify-content: center; gap: 14px"><span style="width: 14px; height: 14px; border-radius: 50%; background: {{ t.text }}"></span><span style="width: 14px; height: 14px; border-radius: 50%; background: {{ t.text }}"></span><span style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid {{ t.surf2 }}; box-sizing: border-box"></span><span style="width: 14px; height: 14px; border-radius: 50%; border: 2px solid {{ t.surf2 }}; box-sizing: border-box"></span></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 22px">
+<button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">1</button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">2</button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">3</button>
+<button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">4</button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">5</button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">6</button>
+<button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">7</button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">8</button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">9</button>
+<button aria-label="Use fingerprint" style="height: 60px; border-radius: 16px; border: 0; background: transparent; color: {{ t.text }}; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 11v4"></path><path d="M8 13a4 4 0 0 1 8 0v2"></path><path d="M5 12a7 7 0 0 1 14 0v3"></path></svg></button><button style="height: 60px; border-radius: 16px; border: 0; background: {{ t.surf }}; color: {{ t.text }}; font: inherit">0</button><button aria-label="Delete" style="height: 60px; border-radius: 16px; border: 0; background: transparent; color: {{ t.text }}; font: inherit">⌫</button>
+</div>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+<div style="width: 96px; height: 96px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 14px {{ t.okBg }}"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></div>
+<h1 style="margin: 14px 0 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.5">Paid</h1>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 32px">KES 850</div>
+<div style="font-size: 14px; color: {{ t.muted }}">to Mama Shiku Stores</div>
+</div>
+<div style="border-radius: 18px; background: {{ t.surf }}; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Till</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">524107</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Reference</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[REFERENCE]</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Fee</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[FEE]</span></div>
+</div>
+<div style="display: flex; gap: 10px">
+<button style="flex: 1; height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600">Share receipt</button>
+<a href="MobHome.dc.html" style="flex: 1; height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">Done</a>
+</div>
+</div>
+
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2310,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = { id: 'l', label: 'LIGHT', bg: '#FFFFFF', surf: '#F4F4F0', surf2: '#E5E5DE', line: '#E5E5DE', text: '#111114', muted: '#5A5A55', focus: '#111114', btn2Border: '#D9D9D2', okBg: '#F3FFD0', okTx: '#3B5200', scrim: '#9A9A94' };
+const D = { id: 'd', label: 'DARK', bg: '#0A0A0C', surf: '#18181C', surf2: '#232328', line: 'rgba(244,244,240,.08)', text: '#F4F4F0', muted: '#C9C9C2', focus: '#D4FF3D', btn2Border: 'rgba(244,244,240,.16)', okBg: 'rgba(212,255,61,.14)', okTx: '#D4FF3D', scrim: '#000000' };
+return { themes: [D] };
+}
+}
+</script>
+</body>
+</html>

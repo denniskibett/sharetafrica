@@ -16,7 +16,7 @@
 @endphp
 <div {{ $attributes->merge(['class' => 'rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6']) }}>
   <div class="flex items-start justify-between gap-3">
-    <h4 class="text-2xl font-bold text-gray-800 dark:text-white/90 md:text-[28px] md:leading-9" x-text="{{ $text }}">—</h4>
+    <h4 @class(['font-bold text-gray-800 dark:text-white/90', 'text-2xl md:text-[28px] md:leading-9' => $format !== 'raw', 'text-lg leading-7 md:text-xl' => $format === 'raw']) x-text="{{ $text }}">—</h4>
     @if ($icon)
       <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $tones[$tone] ?? $tones['violet'] }}">
         <x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" />

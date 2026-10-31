@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet (dark) – Sharet tag</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:inherit}
+</style>
+</helmet>
+<div style="width: 1880px; height: 1100px; box-sizing: border-box; padding: 60px; background: #050507; font-family: 'Inter Tight', system-ui, sans-serif; display: flex; flex-direction: row; gap: 80px">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 16px; padding: 40px; border-radius: 32px; background: {{ t.surf }}">
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 14px; letter-spacing: 0.2em; color: {{ t.muted }}">{{ t.label }} MODE</div>
+<div style="display: flex; gap: 40px">
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="FlowPay.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">Pay a Sharet tag</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="t-q-{{ t.id }}" style="font-size: 13px; font-weight: 600">Tag</label><div style="display: flex; align-items: center; height: 56px; padding: 0 16px; border-radius: 14px; border: 2px solid {{ t.focus }}; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 18px; color: {{ t.muted }}">@</span><input id="t-q-{{ t.id }}" value="ami" style="flex-grow: 1; min-width: 0; background: transparent; border: 0; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 18px; padding: 0"></div></div>
+<div style="display: flex; flex-direction: column">
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid {{ t.line }}; text-decoration: none"><span style="width: 48px; height: 48px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">AW</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Amina Wanjiru</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: {{ t.muted }}">@amina · Nairobi</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ t.okTx }}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></a>
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid {{ t.line }}; text-decoration: none"><span style="width: 48px; height: 48px; border-radius: 50%; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">AK</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Amiri Kileo</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: {{ t.muted }}">@amiri.k · Arusha</span></span></a>
+<a href="#" style="display: flex; align-items: center; gap: 12px; padding: 12px 0; text-decoration: none"><span style="width: 48px; height: 48px; border-radius: 50%; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">AS</span><span style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Amina Shop</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px; color: {{ t.muted }}">@aminashop · Business</span></span></a>
+</div>
+<div style="flex-grow: 1"></div>
+<a href="#" style="display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 18px; background: {{ t.surf }}; text-decoration: none"><span style="width: 44px; height: 44px; border-radius: 12px; background: {{ t.bg }}; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h3v3h-3z"></path><path d="M20 14v7h-6"></path></svg></span><span style="flex-grow: 1; font-size: 15px; font-weight: 600">Scan a tag QR</span></a>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 18px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><span style="width: 40px; height: 40px; border-radius: 50%; background: #D4FF3D; color: #050507; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600">AW</span><span style="display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 600">Amina Wanjiru</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; color: {{ t.muted }}">@amina</span></span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 40px 0 10px">
+<label for="t-amt-{{ t.id }}" style="font-size: 13px; color: {{ t.muted }}">Amount</label>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 20px; color: {{ t.muted }}">KES</span><input id="t-amt-{{ t.id }}" value="1,200" style="width: 150px; background: transparent; border: 0; color: {{ t.text }}; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 50px; text-align: center; padding: 0"></div>
+<div style="font-size: 13px; color: {{ t.muted }}">Balance KES [BALANCE]</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px"><label for="t-note-{{ t.id }}" style="font-size: 13px; font-weight: 600">Note (optional)</label><input id="t-note-{{ t.id }}" value="Lunch on Friday" style="height: 52px; box-sizing: border-box; padding: 0 16px; border-radius: 14px; border: 1px solid {{ t.line }}; background: {{ t.surf }}; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px"></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; background: {{ t.okBg }}; color: {{ t.okTx }}; font-size: 14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3L4 14h7l-1 7 9-11h-7z"></path></svg>Sharet to Sharet · fee [FEE]</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; gap: 10px">
+<button style="flex: 1; height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600">Request</button>
+<a href="#" style="flex: 1; height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">Pay</a>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; align-items: center; gap: 18px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="align-self: stretch; display: flex; align-items: center; gap: 12px"><a href="#" aria-label="Back" style="width: 44px; height: 44px; border-radius: 14px; background: {{ t.surf }}; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></a><div style="font-size: 18px; font-weight: 600">My tag</div></div>
+<div style="width: 300px; box-sizing: border-box; border-radius: 28px; background: #D4FF3D; color: #050507; padding: 26px; display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 20px">
+<div style="width: 200px; height: 200px; border-radius: 18px; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+<svg width="164" height="164" viewBox="0 0 21 21" shape-rendering="crispEdges" aria-label="QR code for @juma" role="img"><rect x="0" y="0" width="7" height="7" fill="#050507"></rect><rect x="1" y="1" width="5" height="5" fill="#FFFFFF"></rect><rect x="2" y="2" width="3" height="3" fill="#050507"></rect><rect x="14" y="0" width="7" height="7" fill="#050507"></rect><rect x="15" y="1" width="5" height="5" fill="#FFFFFF"></rect><rect x="16" y="2" width="3" height="3" fill="#050507"></rect><rect x="0" y="14" width="7" height="7" fill="#050507"></rect><rect x="1" y="15" width="5" height="5" fill="#FFFFFF"></rect><rect x="2" y="16" width="3" height="3" fill="#050507"></rect><rect x="8" y="1" width="2" height="1" fill="#050507"></rect><rect x="11" y="2" width="1" height="3" fill="#050507"></rect><rect x="8" y="4" width="2" height="2" fill="#050507"></rect><rect x="9" y="8" width="3" height="1" fill="#050507"></rect><rect x="1" y="9" width="4" height="1" fill="#050507"></rect><rect x="14" y="9" width="2" height="3" fill="#050507"></rect><rect x="18" y="8" width="2" height="2" fill="#050507"></rect><rect x="8" y="11" width="1" height="4" fill="#050507"></rect><rect x="11" y="12" width="2" height="2" fill="#050507"></rect><rect x="16" y="13" width="4" height="1" fill="#050507"></rect><rect x="9" y="16" width="3" height="1" fill="#050507"></rect><rect x="14" y="15" width="1" height="5" fill="#050507"></rect><rect x="17" y="16" width="3" height="3" fill="#050507"></rect><rect x="10" y="18" width="2" height="2" fill="#050507"></rect><rect x="5" y="11" width="2" height="1" fill="#050507"></rect></svg>
+</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 26px">@juma</div>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">sharet.africa/@juma</div>
+</div>
+<p style="margin: 0; font-size: 15px; line-height: 1.55; color: {{ t.muted }}; text-align: center; max-width: 290px">Anyone on Sharet can pay you with your tag. No phone number needed.</p>
+<div style="flex-grow: 1"></div>
+<div style="align-self: stretch; display: flex; gap: 10px">
+<button style="flex: 1; height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600">Edit tag</button>
+<button style="flex: 1; height: 56px; border-radius: 16px; border: 0; background: {{ t.text }}; color: {{ t.bg }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600">Share</button>
+</div>
+</div>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; border-radius: 40px; overflow: hidden; background: {{ t.bg }}; color: {{ t.text }}; padding: 60px 24px 36px; display: flex; flex-direction: column; gap: 22px; box-shadow: 0 20px 50px rgba(17,17,20,.10)">
+<div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px">
+<svg width="200" height="70" viewBox="0 0 200 70" aria-hidden="true"><polygon points="0,0 120,0 136,15 120,30 0,30" fill="#D4FF3D"></polygon><polygon points="200,40 80,40 64,55 80,70 200,70" fill="{{ t.surf2 }}"></polygon></svg>
+<h1 style="margin: 14px 0 0; font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 24px; font-weight: 400; line-height: 1.5">Sent to @amina</h1>
+<div style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 32px">KES 1,200</div>
+<div style="font-size: 14px; color: {{ t.muted }}">“Lunch on Friday”</div>
+</div>
+<div style="border-radius: 18px; background: {{ t.surf }}; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">To</span><span>Amina Wanjiru</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: {{ t.muted }}">Reference</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">[REFERENCE]</span></div>
+</div>
+<div style="display: flex; gap: 10px">
+<button style="flex: 1; height: 56px; border-radius: 16px; border: 1px solid {{ t.btn2Border }}; background: transparent; color: {{ t.text }}; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600">Pay again</button>
+<a href="MobHome.dc.html" style="flex: 1; height: 56px; border-radius: 16px; background: #D4FF3D; color: #050507; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">Done</a>
+</div>
+</div>
+
+</div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1880,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const L = { id: 'l', label: 'LIGHT', bg: '#FFFFFF', surf: '#F4F4F0', surf2: '#E5E5DE', line: '#E5E5DE', text: '#111114', muted: '#5A5A55', focus: '#111114', btn2Border: '#D9D9D2', okBg: '#F3FFD0', okTx: '#3B5200' };
+const D = { id: 'd', label: 'DARK', bg: '#0A0A0C', surf: '#18181C', surf2: '#232328', line: 'rgba(244,244,240,.08)', text: '#F4F4F0', muted: '#C9C9C2', focus: '#D4FF3D', btn2Border: 'rgba(244,244,240,.16)', okBg: 'rgba(212,255,61,.14)', okTx: '#D4FF3D' };
+return { themes: [D] };
+}
+}
+</script>
+</body>
+</html>

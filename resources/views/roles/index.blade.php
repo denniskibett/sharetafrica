@@ -46,7 +46,11 @@
               <td class="whitespace-nowrap px-6 py-3" x-text="sharet.number(r.users)"></td>
               <td class="whitespace-nowrap px-6 py-3"><span :class="sharet.pill(r.protected ? 'neutral' : 'info')" x-text="r.protected ? 'Built-in' : 'Custom'"></span></td>
               <td class="whitespace-nowrap px-6 py-3 text-right">
-                <x-ui.button variant="secondary" class="!h-9" icon="pencil-square" @click="edit(r)">Edit</x-ui.button>
+                <x-ui.row-menu>
+                  <x-ui.row-menu-item icon="pencil-square" @click="edit(r)">Edit permissions</x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="users" x-bind:href="'{{ route('users.index') }}?role=' + r.name">People with this role</x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="trash" danger x-show="!r.protected" @click="edit(r, false); destroy()">Delete role</x-ui.row-menu-item>
+                </x-ui.row-menu>
               </td>
             </tr>
           </template>
@@ -112,10 +116,10 @@
       get filtered() { const q = this.search.toLowerCase(); return this.roles.filter(r => (r.label + r.description).toLowerCase().includes(q)); },
       match(p) { const q = this.permQuery.toLowerCase(); return !q || (p.label + p.name).toLowerCase().includes(q); },
       get visibleGroups() { return this.groups.filter(g => g.permissions.some(p => this.match(p))); },
-      edit(r) {
+      edit(r, open = true) {
         this.errors = {}; this.permQuery = '';
-        this.form = r ? { id: r.id, name: r.name, label: r.label, protected: r.protected, permissions: [...r.permissions] } : { id: null, name: '', label: '', protected: false, permissions: [] };
-        sharet.panel('role');
+        this.form = r ? { id: r.id, name: r.name, label: r.label, protected: r.protected, users: r.users, permissions: [...r.permissions] } : { id: null, name: '', label: '', protected: false, permissions: [] };
+        open && sharet.panel('role');
       },
       toggle(id) { const i = this.form.permissions.indexOf(id); i >= 0 ? this.form.permissions.splice(i, 1) : this.form.permissions.push(id); },
       groupOn(g) { return g.permissions.every(p => this.form.permissions.includes(p.id)); },
@@ -132,7 +136,8 @@
         this.busy = false;
       },
       async destroy() {
-        if (!await sharet.confirm({ title: `Delete ${this.form.label}?`, message: 'People with only this role lose the access it gave them.', tone: 'error', confirmText: 'Delete role' })) return;
+        if (!await sharet.confirm({ title: `Delete ${this.form.label}?`, message: 'People with only this role lose the access it gave them.', tone: 'error', confirmText: 'Delete role',
+          details: [['Role', this.form.label], ['People with it', String(this.form.users ?? 0)], ['Permissions', String(this.form.permissions.length)]] })) return;
         try { await sharet.send('DELETE', `${url}/${this.form.id}`); window.dispatchEvent(new CustomEvent('slide-over-close')); await this.load(); } catch (e) {}
       },
     };

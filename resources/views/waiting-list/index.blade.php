@@ -28,9 +28,13 @@
       </select>
     </x-slot:filters>
     <x-slot:actions>
-      <x-ui.button class="!h-9" icon="paper-airplane"
-          @click="sharet.confirm({ title: 'Invite ' + row.person.name + '?', message: 'We email ' + row.person.email + ' a link to choose their lane and finish setting up.', confirmText: 'Send invite', tone: 'info' })
-            .then(ok => ok && sharet.send('POST', '{{ url('admin/waiting-list') }}/' + row.id + '/invite').then(() => { remove(row.id); stats.waiting--; stats.invited++ }).catch(() => {}))">Invite</x-ui.button>
+      <x-ui.row-menu>
+        <x-ui.row-menu-item icon="paper-airplane"
+            @click="sharet.confirm({ title: 'Send an invite?', message: 'We email them a link to choose their lane and finish setting up.', confirmText: 'Send invite', tone: 'info',
+                      details: [['Name', row.person.name], ['Email', row.person.email], ['Phone', row.phone], ['Interested in', row.lane], ['Joined', row.joined]] })
+              .then(ok => ok && sharet.send('POST', '{{ url('admin/waiting-list') }}/' + row.id + '/invite').then(() => { remove(row.id); stats.waiting--; stats.invited++ }).catch(() => {}))">Invite</x-ui.row-menu-item>
+        <x-ui.row-menu-item icon="envelope" x-bind:href="'mailto:' + row.person.email">Email</x-ui.row-menu-item>
+      </x-ui.row-menu>
     </x-slot:actions>
     <x-slot:empty>Nobody is waiting right now.</x-slot:empty>
   </x-ui.table>

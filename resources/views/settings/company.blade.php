@@ -20,8 +20,17 @@
   <x-ui.stats :cols="3" class="mb-6">
     <x-ui.stat label="Business profile" value="d.progress.of ? Math.round(d.progress.done / d.progress.of * 100) + '% complete' : '—'" format="raw" icon="building-storefront" tone="lime" />
     <x-ui.stat label="Verification" value="d.verified ? 'Verified' : (d.exists ? 'In review' : 'Not started')" format="raw" icon="shield-check" tone="emerald" />
-    <x-ui.stat label="Directors" value="(d.company.directors || []).filter(x => x.name).length" icon="users" tone="sky" />
+    <x-ui.stat label="Your verification" value="d.owner?.bank_grade ? 'Bank grade' : (d.owner?.personal ? 'Basic' : 'No account')" format="raw" icon="identification" tone="sky" />
   </x-ui.stats>
+
+  <div x-show="!loading && !d.owner?.personal" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 sm:flex-row sm:items-center sm:justify-between">
+    <p><strong>You need a personal account first.</strong> Only account holders can register a business, and you are listed as its first director. Add your M-Pesa number to get one.</p>
+    <x-ui.button href="{{ route('profile.edit') }}#personal">Add my M-Pesa number</x-ui.button>
+  </div>
+  <div x-show="!loading && d.owner?.personal && !d.owner?.bank_grade" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100 sm:flex-row sm:items-center sm:justify-between">
+    <p>Your business can't be fully verified until <strong>your own bank-grade verification</strong> is done (ID photos, selfies and signature).</p>
+    <x-ui.button variant="secondary" href="{{ route('profile.edit') }}#verification">Finish my verification</x-ui.button>
+  </div>
 
   <form x-show="!loading" x-cloak @submit.prevent="save()" class="space-y-6">
     <x-ui.card title="Business" subtitle="As registered with the Business Registration Service (BRS).">
@@ -57,15 +66,15 @@
       </div>
     </x-ui.card>
 
-    <x-ui.card title="Directors and owners" subtitle="Everyone who owns 10% or more, and every director.">
+    <x-ui.card title="Directors and owners" subtitle="You are listed first as the account holder. Add every other director and anyone who owns 10% or more.">
       <div class="space-y-4">
         <template x-for="(row, i) in d.company.directors" :key="i">
           <div class="grid items-end gap-3 rounded-xl border border-gray-200 p-4 dark:border-gray-800 md:grid-cols-[1.4fr_1fr_1fr_110px_auto]">
-            <label class="text-sm"><span class="mb-1.5 block font-medium text-gray-700 dark:text-gray-300">Full name</span><input x-model="row.name" class="{{ $select }}"></label>
-            <label class="text-sm"><span class="mb-1.5 block font-medium text-gray-700 dark:text-gray-300">ID / passport</span><input x-model="row.id_number" class="{{ $select }}"></label>
+            <label class="text-sm"><span class="mb-1.5 flex items-center gap-2 font-medium text-gray-700 dark:text-gray-300">Full name <span x-show="row.self" :class="sharet.pill('dark')">You</span></span><input x-model="row.name" :readonly="row.self" class="{{ $select }} read-only:bg-gray-50 dark:read-only:bg-white/5"></label>
+            <label class="text-sm"><span class="mb-1.5 block font-medium text-gray-700 dark:text-gray-300">ID / passport</span><input x-model="row.id_number" :readonly="row.self" :placeholder="row.self ? 'From your verification' : ''" class="{{ $select }} read-only:bg-gray-50 dark:read-only:bg-white/5"></label>
             <label class="text-sm"><span class="mb-1.5 block font-medium text-gray-700 dark:text-gray-300">Role</span><input x-model="row.role" class="{{ $select }}" placeholder="Director"></label>
             <label class="text-sm"><span class="mb-1.5 block font-medium text-gray-700 dark:text-gray-300">Owns %</span><input type="number" min="0" max="100" x-model="row.shareholding" class="{{ $select }}"></label>
-            <button type="button" @click="d.company.directors.splice(i, 1)" class="h-11 rounded-lg px-3 text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10" aria-label="Remove"><x-heroicon-o-trash class="h-5 w-5" /></button>
+            <button type="button" x-show="!row.self" @click="d.company.directors.splice(i, 1)" class="h-11 rounded-lg px-3 text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10" aria-label="Remove"><x-heroicon-o-trash class="h-5 w-5" /></button>
           </div>
         </template>
         <x-ui.button variant="secondary" icon="plus" @click="d.company.directors.push({ name: '', id_number: '', role: 'Director', shareholding: '' })">Add person</x-ui.button>

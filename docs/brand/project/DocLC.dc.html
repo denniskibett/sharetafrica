@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sharet – Letter of credit</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&amp;family=Inter+Tight:wght@400;500;600&amp;family=Geist+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#111114}
+</style>
+</helmet>
+<div style="width: 794px; height: 1123px; box-sizing: border-box; background: #FFFFFF; color: #111114; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 11px; display: flex; flex-direction: column">
+<div style="background: #0A0A0C; color: #F4F4F0; padding: 26px 56px; display: flex; justify-content: space-between; align-items: center">
+<img src="../assets/0cdeb515754bd0687fd21718d180de14.svg" alt="Sharet Africa" style="width: 140px">
+<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span style="font-family: 'Boldonse', 'Archivo Black', sans-serif; font-size: 16px; line-height: 1.5">Irrevocable Documentary Credit</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; color: #D4FF3D">SUBJECT TO UCP 600 · MT700 FORMAT</span></div>
+</div>
+<div style="padding: 26px 56px 30px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<div style="padding: 12px; border-radius: 8px; background: #F4F4F0; display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: .12em; color: #5A5A55">:20: CREDIT NO.</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">SHR-LC-2026-0187</span></div>
+<div style="padding: 12px; border-radius: 8px; background: #F4F4F0; display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: .12em; color: #5A5A55">:31C: ISSUED</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">20 SEP 2026</span></div>
+<div style="padding: 12px; border-radius: 8px; background: #F4F4F0; display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: .12em; color: #5A5A55">:31D: EXPIRY</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px">15 DEC 2026 · CHINA</span></div>
+<div style="padding: 12px; border-radius: 8px; background: #D4FF3D; display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: .12em">:32B: AMOUNT</span><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">USD 38,500.00</span></div>
+</div>
+<div style="display: flex; flex-direction: column">
+<sc-for list="{{ fields }}" as="f" hint-placeholder-count="14">
+<div style="display: grid; grid-template-columns: 52px 170px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px solid #E5E5DE; line-height: 1.5">
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; color: #5A5A55">{{ f.tag }}</span>
+<span style="font-weight: 600">{{ f.label }}</span>
+<span style="font-family: 'Geist Mono', ui-monospace, monospace; white-space: pre-line">{{ f.value }}</span>
+</div>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; gap: 20px; align-items: flex-end">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 4px; color: #5A5A55; line-height: 1.6"><span style="font-family: 'Geist Mono', ui-monospace, monospace; font-size: 9px; letter-spacing: .12em">ISSUING BANK</span><span style="color: #111114; font-weight: 600">[PARTNER BANK NAME], Nairobi</span><span>Arranged and serviced by Sharet Africa Ltd · [LICENCE NO.]</span></div>
+<div style="width: 180px; display: flex; flex-direction: column; gap: 6px"><svg width="150" height="36" viewBox="0 0 150 36" aria-hidden="true"><path d="M4 26 C18 6 30 32 46 16 S74 30 90 12 S120 30 146 14" fill="none" stroke="#111114" stroke-width="1.6"></path></svg><span style="border-top: 1px solid #111114; padding-top: 6px; font-weight: 600">Authorised signatory</span></div>
+</div>
+<div style="display: flex; justify-content: space-between; color: #5A5A55; font-size: 10px; border-top: 1px solid #E5E5DE; padding-top: 12px"><span>Draft preview generated in the Sharet app. Not valid until issued and authenticated via SWIFT.</span><span style="font-family: 'Geist Mono', ui-monospace, monospace">PAGE 1/1</span></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":794,"height":1123}}'>
+class Component extends DCLogic {
+renderVals() {
+const f = (tag, label, value) => ({ tag, label, value });
+return { fields: [
+f(':40A:', 'Form of credit', 'IRREVOCABLE'),
+f(':50:', 'Applicant', 'KILIMO FRESH EXPORTS LTD\nPLOT 214 MOMBASA ROAD, NAIROBI, KENYA'),
+f(':59:', 'Beneficiary', 'GUANGZHOU HENGLI AGRI-MACHINERY CO., LTD\nNANSHA DISTRICT, GUANGZHOU, CHINA'),
+f(':41D:', 'Available with / by', 'ANY BANK BY NEGOTIATION'),
+f(':42C:', 'Drafts at', 'SIGHT'),
+f(':43P:', 'Partial shipments', 'NOT ALLOWED'),
+f(':43T:', 'Transhipment', 'ALLOWED'),
+f(':44E/F:', 'Port of loading / discharge', 'NANSHA, GUANGZHOU / MOMBASA, KENYA'),
+f(':44C:', 'Latest shipment', '15 NOV 2026'),
+f(':45A:', 'Goods', '1 UNIT AVOCADO GRADING AND PACKING LINE, MODEL HL-AG800, CIF MOMBASA INCOTERMS 2020'),
+f(':46A:', 'Documents required', '1. SIGNED COMMERCIAL INVOICE IN 3 ORIGINALS\n2. FULL SET CLEAN ON BOARD BILL OF LADING, FREIGHT PREPAID\n3. INSURANCE CERTIFICATE FOR 110% CIF VALUE\n4. CERTIFICATE OF ORIGIN'),
+f(':71B:', 'Charges', 'ALL CHARGES OUTSIDE KENYA FOR BENEFICIARY'),
+f(':48:', 'Presentation period', '21 DAYS AFTER SHIPMENT, WITHIN VALIDITY'),
+f(':49:', 'Confirmation', 'WITHOUT')
+] };
+}
+}
+</script>
+</body>
+</html>

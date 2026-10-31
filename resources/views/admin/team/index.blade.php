@@ -21,10 +21,12 @@
       ['key' => 'status', 'label' => 'Website', 'type' => 'pill'],
   ]">
     <x-slot:actions>
-      <x-ui.button variant="secondary" class="!h-9" icon="pencil-square" @click="sharet.panel('member', row)">Edit</x-ui.button>
-      <button type="button" title="Remove" class="rounded-lg p-2 text-gray-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10"
-              @click="sharet.confirm({ title: 'Remove ' + row.name + '?', message: 'They will no longer show on the website.', tone: 'error', confirmText: 'Remove' })
-                .then(ok => ok && sharet.send('DELETE', '{{ url('admin/team') }}/' + row.id).then(() => load()).catch(() => {}))"><x-heroicon-o-trash class="h-5 w-5" /></button>
+      <x-ui.row-menu>
+        <x-ui.row-menu-item icon="pencil-square" @click="sharet.panel('member', row)">Edit</x-ui.row-menu-item>
+        <x-ui.row-menu-item icon="trash" danger
+            @click="sharet.confirm({ title: 'Remove from the team?', message: 'They will no longer show on the website.', tone: 'error', confirmText: 'Remove', details: [['Name', row.name], ['Role', row.role]] })
+              .then(ok => ok && sharet.send('DELETE', '{{ url('admin/team') }}/' + row.id).then(() => load()).catch(() => {}))">Remove</x-ui.row-menu-item>
+      </x-ui.row-menu>
     </x-slot:actions>
     <x-slot:empty>No one on the team yet.</x-slot:empty>
   </x-ui.table>

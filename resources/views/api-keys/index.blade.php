@@ -7,7 +7,7 @@
     $input = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30';
 @endphp
 
-<div x-data="apiKeysPage(@js($keys), @js(url('api-keys')))">
+<div x-data="apiKeysPage('{{ url('api-keys') }}')">
   <div class="mb-6">
     <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">API keys</h1>
     <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
@@ -18,7 +18,7 @@
 
   {{-- Newly issued key: shown once --}}
   <div x-show="plain" x-cloak x-transition class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-    <p class="mb-3 text-sm font-medium text-emerald-800 dark:text-emerald-200">Copy this key now. It will not be shown again.</p>
+    <p class="mb-3 text-sm font-medium text-emerald-800 dark:text-emerald-200">Copy this key now. It will not be shown again. The examples below now use it, so you can test it straight away.</p>
     <div class="flex flex-col gap-2 sm:flex-row">
       <input readonly :value="plain" class="{{ $input }} font-mono" @focus="$event.target.select()">
       <button type="button" @click="sharet.copy(plain)" class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-700">
@@ -28,6 +28,8 @@
     </div>
   </div>
 
+  @include('api-keys.partials.guide')
+
   <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
     <div class="flex flex-col justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center">
       <div>
@@ -35,7 +37,7 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">Test keys work in the sandbox only. Live keys move real money.</p>
       </div>
       <button type="button" @click="creating = true; form = { name: '', environment: 'test' }; errors = {}"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 text-sm font-medium text-white hover:bg-violet-700">
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 text-sm font-medium text-white hover:bg-gray-800 dark:bg-[#D4FF3D] dark:text-gray-900">
         <x-heroicon-o-plus class="h-5 w-5" /> Add API key
       </button>
     </div>
@@ -66,9 +68,6 @@
                 </p>
                 <div class="flex items-center gap-2">
                   <code class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-xs text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400" x-text="k.masked"></code>
-                  <button type="button" @click="rotate(k)" title="Regenerate" class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
-                    <x-heroicon-o-arrow-path class="h-4 w-4" />
-                  </button>
                 </div>
               </td>
               <td class="whitespace-nowrap px-5 py-3">
@@ -80,14 +79,16 @@
               <td class="whitespace-nowrap px-5 py-3 text-gray-500 dark:text-gray-400" x-text="k.created_at"></td>
               <td class="whitespace-nowrap px-5 py-3 text-gray-500 dark:text-gray-400" x-text="k.last_used_at"></td>
               <td class="whitespace-nowrap px-5 py-3">
-                <button type="button" role="switch" :aria-checked="k.enabled" @click="toggle(k)" class="relative h-6 w-11 rounded-full transition" :class="k.enabled ? 'bg-violet-500' : 'bg-gray-200 dark:bg-white/10'">
+                <button type="button" role="switch" :aria-checked="k.enabled" @click="toggle(k)" class="relative h-6 w-11 rounded-full transition" :class="k.enabled ? 'bg-gray-900 dark:bg-[#D4FF3D]' : 'bg-gray-200 dark:bg-white/10'">
                   <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition" :class="k.enabled && 'translate-x-5'"></span>
                 </button>
               </td>
               <td class="whitespace-nowrap px-5 py-3">
-                <button type="button" @click="removing = k" title="Delete" class="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">
-                  <x-heroicon-o-trash class="h-5 w-5" />
-                </button>
+                <x-ui.row-menu>
+                  <x-ui.row-menu-item icon="arrow-path" @click="rotate(k)">Regenerate</x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="power" @click="toggle(k)" x-text="k.enabled ? 'Disable' : 'Enable'"></x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="trash" danger @click="destroy(k)">Delete</x-ui.row-menu-item>
+                </x-ui.row-menu>
               </td>
             </tr>
           </template>
@@ -107,42 +108,38 @@
       <p x-show="errors.name" class="mt-1 text-xs text-red-600" x-text="errors.name"></p>
       <fieldset class="mt-5">
         <legend class="mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300">Environment</legend>
-        <div class="grid grid-cols-2 gap-3">
-          <label class="flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 text-sm" :class="form.environment === 'test' ? 'border-violet-500 bg-violet-50 dark:bg-violet-500/10' : 'border-gray-300 dark:border-gray-700'">
-            <input type="radio" value="test" x-model="form.environment" class="text-violet-600"> Test (sandbox)
+        <div class="grid gap-3 sm:grid-cols-2">
+          <label class="flex cursor-pointer gap-3 rounded-xl border p-4 text-sm" :class="form.environment === 'test' ? 'border-gray-900 bg-gray-50 dark:border-[#D4FF3D] dark:bg-white/5' : 'border-gray-300 dark:border-gray-700'">
+            <input type="radio" value="test" x-model="form.environment" class="mt-0.5 text-gray-900">
+            <span><span class="block font-medium text-gray-900 dark:text-white">Test · sandbox</span><span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">Starts with sk_test_. Uses your M-Pesa Sandbox. No real money. Use it while you build.</span></span>
           </label>
-          <label class="flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 text-sm" :class="form.environment === 'live' ? 'border-rose-500 bg-rose-50 dark:bg-rose-500/10' : 'border-gray-300 dark:border-gray-700'">
-            <input type="radio" value="live" x-model="form.environment" class="text-rose-600"> Live
+          <label class="flex cursor-pointer gap-3 rounded-xl border p-4 text-sm" :class="form.environment === 'live' ? 'border-red-500 bg-red-50 dark:bg-red-500/10' : 'border-gray-300 dark:border-gray-700'">
+            <input type="radio" value="live" x-model="form.environment" class="mt-0.5 text-red-600">
+            <span><span class="block font-medium text-gray-900 dark:text-white">Live</span><span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">Starts with sk_live_. Uses your M-Pesa Live. Moves real money: only on your server.</span></span>
           </label>
         </div>
       </fieldset>
+      <div class="mt-5 rounded-xl bg-gray-50 p-4 text-xs text-gray-600 dark:bg-white/5 dark:text-gray-300">
+        <p class="font-medium text-gray-800 dark:text-white/90">What you are generating</p>
+        <p class="mt-1">A secret that lets <span class="font-medium" x-text="form.name || 'your system'"></span> call the Sharet API as your business, in <span x-text="form.environment === 'live' ? 'live mode (real money)' : 'the sandbox (test money)'"></span>. You will see it once; we only keep a fingerprint.</p>
+      </div>
       <div class="mt-8 flex gap-3">
         <button type="button" @click="creating = false" class="h-11 flex-1 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Close</button>
-        <button type="submit" :disabled="busy" class="h-11 flex-1 rounded-lg bg-violet-600 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50">Generate API key</button>
+        <button type="submit" :disabled="busy" class="h-11 flex-1 rounded-lg bg-gray-900 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 dark:bg-[#D4FF3D] dark:text-gray-900">Generate API key</button>
       </div>
     </form>
   </div>
 
   {{-- Delete confirm --}}
-  <div x-show="removing" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="removing = null">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="removing = null"></div>
-    <div x-show="removing" x-transition class="relative w-full max-w-[460px] rounded-3xl bg-white p-6 text-center dark:bg-gray-900 lg:p-8">
-      <h4 class="mb-2 text-xl font-semibold text-gray-800 dark:text-white/90" x-text="'Delete ' + (removing?.name || '') + '?'"></h4>
-      <p class="text-sm text-gray-500 dark:text-gray-400">Any system using this key stops working at once. This cannot be undone.</p>
-      <div class="mt-7 flex justify-center gap-3">
-        <button type="button" @click="removing = null" class="h-11 rounded-lg border border-gray-300 px-5 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">No, keep it</button>
-        <button type="button" @click="destroy()" class="h-11 rounded-lg bg-red-600 px-5 text-sm font-medium text-white hover:bg-red-700">Yes, delete</button>
-      </div>
-    </div>
-  </div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-  function apiKeysPage(keys, base) {
+  function apiKeysPage(base) {
     return {
-      keys, plain: null, creating: false, removing: null, form: {}, errors: {}, busy: false,
+      keys: [], plain: null,
+      async init() { this.keys = (await (await fetch(base, { headers: { Accept: 'application/json' } })).json()).keys; }, creating: false, removing: null, form: {}, errors: {}, busy: false,
       put(k) { this.keys = this.keys.some(x => x.id === k.id) ? this.keys.map(x => x.id === k.id ? k : x) : [k, ...this.keys]; },
       async create() {
         this.busy = true; this.errors = {};
@@ -152,12 +149,14 @@
       },
       async toggle(k) { try { const r = await sharet.send('PATCH', `${base}/${k.id}/toggle`); this.put(r.key); } catch (e) {} },
       async rotate(k) {
-        if (!confirm(`Regenerate "${k.name}"? The current key stops working immediately.`)) return;
+        if (!await sharet.confirm({ title: 'Regenerate this key?', message: 'The current key stops working immediately. Update your systems with the new one.', confirmText: 'Regenerate',
+          details: [['Name', k.name], ['Environment', k.environment], ['Key', k.masked], ['Last used', k.last_used_at]] })) return;
         try { const r = await sharet.send('POST', `${base}/${k.id}/rotate`); this.put(r.key); this.plain = r.plain; window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) {}
       },
-      async destroy() {
-        const k = this.removing;
-        try { await sharet.send('DELETE', `${base}/${k.id}`); this.keys = this.keys.filter(x => x.id !== k.id); this.removing = null; } catch (e) {}
+      async destroy(k) {
+        if (!await sharet.confirm({ title: 'Delete this key?', message: 'Requests using it get 401 from now on. This cannot be undone.', tone: 'error', confirmText: 'Delete',
+          details: [['Name', k.name], ['Environment', k.environment], ['Key', k.masked]] })) return;
+        try { await sharet.send('DELETE', `${base}/${k.id}`); this.keys = this.keys.filter(x => x.id !== k.id); } catch (e) {}
       },
     };
   }
