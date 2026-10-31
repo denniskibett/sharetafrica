@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/company.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet · Company — Real team, one ledger, one clear bet on Africa')
-@section('description', 'Sharet was founded in 2026 to make payments across East Africa cheaper, simpler, and more accessible. Named founding team, regulatory posture, and why now is the right time.')
+@section('title', 'Sharet Company — The team and the bet on Africa')
+@section('description', 'Sharet was founded in Nairobi in 2026 to make payments across East Africa cheaper and simpler. Meet the team and the companies we run.')
 
 @section('content')
 

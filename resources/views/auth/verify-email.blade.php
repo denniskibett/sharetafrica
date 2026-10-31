@@ -1,5 +1,6 @@
 {{-- resources/views/auth/verify-email.blade.php --}}
 @extends('home.layouts.app')
+@section('robots', 'noindex,follow')
 
 @section('title', 'Verify your email · Sharet Africa')
 

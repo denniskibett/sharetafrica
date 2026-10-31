@@ -1,5 +1,6 @@
 {{-- resources/views/auth/register.blade.php --}}
 @extends('home.layouts.app')
+@section('robots', 'noindex,follow')
 
 @section('title', 'Create account · Sharet Africa')
 @section('description', 'Create your Sharet account.')

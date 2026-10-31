@@ -54,6 +54,7 @@ Route::controller(HomeController::class)->group(function () {
 Route::post('/t', TrackController::class)->middleware('throttle:240,1')
     ->withoutMiddleware([\App\Http\Middleware\ApplyIntegrations::class])->name('track');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::view('/privacy', 'privacy')->name('privacy');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
 /*

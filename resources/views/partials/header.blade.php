@@ -8,7 +8,7 @@
       <x-heroicon-o-bars-3-bottom-left class="h-5 w-5" />
     </button>
 
-    <a href="{{ route('dashboard') }}" class="lg:hidden" aria-label="Dashboard"><x-brand :size="28" /></a>
+    <a href="{{ route('dashboard') }}" class="md:hidden" aria-label="Dashboard"><x-brand :size="28" /></a>
 
     {{-- Search the dashboard menu (same items as the sidebar). ⌘K / Ctrl+K focuses it; ↑ ↓ Enter to pick. --}}
     <div class="relative hidden sm:block sm:w-72 lg:w-96"

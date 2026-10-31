@@ -1,0 +1,14 @@
+{
+  "name": "Sharet Africa",
+  "short_name": "Sharet",
+  "description": "Cheaper payments across East Africa.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0C",
+  "theme_color": "#0A0A0C",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/images/logo/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

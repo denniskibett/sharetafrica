@@ -1,5 +1,6 @@
 {{-- resources/views/auth/login.blade.php --}}
 @extends('home.layouts.app')
+@section('robots', 'noindex,follow')
 
 @section('title', 'Sign in · Sharet Africa')
 @section('description', 'Sign in to your Sharet wallet.')

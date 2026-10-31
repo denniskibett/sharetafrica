@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/merchants.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet · Merchants — Accept from any rail. Settle anywhere.')
-@section('description', 'One Sharet wallet for every rail — M-PESA, MTN, Airtel, cards, banks. Receive payments from anyone, settle externally on demand. Onboard in a day. Cheaper than rail-to-rail hops.')
+@section('title', 'Sharet Merchants — Accept from any rail, settle anywhere')
+@section('description', 'One wallet for M-PESA, MTN, Airtel, cards and banks. Take payments from anyone in East Africa and settle out on demand. Onboard in a day.')
 
 @section('content')
 

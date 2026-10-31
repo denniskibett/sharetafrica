@@ -1,5 +1,6 @@
 {{-- resources/views/auth/reset-password.blade.php --}}
 @extends('home.layouts.app')
+@section('robots', 'noindex,follow')
 
 @section('title', 'Set a new password · Sharet Africa')
 

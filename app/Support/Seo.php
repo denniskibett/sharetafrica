@@ -17,6 +17,7 @@ class Seo
         'trade' => ['trade', 'Trade: pay suppliers in China, the UAE, India and Europe, receive from international buyers, embedded trade finance, settle locally in KES, TZS or UGX.', '0.8'],
         'developers' => ['developers', 'Developers: REST API for the Sharet ledger with idempotent writes, HMAC-signed webhooks, RFC 7807 errors and a free sandbox for Kenya, Tanzania and Uganda rails.', '0.8'],
         'company' => ['company', 'Company: founded 2026 in Nairobi, named team, regulatory posture and the companies Sharet runs.', '0.6'],
+        'privacy' => ['privacy', 'Privacy: what Sharet collects, why, who sees it, how long it is kept, and your rights under the Kenya Data Protection Act, 2019.', '0.3'],
         'contact' => ['contact', 'Contact: merchant onboarding, personal wallets, trade accounts, developer access, press and careers.', '0.6'],
     ];
 

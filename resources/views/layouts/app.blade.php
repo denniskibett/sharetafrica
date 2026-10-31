@@ -21,6 +21,8 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="alternate icon" href="{{ SystemHelper::faviconUrl() }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <meta name="robots" content="noindex">
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
 
@@ -321,7 +323,8 @@
 
 </head>
 
-{{-- sidebarToggle: collapsed sidebar on large screens (remembered), open drawer on phones (never remembered).
+{{-- sidebarToggle: from tablet width up the sidebar is a column beside the content (true = collapsed to icons; tablets
+     start collapsed, the choice is remembered on desktop). On phones it is a drawer (true = open).
      Content width: one standard width for every page; it grows when the sidebar is collapsed. --}}
 <body class="bg-gray-50 font-outfit text-gray-800 antialiased dark:bg-gray-900 dark:text-gray-200"
       x-data="{
@@ -330,10 +333,12 @@
           sidebarToggle: false,
       }"
       x-init="
-          sidebarToggle = window.innerWidth >= 1024 && collapsed;
+          sidebarToggle = window.innerWidth >= 768 && (collapsed || window.innerWidth < 1024);
           $watch('sidebarToggle', v => { if (window.innerWidth >= 1024) collapsed = v });
           $watch('darkMode', v => { document.documentElement.classList.toggle('dark', v); localStorage.setItem('darkMode', JSON.stringify(v)) });
       ">
+
+<a href="#main" class="sr-only z-[100003] rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
 
 <div class="flex h-screen overflow-hidden">
     @include('partials.sidebar')
@@ -341,7 +346,7 @@
     <div class="relative flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
         @include('partials.header')
 
-        <main class="flex-1">
+        <main id="main" class="flex-1" tabindex="-1">
             {{-- Full width on every screen: the content fills what the sidebar leaves, collapsed or not --}}
             <div class="w-full p-4 md:p-6 2xl:p-8">
                 @yield('content')

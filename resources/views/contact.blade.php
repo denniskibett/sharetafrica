@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/contact.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet · Contact — Start a project, press, careers')
-@section('description', 'Three contact channels for Sharet — merchant onboarding, personal wallets, trade accounts, developer access, press, and careers. Team replies within 48 working hours.')
+@section('title', 'Contact Sharet — Merchants, wallets, trade, press')
+@section('description', 'Get in touch about merchant onboarding, personal wallets, trade accounts, developer access, press or careers. We reply within 48 working hours.')
 
 @section('content')
 
@@ -222,18 +222,18 @@
 
       <div class="channel-grid">
         <article class="channel-card">
-          <span class="label">Press pack · ZIP</span>
+          <span class="label">Press pack</span>
           <h3>Brand assets.</h3>
-          <p>Sharet logo (SVG, PNG), founder portraits, office imagery, a one-liner, and a 600-word boilerplate. Updated quarterly.</p>
-          <a class="channel-line" href="#">Download press pack ↓</a>
-          <span class="mono" style="color: var(--fg-mute);">Last updated · Sep 2026</span>
+          <p>Sharet logos (SVG, PNG), team photos, a one-liner and a short boilerplate. Sent by email on request.</p>
+          <a class="channel-line" href="mailto:press@sharet.africa?subject=Press%20pack%20request">Request the press pack →</a>
+          <span class="mono" style="color: var(--fg-mute);">press@sharet.africa</span>
         </article>
         <article class="channel-card">
-          <span class="label">Bio · founders</span>
-          <h3>Founder bios.</h3>
-          <p>Short and long-form bios for the founding team, available in English and Swahili. Quotation rights granted on request.</p>
-          <a class="channel-line" href="#">Read founder bios →</a>
-          <span class="mono" style="color: var(--fg-mute);">EN · SW · last reviewed Sep 2026</span>
+          <span class="label">Team</span>
+          <h3>Who builds Sharet.</h3>
+          <p>Names, roles and photos of the team. Longer bios and quotes for articles on request.</p>
+          <a class="channel-line" href="{{ route('company') }}#team">Meet the team →</a>
+          <span class="mono" style="color: var(--fg-mute);">sharet.africa/company</span>
         </article>
         <article class="channel-card">
           <span class="label">Commentary</span>

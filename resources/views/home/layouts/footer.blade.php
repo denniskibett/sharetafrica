@@ -39,9 +39,9 @@
     <div class="footer-bottom">
       <span>© 2026 Sharet Africa · Nairobi HQ · regional by appointment</span>
       <div class="footer-meta-links">
-        <a href="#">Privacy</a>
-        <a href="#">Imprint</a>
-        <a href="#">Sitemap</a>
+        <a href="{{ route('privacy') }}">Privacy</a>
+        <a href="{{ route('company') }}">Company details</a>
+        <a href="{{ route('sitemap') }}">Sitemap</a>
       </div>
     </div>
   </div>

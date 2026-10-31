@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/personal.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet · Personal — Send to anyone in East Africa. Cheaper. No signup required on their side.')
-@section('description', 'Send money to anyone in East Africa — M-PESA, MTN, Airtel, Vodacom, or bank — from one Sharet wallet. Zero internal fees. Recipient never needs to sign up. Worked cost comparison inside.')
+@section('title', 'Sharet Personal — Send money anywhere in East Africa')
+@section('description', 'Send to M-PESA, MTN, Airtel, Vodacom or a bank from one Sharet wallet. Zero internal fees, and the person you pay never needs to sign up.')
 
 @section('content')
 

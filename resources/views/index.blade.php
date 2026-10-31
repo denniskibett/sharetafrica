@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/index.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet Africa — Cheaper payments across East Africa. Any rail. No signup required on the other side.')
-@section('description', 'Send money to anyone in East Africa — M-PESA, MTN, Airtel, Vodacom, or bank — from one Sharet wallet. Internal transfers are free. External payments cost less. And the person you\'re paying never has to sign up for anything.')
+@section('title', 'Sharet Africa — Cheaper payments across East Africa')
+@section('description', 'Send money to anyone in East Africa on M-PESA, MTN, Airtel or bank from one Sharet wallet. Free internal transfers; the person you pay never signs up.')
 
 @section('content')
 
@@ -382,6 +382,21 @@
         </p>
       </div>
 
+      {{-- Latest blog posts (Website › Blog); the three standing notes show until the first post is published --}}
+      @php $latestPosts = \App\Models\Post::published()->latest('published_at')->take(3)->get(); @endphp
+      @if ($latestPosts->isNotEmpty())
+      <div class="journal-grid">
+        @foreach ($latestPosts as $post)
+          <article class="journal-card">
+            @if ($post->cover_url)<div class="j-img"><img loading="lazy" decoding="async" src="{{ $post->cover_url }}" alt="" /></div>@endif
+            <div class="j-meta"><span>Blog</span><span aria-hidden="true">·</span><span>{{ $post->published_at->format('d M Y') }}</span></div>
+            <h3>{{ $post->title }}</h3>
+            <p>{{ $post->excerpt }}</p>
+            <a class="btn btn--ghost btn--sm" href="{{ route('blog.show', $post->slug) }}">Read note</a>
+          </article>
+        @endforeach
+      </div>
+      @else
       <div class="journal-grid">
         <article class="journal-card">
           <div class="j-img">
@@ -390,7 +405,7 @@
           <div class="j-meta"><span>Ledger</span><span aria-hidden="true">·</span><span>04 Oct 2026</span></div>
           <h3>Why the recipient never needs an account.</h3>
           <p>How Sharet routes a payment to a phone number that isn't on our system — and why that is the whole point of the design.</p>
-          <a class="btn btn--ghost btn--sm" href="#">Read note</a>
+          <a class="btn btn--ghost btn--sm" href="{{ route('blog.index') }}">Read the blog</a>
         </article>
 
         <article class="journal-card">
@@ -400,7 +415,7 @@
           <div class="j-meta"><span>Treasury</span><span aria-hidden="true">·</span><span>22 Sep 2026</span></div>
           <h3>Liquidity pools, not cross-border hops.</h3>
           <p>Why Sharet maintains local settlement positions in each market instead of moving every customer's funds across borders per transaction.</p>
-          <a class="btn btn--ghost btn--sm" href="#">Read note</a>
+          <a class="btn btn--ghost btn--sm" href="{{ route('blog.index') }}">Read the blog</a>
         </article>
 
         <article class="journal-card">
@@ -410,9 +425,10 @@
           <div class="j-meta"><span>Trade</span><span aria-hidden="true">·</span><span>09 Aug 2026</span></div>
           <h3>The Mombasa–Dubai corridor in numbers.</h3>
           <p>What we learned building settlement rails for importers paying suppliers abroad — and why the fee structure matters more than the FX rate.</p>
-          <a class="btn btn--ghost btn--sm" href="#">Read note</a>
+          <a class="btn btn--ghost btn--sm" href="{{ route('blog.index') }}">Read the blog</a>
         </article>
       </div>
+      @endif
     </div>
   </section>
 

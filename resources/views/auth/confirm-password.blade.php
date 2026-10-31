@@ -1,5 +1,6 @@
 {{-- resources/views/auth/confirm-password.blade.php --}}
 @extends('home.layouts.app')
+@section('robots', 'noindex,follow')
 
 @section('title', 'Confirm password · Sharet Africa')
 

@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/trade.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet · Trade — Pay abroad. Get paid from abroad. Finance the gap. Settle locally.')
-@section('description', 'Sharet sits on both sides of the African trade corridor — payments, FX, settlement, and embedded trade finance. Pay suppliers in China, the UAE, India, and Europe. Receive from international buyers. Settle locally in KES, TZS, or UGX. Order now, pay later — we carry the credit gap.')
+@section('title', 'Sharet Trade — Pay suppliers abroad, settle locally')
+@section('description', 'Pay suppliers in China, the UAE, India and Europe, get paid by buyers abroad, finance the gap, and settle in KES, TZS or UGX.')
 
 @section('content')
 

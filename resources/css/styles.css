@@ -723,6 +723,7 @@ p:last-child { margin-bottom: 0; }
   grid-template-columns: repeat(12, 1fr);
   gap: var(--space-5);
 }
+.cap-card--third { grid-column: span 4; } /* three per row: the six companies sit in two rows */
 .cap-card {
   background: var(--bg-card);
   border: 1px solid var(--rule);
@@ -1234,7 +1235,7 @@ p:last-child { margin-bottom: 0; }
   .work-item--md, .work-item--sm { grid-column: span 3; }
   .cap-bento { grid-template-columns: repeat(6, 1fr); }
   .cap-card--wide, .cap-card--tall { grid-column: span 6; }
-  .cap-card--std { grid-column: span 3; }
+  .cap-card--std, .cap-card--third { grid-column: span 3; }
   .cap-card--tall { grid-row: auto; aspect-ratio: 16 / 10; }
   .process-grid { grid-template-columns: repeat(2, 1fr); }
   .split, .split--reverse { grid-template-columns: 1fr; }
@@ -1262,7 +1263,7 @@ p:last-child { margin-bottom: 0; }
   .work-grid { grid-template-columns: 1fr; }
   .work-item--xl, .work-item--lg, .work-item--md, .work-item--sm { grid-column: span 1; }
   .cap-bento { grid-template-columns: 1fr; }
-  .cap-card--wide, .cap-card--std, .cap-card--tall { grid-column: span 1; }
+  .cap-card--wide, .cap-card--std, .cap-card--tall, .cap-card--third { grid-column: span 1; }
   .process-grid { grid-template-columns: 1fr; }
   .team-grid { grid-template-columns: 1fr; }
   .awards-strip { grid-template-columns: 1fr; }
@@ -1336,3 +1337,14 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; pointer-events: none
 .article-body pre { background: rgba(127,127,127,.12); border-radius: 10px; padding: 1em; overflow-x: auto; font-size: .9rem; }
 .article-body img { max-width: 100%; border-radius: 12px; }
 .article-body a { color: inherit; text-decoration: underline; }
+
+/* Blog list hero: shorter than the page heroes */
+.hero--compact { padding-block: var(--space-8) var(--space-6); }
+
+/* Small screens: wide API tables and code samples scroll inside their box instead of widening the page */
+.split-text, .split-img { min-width: 0; }
+.code-block { max-width: 100%; overflow-x: auto; }
+@media (max-width: 760px) {
+  .spec-table { display: block; max-width: 100%; overflow-x: auto; }
+}
+.section-head > * { min-width: 0; overflow-wrap: anywhere; }

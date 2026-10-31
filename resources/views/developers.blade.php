@@ -1,8 +1,8 @@
 {{-- resources/views/home/pages/developers.blade.php --}}
 @extends('home.layouts.app')
 
-@section('title', 'Sharet · Developers — API spec, sandbox, and the Sharet ledger')
-@section('description', 'REST API for the Sharet ledger. Idempotent writes, HMAC-signed webhooks, RFC 7807 errors. Base URL, auth model, rate limits, and a free sandbox for Kenya, Tanzania, and Uganda rails.')
+@section('title', 'Sharet Developers — API, sandbox and the Sharet ledger')
+@section('description', 'REST API for the Sharet ledger: API keys, idempotent writes, signed webhooks, RFC 7807 errors and a free sandbox for Kenya, Tanzania and Uganda.')
 
 @push('head')
 <style>
@@ -143,15 +143,15 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
         <tbody>
           <tr><td>Base URL</td><td>https://api.sharet.africa/v1</td></tr>
           <tr><td>Sandbox URL</td><td>https://sandbox.api.sharet.africa/v1</td></tr>
-          <tr><td>Auth</td><td>Bearer JWT (short-lived, 15 min) + HMAC-SHA256 signed request body</td></tr>
+          <tr><td>Auth</td><td>Bearer API key: <code>sk_test_…</code> (sandbox) or <code>sk_live_…</code>, created in Dashboard › API keys</td></tr>
           <tr><td>Idempotency</td><td>Required on all POST/PUT. Header: <code>Idempotency-Key</code>. 24-hour window.</td></tr>
           <tr><td>Content-Type</td><td><code>application/json</code></td></tr>
-          <tr><td>Rate limits</td><td>100 req/s standard · 1,000 req/s on Tier 03. Headers: <code>X-RateLimit-Remaining</code>.</td></tr>
+          <tr><td>Rate limits</td><td>60 requests a minute per key today; higher limits on request. Headers: <code>X-RateLimit-Remaining</code>.</td></tr>
           <tr><td>Errors</td><td>RFC 7807 <code>problem+json</code></td></tr>
           <tr><td>Webhooks</td><td>HMAC-SHA256 signed · retried 24h with exponential backoff</td></tr>
           <tr><td>SLA</td><td>99.9% uptime target (contractual on Tier 03)</td></tr>
-          <tr><td>Status page</td><td><a href="#" style="color:var(--lime)">status.sharet.africa</a></td></tr>
-          <tr><td>OpenAPI spec</td><td><a href="#" style="color:var(--lime)">/openapi/v1.yaml</a></td></tr>
+          <tr><td>Status</td><td>Status page coming soon. Incidents are emailed to developers with live keys.</td></tr>
+          <tr><td>OpenAPI spec</td><td><a href="{{ route('contact') }}" style="color:var(--lime)">On request while the API is in sandbox</a></td></tr>
         </tbody>
       </table>
     </div>
@@ -303,7 +303,7 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
       </div>
 
       <div class="center-row" style="margin-top: var(--space-7); justify-content: center;">
-        <a class="btn btn--ghost btn--lg" href="#">Read the OpenAPI spec
+        <a class="btn btn--ghost btn--lg" href="{{ route('register') }}">Get a sandbox key
           <svg class="arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
       </div>
