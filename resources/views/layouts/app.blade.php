@@ -331,7 +331,7 @@
 @include('partials.customer.topbar')
 <main id="main" tabindex="-1">
     {{-- A personal app, not a back office: no sidebar, full width; room for the tab bar on phones --}}
-    <div class="w-full px-4 pb-28 pt-[max(env(safe-area-inset-top),20px)] md:px-6 md:pb-12 md:pt-8 2xl:px-8">
+    <div class="w-full px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-8 2xl:px-8">
         @yield('content')
         {{ $slot ?? '' }}
     </div>

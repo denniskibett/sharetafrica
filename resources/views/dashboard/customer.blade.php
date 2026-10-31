@@ -16,11 +16,6 @@
      }"
      x-init="load()"
      @wallet-changed.window="load()">
-  {{-- Phones have no top bar: a short hello with the @name people send to --}}
-  <div class="md:hidden">
-    <p class="text-xl font-semibold">Hi, {{ \Illuminate\Support\Str::before(trim($user->name), ' ') ?: $user->name }}</p>
-    <p class="text-sm text-app-muted">{{ '@'.$handle }}</p>
-  </div>
 
   @unless ($verified)
     <a href="{{ route('profile.edit') }}#verification" class="flex items-center gap-4 rounded-2xl border border-app-accent/40 bg-app-panel p-4 hover:border-app-accent">
