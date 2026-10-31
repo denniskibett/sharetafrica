@@ -22,9 +22,11 @@
 set -euo pipefail
 
 HOST="${DEPLOY_HOST:-root@185.113.249.146}"
-SITE=/home/sharet.africa
+# A staging site: DEPLOY_SITE=/home/v2.sharet.africa DEPLOY_OWNER=<its user> DEPLOY_URL=https://v2.sharet.africa
+SITE="${DEPLOY_SITE:-/home/sharet.africa}"
 LIVE=$SITE/public_html
-OWNER=share6158
+OWNER="${DEPLOY_OWNER:-share6158}"
+URL="${DEPLOY_URL:-https://sharet.africa}"
 PHP=/usr/local/lsws/lsphp83/bin/php
 STAMP=$(date +%Y%m%d-%H%M%S)
 RELEASE=$SITE/releases/$STAMP
@@ -105,7 +107,7 @@ say "6. Check the site answers"
 if [ "$DRY" = 0 ]; then
   failed=0
   for path in / /merchants /developers /company /contact /login /sitemap.xml /llms.txt; do
-    code=$(curl -s -o /dev/null -w '%{http_code}' "https://sharet.africa$path")
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
     echo "  $code  $path"
     [ "$code" = 200 ] || failed=1
   done
