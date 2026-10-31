@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use Bavix\Wallet\Interfaces\Wallet;
+use Bavix\Wallet\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
-class Company extends Model
+class Company extends Model implements Wallet
 {
     use HasFactory, SoftDeletes;
+    use HasWallet; // company wallet: merchant/business balance (bavix)
 
     /**
      * Mass assignable attributes.

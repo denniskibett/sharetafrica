@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ SystemHelper::appName() }} | {{ ucfirst(request()->segment(1) ?? 'Dashboard') }}</title>
+    <title>@yield('title', \Illuminate\Support\Str::headline(request()->segment(1) ?? 'Dashboard')) · {{ SystemHelper::appName() }}</title>
 
     {{-- Dynamic Meta --}}
     @if(SystemHelper::metaDescription())
@@ -343,6 +343,21 @@
         </main>
     </div>
 </div>
+
+{{-- Toasts from sharet.toast() / sharet.send() --}}
+<div x-data="{ toasts: [] }"
+     @toast.window="const t = { id: Date.now() + Math.random(), ...$event.detail }; toasts.push(t); setTimeout(() => toasts = toasts.filter(x => x.id !== t.id), 4500)"
+     class="pointer-events-none fixed bottom-4 right-4 z-[100000] flex w-[min(380px,calc(100vw-2rem))] flex-col gap-2" aria-live="polite">
+    <template x-for="t in toasts" :key="t.id">
+        <div x-transition class="pointer-events-auto flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-lg"
+             :class="t.type === 'error'
+                ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-500/30 dark:bg-red-950 dark:text-red-200'
+                : 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950 dark:text-emerald-200'">
+            <span x-text="t.message"></span>
+        </div>
+    </template>
+</div>
+@stack('scripts')
 
 </body>
 </html>

@@ -40,15 +40,6 @@ class SystemHelper
                         'session_timeout' => 30,
                         'password_expiry' => 90,
                     ],
-                    'integrations' => [
-                        'google_analytics' => '',
-                        'google_maps_key' => '',
-                        'mail_driver' => 'smtp',
-                        'mail_host' => '',
-                        'mail_port' => '587',
-                        'mail_username' => '',
-                        'mail_password' => '',
-                    ],
                     'backup' => [
                         'auto_backup' => true,
                         'backup_frequency' => 'daily',
@@ -383,6 +374,7 @@ class SystemHelper
     public static function currencySymbol() { return self::get('currency_symbol', 'KSh'); }
     public static function customCss() { return self::get('custom_css'); }
     public static function customJs() { return self::get('custom_js'); }
-    public static function googleAnalyticsId() { return config('services.google.analytics_id') ?? self::get('settings.integrations.google_analytics'); }
+    // Keys live in Integrations (encrypted), not in system settings
+    public static function googleAnalyticsId() { return config('services.google.analytics_id') ?? \App\Services\Integrations::credentials('google')['analytics_id'] ?? null; }
     public static function twoFactorAuthEnabled() { return (bool) self::get('settings.security.two_factor_auth', false); }
 }

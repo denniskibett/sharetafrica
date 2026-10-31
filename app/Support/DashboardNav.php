@@ -17,7 +17,7 @@ class DashboardNav
     public const ADMIN = ['admin', 'super_admin'];
 
     /**
-     * label, route, icon (heroicon outline name), tone (sidebar colour), roles (null = everyone), active (route patterns)
+     * label, route, icon (heroicon outline name), tone (sidebar colour), roles (null = everyone), can (Spatie permission), company (non-admins need a company), active (route patterns)
      */
     protected static function groups(): array
     {
@@ -46,6 +46,8 @@ class DashboardNav
                     ['label' => 'Settlements', 'route' => 'merchant.settle', 'icon' => 'building-library', 'tone' => 'sky'],
                     ['label' => 'QR codes', 'route' => 'merchant.qr', 'icon' => 'qr-code', 'tone' => 'amber'],
                     ['label' => 'Reconciliation', 'route' => 'merchant.reconcile', 'icon' => 'scale', 'tone' => 'indigo'],
+                    ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
+                    ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'api_keys.manage'],
                 ],
             ],
             [
@@ -56,13 +58,15 @@ class DashboardNav
                     ['label' => 'Pay suppliers', 'route' => 'business.pay', 'icon' => 'paper-airplane', 'tone' => 'emerald'],
                     ['label' => 'Trade finance', 'route' => 'business.trade-finance', 'icon' => 'globe-europe-africa', 'tone' => 'amber'],
                     ['label' => 'Treasury', 'route' => 'business.treasury', 'icon' => 'building-library', 'tone' => 'indigo'],
+                    ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
+                    ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'api_keys.manage'],
                 ],
             ],
             [
                 'title' => 'Developers',
                 'roles' => ['techie'],
                 'items' => [
-                    ['label' => 'API keys', 'route' => 'developer.api-keys.index', 'icon' => 'key', 'tone' => 'amber'],
+                    ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'amber', 'can' => 'api_keys.manage'],
                     ['label' => 'Webhooks', 'route' => 'developer.webhooks.index', 'icon' => 'bolt', 'tone' => 'violet'],
                     ['label' => 'Request logs', 'route' => 'developer.logs', 'icon' => 'command-line', 'tone' => 'slate'],
                     ['label' => 'Sandbox', 'route' => 'developer.sandbox', 'icon' => 'beaker', 'tone' => 'teal'],
@@ -84,9 +88,9 @@ class DashboardNav
                 'roles' => self::ADMIN,
                 'items' => [
                     ['label' => 'Waiting list', 'route' => 'admin.waiting_list', 'icon' => 'queue-list', 'tone' => 'amber'],
-                    ['label' => 'Integrations', 'route' => 'admin.integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet'],
-                    ['label' => 'API keys', 'route' => 'admin.api-keys.index', 'icon' => 'key', 'tone' => 'orange'],
-                    ['label' => 'Roles & permissions', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'tone' => 'emerald'],
+                    ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
+                    ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'api_keys.manage'],
+                    ['label' => 'Roles & permissions', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'tone' => 'emerald', 'can' => 'roles.manage'],
                     ['label' => 'System settings', 'route' => 'admin.system.index', 'icon' => 'adjustments-horizontal', 'tone' => 'slate'],
                 ],
             ],
@@ -113,7 +117,8 @@ class DashboardNav
 
             $items = [];
             foreach ($group['items'] as $item) {
-                if (! self::allowed($user, $item['roles'] ?? null)) {
+                if (! self::allowed($user, $item['roles'] ?? null) || (isset($item['can']) && ! $user?->can($item['can']))
+                    || (! empty($item['company']) && ! $user?->company_id && ! $user?->hasAnyRole(self::ADMIN))) {
                     continue;
                 }
                 $ready = Route::has($item['route']);

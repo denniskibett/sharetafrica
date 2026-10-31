@@ -1,5 +1,6 @@
 {{-- Role home: greeting + the role's tools from DashboardNav (same icons/colours as the sidebar).
-     Expects $title (page heading), $groups (DashboardNav group titles to show), optional $intro. --}}
+     Expects $title (page heading), $groups (DashboardNav group titles to show), optional $intro,
+     optional $walletOwner (User or Company with a bavix wallet) to show its balance. --}}
 @php
     $tones = [
         'violet'  => 'bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300',
@@ -23,6 +24,18 @@
     @isset($intro)<p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">{{ $intro }}</p>@endisset
   </div>
 </div>
+
+@isset($walletOwner)
+  @php $wallet = $walletOwner->wallet; @endphp
+  <div class="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div class="relative overflow-hidden rounded-2xl bg-gray-900 p-6 text-white dark:bg-white/[0.06]">
+      <div class="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-[#D4FF3D]/20"></div>
+      <p class="text-sm text-white/70">{{ $walletOwner instanceof \App\Models\Company ? $walletOwner->name.' balance' : 'Wallet balance' }}</p>
+      <p class="mt-2 text-3xl font-semibold tracking-tight">KES {{ number_format((float) $wallet->balanceFloat, 2) }}</p>
+      <p class="mt-3 text-xs text-white/60">{{ $wallet->exists ? 'Updated '.$wallet->updated_at->diffForHumans() : 'No money has moved yet.' }}</p>
+    </div>
+  </div>
+@endisset
 
 @foreach ($sections as $section)
   <h2 class="mb-3 mt-8 text-xs font-semibold uppercase tracking-wider text-gray-400 first:mt-0 dark:text-gray-500">{{ $section['title'] }}</h2>

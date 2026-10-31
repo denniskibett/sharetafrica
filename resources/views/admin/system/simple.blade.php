@@ -886,24 +886,10 @@
                     </div>
                 </div>
 
-                <!-- Google Analytics -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Google Analytics ID
-                    </label>
-                    <input type="text" name="google_analytics" 
-                           value="{{ old('google_analytics', $system->settings['integrations']['google_analytics'] ?? '') }}"
-                           class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-800 dark:text-gray-200">
-                </div>
-
-                <!-- Google Maps -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Google Maps API Key
-                    </label>
-                    <input type="text" name="google_maps_key" 
-                           value="{{ old('google_maps_key', $system->settings['integrations']['google_maps_key'] ?? '') }}"
-                           class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-800 dark:text-gray-200">
+                {{-- Keys moved to Integrations (encrypted, never echoed back) --}}
+                <div class="rounded-lg border border-violet-200 bg-violet-50 p-4 text-sm text-violet-800 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
+                    Email (SMTP), Google, M-Pesa and SMS keys are now set on the
+                    <a href="{{ route('integrations.index') }}" class="font-semibold underline">Integrations</a> page, where they are stored encrypted.
                 </div>
 
                 <!-- Custom CSS & JS -->

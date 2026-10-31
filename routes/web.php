@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OnboardingController;
@@ -203,6 +206,55 @@ Route::middleware([
         return view('dashboard.ops');
     })->name('dashboard.ops');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Integrations (M-Pesa, SMS, email… per company, platform defaults for admins)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:integrations.manage'])
+    ->prefix('integrations')->name('integrations.')->controller(IntegrationController::class)
+    ->group(function () {
+        $provider = implode('|', array_keys(config('integrations')));
+        Route::get('/', 'index')->name('index');
+        Route::put('/{provider}', 'update')->name('update')->where('provider', $provider);
+        Route::patch('/{provider}/toggle', 'toggle')->name('toggle')->where('provider', $provider);
+        Route::post('/{provider}/test', 'test')->name('test')->where('provider', $provider);
+        Route::delete('/{provider}', 'destroy')->name('destroy')->where('provider', $provider);
+    });
+
+/*
+|--------------------------------------------------------------------------
+| API keys for the Sharet API
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:api_keys.manage'])
+    ->prefix('api-keys')->name('api-keys.')->controller(ApiKeyController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::patch('/{id}/toggle', 'toggle')->name('toggle')->whereNumber('id');
+        Route::post('/{id}/rotate', 'rotate')->name('rotate')->whereNumber('id');
+        Route::delete('/{id}', 'destroy')->name('destroy')->whereNumber('id');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Roles & permissions (Spatie)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:roles.manage'])
+    ->prefix('admin/roles')->name('admin.roles.')->controller(RoleController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{role}/data', 'getRole')->name('data');
+        Route::put('/{role}', 'update')->name('update');
+        Route::delete('/{role}', 'destroy')->name('destroy');
+    });
 
 /*
 |--------------------------------------------------------------------------

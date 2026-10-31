@@ -16,7 +16,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::withCount('users')
+        $roles = Role::withCount('users')->with('permissions:id')
             ->orderBy('name')
             ->get();
 
@@ -24,6 +24,12 @@ class RoleController extends Controller
             ->groupBy(fn ($permission) => explode('.', $permission->name)[0] ?? 'other');
 
         $roleConstants = $this->getRoleConstants();
+
+        $roles->each(function ($role) {
+            $role->description = $this->roleDescription($role->name);
+            $role->is_protected = $this->isProtectedRole($role->name);
+            $role->permission_ids = $role->permissions->pluck('id');
+        });
 
         return view('roles.index', compact('roles', 'permissions', 'roleConstants'));
     }
@@ -78,7 +84,7 @@ class RoleController extends Controller
             Log::error('Error creating role: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create role: ' . $e->getMessage(),
+                'message' => 'Could not create the role. Please try again.',
             ], 500);
         }
     }
@@ -95,10 +101,11 @@ class RoleController extends Controller
         ]);
 
         try {
-            if ($this->isProtectedRole($role->name)) {
+            // Built-in roles keep their name (code checks it) but their permissions can change
+            if ($this->isProtectedRole($role->name) && $request->name !== $role->name) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'This role is protected and cannot be modified.',
+                    'message' => 'Built-in roles cannot be renamed.',
                 ], 422);
             }
 
@@ -123,7 +130,7 @@ class RoleController extends Controller
             Log::error('Error updating role: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update role: ' . $e->getMessage(),
+                'message' => 'Could not update the role. Please try again.',
             ], 500);
         }
     }
@@ -158,7 +165,7 @@ class RoleController extends Controller
             Log::error('Error deleting role: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete role: ' . $e->getMessage(),
+                'message' => 'Could not delete the role. Please try again.',
             ], 500);
         }
     }
