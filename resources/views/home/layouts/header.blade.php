@@ -3,7 +3,7 @@
   <div class="container container--wide">
     <nav class="nav" aria-label="Primary">
       <a class="brand" href="{{ route('home') }}" aria-label="Sharet Africa home">
-        <img class="brand-logo" src="{{ asset('images/brand/sharet-logo-on-dark.svg') }}" alt="Sharet Africa" width="150" height="48" fetchpriority="high">
+        <img class="brand-logo" src="{{ asset('images/brand/sharet-logo-compact-on-dark.svg') }}" alt="Sharet Africa" width="150" height="33" fetchpriority="high">
       </a>
       <div class="nav-links" role="navigation">
         <a href="{{ route('merchants') }}" @if(request()->routeIs('merchants')) aria-current="page" @endif>Merchants</a>
