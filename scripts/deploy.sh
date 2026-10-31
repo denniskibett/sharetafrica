@@ -79,19 +79,27 @@ else
 fi
 
 say "4. Prepare the release (env, uploads, packages, migrations)"
-run "set -e; cd $RELEASE && \
-  cp -a $LIVE/.env .env && \
-  sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env && \
-  rsync -a $LIVE/storage/ storage/ && \
-  rsync -a --ignore-existing $LIVE/public/ public/ --exclude build --exclude storage && \
-  chown -R $OWNER:$OWNER $RELEASE && \
-  sudo -u $OWNER $PHP $SITE/composer.phar install --no-dev --optimize-autoloader --no-interaction --quiet && \
-  sudo -u $OWNER $PHP artisan storage:link >/dev/null 2>&1 || true; \
-  sudo -u $OWNER $PHP artisan migrate --force && \
-  sudo -u $OWNER $PHP artisan optimize"
+# Each line must succeed (set -e). No caches here: Laravel caches absolute paths, and this folder
+# is renamed to public_html in step 5, so caching happens after the swap.
+run "set -e
+  cd $RELEASE
+  cp -a $LIVE/.env .env
+  sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+  rsync -a $LIVE/storage/ storage/
+  rsync -a --ignore-existing --exclude build --exclude storage $LIVE/public/ public/
+  mkdir -p bootstrap/cache
+  chown -R $OWNER:$OWNER $RELEASE
+  sudo -u $OWNER $PHP $SITE/composer.phar install --no-dev --optimize-autoloader --no-interaction --quiet
+  sudo -u $OWNER $PHP artisan optimize:clear >/dev/null
+  sudo -u $OWNER $PHP artisan migrate --force"
 
-say "5. Swap the new release in"
-run "mv $LIVE $SITE/releases/previous-$STAMP && mv $RELEASE $LIVE"
+say "5. Swap the new release in, then link storage and cache from the final path"
+run "set -e
+  mv $LIVE $SITE/releases/previous-$STAMP
+  mv $RELEASE $LIVE
+  cd $LIVE
+  rm -f public/storage && sudo -u $OWNER ln -s ../storage/app/public public/storage
+  sudo -u $OWNER $PHP artisan optimize"
 
 say "6. Check the site answers"
 if [ "$DRY" = 0 ]; then
