@@ -37,27 +37,38 @@ app/
     Money.php                  cents in, "1,000.00" out, percentages with half-up rounding
     Invariants.php             the checks behind `php artisan ledger:check`
     LedgerException.php        one exception type with a reason code
-  Integrations/                (next) one adapter per payment provider
-    Contracts/PaymentRail.php  collect, payout, status, reversal, balance, statement, verifyWebhook
-    Cashia/  Gladys/  Daraja/
+  Integrations/                one adapter per payment provider (docs/v2/RAILS.md)
+    Contracts/PaymentRail.php  collect, payout, status
+    RailResult.php  Rails.php  the answer type and the registry (config/rails.php)
+    Simulator/SimulatorRail.php  stand-in PSP until Cashia and Daraja (no real money)
+    Cashia/  Daraja/  Gladys/  (to integrate)
+  Ramp/                        personal "Pay anyone" orders (docs/v2/ORDERS.md)
+    RampOrders.php             quote, confirm, refresh, apply (the only place orders change)
+    Pricing.php  Destination.php
   Models/
-    LedgerAccount.php  LedgerJournal.php  LedgerPosting.php  LedgerHold.php
+    LedgerAccount.php  LedgerJournal.php  LedgerPosting.php  LedgerHold.php  RailRequest.php  RampOrder.php
   Http/Controllers/
     LedgerController.php       staff ledger area: accounts, trial balance, account statement, journal
+    PayController.php          personal Pay anyone: quote, confirm, follow
   Console/Commands/
-    LedgerCheck.php            ledger:check (run hourly; alerts on any failure)
+    LedgerCheck.php            ledger:check (hourly; alerts on any failure)
+    RampResolve.php            ramp:resolve (every minute; status checks, quote expiry)
   Providers/
     V2ServiceProvider.php      wires routes/v2.php, commands and the schedule; v1 files stay untouched
 config/
   ledger.php                   chart of accounts and safeguarding groups
+  rails.php  pricing.php       payment rails; fees and limits (placeholders until the Cashia tariff)
 database/migrations/
   2026_11_01_100000_create_ledger_tables.php   tables + insert-only triggers
+  2026_11_01_110000_create_rail_requests_and_ramp_orders.php
 database/seeders/
   LedgerAccountSeeder.php      creates the chart of accounts
 resources/views/ledger/
   index.blade.php              accounts and trial balance (JSON table, no reload)
   show.blade.php               one account: balance and statement (JSON table)
   partials/journal.blade.php   journal detail in the slide-over
+resources/views/pay/
+  index.blade.php  show.blade.php  partials/form.blade.php  partials/status.blade.php
 routes/
   v2.php
 scripts/
@@ -66,9 +77,10 @@ tests/
   Feature/Ledger/LedgerTest.php       posting, refusals, idempotency, holds, reversals, triggers, ledger:check
   Feature/Ledger/LedgerPagesTest.php  staff pages and JSON, access control
   Unit/MoneyTest.php                  parsing, formatting, rounding
+  Feature/Ramp/RampOrdersTest.php     every journey, failure, refund, duplicate and limit
 .sharet-version                       "v2" (v1 has no file)
 docs/v2/
-  README.md  LEDGER.md  SWITCHING.md
+  README.md  LEDGER.md  SWITCHING.md  RAILS.md  ORDERS.md
 ```
 
 ## Documentation plan
@@ -78,18 +90,24 @@ docs/v2/
 | `docs/v2/README.md` | This file: rules, tree, plan | done |
 | `docs/v2/LEDGER.md` | Accounts, journals, postings, holds, idempotency, invariants, how to post each journey | done |
 | `docs/v2/SWITCHING.md` | Running v1 and v2 side by side and switching for an audit | done |
-| `docs/v2/RAILS.md` | The PaymentRail interface, Cashia, Gladys, Daraja adapters, callbacks, status checks | with the rails |
-| `docs/v2/ORDERS.md` | Ramp order states, quotes, refunds, the unknown-state worker | with the orders |
+| `docs/v2/RAILS.md` | The PaymentRail interface, the simulator, how to add Cashia, callbacks, status checks | done (simulator) |
+| `docs/v2/ORDERS.md` | Ramp order states, quotes, refunds, the unknown-state worker | done |
 | `docs/v2/RISK.md` | The Django risk service, score bands, fallback rules | with the risk service |
 | `docs/v2/RUNBOOKS.md` | Outages, reversals, late money, daily close, kill switch | before launch |
 | `docs/v2/DEPLOY.md` | Servers, CI, release steps (amazonblue deploy pattern) | before launch |
 
+## Local copy of the live database
+
+`~/sharet-live/` holds dumps of the live database (outside any repo, readable by you only). The v2 worktree's `.env`
+points at the local copy `sharet_live_copy`; v1's local database is untouched. A local-only test login is in
+`~/sharet-live/local-test-login.txt`. Refresh the copy by re-running the dump and import.
+
 ## Build order (phase 1, personal accounts)
 
-1. Ledger core, tests, staff ledger area — **this branch, first**
-2. Payment rails interface + Cashia and Daraja adapters (integrations side)
-3. Ramp orders: quote, states, idempotency, refunds, unknown-state worker
-4. Personal flows: pay a phone, paybill, till, bank; receipts
+1. Ledger core, tests, staff ledger area — **done**
+2. Payment rails interface — **done, with the simulator**; Cashia and Daraja adapters next (integrations side)
+3. Ramp orders: quote, states, idempotency, refunds, unknown-state worker — **done**
+4. Personal flows: pay a phone, paybill, till, bank — **done** (receipts by SMS next)
 5. Reconciliation: statement import, matching, suspense, daily sign-off
 6. Risk service (Django) + fallback rules in Laravel
 7. Staff consoles: support, operations, finance, compliance, kill switch

@@ -33,6 +33,7 @@ class DashboardNav
                 'title' => 'Wallet',
                 'roles' => ['individual'],
                 'items' => [
+                    ['label' => 'Pay anyone', 'route' => 'pay.index', 'icon' => 'banknotes', 'tone' => 'emerald', 'active' => ['pay.*']],
                     ['label' => 'Wallet', 'route' => 'wallet.index', 'icon' => 'wallet', 'tone' => 'violet'],
                     ['label' => 'Send money', 'route' => 'wallet.transfer', 'icon' => 'paper-airplane', 'tone' => 'emerald'],
                     ['label' => 'Receive money', 'route' => 'wallet.deposit', 'icon' => 'arrow-down-tray', 'tone' => 'sky'],
