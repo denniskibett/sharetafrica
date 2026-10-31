@@ -63,6 +63,7 @@ class User extends Authenticatable implements Wallet, Customer
         'password',
         'remember_token',
         'kyc', // encrypted verification details; read through ProfileController only
+        'transaction_pin',
     ];
 
     /**
@@ -75,6 +76,7 @@ class User extends Authenticatable implements Wallet, Customer
         'social' => 'array',
         'status' => 'boolean',
         'kyc_submitted_at' => 'datetime',
+        'pin_locked_until' => 'datetime',
     ];
 
     // ==========================================================

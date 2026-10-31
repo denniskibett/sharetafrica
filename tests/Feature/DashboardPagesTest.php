@@ -51,12 +51,12 @@ class DashboardPagesTest extends TestCase
         $this->actingAs($user = $this->admin());
 
         $this->putJson('/profile/verification', ['id_type' => 'national_id', 'id_number' => '12345678', 'date_of_birth' => '1990-05-01'])->assertOk();
-        $this->assertSame('basic', $user->fresh()->kyc_level);
+        $this->assertSame('none', $user->fresh()->kyc_level); // verified needs the ID photos and selfies too
         $this->assertStringNotContainsString('12345678', (string) $user->fresh()->getRawOriginal('kyc'));
 
         $this->putJson('/profile/verification', ['id_type' => 'national_id', 'id_number' => '12345678', 'date_of_birth' => '2015-01-01'])
             ->assertStatus(422)->assertJsonValidationErrors('date_of_birth');
-        $this->getJson('/profile/data')->assertOk()->assertJsonPath('level.key', 'basic')->assertJsonPath('kyc.id_number', '12345678');
+        $this->getJson('/profile/data')->assertOk()->assertJsonPath('level.key', 'none')->assertJsonPath('kyc.id_number', '12345678');
     }
 
     public function test_business_settings_create_a_company(): void
@@ -64,6 +64,7 @@ class DashboardPagesTest extends TestCase
         $this->actingAs($user = User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant', 'phone' => null]));
         $this->putJson('/settings/business', ['name' => 'Duka Ltd'])->assertStatus(422); // needs a personal account first
         $user->update(['phone' => '+254711000222']);
+        \App\Support\Kyc::save($user, ['documents' => array_fill_keys(\App\Support\Kyc::VERIFY, ['path' => 'kyc/x.jpg'])]); // verified
 
         $this->putJson('/settings/business', ['name' => 'Duka Ltd', 'tax_id' => 'p051234567x', 'directors' => [['name' => 'Jane Wanjiku', 'id_number' => '22334455']], 'settlement' => ['method' => 'bank', 'account_number' => '0123456789']])->assertOk();
         $company = $user->fresh()->company;
@@ -112,7 +113,7 @@ class DashboardPagesTest extends TestCase
     public function test_customers_get_the_sharet_app_and_staff_the_admin_dashboard(): void
     {
         $this->actingAs(User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant']));
-        $this->get('/dashboard')->assertOk()->assertSee('class="sharet-app', false)->assertSee('TOTAL BALANCE')->assertDontSee('Admin overview');
+        $this->get('/dashboard')->assertOk()->assertSee('class="sharet-app', false)->assertSee('Wallet · KES')->assertDontSee('Admin overview');
         $this->get('/profile')->assertOk()->assertSee('class="sharet-app', false);
 
         $this->actingAs($this->admin());

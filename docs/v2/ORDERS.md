@@ -35,3 +35,30 @@ Both poll JSON every 2 seconds while the payment moves; nothing reloads.
 **Tests:** `tests/Feature/Ramp/RampOrdersTest.php` covers pricing, all destination types, cancelled prompt, failed payout
 with refund, silent provider, duplicate callbacks, double confirm, expiry, validation and limits, the resolver, the
 production guard and the pages.
+
+## Wallet payments (dashboard money panel)
+
+The customer dashboard's right-hand panel (`dashboard/partials/money`) does everything; `/pay` is the history.
+
+| Action | How | Ledger |
+|---|---|---|
+| Receive from M-PESA (add money) | `POST /pay/top-up`, confirmed like any order (STK) | Dr rail / Cr 2100 wallet. Free |
+| Receive from a Sharet wallet | the sender pays your `@handle` (shown with a QR code) | see transfer |
+| Send to an @handle | `POST /pay/transfer`, instant, no rail | Dr 2100 sender / Cr 2100 recipient. Free |
+| Send to phone, paybill, till or bank | `POST /pay/quote` with `funding` mpesa or wallet | wallet: Dr 2100 / Cr 2200 on confirm, then the payout; a failed payout returns to the wallet |
+| Withdraw | a wallet payment to your own number (B2C) or bank | as above |
+
+M-PESA destinations follow Daraja: B2C to a phone, B2B to a paybill or till, and banks through their paybill.
+
+## Tariff (config/pricing.php)
+
+Revenue share: Safaricom's charge for the amount band plus our markup (`markup_bp`, 20%), excise (15%) on the markup only.
+Up to KES 100 is free. Example: 985.00 → 13.00 + 2.60 = 15.60 fee, 0.39 excise, pay 1,001.00.
+Check the bands against Safaricom's current tariff sheet (and the partner's rate) before going live.
+
+## Sharet PIN (App\Support\TransactionPin)
+
+Money leaving a wallet (wallet payments, withdrawals, @name transfers) needs the customer's 4-digit Sharet PIN:
+`POST /pay/pin` sets it (first time; changing it needs the current one), and `confirm` / `transfer` check it. Stored
+hashed; easy PINs (1234, 0000…) refused; 5 wrong tries pause wallet payments for 15 minutes. Money from M-PESA is
+approved by the M-PESA PIN on the phone, so no Sharet PIN is asked.

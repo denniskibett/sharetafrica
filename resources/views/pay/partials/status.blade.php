@@ -17,23 +17,19 @@
   </div>
 
   <dl class="divide-y divide-gray-100 rounded-xl bg-gray-50 px-4 text-sm dark:divide-gray-800 dark:bg-white/5">
-    <div class="flex justify-between py-2"><dt class="text-gray-500">They receive</dt><dd class="tabular-nums" x-text="'KES ' + order?.amount"></dd></div>
-    <div class="flex justify-between py-2"><dt class="text-gray-500">Sharet fee</dt><dd class="tabular-nums" x-text="'KES ' + order?.fee"></dd></div>
-    <div class="flex justify-between py-2"><dt class="text-gray-500">Excise duty (15% of the fee)</dt><dd class="tabular-nums" x-text="'KES ' + order?.excise"></dd></div>
+    <div class="flex justify-between py-2" x-show="!order?.top_up"><dt class="text-gray-500">They receive</dt><dd class="tabular-nums" x-text="'KES ' + order?.amount"></dd></div>
+    <div class="flex justify-between py-2" x-show="!order?.top_up"><dt class="text-gray-500">Fee (M-PESA charge + Sharet)</dt><dd class="tabular-nums" x-text="'KES ' + order?.fee"></dd></div>
+    <div class="flex justify-between py-2" x-show="!order?.top_up"><dt class="text-gray-500">Excise duty (15% of the Sharet part)</dt><dd class="tabular-nums" x-text="'KES ' + order?.excise"></dd></div>
     <div class="flex justify-between py-2" x-show="order?.rounding !== '0.00'"><dt class="text-gray-500">Rounding to whole shillings</dt><dd class="tabular-nums" x-text="'KES ' + order?.rounding"></dd></div>
-    <div class="flex justify-between py-2 font-semibold text-gray-900 dark:text-white"><dt>You pay from M-PESA</dt><dd class="tabular-nums" x-text="'KES ' + order?.total"></dd></div>
+    <div class="flex justify-between py-2 font-semibold text-gray-900 dark:text-white">
+      <dt x-text="order?.top_up ? 'You add from M-PESA' : (order?.funding === 'wallet' ? 'You pay from your wallet' : 'You pay from M-PESA')"></dt>
+      <dd class="tabular-nums" x-text="'KES ' + order?.total"></dd>
+    </div>
   </dl>
 
   <p x-show="order?.failure" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300" x-text="order?.failure"></p>
 
-  <ol class="space-y-2 border-l border-gray-200 pl-4 text-sm dark:border-gray-700" x-show="order?.timeline?.length">
-    <template x-for="(e, i) in order?.timeline || []" :key="i">
-      <li class="relative">
-        <span class="absolute -left-[21px] top-1.5 h-2 w-2 rounded-full" :class="i === order.timeline.length - 1 ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600'"></span>
-        <span class="mr-2 tabular-nums text-gray-400" x-text="e.at"></span><span class="text-gray-700 dark:text-gray-300" x-text="e.text"></span>
-      </li>
-    </template>
-  </ol>
+  <div x-show="order?.timeline?.length">@include('pay.partials.steps')</div>
 
   <p x-show="order && !order.final && order.status !== 'quoted'" class="flex items-center gap-2 text-xs text-gray-500">
     <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span> Updating by itself. You can leave this page; we will text you the result.

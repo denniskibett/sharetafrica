@@ -1,9 +1,13 @@
+// Fonts ship with the app (no Google Fonts request): Outfit for numbers and staff pages, Inter Tight for customer text
+import '@fontsource-variable/outfit';
+import '@fontsource-variable/inter-tight';
 import './bootstrap';
 
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';
+import intersect from '@alpinejs/intersect';
 import { dataTable, chart, alertModal, profile, kycCamera, signaturePad, checkPhoto, installHelpers, installImagePaste } from './dashboard';
 
 /**
@@ -87,8 +91,11 @@ Alpine.data('profile', profile);
 Alpine.data('kycCamera', kycCamera);
 Alpine.data('signaturePad', signaturePad);
 window.sharet.checkPhoto = checkPhoto;
+/** Draw a QR code for `text` on a canvas (the receive panel). The library loads only when a QR is shown. */
+window.sharet.qr = async (canvas, text) => (await import('qrcode')).toCanvas(canvas, text, { width: 220, margin: 1, color: { dark: '#050507', light: '#FFFFFF' } });
 Alpine.plugin(persist);
 Alpine.plugin(focus);
 Alpine.plugin(collapse);
+Alpine.plugin(intersect);
 window.Alpine = Alpine;
 Alpine.start();

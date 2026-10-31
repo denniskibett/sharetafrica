@@ -4,7 +4,7 @@
 
 @section('content')
 <x-ui.page-header title="Payment" :subtitle="$order['date'].' · '.$order['recipient']" />
-<p class="-mt-4 mb-6 text-sm"><a href="{{ route('pay.index') }}" class="text-gray-500 hover:underline">← All payments</a></p>
+<p class="-mt-4 mb-6 text-sm"><a href="{{ route('pay.index') }}" class="text-gray-500 hover:underline">← All transactions</a></p>
 
 <div class="max-w-xl" x-data="{
     order: @js($order), timer: null,

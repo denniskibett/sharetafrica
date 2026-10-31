@@ -64,12 +64,14 @@ class RampOrdersTest extends TestCase
 
     public function test_pricing_adds_fee_excise_and_rounds_up_to_whole_shillings(): void
     {
-        // 985.00: 1% = 9.85, below the 10.00 minimum → fee 10.00, excise 1.50, total 996.50 → pay 997.00, rounding 0.50
-        $this->assertSame(['fee' => 1000, 'excise' => 150, 'rounding' => 50, 'total' => 99700], Pricing::quote(98500));
-        // 5,000.00: fee 50.00, excise 7.50 → 5,057.50 → 5,058.00
-        $this->assertSame(['fee' => 5000, 'excise' => 750, 'rounding' => 50, 'total' => 505800], Pricing::quote(500000));
-        // 50,000.00: 1% = 500 capped at 100.00, excise 15.00 → 50,115.00 exactly
-        $this->assertSame(['fee' => 10000, 'excise' => 1500, 'rounding' => 0, 'total' => 5011500], Pricing::quote(5000000));
+        // up to 100.00 is free, as on M-PESA
+        $this->assertSame(['fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => 10000], Pricing::quote(10000));
+        // 985.00: Safaricom 13.00 + 20% markup 2.60 = fee 15.60, excise 15% of 2.60 = 0.39 → 1,000.99 → pay 1,001.00
+        $this->assertSame(['fee' => 1560, 'excise' => 39, 'rounding' => 1, 'total' => 100100], Pricing::quote(98500));
+        // 5,000.00: 57.00 + 11.40 = 68.40, excise 1.71 → 5,070.11 → 5,071.00
+        $this->assertSame(['fee' => 6840, 'excise' => 171, 'rounding' => 89, 'total' => 507100], Pricing::quote(500000));
+        // 50,000.00: 108.00 + 21.60 = 129.60, excise 3.24 → 50,132.84 → 50,133.00
+        $this->assertSame(['fee' => 12960, 'excise' => 324, 'rounding' => 16, 'total' => 5013300], Pricing::quote(5000000));
     }
 
     public function test_a_payment_to_a_phone_is_collected_paid_and_booked_to_the_cent(): void
@@ -84,15 +86,15 @@ class RampOrdersTest extends TestCase
 
         $order = $this->orders->refresh($order);
         $this->assertSame('paying', $order->status);
-        $this->assertSame(99700, $this->natural('2200', $order), 'collected money waits in the order account');
+        $this->assertSame(100100, $this->natural('2200', $order), 'collected money waits in the order account');
 
         $order = $this->orders->refresh($order);
         $this->assertSame('paid', $order->status);
         $this->assertSame(0, $this->natural('2200', $order));
-        $this->assertSame(1000, $this->natural('4100'));
-        $this->assertSame(150, $this->natural('2300'));
-        $this->assertSame(50, $this->natural('4900'));
-        $this->assertSame(1200, $this->natural('1130'), 'what stays at the PSP is exactly fee + excise + rounding');
+        $this->assertSame(1560, $this->natural('4100'));
+        $this->assertSame(39, $this->natural('2300'));
+        $this->assertSame(1, $this->natural('4900'));
+        $this->assertSame(1600, $this->natural('1130'), 'what stays at the PSP is exactly fee + excise + rounding');
         $this->assertCount(4, $order->timeline);
         $this->assertBooksClean();
     }
@@ -233,9 +235,9 @@ class RampOrdersTest extends TestCase
         $payer = $this->payer();
         $this->actingAs($payer);
 
-        $this->get('/pay')->assertOk()->assertSee('Pay anyone')->assertSee('Test mode');
+        $this->get('/pay')->assertOk()->assertSee('Transactions')->assertSee('Test mode');
         $quote = $this->postJson('/pay/quote', ['type' => 'phone', 'phone' => '0722 111 222', 'amount' => '985'])
-            ->assertOk()->assertJsonPath('order.total', '997.00')->assertJsonPath('order.status', 'quoted')->json('order');
+            ->assertOk()->assertJsonPath('order.total', '1,001.00')->assertJsonPath('order.status', 'quoted')->json('order');
         $this->postJson('/pay/quote', ['type' => 'phone', 'phone' => '0722', 'amount' => '985'])->assertStatus(422)->assertJsonValidationErrors('phone');
 
         $this->postJson("/pay/{$quote['uuid']}/confirm")->assertOk()->assertJsonPath('order.status', 'collecting');

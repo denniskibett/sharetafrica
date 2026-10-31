@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Integrations\Contracts\IdReader;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -9,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Personal account levels and the details behind them (users.kyc, encrypted).
  *
- *   basic     M-Pesa grade: full name + M-Pesa number. Enough to send and receive.
+ *   basic     verified: name, M-Pesa number, ID photos (front and back) and the three selfies. Basic limits, enough
+ *             to send and receive. The ID's details are read from the photo (IdReader), not typed.
  *   standard  bank grade: ID, KRA PIN, address, work and income, next of kin, PEP answer,
  *             plus clear photos: ID front and back (or passport page), selfies centre/left/right, signature.
  *             Needed for loans, cards, trade and higher limits, and to register a business.
@@ -19,6 +21,9 @@ use Illuminate\Support\Facades\Storage;
  */
 class Kyc
 {
+    /** Photos that verify an account (basic level). A passport has no back. */
+    public const VERIFY = ['id_front', 'id_back', 'selfie_center', 'selfie_left', 'selfie_right'];
+
     public const FIELDS = ['id_type', 'id_number', 'date_of_birth', 'kra_pin', 'nationality', 'county', 'town', 'address',
         'occupation', 'income_band', 'source_of_funds', 'next_of_kin_name', 'next_of_kin_phone'];
 
@@ -56,13 +61,16 @@ class Kyc
     public static function progress(User $user): array
     {
         $kyc = self::data($user);
-        $basic = filled($user->name) && filled($user->phone);
+        $verify = array_values(array_intersect(self::VERIFY, self::requiredDocuments($kyc)));
+        $photos = collect($verify)->filter(fn ($t) => filled($kyc['documents'][$t]['path'] ?? null))->count();
+        $basic = filled($user->name) && filled($user->phone) && $photos === count($verify);
         $fields = collect(self::FIELDS)->filter(fn ($k) => filled($kyc[$k] ?? null))->count();
         $required = self::requiredDocuments($kyc);
         $docs = collect($required)->filter(fn ($t) => filled($kyc['documents'][$t]['path'] ?? null))->count();
 
         return [
-            'basic' => ['done' => (int) filled($user->name) + (int) filled($user->phone), 'of' => 2, 'complete' => $basic],
+            'basic' => ['done' => (int) filled($user->name) + (int) filled($user->phone) + $photos, 'of' => 2 + count($verify), 'complete' => $basic,
+                'photos' => [$photos, count($verify)], 'phone' => filled($user->phone)],
             'standard' => [
                 'done' => $fields + $docs, 'of' => count(self::FIELDS) + count($required),
                 'fields' => [$fields, count(self::FIELDS)], 'documents' => [$docs, count($required)],
@@ -105,9 +113,32 @@ class Kyc
 
         $old && $old !== $path && Storage::disk('local')->delete($old);
         $kyc['documents'][$type] = ['path' => $path, 'uploaded_at' => now()->toIso8601String()];
+        if (in_array($type, ['id_front', 'id_back'], true)) {
+            $kyc = self::readId($kyc, $type, Storage::disk('local')->path($path));
+        }
         self::save($user, $kyc);
 
         return $path;
+    }
+
+    /** What the ID photo says, kept under id_read; empty details are filled from it so nobody types them again. */
+    private static function readId(array $kyc, string $side, string $file): array
+    {
+        try {
+            $read = app(IdReader::class)->read($file, $side);
+        } catch (\Throwable $e) {
+            report($e);
+            $read = [];
+        }
+        $kyc['id_read'][$side] = $read + ['at' => now()->toIso8601String()];
+        $kyc['id_type'] = ($kyc['id_type'] ?? null) ?: ($read ? 'national_id' : null);
+        foreach (['id_number', 'date_of_birth', 'full_name', 'sex'] as $field) {
+            if (filled($read[$field] ?? null) && blank($kyc[$field] ?? null)) {
+                $kyc[$field] = $read[$field];
+            }
+        }
+
+        return $kyc;
     }
 
     /** Document list for a page: label, hint, kind, uploaded?, when, and the private URL to view it. */
@@ -117,7 +148,7 @@ class Kyc
         $required = self::requiredDocuments($kyc);
 
         return collect(self::DOCUMENTS)->only($required)->map(fn ($d, $type) => [
-            'type' => $type, 'label' => $d[0], 'hint' => $d[1], 'kind' => $d[2],
+            'type' => $type, 'label' => $d[0], 'hint' => $d[1], 'kind' => $d[2], 'verify' => in_array($type, self::VERIFY, true),
             'uploaded' => filled($kyc['documents'][$type]['path'] ?? null),
             'at' => isset($kyc['documents'][$type]['uploaded_at']) ? \Illuminate\Support\Carbon::parse($kyc['documents'][$type]['uploaded_at'])->timezone('Africa/Nairobi')->format('j M Y, H:i') : null,
             'url' => filled($kyc['documents'][$type]['path'] ?? null) ? route($route, ['user' => $user->id, 'type' => $type, 'v' => crc32($kyc['documents'][$type]['path'])]) : null,

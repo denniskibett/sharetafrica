@@ -56,7 +56,7 @@ class ProfileController extends Controller
             'kyc' => $kyc,
             'level' => $progress + [
                 'key' => $level,
-                'label' => ['none' => 'Not verified', 'basic' => 'Basic · M-Pesa', 'standard' => 'Bank grade'][$level],
+                'label' => ['none' => 'Not verified', 'basic' => 'Verified', 'standard' => 'Bank grade'][$level],
                 'submitted' => $user->kyc_submitted_at?->timezone('Africa/Nairobi')->format('j M Y'),
             ],
             'documents' => Kyc::documents($user, 'profile.document'),
@@ -154,7 +154,15 @@ class ProfileController extends Controller
             Kyc::storeDocument($request->user(), $type, $data);
         }
 
-        return response()->json(['message' => Kyc::DOCUMENTS[$type][0].' saved.']);
+        $user = $request->user()->fresh();
+        $kyc = Kyc::data($user);
+        $read = array_intersect_key($kyc['id_read'][$type] ?? [], array_flip(['full_name', 'id_number', 'date_of_birth']));
+        $verified = Kyc::progress($user)['basic']['complete'];
+
+        return response()->json([
+            'message' => $verified ? 'You are verified. You can start sending and receiving.' : Kyc::DOCUMENTS[$type][0].' saved.'.($read ? ' We read your details from it.' : ''),
+            'read' => $read, 'verified' => $verified,
+        ]);
     }
 
     /** Streams a verification photo to its owner or to staff who manage people. */

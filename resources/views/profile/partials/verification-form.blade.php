@@ -1,15 +1,20 @@
-{{-- Verification. Basic = name + M-Pesa number. Bank grade = the details below + photos and signature. Stored encrypted. --}}
+{{-- Verification. Verified (basic) = M-Pesa number + ID photos + selfies, details read from the ID.
+     Bank grade = the details below + signature. Stored encrypted. --}}
 @php
     $select = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
 @endphp
-<x-ui.card title="Basic · M-Pesa account" subtitle="Your name and M-Pesa number. Enough to send and receive across East Africa." class="mb-6">
-  <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Active' : 'Add your M-Pesa number'"></span></x-slot:actions>
-  <dl class="grid gap-4 text-sm sm:grid-cols-2">
-    <div><dt class="text-gray-500">Name</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.user.name"></dd></div>
+<x-ui.card title="Verified account" subtitle="Your M-Pesa number, your ID and three selfies. Then you can send and receive at basic limits." class="mb-6">
+  <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Verified' : 'Not verified yet'"></span></x-slot:actions>
+  <dl class="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
     <div><dt class="text-gray-500">M-Pesa number</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.user.phone || 'Not added yet'"></dd></div>
+    <div><dt class="text-gray-500">Name on ID</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.kyc.full_name || 'Read from your ID'"></dd></div>
+    <div><dt class="text-gray-500">ID number</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.kyc.id_number || 'Read from your ID'"></dd></div>
+    <div><dt class="text-gray-500">Date of birth</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.kyc.date_of_birth || 'Read from your ID'"></dd></div>
   </dl>
-  <button type="button" x-show="!data.user.phone" @click="tab = 'personal'" class="mt-4 text-sm font-medium underline">Add it in Personal details</button>
+  <button type="button" x-show="!data.user.phone" @click="tab = 'personal'" class="mt-4 text-sm font-medium underline">Add your M-Pesa number in Personal details</button>
 </x-ui.card>
+
+<div class="mb-6">@include('profile.partials.documents')</div>
 
 <form @submit.prevent="submit('PUT', '{{ route('profile.verification') }}', data.kyc)" class="space-y-6">
   <x-ui.card title="Bank grade" subtitle="What a bank asks when you open an account. Needed for loans, cards, trade payments, higher limits and to register a business.">
@@ -74,4 +79,3 @@
   </div>
 </form>
 
-<div class="mt-6">@include('profile.partials.documents')</div>

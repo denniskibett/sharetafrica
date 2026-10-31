@@ -1,50 +1,76 @@
-{{-- Customer app top bar. Phones: avatar, greeting, notifications (like the canvas mobile home).
-     Wider screens: page actions "Add money" and "Send money", notifications, account menu. --}}
+{{-- Customer app top bar (no sidebar: a personal app). Phones: logo, "Morning, V2", theme, notifications, and the
+     avatar on the right (opens the Account sheet). Wider screens:
+     logo (home), greeting and time, theme, notifications (latest payments) and the account
+     menu (transactions, website, profile, settings). --}}
 @php
     $user = auth()->user();
     $hour = (int) now()->timezone('Africa/Nairobi')->format('G');
     $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
     $initials = \App\Support\Table::person($user)['initials'];
     $first = \Illuminate\Support\Str::before(trim($user->name), ' ') ?: $user->name;
+    $icon = 'flex h-11 w-11 items-center justify-center rounded-xl bg-app-tile hover:bg-app-raised';
 @endphp
-<header class="sticky top-0 z-[999] flex h-[72px] shrink-0 items-center gap-3 border-b border-white/[0.08] bg-[#0A0A0C]/90 px-4 backdrop-blur md:px-8">
-  <a href="{{ route('profile.show') }}" class="flex min-w-0 items-center gap-3 md:hidden" aria-label="Your profile">
-    <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#232328] text-[15px] font-semibold">
-      @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
-    </span>
-    <span class="min-w-0"><span class="block text-[13px] text-[#80807A]">{{ $greeting }}</span><span class="block truncate text-base font-semibold">{{ $first }}</span></span>
+<header class="sticky top-0 z-[999] border-b border-app-line bg-app-bg/90 backdrop-blur">
+ <div class="flex h-[72px] w-full items-center gap-3 px-4 md:px-6 2xl:px-8">
+  <a href="{{ route('dashboard') }}" class="shrink-0" aria-label="Sharet home">
+    <img src="{{ asset('images/brand/sharet-logo-colour-on-dark.svg') }}" alt="Sharet" class="hidden h-6 w-auto dark:block md:h-7">
+    <img src="{{ asset('images/brand/sharet-logo-colour-on-light.svg') }}" alt="Sharet" class="h-6 w-auto dark:hidden md:h-7">
   </a>
+  {{-- Phones: just "Morning, V2". Wider screens: the greeting and the date and time. --}}
+  <p class="min-w-0 truncate border-l border-app-line pl-3 text-sm font-semibold md:hidden" x-data="clock()"><span x-text="short">{{ \Illuminate\Support\Str::after($greeting, 'Good ') }}</span>, {{ $first }}</p>
+  <p class="ml-5 hidden border-l border-app-line pl-5 lg:block" x-data="clock()">
+    <span class="block text-sm font-semibold"><span x-text="greeting">{{ $greeting }}</span>, {{ $first }}</span>
+    <span class="app-num block text-xs text-app-muted" x-text="time"></span>
+  </p>
 
-  <div class="ml-auto flex items-center gap-2 md:gap-3">
-    {{-- Shown as "coming soon" until the deposit / transfer pages exist --}}
-    @if (Route::has('wallet.deposit'))
-      <a href="{{ route('wallet.deposit') }}" class="hidden h-[46px] items-center rounded-xl border border-white/[0.16] px-[18px] text-sm font-semibold hover:bg-white/[0.04] md:flex">Add money</a>
-    @else
-      <span title="Coming soon" aria-disabled="true" class="hidden h-[46px] cursor-default items-center rounded-xl border border-white/[0.08] px-[18px] text-sm font-semibold text-[#5A5A55] md:flex">Add money</span>
-    @endif
-    @if (Route::has('wallet.transfer'))
-      <a href="{{ route('wallet.transfer') }}" class="hidden h-[46px] items-center rounded-xl bg-[#D4FF3D] px-[18px] text-sm font-semibold text-[#050507] hover:bg-[#E2FF73] md:flex">Send money</a>
-    @else
-      <span title="Coming soon" aria-disabled="true" class="hidden h-[46px] cursor-default items-center gap-2 rounded-xl bg-[#D4FF3D]/30 px-[18px] text-sm font-semibold text-[#050507] md:flex">Send money <span class="app-mono rounded bg-black/20 px-1.5 py-0.5 text-[10px] uppercase">Soon</span></span>
-    @endif
-    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-      <button type="button" @click="open = !open" aria-label="Notifications" class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#18181C] hover:bg-[#232328]"><x-heroicon-o-bell class="h-5 w-5" /></button>
-      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-white/[0.08] bg-[#18181C] p-5 text-center shadow-xl">
-        <p class="text-sm font-semibold">You're all caught up</p>
-        <p class="mt-1 text-xs text-[#80807A]">Payment and account alerts will show here.</p>
+  <div class="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+    <button type="button" @click="darkMode = !darkMode" class="{{ $icon }} !hidden md:!flex" :aria-label="darkMode ? 'Light mode' : 'Dark mode'">
+      <x-heroicon-o-sun x-show="darkMode" class="h-5 w-5" /><x-heroicon-o-moon x-show="!darkMode" class="h-5 w-5" />
+    </button>
+    {{-- Alerts: the latest payments (a dot while one is still moving); a row opens its receipt --}}
+    <div class="relative" x-data="{ open: false, rows: [], async load() { this.rows = (await (await fetch('{{ route('pay.index') }}?per_page=5&sort=-date', { headers: { Accept: 'application/json' } })).json()).data } }"
+         x-init="load()" @wallet-changed.window="load()" @click.outside="open = false">
+      <button type="button" @click="open = !open; open && load()" aria-label="Notifications" class="{{ $icon }} relative">
+        <x-heroicon-o-bell class="h-5 w-5" />
+        <span x-show="rows.some(r => r.flow === 'pending')" x-cloak class="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-app-wait"></span>
+      </button>
+      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-app-line bg-app-panel p-3 shadow-xl">
+        <p class="px-2 pb-1 text-sm font-semibold">Latest payments</p>
+        <ul x-show="rows.length" class="px-2" @click="open = false">
+          <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
+        </ul>
+        <p x-show="!rows.length" class="px-2 py-6 text-center text-sm text-app-muted">Payment alerts will show here.</p>
+        <a href="{{ route('pay.index') }}" class="mt-1 block rounded-lg px-2 py-2 text-center text-sm font-medium text-app-soft hover:bg-app-tile">See all transactions</a>
       </div>
     </div>
+    <button type="button" @click="$dispatch('account-sheet')" class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-app-raised text-sm font-semibold md:hidden" aria-label="Account">
+      @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
+    </button>
     <div class="relative hidden md:block" x-data="{ open: false }" @click.outside="open = false">
-      <button type="button" @click="open = !open" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-white/[0.04]" aria-label="Account menu">
-        <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#232328] text-sm font-semibold">
+      <button type="button" @click="open = !open" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-app-tile" aria-label="Account menu">
+        <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-app-raised text-sm font-semibold">
           @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
         </span>
-        <x-heroicon-o-chevron-down class="h-4 w-4 text-[#80807A]" />
+        <x-heroicon-o-chevron-down class="h-4 w-4 text-app-muted" />
       </button>
-      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-60 rounded-2xl border border-white/[0.08] bg-[#18181C] p-2 shadow-xl">
-        <p class="truncate px-3 pb-2 pt-1 text-sm font-semibold">{{ $user->name }}<span class="block truncate text-xs font-normal text-[#80807A]">{{ $user->email }}</span></p>
+      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-64 rounded-2xl border border-app-line bg-app-panel p-2 shadow-xl">
+        <p class="truncate px-3 pb-2 pt-1 text-sm font-semibold">{{ $user->name }}<span class="block truncate text-xs font-normal text-app-muted">{{ $user->email }}</span></p>
         @include('partials.customer.account-links')
       </div>
     </div>
   </div>
+ </div>
 </header>
+
+<script>
+  /** Greeting and time on the viewer's own clock, updated every 20 seconds. */
+  function clock() {
+    const tick = (c) => {
+      const d = new Date(), h = d.getHours();
+      c.short = h < 12 ? 'Morning' : h < 17 ? 'Afternoon' : 'Evening';
+      c.greeting = 'Good ' + c.short.toLowerCase();
+      c.time = d.toLocaleString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    };
+    return { greeting: @js($greeting), short: @js(\Illuminate\Support\Str::after($greeting, 'Good ')), time: '', init() { tick(this); setInterval(() => tick(this), 20000); } };
+  }
+</script>

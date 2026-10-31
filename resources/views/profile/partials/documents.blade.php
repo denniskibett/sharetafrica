@@ -1,9 +1,9 @@
-{{-- Bank-grade photos: ID front/back (or passport page), three camera selfies, signature.
-     Photos are checked for size, light and sharpness before upload, and stored privately. --}}
-<x-ui.card title="Photos and signature" subtitle="Clear, readable photos only: all four corners of the ID in frame, no glare, no filters. Take a photo, choose a file, or point at a card and paste (⌘V / Ctrl+V).">
+{{-- Verification photos: ID front/back (or passport page) and three camera selfies verify the account; the signature
+     is for bank grade. Photos are checked for size, light and sharpness before upload, and stored privately. --}}
+<x-ui.card title="ID and selfies" subtitle="Your ID (front and back) and three selfies verify your account. We read your name, ID number and date of birth from the ID: nothing to type. All four corners in frame, no glare.">
   <x-slot:actions>
-    <span :class="sharet.pill(data.level.standard?.documents?.[0] === data.level.standard?.documents?.[1] ? 'success' : 'warning')"
-          x-text="(data.level.standard?.documents?.[0] ?? 0) + ' of ' + (data.level.standard?.documents?.[1] ?? 0) + ' done'"></span>
+    <span :class="sharet.pill(data.level.basic?.photos?.[0] === data.level.basic?.photos?.[1] ? 'success' : 'warning')"
+          x-text="(data.level.basic?.photos?.[0] ?? 0) + ' of ' + (data.level.basic?.photos?.[1] ?? 0) + ' photos'"></span>
   </x-slot:actions>
 
   <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -14,7 +14,7 @@
             <p class="font-medium text-gray-900 dark:text-white" x-text="d.label"></p>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="d.hint"></p>
           </div>
-          <span :class="sharet.pill(d.uploaded ? 'success' : 'neutral')" x-text="d.uploaded ? 'Done' : 'Needed'"></span>
+          <span :class="sharet.pill(d.uploaded ? 'success' : (d.verify ? 'warning' : 'neutral'))" x-text="d.uploaded ? 'Done' : (d.verify ? 'Needed' : 'Bank grade')"></span>
         </div>
 
         <div class="mt-3 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-gray-50 dark:bg-white/[0.03]">

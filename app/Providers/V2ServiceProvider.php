@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Integrations\Contracts\IdReader;
+use App\Integrations\IdReader\NullIdReader;
+use App\Integrations\IdReader\TesseractIdReader;
 use App\Ledger\Ledger;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +16,8 @@ class V2ServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Ledger::class);
+        $this->app->singleton(IdReader::class, fn () => config('services.tesseract.reader') === 'tesseract' && TesseractIdReader::available()
+            ? new TesseractIdReader : new NullIdReader);
     }
 
     public function boot(): void

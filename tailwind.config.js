@@ -18,7 +18,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["Figtree", ...defaultTheme.fontFamily.sans], // Makes Figtree the default font
-        outfit: ["Outfit", "sans-serif"], // Optional font (use with `font-outfit`)
+        outfit: ["Outfit Variable", "Outfit", "sans-serif"], // bundled with the app (@fontsource-variable/outfit)
         figtree: ["Figtree", "sans-serif"],
 
       },
@@ -44,6 +44,26 @@ module.exports = {
         white: "#FFFFFF",
         black: "#101828",
         "gray-dark": "#1a1a1a",
+        // Customer app theme (body.sharet-app): channels set in app.css, light paper or near-black
+        app: {
+          bg: "rgb(var(--app-bg) / <alpha-value>)",
+          panel: "rgb(var(--app-panel) / <alpha-value>)",
+          tile: "rgb(var(--app-tile) / <alpha-value>)",
+          raised: "rgb(var(--app-raised) / <alpha-value>)",
+          ink: "rgb(var(--app-ink) / <alpha-value>)",
+          soft: "rgb(var(--app-soft) / <alpha-value>)",
+          muted: "rgb(var(--app-muted) / <alpha-value>)",
+          faint: "rgb(var(--app-faint) / <alpha-value>)",
+          line: "rgb(var(--app-ink) / 0.09)",
+          accent: "rgb(var(--app-accent) / <alpha-value>)",
+          lime: "#D4FF3D",
+          danger: "rgb(var(--app-danger) / <alpha-value>)",
+          // money and status: in (green), out (red), waiting (orange), moving (blue)
+          in: "rgb(var(--app-in) / <alpha-value>)",
+          out: "rgb(var(--app-out) / <alpha-value>)",
+          wait: "rgb(var(--app-wait) / <alpha-value>)",
+          info: "rgb(var(--app-info) / <alpha-value>)",
+        },
         success: {
           50: "#d1fae5", // Light success color
           100: "#a7f3d0",

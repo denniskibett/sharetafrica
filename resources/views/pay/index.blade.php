@@ -1,84 +1,54 @@
-{{-- Pay anyone: M-PESA in, paid out to a phone, paybill, till or bank. Quote, confirm and progress all happen in place. --}}
+{{-- Transactions: every payment in and out, listed as in the mobile app (standard icon per kind, signed amount).
+     A row opens the receipt panel; starting a payment happens in the dashboard's money panel. --}}
 @extends('layouts.app')
-@section('title', 'Pay anyone')
+@section('title', 'Transactions')
 
 @section('content')
-<x-ui.page-header title="Pay anyone" subtitle="Pay a phone, paybill, till or bank account from your M-PESA. You see the full cost before you pay." />
-
-@if (config('rails.default') === 'simulator')
-  <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-    <strong>Test mode:</strong> payments are simulated, no real money moves. A number ending <code>0000</code> fails, ending <code>9999</code> answers slowly. Fees are placeholders until the partner tariff is agreed.
+<div x-data="{
+       rows: [], stats: {}, page: 1, last: 1, filter: '', loading: true,
+       async load(more = false) {
+         this.page = more ? this.page + 1 : 1; this.loading = true;
+         const q = new URLSearchParams({ per_page: 20, page: this.page, sort: '-date', ...(this.filter && { status: this.filter }) });
+         const r = await (await fetch('{{ route('pay.index') }}?' + q, { headers: { Accept: 'application/json' } })).json();
+         this.rows = more ? this.rows.concat(r.data) : r.data; this.stats = r.stats; this.last = r.meta.last_page; this.loading = false;
+       },
+     }" x-init="load()" @wallet-changed.window="load()" class="flex flex-col gap-6">
+  <div>
+    <h1>Transactions</h1>
+    <p class="mt-1 text-sm text-app-muted">Everything in and out of your wallet.</p>
   </div>
-@endif
 
-<div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
-  <div class="xl:col-span-5" x-data="payPage({ quoteUrl: '{{ route('pay.quote') }}', base: '{{ url('pay') }}' })">
-    <x-ui.card>
-      <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90" x-text="order ? 'Your payment' : 'New payment'"></h3>
-      <div x-show="!order">@include('pay.partials.form')</div>
-      <div x-show="order" x-cloak>
-        @include('pay.partials.status')
-        <button type="button" x-show="order?.final" @click="reset()" class="mt-4 h-11 w-full rounded-lg border border-gray-300 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">Make another payment</button>
+  <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+    @foreach ([['Wallet', 'wallet', 'wallet'], ['In this month', 'month_in', 'arrow-down-left'], ['Out this month', 'month_out', 'arrow-up-right'], ['Fees this month', 'month_fees', 'receipt-percent']] as [$label, $key, $icon])
+      <div class="rounded-2xl border border-app-line bg-app-panel p-4">
+        <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-5 w-5', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
+        <p class="mt-2 text-xs text-app-muted">{{ $label }} · KES</p>
+        <p class="text-lg tabular-nums" @class(['text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out']) x-text="stats.{{ $key }} ?? '—'"></p>
       </div>
-    </x-ui.card>
+    @endforeach
   </div>
 
-  <div class="xl:col-span-7" x-data="dataTable({ url: '{{ route('pay.index') }}', sort: '-date', perPage: 10 })">
-    <x-ui.stats :cols="2" class="mb-6">
-      <x-ui.stat label="Paid" value="stats.paid" icon="check-circle" tone="emerald" />
-      <x-ui.stat label="Sent this way" value="stats.sent" format="raw" icon="banknotes" tone="violet" />
-    </x-ui.stats>
-    <x-ui.table title="Your payments" :searchable="false" :columns="[
-        ['key' => 'date', 'label' => 'Date', 'type' => 'muted', 'sort' => 'date'],
-        ['key' => 'recipient', 'label' => 'To'],
-        ['key' => 'amount', 'label' => 'Amount', 'type' => 'code'],
-        ['key' => 'pill', 'label' => 'Status', 'type' => 'pill'],
-    ]">
-      <x-slot:actions>
-        <x-ui.row-menu>
-          <x-ui.row-menu-item icon="eye" x-bind:href="row.url">Open</x-ui.row-menu-item>
-        </x-ui.row-menu>
-      </x-slot:actions>
-      <x-slot:empty>No payments yet.</x-slot:empty>
-    </x-ui.table>
-  </div>
+  @include('pay.partials.chart')
+
+  <section class="order-2 rounded-2xl border border-app-line bg-app-panel p-5">
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
+      <h2 class="text-base font-semibold">All transactions</h2>
+      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex gap-1 rounded-lg bg-app-tile p-1 text-sm" role="tablist">
+        @foreach (['' => 'All', 'paid' => 'Done', 'collecting' => 'Waiting', 'refunded' => 'Refunded'] as $value => $text)
+          <button type="button" role="tab" @click="filter = '{{ $value }}'; load()" :aria-selected="filter === '{{ $value }}'"
+                  :class="filter === '{{ $value }}' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-8 rounded-md px-3 font-medium">{{ $text }}</button>
+        @endforeach
+      </div>
+      <a href="{{ route('dashboard', ['panel' => 'send']) }}" class="flex h-10 items-center gap-2 rounded-xl bg-app-lime px-4 text-sm font-semibold text-[#050507] hover:bg-[#E2FF73]"><x-heroicon-o-paper-airplane class="h-5 w-5" /> Send money</a>
+      </div>
+    </div>
+    @if (config('rails.default') === 'simulator')<p class="mb-2 text-xs text-app-muted">Test mode: payments are simulated, no real money moves.</p>@endif
+    <ul x-show="rows.length">
+      <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
+    </ul>
+    <p x-show="!loading && !rows.length" x-cloak class="py-10 text-center text-sm text-app-muted">No transactions here yet.</p>
+    <button type="button" x-show="page < last" x-cloak @click="load(true)" :disabled="loading" class="mt-3 h-11 w-full rounded-xl bg-app-tile text-sm font-medium hover:bg-app-raised" x-text="loading ? 'Loading…' : 'Show more'"></button>
+  </section>
 </div>
-
-<script>
-  function payPage({ quoteUrl, base }) {
-    return {
-      type: 'phone', form: { phone: '', paybill: '', till: '', account: '', bank: '', amount: '', note: '' },
-      errors: {}, quote: null, order: null, busy: false, timer: null,
-      async getQuote() {
-        this.busy = true; this.errors = {};
-        try { this.quote = (await sharet.send('POST', quoteUrl, { ...this.form, type: this.type })).order; }
-        catch (e) { this.errors = e.errors || {}; }
-        this.busy = false;
-      },
-      async confirm() {
-        this.busy = true; this.errors = {};
-        try {
-          this.order = (await sharet.send('POST', `${base}/${this.quote.uuid}/confirm`)).order;
-          this.quote = null; this.follow();
-        } catch (e) { this.errors = e.errors || {}; }
-        this.busy = false;
-      },
-      follow() {
-        clearTimeout(this.timer);
-        window.dispatchEvent(new CustomEvent('table-reload'));
-        if (!this.order || this.order.final) return;
-        this.timer = setTimeout(async () => {
-          try { this.order = (await getJsonOrder(this.order.url)).order; } catch (e) {}
-          this.follow();
-        }, 2000);
-      },
-      reset() { clearTimeout(this.timer); this.order = null; this.quote = null; this.form.amount = ''; this.form.note = ''; },
-    };
-  }
-  async function getJsonOrder(url) {
-    const res = await fetch(url, { headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' });
-    if (!res.ok) throw new Error(res.status);
-    return res.json();
-  }
-</script>
 @endsection

@@ -1,5 +1,6 @@
 {{-- Dashboard layout. Staff get the admin dashboard; customers (personal, merchant, business, developer) get the
-     Sharet app look: always dark, landing-page fonts (Boldonse, Inter Tight, Geist Mono), lime on black, phone tab bar. --}}
+     Sharet app look: bundled fonts (Inter Tight text, Outfit numbers), lime accents, light paper or near-black
+     (the same toggle as staff), a top bar instead of a sidebar, and a phone tab bar. --}}
 @php $customer = \App\Support\DashboardNav::isCustomer(auth()->user()); @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -31,7 +32,6 @@
     {{-- Light/dark before first paint: saved choice, else the device setting (no white flash on dark phones) --}}
     <script>
         (function () {
-            @if ($customer) document.documentElement.classList.add('dark'); return; @endif
             var saved = null;
             try { saved = JSON.parse(localStorage.getItem('darkMode')); } catch (e) {}
             var dark = saved === null ? window.matchMedia('(prefers-color-scheme: dark)').matches : saved;
@@ -40,12 +40,6 @@
     </script>
     <style>[x-cloak]{display:none!important}</style>
 
-    @if ($customer)
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&family=Inter+Tight:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
-    @endif
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- Instant page changes: the browser fetches a link's page when you hover it (Chrome/Edge; others ignore) --}}
     <script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/logout","/t","/*\\?*","/admin/emails/*"]}},{"not":{"selector_matches":"[data-no-prefetch], [target=_blank]"}}]},"eagerness":"moderate"}]}</script>
@@ -330,19 +324,20 @@
 </head>
 
 @if ($customer)
-<body class="sharet-app min-h-screen bg-[#0A0A0C] text-[#F4F4F0] antialiased" x-data="{ darkMode: true, sidebarToggle: false }">
-<a href="#main" class="sr-only z-[100003] rounded-lg bg-[#D4FF3D] px-4 py-2 text-sm font-semibold text-[#050507] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
-<div class="flex min-h-screen">
-    @include('partials.customer.sidebar')
-    <div class="flex min-w-0 flex-1 flex-col">
-        @include('partials.customer.topbar')
-        <main id="main" class="flex-1 px-4 pb-28 pt-5 md:px-8 md:pb-10 md:pt-7" tabindex="-1">
-            @yield('content')
-            {{ $slot ?? '' }}
-        </main>
+<body class="sharet-app bg-app-bg text-app-ink antialiased"
+      x-data="{ darkMode: document.documentElement.classList.contains('dark'), sidebarToggle: false }"
+      x-init="$watch('darkMode', v => { document.documentElement.classList.toggle('dark', v); localStorage.setItem('darkMode', JSON.stringify(v)) })">
+<a href="#main" class="sr-only z-[100003] rounded-lg bg-app-lime px-4 py-2 text-sm font-semibold text-[#050507] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
+@include('partials.customer.topbar')
+<main id="main" tabindex="-1">
+    {{-- A personal app, not a back office: no sidebar, full width; room for the tab bar on phones --}}
+    <div class="w-full px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-8 2xl:px-8">
+        @yield('content')
+        {{ $slot ?? '' }}
     </div>
-</div>
+</main>
 @include('partials.customer.tabbar')
+@include('pay.partials.detail')
 @else
 {{-- sidebarToggle: from tablet width up the sidebar is a column beside the content (true = collapsed to icons; tablets
      start collapsed, the choice is remembered on desktop). On phones it is a drawer (true = open).

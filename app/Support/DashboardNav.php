@@ -134,19 +134,29 @@ class DashboardNav
         return $user !== null && ! $user->hasAnyRole(self::OPS);
     }
 
-    /** The lane's main action for the phone tab bar: [label, route, icon]. */
-    public static function laneAction(?User $user): array
-    {
-        return match ($user?->intent) {
-            'merchant' => ['Accept', 'merchant.accept', 'banknotes'],
-            'business' => ['Pay', 'business.pay', 'paper-airplane'],
-            'techie' => ['API', 'api-keys.index', 'key'],
-            default => ['Send', 'wallet.transfer', 'paper-airplane'],
-        };
-    }
-
     /** Groups this user may see, each item resolved to url/active/ready. */
     public static function for(?User $user): array
+    {
+        return self::isCustomer($user) ? self::customer() : self::staff($user);
+    }
+
+    /**
+     * The customer app's menu: transactions and the website. The dashboard, where everything else starts, is the logo
+     * (and Home on the phone tab bar). Profile and settings live in the header's account menu.
+     */
+    protected static function customer(): array
+    {
+        $items = [
+            ['label' => 'Transactions', 'route' => 'pay.index', 'icon' => 'arrows-right-left', 'active' => ['pay.*']],
+            ['label' => 'Sharet website', 'route' => 'home', 'icon' => 'globe-alt'],
+        ];
+
+        return [['title' => 'Menu', 'items' => array_map(fn ($i) => $i + [
+            'ready' => true, 'url' => route($i['route']), 'current' => request()->routeIs(...($i['active'] ?? [$i['route']])),
+        ], $items)]];
+    }
+
+    protected static function staff(?User $user): array
     {
         $out = [];
         $soon = [];

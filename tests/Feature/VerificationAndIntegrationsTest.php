@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Integrations\Contracts\IdReader;
 use App\Models\Integration;
 use App\Models\User;
 use App\Services\Integrations;
@@ -24,32 +25,45 @@ class VerificationAndIntegrationsTest extends TestCase
         return $user;
     }
 
-    public function test_basic_is_the_mpesa_number_and_bank_grade_needs_details_photos_and_signature(): void
+    public function test_verified_is_the_mpesa_number_id_and_selfies_and_bank_grade_adds_details_and_signature(): void
     {
         Storage::fake('local');
+        $this->app->instance(IdReader::class, new class implements IdReader
+        {
+            public function read(string $path, string $side): array
+            {
+                return $side === 'id_front' ? ['full_name' => 'Jane Wanjiru Doe', 'id_number' => '12345678', 'date_of_birth' => '1990-01-01', 'sex' => 'female'] : [];
+            }
+        });
         $user = User::factory()->create(['onboarding_status' => 'active', 'phone' => null]);
         $this->actingAs($user)->getJson('/profile/data')->assertJsonPath('level.key', 'none');
 
         $user->update(['phone' => '+254711222333']);
-        $this->getJson('/profile/data')->assertJsonPath('level.key', 'basic');
+        $this->getJson('/profile/data')->assertJsonPath('level.key', 'none'); // the number alone no longer verifies
+
+        // Too small an ID photo is refused
+        $this->postJson('/profile/documents/id_front', ['file' => UploadedFile::fake()->image('id.jpg', 400, 300)])->assertStatus(422);
+
+        $this->postJson('/profile/documents/id_front', ['file' => UploadedFile::fake()->image('id_front.jpg', 1600, 1000)])
+            ->assertOk()->assertJsonPath('read.id_number', '12345678')->assertJsonPath('verified', false);
+        $this->postJson('/profile/documents/id_back', ['file' => UploadedFile::fake()->image('id_back.jpg', 1600, 1000)])->assertOk();
+        $png = fn ($w, $h) => 'data:image/png;base64,'.base64_encode(UploadedFile::fake()->image('x.png', $w, $h)->getContent());
+        foreach (['selfie_center', 'selfie_left', 'selfie_right'] as $type) {
+            $last = $this->postJson("/profile/documents/$type", ['image' => $png(800, 600)])->assertOk();
+        }
+        $last->assertJsonPath('verified', true);
+        $this->assertSame('basic', $user->fresh()->kyc_level);
+        $this->getJson('/profile/data')->assertJsonPath('level.label', 'Verified')
+            ->assertJsonPath('kyc.id_number', '12345678')->assertJsonPath('kyc.date_of_birth', '1990-01-01')
+            ->assertJsonPath('kyc.full_name', 'Jane Wanjiru Doe')->assertJsonPath('kyc.id_type', 'national_id');
 
         $this->putJson('/profile/verification', [
             'id_type' => 'national_id', 'id_number' => '12345678', 'date_of_birth' => '1990-01-01', 'kra_pin' => 'A012345678Z',
             'nationality' => 'Kenyan', 'county' => 'Nairobi', 'town' => 'Westlands', 'address' => 'Mpaka Rd', 'occupation' => 'Engineer',
             'income_band' => '50k_150k', 'source_of_funds' => 'salary', 'next_of_kin_name' => 'Jane', 'next_of_kin_phone' => '+254700000009', 'pep' => false,
         ])->assertOk();
-        $this->assertSame('basic', $user->fresh()->kyc_level); // photos still missing
+        $this->assertSame('basic', $user->fresh()->kyc_level); // signature still missing
 
-        // Too small an ID photo is refused
-        $this->postJson('/profile/documents/id_front', ['file' => UploadedFile::fake()->image('id.jpg', 400, 300)])->assertStatus(422);
-
-        foreach (['id_front', 'id_back'] as $type) {
-            $this->postJson("/profile/documents/$type", ['file' => UploadedFile::fake()->image("$type.jpg", 1600, 1000)])->assertOk();
-        }
-        $png = fn ($w, $h) => 'data:image/png;base64,'.base64_encode(UploadedFile::fake()->image('x.png', $w, $h)->getContent());
-        foreach (['selfie_center', 'selfie_left', 'selfie_right'] as $type) {
-            $this->postJson("/profile/documents/$type", ['image' => $png(800, 600)])->assertOk();
-        }
         $this->postJson('/profile/documents/signature', ['image' => $png(600, 200)])->assertOk();
 
         $this->assertSame('standard', $user->fresh()->kyc_level);

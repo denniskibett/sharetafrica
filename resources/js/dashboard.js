@@ -104,7 +104,7 @@ export function chart({ url = null, options = null, params = {}, height = 300 } 
             this.empty = !series.length || series.every((s) => (typeof s === 'number' ? s === 0 : !(s.data ?? []).some((v) => Number(v?.y ?? v) > 0)));
             const t = this.theme();
             const opts = {
-                colors: PALETTE, dataLabels: { enabled: false }, legend: { position: 'top', horizontalAlign: 'left', fontFamily: 'Outfit' },
+                colors: PALETTE, dataLabels: { enabled: false }, legend: { position: 'top', horizontalAlign: 'left', fontFamily: 'Outfit Variable, Outfit' },
                 stroke: { curve: 'smooth', width: spec?.type === 'bar' ? 0 : 2 },
                 plotOptions: { bar: { borderRadius: 4, columnWidth: '45%', borderRadiusApplication: 'end' }, pie: { donut: { size: '68%' } } },
                 fill: spec?.type === 'area' ? { type: 'gradient', gradient: { opacityFrom: 0.35, opacityTo: 0 } } : {},
@@ -112,7 +112,7 @@ export function chart({ url = null, options = null, params = {}, height = 300 } 
                 yaxis: { labels: { formatter: (v) => (Number.isInteger(v) ? v.toLocaleString() : v) } },
                 ...spec,
                 ...t,
-                chart: { height, fontFamily: 'Outfit', toolbar: { show: false }, zoom: { enabled: false }, ...t.chart, ...(spec?.chart ?? {}), type: spec?.type ?? 'bar' },
+                chart: { height, fontFamily: 'Outfit Variable, Outfit', toolbar: { show: false }, zoom: { enabled: false }, ...t.chart, ...(spec?.chart ?? {}), type: spec?.type ?? 'bar' },
             };
             if (this.instance) { this.instance.destroy(); this.instance = null; }
             if (this.empty) return;

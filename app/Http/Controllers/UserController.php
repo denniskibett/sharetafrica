@@ -130,7 +130,7 @@ class UserController extends Controller
             'company' => $user->company?->name,
             'self' => $user->id === $request->user()->id,
             'waiting' => $user->onboarding_status === 'waiting_list',
-            'level' => ['key' => Kyc::refreshLevel($user), 'label' => ['none' => 'Not verified', 'basic' => 'Basic · M-Pesa', 'standard' => 'Bank grade'][$user->kyc_level ?? 'none']] + $progress,
+            'level' => ['key' => Kyc::refreshLevel($user), 'label' => ['none' => 'Not verified', 'basic' => 'Verified', 'standard' => 'Bank grade'][$user->kyc_level ?? 'none']] + $progress,
             'details' => collect([
                 ['Phone (M-Pesa)', $user->phone], ['Email', $user->email], ['Country', $user->country], ['Town', $user->city],
                 ['ID document', isset($kyc['id_type']) ? ucwords(str_replace('_', ' ', $kyc['id_type'])) : null], ['ID number', $mask($kyc['id_number'] ?? null)],

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * quoted → collecting → paying → paid
  *                    ↘ failed            ↘ refunding → refunded  (or refund_failed: ops)
  * quoted → expired
+ * Wallet-funded orders skip collecting (quoted → paying); top-ups (destination_type "wallet") end at paid once collected.
  */
 class RampOrder extends Model
 {
@@ -55,6 +56,8 @@ class RampOrder extends Model
             'paybill' => 'Paybill '.($d['paybill'] ?? '').' · account '.($d['account'] ?? ''),
             'till' => 'Till '.($d['till'] ?? ''),
             'bank' => (config('pricing.banks.'.($d['bank'] ?? '')) ?? 'Bank').' · '.($d['account'] ?? ''),
+            'wallet' => 'Your Sharet wallet',
+            'sharet' => '@'.($d['handle'] ?? '').' · '.($d['name'] ?? ''),
             default => '—',
         };
     }
@@ -65,7 +68,7 @@ class RampOrder extends Model
             'quoted' => ['Quote', 'neutral'],
             'collecting' => ['Waiting for M-PESA PIN', 'warning'],
             'paying' => ['Sending', 'info'],
-            'paid' => ['Paid', 'success'],
+            'paid' => [$this->destination_type === 'wallet' ? 'Added to wallet' : 'Paid', 'success'],
             'failed' => ['Not paid', 'error'],
             'refunding' => ['Refunding', 'warning'],
             'refunded' => ['Refunded', 'neutral'],
@@ -75,14 +78,36 @@ class RampOrder extends Model
         };
     }
 
-    public function present(): array
+    /** A standard icon for a progress step, from what it says (works for steps saved before icons existed). */
+    public static function stepIcon(string $text): string
+    {
+        return match (true) {
+            (bool) preg_match('/^(Could not|Not paid|Refund could not)/', $text) => 'x-circle',
+            (bool) preg_match('/expired/i', $text) => 'clock',
+            (bool) preg_match('/(Refund|back in your wallet)/', $text) => 'arrow-uturn-left',
+            (bool) preg_match('/^(Received by|Added to your wallet|Paid by)/', $text) => 'check-circle',
+            (bool) preg_match('/prompt sent/', $text) => 'device-phone-mobile',
+            (bool) preg_match('/^(Taken from your wallet|Sent from your wallet|Sending)/', $text) => 'paper-airplane',
+            default => 'document-text', // quote ready, adding money
+        };
+    }
+
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** As $viewer sees it: the recipient of a transfer sees where it came from, not the sender's number. */
+    public function present(?User $viewer = null): array
     {
         [$label, $tone] = $this->statusLabel();
+        $incoming = $viewer && $this->recipient_user_id === $viewer->id;
 
         return [
             'id' => $this->id,
             'uuid' => $this->uuid,
-            'recipient' => $this->recipient(),
+            'recipient' => $incoming ? 'From @'.($this->sender?->handle ?? 'sharet').' · '.$this->sender?->name : $this->recipient(),
+            'incoming' => $incoming,
             'note' => $this->note,
             'amount' => Money::format($this->amount),
             'fee' => Money::format($this->fee),
@@ -93,9 +118,33 @@ class RampOrder extends Model
             'state' => ['label' => $label, 'tone' => $tone],
             'final' => $this->final(),
             'failure' => $this->failure,
-            'payer' => $this->payer_phone,
+            'payer' => $incoming ? null : $this->payer_phone,
+            'funding' => $this->funding,
+            'top_up' => $this->destination_type === 'wallet',
+            'transfer' => $this->destination_type === 'sharet',
+            'withdrawal' => $this->funding === 'wallet' && $this->destination_type === 'phone' && $this->destination['phone'] === $this->payer_phone,
+            'in' => $in = $incoming || $this->destination_type === 'wallet',
+            'signed' => ($in ? '+' : '−').Money::format($in ? $this->amount : $this->total),
+            // colour of the amount: in (green), out (red), pending (amber, still moving), none (failed, refunded, expired)
+            'flow' => match (true) {
+                in_array($this->status, ['failed', 'refunded', 'expired', 'quoted'], true) => 'none',
+                ! $this->final() => 'pending',
+                default => $in ? 'in' : 'out',
+            },
+            'title' => match (true) {
+                $incoming => 'From @'.($this->sender?->handle ?? 'sharet'),
+                $this->destination_type === 'wallet' => 'Added from M-PESA',
+                $this->funding === 'wallet' && $this->destination_type === 'phone' && $this->destination['phone'] === $this->payer_phone => 'Withdrawn to M-PESA',
+                default => $this->recipient(),
+            },
+            // heroicon (outline) for the list and receipt, one per kind of payment
+            'icon' => $incoming ? 'arrow-down-left' : match ($this->destination_type) {
+                'wallet' => 'arrow-down-tray', 'sharet' => 'at-symbol', 'paybill' => 'building-office', 'till' => 'shopping-bag',
+                'bank' => 'building-library', default => $this->funding === 'wallet' && ($this->destination['phone'] ?? null) === $this->payer_phone ? 'banknotes' : 'device-phone-mobile',
+            },
+            'receipt' => $this->status === 'paid' ? collect($this->timeline)->last()['text'] ?? null : null,
             'quote_expires_at' => $this->quote_expires_at?->toIso8601String(),
-            'timeline' => $this->timeline ?? [],
+            'timeline' => array_map(fn ($e) => $e + ['icon' => self::stepIcon($e['text'])], $this->timeline ?? []),
             'date' => $this->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
             'url' => route('pay.show', $this->uuid),
             'sandbox' => $this->rail === 'simulator',

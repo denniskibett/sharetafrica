@@ -559,38 +559,58 @@ span.flatpickr-weekday,
 .prose-sharet a { text-decoration: underline; }
 
 /* ===== Customer app (body.sharet-app): the landing page's look for personal, merchant, business and developer
-   accounts. Shared dashboard components keep their markup; these rules swap their dark greys for the brand
-   neutrals (#0A0A0C page, #111114 card, #18181C tile), the fonts for Inter Tight / Boldonse / Geist Mono, and
-   blues and violets for lime. ===== */
-.sharet-app { font-family: 'Inter Tight', system-ui, sans-serif; }
-.sharet-app .app-mono, .sharet-app code, .sharet-app pre { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; }
-.sharet-app .app-display, .sharet-app main h1 { font-family: 'Boldonse', 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: 0; line-height: 1.45; }
-.sharet-app main h1 { font-size: 22px; }
-@media (min-width: 768px) { .sharet-app main h1 { font-size: 26px; } }
-.sharet-app main h4 { font-family: 'Geist Mono', ui-monospace, monospace; font-weight: 500; letter-spacing: -0.01em; }
+   accounts, in light (design paper, never plain white) or dark (near-black). Two fonts only, bundled: Inter Tight
+   for text, Outfit for numbers and headings (cheap on prepaid data). The palette lives in the --app-*
+   channels below (Tailwind: bg-app-panel, text-app-muted, border-app-line...). Shared dashboard components keep
+   their markup; these rules swap their greys for the palette, the fonts for Inter Tight / Boldonse / Geist Mono,
+   and blues and violets for lime. ===== */
+.sharet-app {
+  --app-bg: 236 236 230; --app-panel: 244 244 240; --app-tile: 228 228 221; --app-raised: 218 218 210;
+  --app-ink: 10 10 12; --app-soft: 58 58 63; --app-muted: 107 107 102; --app-faint: 160 160 152;
+  --app-accent: 77 107 0; --app-danger: 200 40 40;
+  --app-in: 21 128 61; --app-out: 190 40 40; --app-wait: 234 88 12; --app-info: 3 105 161;
+  font-family: 'Inter Tight Variable', 'Inter Tight', system-ui, sans-serif;
+}
+.dark .sharet-app {
+  --app-bg: 10 10 12; --app-panel: 17 17 20; --app-tile: 24 24 28; --app-raised: 35 35 40;
+  --app-ink: 244 244 240; --app-soft: 201 201 194; --app-muted: 128 128 122; --app-faint: 90 90 85;
+  --app-accent: 212 255 61; --app-danger: 255 122 122;
+  --app-in: 74 222 128; --app-out: 248 113 113; --app-wait: 251 146 60; --app-info: 56 189 248;
+}
+.sharet-app .app-mono { font-weight: 500; letter-spacing: 0.08em; } /* small labels: no extra font file, just spacing */
+.sharet-app code, .sharet-app pre { font-family: ui-monospace, Menlo, monospace; }
+.sharet-app .app-display, .sharet-app main h1 { font-family: 'Outfit Variable', 'Outfit', sans-serif; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+.sharet-app main h1 { font-size: 24px; }
+@media (min-width: 768px) { .sharet-app main h1 { font-size: 30px; } }
+.sharet-app main h4 { font-weight: 600; letter-spacing: -0.01em; }
+/* Numbers (amounts, balances, times, counts) are Outfit semibold, as in the journey designs (the wallet balance bold);
+   mark them tabular-nums or app-num */
+.sharet-app .tabular-nums, .sharet-app .app-num { font-family: 'Outfit Variable', 'Outfit', sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.sharet-app .tabular-nums.font-bold { font-weight: 700; } /* the wallet balance */
 
-/* Surfaces */
-.sharet-app .dark\:bg-white\/\[0\.03\], .sharet-app .dark\:bg-gray-900, .sharet-app .dark\:bg-gray-800 { background-color: #111114 !important; }
-.sharet-app .dark\:bg-white\/5, .sharet-app .dark\:bg-white\/\[0\.06\], .sharet-app .dark\:hover\:bg-white\/5:hover, .sharet-app .dark\:hover\:bg-white\/\[0\.02\]:hover { background-color: #18181C !important; }
-.sharet-app thead.dark\:bg-gray-900, .sharet-app .dark\:bg-gray-950 { background-color: #0A0A0C !important; }
-.sharet-app .dark\:border-gray-800, .sharet-app .dark\:border-gray-700, .sharet-app .dark\:divide-gray-800 > * + * { border-color: rgba(244, 244, 240, 0.08) !important; }
+/* Surfaces (both modes: an element carries its light and dark class, the palette decides) */
+.sharet-app .bg-white, .sharet-app .dark\:bg-white\/\[0\.03\], .sharet-app .dark\:bg-gray-900, .sharet-app .dark\:bg-gray-800 { background-color: rgb(var(--app-panel)) !important; }
+.sharet-app .bg-gray-50, .sharet-app .bg-gray-100, .sharet-app .dark\:bg-white\/5, .sharet-app .dark\:bg-white\/\[0\.06\], .sharet-app .hover\:bg-gray-50:hover, .sharet-app .dark\:hover\:bg-white\/5:hover, .sharet-app .dark\:hover\:bg-white\/\[0\.02\]:hover { background-color: rgb(var(--app-tile)) !important; }
+.sharet-app thead.dark\:bg-gray-900, .sharet-app .dark\:bg-gray-950 { background-color: rgb(var(--app-bg)) !important; }
+.sharet-app .border-gray-100, .sharet-app .border-gray-200, .sharet-app .border-gray-300, .sharet-app .dark\:border-gray-800, .sharet-app .dark\:border-gray-700, .sharet-app .divide-gray-100 > * + *, .sharet-app .dark\:divide-gray-800 > * + * { border-color: rgb(var(--app-ink) / 0.09) !important; }
 .sharet-app .rounded-2xl { border-radius: 16px; }
 
 /* Text */
-.sharet-app .dark\:text-white, .sharet-app .dark\:text-white\/90 { color: #F4F4F0 !important; }
-.sharet-app .dark\:text-gray-300, .sharet-app .dark\:text-gray-400 { color: #C9C9C2 !important; }
-.sharet-app .text-gray-500 { color: #80807A !important; }
+.sharet-app .text-gray-900, .sharet-app .text-gray-800, .sharet-app .dark\:text-white, .sharet-app .dark\:text-white\/90 { color: rgb(var(--app-ink)) !important; }
+.sharet-app .text-gray-700, .sharet-app .text-gray-600, .sharet-app .dark\:text-gray-300, .sharet-app .dark\:text-gray-400 { color: rgb(var(--app-soft)) !important; }
+.sharet-app .text-gray-500, .sharet-app .text-gray-400 { color: rgb(var(--app-muted)) !important; }
 
 /* Accents: lime instead of violet/blue; lime surfaces always carry dark text */
 .sharet-app .bg-primary, .sharet-app .dark\:bg-\[\#D4FF3D\] { background-color: #D4FF3D !important; color: #050507 !important; }
-.sharet-app .focus\:border-violet-300:focus, .sharet-app .focus\:border-violet-400:focus { border-color: #D4FF3D !important; }
-.sharet-app .focus\:ring-violet-500\/10:focus { --tw-ring-color: rgba(212, 255, 61, 0.15) !important; }
-.sharet-app input, .sharet-app select, .sharet-app textarea { color-scheme: dark; }
+.sharet-app .focus\:border-violet-300:focus, .sharet-app .focus\:border-violet-400:focus { border-color: rgb(var(--app-accent)) !important; }
+.sharet-app .focus\:ring-violet-500\/10:focus { --tw-ring-color: rgba(212, 255, 61, 0.2) !important; }
+.dark .sharet-app input, .dark .sharet-app select, .dark .sharet-app textarea { color-scheme: dark; }
 
 /* Phones: comfortable tap targets and no zoom-on-focus in iOS */
 @media (max-width: 767px) {
   .sharet-app input:not([type=checkbox]):not([type=radio]), .sharet-app select, .sharet-app textarea { font-size: 16px; }
   .sharet-app main .rounded-2xl { border-radius: 20px; }
 }
-.sharet-app .bg-gray-900:not(.dark\:bg-\[\#D4FF3D\]) { background-color: #232328; }
+.sharet-app .bg-gray-900:not(.dark\:bg-\[\#D4FF3D\]) { background-color: #0A0A0C; color: #F4F4F0; }
+.dark .sharet-app .bg-gray-900:not(.dark\:bg-\[\#D4FF3D\]) { background-color: #232328; }
 .sharet-app .shadow-theme-xs { box-shadow: none; }

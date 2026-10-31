@@ -10,6 +10,7 @@ use App\Ledger\Money;
 use App\Models\RailRequest;
 use App\Models\RampOrder;
 use App\Models\User;
+use App\Support\Handle;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -18,10 +19,15 @@ use Throwable;
 /**
  * Personal "pay anyone" orders (plan U3): quote → collect from the payer's M-PESA → pay the recipient → paid,
  * or a full refund if the payout fails. The only place an order changes state.
+ * Variations: funding "wallet" pays from the payer's Sharet wallet (2100) instead of collecting first (a withdrawal
+ * is a wallet payment to your own M-PESA or bank); a top-up (destination_type "wallet") collects from M-PESA into the
+ * wallet and stops there; a transfer (destination_type "sharet") moves wallet to wallet at once, no rail.
  *
  * Money rules:
  *  - The ledger posts only on a rail's final answer: collection confirmed → Dr rail / Cr 2200 order;
  *    payout confirmed → Dr 2200 / Cr rail, 4100 fee, 2300 excise, 4900 rounding; refund confirmed → Dr 2200 / Cr rail.
+ *  - Wallet orders: confirm → Dr 2100 wallet / Cr 2200; a failed payout returns it (Dr 2200 / Cr 2100), no rail.
+ *    Top-ups: collection confirmed → Dr rail / Cr 2100 wallet.
  *  - Each order has its own 2200 account, which is back to 0.00 when the order ends (ledger:check warns if not).
  *  - Rails are never called inside a database transaction, and nothing is ever re-sent: no answer = status check.
  *  - apply() is idempotent, so a callback and a status check arriving together post once.
@@ -32,28 +38,20 @@ class RampOrders
 
     // ---------------------------------------------------------------- customer steps
 
-    public function quote(User $user, string $type, array $destination, string $amount, ?string $note = null): RampOrder
+    public function quote(User $user, string $type, array $destination, string $amount, ?string $note = null, string $funding = 'mpesa'): RampOrder
     {
-        $payer = filled($user->phone) ? Destination::phone((string) $user->phone, 'payer') : throw ValidationException::withMessages(['payer' => 'Add your M-PESA number to your profile first.']);
+        $payer = $this->payer($user);
         [$dest, $party] = Destination::normalise($type, $destination);
-
-        try {
-            $cents = Money::cents($amount);
-        } catch (LedgerException) {
-            throw ValidationException::withMessages(['amount' => 'Enter an amount like 1,500 (whole shillings).']);
-        }
-        if ($cents % 100 !== 0) {
-            throw ValidationException::withMessages(['amount' => 'M-PESA sends whole shillings: leave out the cents.']);
-        }
-        if ($cents < config('pricing.min_amount')) {
-            throw ValidationException::withMessages(['amount' => 'The smallest payment is KES '.Money::format(config('pricing.min_amount')).'.']);
-        }
-        if ($type === 'phone' && $party === $payer) {
+        $cents = $this->cents($amount);
+        if ($type === 'phone' && $party === $payer && $funding !== 'wallet') {
             throw ValidationException::withMessages(['phone' => 'That is your own number.']);
         }
 
         $price = Pricing::quote($cents);
         $this->checkLimits($user, $price['total']);
+        if ($funding === 'wallet' && $this->walletBalance($user) < $price['total']) {
+            throw ValidationException::withMessages(['amount' => 'Your wallet has KES '.Money::format($this->walletBalance($user)).'. Add money or pay from M-PESA.']);
+        }
 
         return RampOrder::create([
             'uuid' => (string) Str::uuid(),
@@ -62,6 +60,7 @@ class RampOrders
             'destination_type' => $type,
             'destination' => $dest,
             'payer_phone' => $payer,
+            'funding' => $funding === 'wallet' ? 'wallet' : 'mpesa',
             'amount' => $cents,
             'currency' => config('ledger.currency'),
             'note' => $note ? Str::limit(strip_tags($note), 140, '') : null,
@@ -71,10 +70,87 @@ class RampOrders
         ] + $price);
     }
 
-    /** The payer confirms: we ask their M-PESA to pay (STK push). */
+    /** "Add money": collect from the payer's M-PESA into their wallet. No fee. Confirmed like any order. */
+    public function topUp(User $user, string $amount): RampOrder
+    {
+        $payer = $this->payer($user);
+        $cents = $this->cents($amount);
+        $this->checkLimits($user, $cents);
+
+        return RampOrder::create([
+            'uuid' => (string) Str::uuid(),
+            'user_id' => $user->id,
+            'rail' => $this->rails->default(),
+            'destination_type' => 'wallet',
+            'destination' => ['wallet' => 'Sharet wallet'],
+            'payer_phone' => $payer,
+            'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents,
+            'currency' => config('ledger.currency'),
+            'status' => 'quoted',
+            'quote_expires_at' => now()->addMinutes(config('pricing.quote_minutes')),
+            'timeline' => [$this->event('Adding '.Money::format($cents).' to your wallet')],
+        ]);
+    }
+
+    /** Wallet to wallet, to another Sharet user's @handle. Immediate, no fee, no rail: Dr 2100 sender / Cr 2100 recipient. */
+    public function transfer(User $from, string $handle, string $amount, ?string $note = null): RampOrder
+    {
+        $to = Handle::find($handle) ?? throw ValidationException::withMessages(['handle' => 'No Sharet wallet has that @name.']);
+        if ($to->is($from)) {
+            throw ValidationException::withMessages(['handle' => 'That is your own wallet.']);
+        }
+        $cents = $this->cents($amount);
+        $this->checkLimits($from, $cents);
+
+        try {
+            return DB::transaction(function () use ($from, $to, $cents, $note) {
+                $o = RampOrder::create([
+                    'uuid' => (string) Str::uuid(), 'user_id' => $from->id, 'recipient_user_id' => $to->id, 'rail' => 'internal',
+                    'destination_type' => 'sharet', 'destination' => ['handle' => Handle::for($to), 'name' => $to->name],
+                    'payer_phone' => (string) $from->phone, 'funding' => 'wallet',
+                    'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents, 'currency' => config('ledger.currency'),
+                    'note' => $note ? Str::limit(strip_tags($note), 140, '') : null, 'status' => 'paid', 'quote_expires_at' => now(),
+                    'timeline' => [$this->event('Sent from your wallet to @'.Handle::for($to))],
+                ]);
+                $this->ledger->post("transfer:{$o->uuid}", 'wallet_transfer', [
+                    Ledger::debit($this->ledger->account('2100', $from), $cents),
+                    Ledger::credit($this->ledger->account('2100', $to), $cents),
+                ], ['source' => $o, 'memo' => '@'.Handle::for($from).' to @'.Handle::for($to)]);
+
+                return $o;
+            });
+        } catch (LedgerException $e) {
+            throw $e->reason === 'insufficient_funds'
+                ? ValidationException::withMessages(['amount' => 'Your wallet has KES '.Money::format($this->walletBalance($from)).'.']) : $e;
+        }
+    }
+
+    /** What the user's wallet holds now (cents). */
+    public function walletBalance(User $user): int
+    {
+        return $this->ledger->account('2100', $user)->available();
+    }
+
+    /** The payer confirms: we ask their M-PESA to pay (STK push), or take it from their wallet and pay at once. */
     public function confirm(RampOrder $order): RampOrder
     {
-        $request = DB::transaction(function () use ($order) {
+        try {
+            $request = $this->startConfirmed($order);
+        } catch (LedgerException $e) {
+            throw $e->reason === 'insufficient_funds'
+                ? ValidationException::withMessages(['amount' => 'Your wallet no longer has enough for this payment.']) : $e;
+        }
+        if ($request === 'expired') {
+            throw ValidationException::withMessages(['order' => 'This quote has expired. Get a new one.']);
+        }
+        $request && $this->send($request);
+
+        return $order->fresh();
+    }
+
+    private function startConfirmed(RampOrder $order): RailRequest|string|null
+    {
+        return DB::transaction(function () use ($order) {
             $o = RampOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
             if ($o->status !== 'quoted') {
                 return null; // already confirmed: confirming twice does nothing
@@ -85,18 +161,23 @@ class RampOrders
                 return 'expired';
             }
             $this->checkLimits($o->user, $o->total, $o->id);
+            if ($o->funding === 'wallet') {
+                $this->ledger->post("ramp:{$o->uuid}:funded", 'wallet_spend', [
+                    Ledger::debit($this->ledger->account('2100', $o->user), $o->total),
+                    Ledger::credit($this->ledger->account('2200', $o), $o->total),
+                ], ['source' => $o, 'memo' => "From wallet to {$o->recipient()}"]);
+                $req = $this->newRequest($o, 'payout', $this->party($o), $o->amount);
+                $o->payout_request_id = $req->id;
+                $this->move($o, 'paying', 'Taken from your wallet. Sending to '.$o->recipient());
+
+                return $req;
+            }
             $req = $this->newRequest($o, 'collect', $o->payer_phone, $o->total);
             $o->collect_request_id = $req->id;
             $this->move($o, 'collecting', 'M-PESA prompt sent to '.$o->payer_phone);
 
             return $req;
         });
-        if ($request === 'expired') {
-            throw ValidationException::withMessages(['order' => 'This quote has expired. Get a new one.']);
-        }
-        $request && $this->send($request);
-
-        return $order->fresh();
     }
 
     /** Ask the rail about whatever the order is waiting for. Safe to call any time (screens poll it). */
@@ -201,10 +282,16 @@ class RampOrders
 
                 return null;
             }
+            $topUp = $o->destination_type === 'wallet';
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
                 Ledger::debit($this->ledger->account($this->rails->account($o->rail, 'collect')), $o->total),
-                Ledger::credit($orderAcct, $o->total),
-            ], ['source' => $o, 'memo' => "Collected from {$o->payer_phone} · M-PESA {$req->receipt}"]);
+                Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $o->total),
+            ], ['source' => $o, 'memo' => ($topUp ? 'Wallet top-up from ' : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
+            if ($topUp) {
+                $this->move($o, 'paid', "Added to your wallet · M-PESA {$req->receipt}");
+
+                return null;
+            }
             $payout = $this->newRequest($o, 'payout', $this->party($o), $o->amount);
             $o->payout_request_id = $payout->id;
             $this->move($o, 'paying', "Paid by M-PESA {$req->receipt}. Sending to {$o->recipient()}");
@@ -223,6 +310,15 @@ class RampOrders
                 ]));
                 $this->ledger->post("ramp:{$o->uuid}:paid", 'ramp_payout', $legs, ['source' => $o, 'memo' => "Paid {$o->recipient()} · ref {$req->receipt}"]);
                 $this->move($o, 'paid', "Received by {$o->recipient()} · ref {$req->receipt}");
+
+                return null;
+            }
+            if ($o->funding === 'wallet') {
+                $this->ledger->post("ramp:{$o->uuid}:refunded", 'wallet_refund', [
+                    Ledger::debit($orderAcct, $o->total),
+                    Ledger::credit($this->ledger->account('2100', $o->user), $o->total),
+                ], ['source' => $o, 'memo' => 'Returned to wallet: '.$req->failure]);
+                $this->move($o, 'refunded', "Could not pay the recipient ({$req->failure}). ".Money::format($o->total).' is back in your wallet', $req->failure);
 
                 return null;
             }
@@ -296,7 +392,31 @@ class RampOrders
         return ['at' => now()->timezone('Africa/Nairobi')->format('H:i:s'), 'text' => $text];
     }
 
-    /** Limits by KYC level, per payment and per day (config/pricing.php). */
+    private function payer(User $user): string
+    {
+        return filled($user->phone) ? Destination::phone((string) $user->phone, 'payer')
+            : throw ValidationException::withMessages(['payer' => 'Add your M-PESA number to your profile first.']);
+    }
+
+    /** "1,500" → cents, whole shillings and at least the minimum. */
+    private function cents(string $amount): int
+    {
+        try {
+            $cents = Money::cents($amount);
+        } catch (LedgerException) {
+            throw ValidationException::withMessages(['amount' => 'Enter an amount like 1,500 (whole shillings).']);
+        }
+        if ($cents % 100 !== 0) {
+            throw ValidationException::withMessages(['amount' => 'M-PESA sends whole shillings: leave out the cents.']);
+        }
+        if ($cents < config('pricing.min_amount')) {
+            throw ValidationException::withMessages(['amount' => 'The smallest amount is KES '.Money::format(config('pricing.min_amount')).'.']);
+        }
+
+        return $cents;
+    }
+
+    /** Limits by KYC level, per payment and per day (config/pricing.php). Top-ups count only against their own payment. */
     private function checkLimits(User $user, int $total, ?int $exceptOrder = null): void
     {
         $level = $user->kyc_level ?: 'none';
@@ -307,7 +427,7 @@ class RampOrders
         if ($total > $limits['per_order']) {
             throw ValidationException::withMessages(['amount' => 'Your limit per payment is KES '.Money::format($limits['per_order']).'. Upgrade your verification to send more.']);
         }
-        $today = RampOrder::where('user_id', $user->id)->where('created_at', '>=', now()->startOfDay())
+        $today = RampOrder::where('user_id', $user->id)->where('destination_type', '!=', 'wallet')->where('created_at', '>=', now()->startOfDay())
             ->whereIn('status', ['collecting', 'paying', 'paid', 'refunding'])->when($exceptOrder, fn ($q) => $q->whereKeyNot($exceptOrder))->sum('total');
         if ($today + $total > $limits['per_day']) {
             throw ValidationException::withMessages(['amount' => 'This would pass your daily limit of KES '.Money::format($limits['per_day']).'. Upgrade your verification to send more.']);

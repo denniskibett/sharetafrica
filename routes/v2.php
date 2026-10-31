@@ -28,12 +28,16 @@ Route::middleware(['auth', 'permission:admin.reconciliation'])
         Route::post('lines/{line}/park', 'park')->name('park')->whereNumber('line');
     });
 
-// Personal "Pay anyone" (personal accounts first; business on hold)
+// Personal transactions: history page + the dashboard money panel's JSON (personal accounts first; business on hold)
 Route::middleware(['auth', 'throttle:60,1'])
     ->prefix('pay')->name('pay.')->controller(PayController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::get('chart', 'chart')->name('chart');
         Route::post('quote', 'quote')->name('quote')->middleware('throttle:20,1');
+        Route::post('top-up', 'topUp')->name('top-up')->middleware('throttle:20,1');
+        Route::post('transfer', 'transfer')->name('transfer')->middleware('throttle:20,1');
+        Route::post('pin', 'pin')->name('pin')->middleware('throttle:10,1');
         Route::post('{order}/confirm', 'confirm')->name('confirm')->middleware('throttle:10,1');
         Route::get('{order}', 'show')->name('show');
     });

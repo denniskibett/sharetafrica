@@ -1,11 +1,11 @@
-{{-- Account level: Basic (M-Pesa grade) → Full (bank grade); business accounts point to Business settings. --}}
+{{-- Account level: Verified (ID and selfies) → bank grade; business accounts point to Business settings. --}}
 <x-ui.card title="Verification" subtitle="More details unlock more services. Everything you give us is encrypted.">
   <ol class="space-y-4">
     <li class="rounded-xl border p-4" :class="data.level.basic.complete ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-500/5' : 'border-gray-200 dark:border-gray-800'">
       <div class="flex items-center justify-between gap-3">
         <div>
-          <p class="font-medium text-gray-900 dark:text-white">Basic · M-Pesa account</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Your name and M-Pesa number. Send and receive across East Africa.</p>
+          <p class="font-medium text-gray-900 dark:text-white">Verified</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">M-Pesa number, ID photos and three selfies. Send and receive at basic limits.</p>
         </div>
         <span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Done' : data.level.basic.done + ' of ' + data.level.basic.of"></span>
       </div>
