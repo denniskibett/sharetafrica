@@ -83,6 +83,7 @@ class DashboardNav
                         'roles' => ['support', 'operations'], 'active' => ['admin.analytics.*']],
                     ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'document-chart-bar', 'tone' => 'violet', 'can' => 'admin.users', 'roles' => ['support', 'operations']],
                     ['label' => 'Reconciliation', 'route' => 'ops.reconciliation.index', 'icon' => 'scale', 'tone' => 'indigo'],
+                    ['label' => 'Ledger', 'route' => 'ledger.index', 'icon' => 'book-open', 'tone' => 'violet', 'can' => 'admin.reconciliation', 'active' => ['ledger.*']],
                     ['label' => 'Treasury pools', 'route' => 'ops.treasury.index', 'icon' => 'circle-stack', 'tone' => 'emerald'],
                     ['label' => 'Live rails', 'route' => 'ops.rails.index', 'icon' => 'signal', 'tone' => 'teal'],
                     ['label' => 'Support tickets', 'route' => 'ops.support.index', 'icon' => 'chat-bubble-left-right', 'tone' => 'rose'],
