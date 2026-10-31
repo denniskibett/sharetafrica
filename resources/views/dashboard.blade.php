@@ -1,7 +1,7 @@
 {{-- resources/views/dashboard.blade.php --}}
 @extends('layouts.app')
 
-@section('title', ($heading ?? 'Dashboard') . ' · Sharet Africa')
+@section('title', $heading ?? 'Dashboard')
 
 @section('content')
 <div class="container-fluid px-4 py-6">
