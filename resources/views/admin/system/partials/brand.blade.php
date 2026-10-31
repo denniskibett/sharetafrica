@@ -26,7 +26,7 @@
         <span class="flex h-16 items-center justify-center rounded-lg {{ $key === 'logo_dark' ? 'bg-gray-900' : 'bg-gray-50 dark:bg-white/5' }}">
           <img x-show="d.files.{{ $key }}" :src="d.files.{{ $key }}" alt="" class="max-h-12 max-w-full">
         </span>
-        <span class="text-xs text-gray-500">Click to replace · SVG or PNG</span>
+        <span class="text-xs text-gray-500">Click or paste to replace · SVG or PNG</span>
         <input type="file" name="{{ $key }}" accept="image/svg+xml,image/png,image/webp,image/x-icon" class="sr-only" @change="d.files.{{ $key }} = URL.createObjectURL($event.target.files[0])">
       </label>
     @endforeach

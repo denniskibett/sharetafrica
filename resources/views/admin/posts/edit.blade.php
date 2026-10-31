@@ -43,7 +43,7 @@
       <x-ui.card title="Cover image">
         <img x-show="cover" :src="cover" alt="" class="mb-4 aspect-[16/9] w-full rounded-lg object-cover">
         <input type="file" name="cover" accept="image/jpeg,image/png,image/webp" @change="cover = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : cover" class="text-sm">
-        <p class="mt-1 text-xs text-gray-500">1600×900 works best. Also used when the post is shared.</p>
+        <p class="mt-1 text-xs text-gray-500">1600×900 works best. Also used when the post is shared. Or paste an image (⌘V / Ctrl+V).</p>
         <p x-show="errors.cover" x-text="errors.cover" class="mt-1 text-xs text-red-600"></p>
       </x-ui.card>
 

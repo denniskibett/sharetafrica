@@ -245,31 +245,38 @@
     </div>
   </section>
 
-  {{-- Companies Sharet runs outside payments (list: App\Support\Seo::COMPANIES); each site carries "A Sharet company" in its footer --}}
+  {{-- Companies Sharet runs outside payments (Website › Companies); each card opens /companies/{slug}.
+       Grid: four in the first row, three in the second. Each site carries "A Sharet company" in its footer. --}}
+  @php
+    $groupCompanies = \App\Models\GroupCompany::listed()->get();
+    $words = [1 => 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+  @endphp
+  @if ($groupCompanies->isNotEmpty())
   <section id="companies">
     <div class="container container--wide">
       <div class="section-head">
         <div>
           <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Our companies</span>
-          <h2>Six businesses.<br/>One parent.</h2>
+          <h2>{{ $words[$groupCompanies->count()] ?? $groupCompanies->count() }} businesses.<br/>One parent.</h2>
         </div>
         <p class="lede">
           Outside payments, Sharet owns and runs these companies. Each one has its own site, its own team and its own customers.
         </p>
       </div>
 
-      <div class="cap-bento">
-        @foreach (\App\Support\Seo::COMPANIES as [$name, $url, $about, $kind])
-          <a class="cap-card cap-card--third" href="{{ $url }}" target="_blank" rel="noopener">
-            <span class="cap-num">{{ $kind }}</span>
-            <h3>{{ $name }}</h3>
-            <p>{{ $about }}</p>
-            <span class="label">{{ rtrim(preg_replace('#^https?://#', '', $url), '/') }} ↗</span>
+      <div class="group-grid">
+        @foreach ($groupCompanies as $c)
+          <a class="cap-card" href="{{ route('companies.show', $c->slug) }}">
+            <span class="cap-num">{{ $c->sector }}</span>
+            <h3>{{ $c->name }}</h3>
+            <p>{{ $c->tagline }}</p>
+            <span class="label">Learn more →</span>
           </a>
         @endforeach
       </div>
     </div>
   </section>
+  @endif
 
   {{-- Offices --}}
   <section class="snug">

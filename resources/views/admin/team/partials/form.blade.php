@@ -19,7 +19,7 @@
           <x-heroicon-o-arrow-up-tray class="h-5 w-5" /> Upload photo
           <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : preview">
         </label>
-        <p class="mt-2 text-xs text-gray-500">JPG, PNG or WebP, up to 4 MB. Square, head and shoulders.</p>
+        <p class="mt-2 text-xs text-gray-500">JPG, PNG or WebP, up to 4 MB. Square, head and shoulders. Or paste one (⌘V / Ctrl+V).</p>
         <p x-show="errors.photo" x-text="errors.photo" class="mt-1 text-xs text-red-600"></p>
       </div>
     </div>

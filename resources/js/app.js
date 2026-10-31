@@ -4,7 +4,7 @@ import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';
-import { dataTable, chart, alertModal, profile, kycCamera, signaturePad, checkPhoto, installHelpers } from './dashboard';
+import { dataTable, chart, alertModal, profile, kycCamera, signaturePad, checkPhoto, installHelpers, installImagePaste } from './dashboard';
 
 /**
  * Dashboard forms save in the background: sharet.send() returns the JSON reply, shows a toast,
@@ -79,6 +79,7 @@ document.addEventListener('submit', async (e) => {
 });
 
 installHelpers(window.sharet);
+installImagePaste();
 Alpine.data('dataTable', dataTable);
 Alpine.data('chart', chart);
 Alpine.data('alertModal', alertModal);

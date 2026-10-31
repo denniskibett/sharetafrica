@@ -1,6 +1,6 @@
 {{-- Bank-grade photos: ID front/back (or passport page), three camera selfies, signature.
      Photos are checked for size, light and sharpness before upload, and stored privately. --}}
-<x-ui.card title="Photos and signature" subtitle="Clear, readable photos only: all four corners of the ID in frame, no glare, no filters.">
+<x-ui.card title="Photos and signature" subtitle="Clear, readable photos only: all four corners of the ID in frame, no glare, no filters. Take a photo, choose a file, or point at a card and paste (⌘V / Ctrl+V).">
   <x-slot:actions>
     <span :class="sharet.pill(data.level.standard?.documents?.[0] === data.level.standard?.documents?.[1] ? 'success' : 'warning')"
           x-text="(data.level.standard?.documents?.[0] ?? 0) + ' of ' + (data.level.standard?.documents?.[1] ?? 0) + ' done'"></span>

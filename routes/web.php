@@ -230,6 +230,13 @@ Route::middleware(['auth', 'permission:admin.system'])->group(function () {
         Route::delete('/{member}', 'destroy')->name('destroy')->whereNumber('member');
     });
 
+    Route::prefix('admin/companies')->name('admin.group-companies.')->controller(\App\Http\Controllers\Admin\GroupCompanyController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::post('/{company}', 'update')->name('update')->whereNumber('company');
+        Route::delete('/{company}', 'destroy')->name('destroy')->whereNumber('company');
+    });
+
     Route::prefix('admin/blog')->name('admin.posts.')->controller(PostController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/new', 'create')->name('create');
@@ -241,6 +248,7 @@ Route::middleware(['auth', 'permission:admin.system'])->group(function () {
 });
 
 Route::get('/blog', [PostController::class, 'publicIndex'])->name('blog.index');
+Route::get('/companies/{slug}', [HomeController::class, 'groupCompany'])->name('companies.show')->where('slug', '[a-z0-9-]+');
 Route::get('/blog/{slug}', [PostController::class, 'publicShow'])->name('blog.show')->where('slug', '[a-z0-9-]+');
 
 /*

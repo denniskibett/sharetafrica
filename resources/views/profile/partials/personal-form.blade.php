@@ -13,6 +13,7 @@
         </label>
         <x-ui.button variant="secondary" x-show="data.user.avatar" @click="sharet.send('DELETE', '{{ route('profile.delete-avatar') }}').then(() => load())">Remove</x-ui.button>
       </div>
+      <p class="w-full text-xs text-gray-500 dark:text-gray-400">JPG, PNG or WebP, up to 2 MB. You can also paste a photo (⌘V / Ctrl+V).</p>
       <p x-show="errors.avatar" x-text="errors.avatar" class="w-full text-xs text-red-600"></p>
     </div>
 

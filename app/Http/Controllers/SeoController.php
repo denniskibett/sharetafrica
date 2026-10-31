@@ -21,6 +21,9 @@ class SeoController extends Controller
             ];
         })->values()->push(['loc' => route('blog.index'), 'lastmod' => now()->startOfDay()->toAtomString(), 'priority' => '0.7']);
 
+        foreach (\App\Models\GroupCompany::listed()->get(['slug', 'updated_at']) as $c) {
+            $urls->push(['loc' => route('companies.show', $c->slug), 'lastmod' => $c->updated_at->toAtomString(), 'priority' => '0.5']);
+        }
         foreach (\App\Models\Post::published()->latest('published_at')->get(['slug', 'updated_at']) as $post) {
             $urls->push(['loc' => route('blog.show', $post->slug), 'lastmod' => $post->updated_at->toAtomString(), 'priority' => '0.6']);
         }
@@ -54,7 +57,7 @@ class SeoController extends Controller
             '- [About Sharet]('.route('company').'): '.Seo::PAGES['company'][1],
             '- [Contact]('.route('contact').'): '.Seo::PAGES['contact'][1].' General: hello@sharet.africa. Support: support@sharet.africa. Press: press@sharet.africa.',
             '', '## Companies run by Sharet', '');
-        foreach (Seo::COMPANIES as [$name, $url, $about]) {
+        foreach (Seo::companies() as [$name, $url, $about]) {
             $lines[] = "- [$name]($url): $about";
         }
         array_push($lines, '', '## Optional', '', '- [Sitemap]('.route('sitemap').')', '');

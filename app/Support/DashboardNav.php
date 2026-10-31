@@ -110,6 +110,7 @@ class DashboardNav
                 'title' => 'Website',
                 'roles' => self::ADMIN,
                 'items' => [
+                    ['label' => 'Companies', 'route' => 'admin.group-companies.index', 'icon' => 'building-office-2', 'tone' => 'teal', 'can' => 'admin.system'],
                     ['label' => 'Team', 'route' => 'admin.team.index', 'icon' => 'user-group', 'tone' => 'rose', 'can' => 'admin.system'],
                     ['label' => 'Blog', 'route' => 'admin.posts.index', 'icon' => 'newspaper', 'tone' => 'sky', 'can' => 'admin.system', 'active' => ['admin.posts.*']],
                 ],

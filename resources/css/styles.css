@@ -1348,3 +1348,24 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; pointer-events: none
   .spec-table { display: block; max-width: 100%; overflow-x: auto; }
 }
 .section-head > * { min-width: 0; overflow-wrap: anywhere; }
+
+/* Group companies: four cards in the first row, three in the second; two per row on tablets, one on phones */
+.group-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--space-5); }
+.group-grid > * { grid-column: span 4; }
+.group-grid > :nth-child(-n+4) { grid-column: span 3; }
+@media (max-width: 1024px) { .group-grid { grid-template-columns: repeat(2, 1fr); } .group-grid > *, .group-grid > :nth-child(-n+4) { grid-column: span 1; } }
+@media (max-width: 640px) { .group-grid { grid-template-columns: 1fr; } }
+
+/* One group company page */
+.company-facts { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); margin: var(--space-6) 0; }
+.company-facts div { border: 1px solid var(--rule); border-radius: var(--radius-lg); padding: var(--space-5); }
+.company-facts dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--fg-mute); margin-bottom: 6px; }
+.company-facts dd { margin: 0; overflow-wrap: anywhere; }
+.company-services { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); }
+.company-services li { padding: var(--space-4) var(--space-5); border: 1px solid var(--rule); border-radius: var(--radius); }
+.company-services li::before { content: "→ "; color: var(--lime); }
+
+/* Team section is for wide screens only (hidden on phones) */
+@media (max-width: 640px) { #team, a[href$="#team"] { display: none; } }
+.article-body .company-services { padding-left: 0; }
+.hero .label + .eyebrow { display: flex; }

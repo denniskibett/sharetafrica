@@ -31,6 +31,20 @@ class Seo
         ['Oteli', 'https://thewillishotel.co.ke/', 'Hotel management, running The Willis Hotel.', 'Hospitality'],
     ];
 
+    /** The group companies from Website › Companies, as [name, url, description, sector]; the list above if the table is not there yet. */
+    public static function companies(): array
+    {
+        try {
+            $rows = \App\Models\GroupCompany::listed()->get();
+            if ($rows->isNotEmpty()) {
+                return $rows->map(fn ($c) => [$c->name, $c->url ?: route('companies.show', $c->slug), $c->tagline, $c->sector, $c->slug])->all();
+            }
+        } catch (\Throwable) {
+        }
+
+        return self::COMPANIES;
+    }
+
     public static function organization(): array
     {
         $base = rtrim(config('app.url'), '/');
@@ -58,7 +72,7 @@ class Seo
                 ['@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => 'support@sharet.africa', 'areaServed' => ['KE', 'UG', 'TZ'], 'availableLanguage' => 'en'],
                 ['@type' => 'ContactPoint', 'contactType' => 'press', 'email' => 'press@sharet.africa'],
             ],
-            'subOrganization' => array_map(fn ($c) => ['@type' => 'Organization', 'name' => $c[0], 'url' => $c[1], 'description' => $c[2]], self::COMPANIES),
+            'subOrganization' => array_map(fn ($c) => ['@type' => 'Organization', 'name' => $c[0], 'url' => $c[1], 'description' => $c[2]], self::companies()),
         ];
     }
 

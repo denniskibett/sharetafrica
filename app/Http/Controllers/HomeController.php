@@ -30,6 +30,15 @@ class HomeController extends Controller
     public function company()    { return view('company'); }
     public function contact()    { return view('contact'); }
 
+    /** /companies/{slug}: one business Sharet runs (Website › Companies). */
+    public function groupCompany(string $slug)
+    {
+        return view('companies.show', [
+            'company' => \App\Models\GroupCompany::listed()->where('slug', $slug)->firstOrFail(),
+            'others' => \App\Models\GroupCompany::listed()->where('slug', '!=', $slug)->get(),
+        ]);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Personal page → waiting list (intent: individual)

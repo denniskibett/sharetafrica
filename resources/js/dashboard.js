@@ -254,3 +254,36 @@ export function signaturePad() {
         },
     };
 }
+
+/**
+ * Paste an image (⌘V / Ctrl+V) into any image upload on the page. It goes to the upload you last
+ * pointed at or clicked, or to the only one visible, and runs exactly like choosing a file
+ * (same change handler, so the same size and clarity checks apply).
+ */
+export function installImagePaste() {
+    let target = null;
+    const isImageInput = (el) => el?.matches?.('input[type=file]') && (el.accept || 'image/').includes('image');
+    const visible = (el) => !!(el.closest('label, div')?.getClientRects().length);
+    const near = (e) => {
+        const box = e.target.closest?.('label, [data-paste-zone], .rounded-xl, .rounded-2xl');
+        const input = box?.querySelector?.('input[type=file]');
+        if (isImageInput(input)) target = input;
+    };
+    document.addEventListener('pointerover', near, true);
+    document.addEventListener('focusin', near, true);
+
+    document.addEventListener('paste', (e) => {
+        if (e.target.closest?.('[contenteditable=true], textarea, input:not([type=file])')) return;
+        const file = [...(e.clipboardData?.items || [])].find((i) => i.kind === 'file' && i.type.startsWith('image/'))?.getAsFile();
+        if (!file) return;
+        const inputs = [...document.querySelectorAll('input[type=file]')].filter((i) => isImageInput(i) && visible(i));
+        const input = target && document.contains(target) && visible(target) ? target : (inputs.length === 1 ? inputs[0] : null);
+        if (!input) { window.sharet.toast('Point at the upload you want, then paste the image.', 'error'); return; }
+        e.preventDefault();
+        const named = new File([file], `pasted-${Date.now()}.${(file.type.split('/')[1] || 'png').replace('jpeg', 'jpg')}`, { type: file.type });
+        const dt = new DataTransfer(); dt.items.add(named);
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        window.sharet.toast('Image pasted.');
+    });
+}
