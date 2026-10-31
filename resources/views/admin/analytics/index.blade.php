@@ -5,8 +5,6 @@
 @section('content')
 @php
     $card = 'rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]';
-    $max = max(1, $series->max('views'));
-    $n = $series->count();
     $kpis = [
         ['Visitors', number_format($kpi['visitors']), 'Counted per day, no cookies', 'users', 'bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300'],
         ['Page views', number_format($kpi['views']), $kpi['per_visitor'].' per visitor', 'eye', 'bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300'],
@@ -53,30 +51,8 @@
   @endforeach
 </div>
 
-<div class="{{ $card }} mb-6">
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-    <h2 class="font-semibold text-gray-900 dark:text-white">Views per day</h2>
-    <div class="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
-      <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-violet-500"></span>Views</span>
-      <span class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm bg-[#9CCB1F]"></span>Visitors</span>
-    </div>
-  </div>
-  @if ($kpi['views'] === 0)
-    <p class="py-16 text-center text-sm text-gray-500 dark:text-gray-400">No visits recorded in this period yet. Tracking starts once this version is live.</p>
-  @else
-    <svg viewBox="0 0 {{ $n * 10 }} 120" preserveAspectRatio="none" class="h-56 w-full" role="img" aria-label="Views per day chart">
-      @foreach ($series as $i => $day)
-        @php $h = $day['views'] / $max * 110; $hv = $day['visitors'] / $max * 110; @endphp
-        <rect x="{{ $i * 10 + 1 }}" y="{{ 115 - $h }}" width="8" height="{{ max($h, 0.5) }}" rx="1" class="fill-violet-500/80"><title>{{ \Carbon\Carbon::parse($day['date'])->format('D j M') }}: {{ $day['views'] }} views, {{ $day['visitors'] }} visitors</title></rect>
-        <rect x="{{ $i * 10 + 3 }}" y="{{ 115 - $hv }}" width="4" height="{{ max($hv, 0.5) }}" rx="1" fill="#9CCB1F" />
-      @endforeach
-    </svg>
-    <div class="mt-2 flex justify-between text-xs text-gray-400">
-      <span>{{ \Carbon\Carbon::parse($series->first()['date'])->format('j M') }}</span>
-      <span>{{ \Carbon\Carbon::parse($series->last()['date'])->format('j M') }}</span>
-    </div>
-  @endif
-</div>
+<x-ui.chart class="mb-6" :url="route('admin.analytics.series')" title="Views per day" subtitle="Page views and visitors on sharet.africa"
+            :ranges="[7 => '7 days', 30 => '30 days', 90 => '90 days', 365 => '12 months']" :days="$days" :height="320" />
 
 <div class="mb-6 grid gap-6 xl:grid-cols-3">
   <div class="{{ $card }} overflow-x-auto xl:col-span-2">

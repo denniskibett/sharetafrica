@@ -1312,3 +1312,27 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; pointer-events: none
 .brand-logo { display: block; height: 40px; width: auto; }
 .brand-logo--footer { height: 56px; }
 @media (max-width: 720px) { .brand-logo { height: 34px; } }
+
+/* Team cards without a photo yet show initials; bio and LinkedIn under the role */
+.team-card .t-initials { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 3rem; font-weight: 800; color: var(--fg-mute); background: var(--bg-elev, rgba(127,127,127,.08)); }
+.team-card .t-bio { margin: 0; font-size: 0.9rem; color: var(--fg-mute); }
+.team-card .t-link { font-size: 0.85rem; font-weight: 600; color: inherit; }
+
+/* Blog */
+.blog-grid { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.blog-card { display: flex; flex-direction: column; gap: var(--space-3); color: inherit; text-decoration: none; }
+.blog-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; }
+.blog-card h2 { margin: 0; font-size: 1.35rem; line-height: 1.25; }
+.blog-card:hover h2 { text-decoration: underline; }
+.blog-card p { margin: 0; color: var(--fg-mute); }
+.blog-pages { margin-top: var(--space-8); }
+.article-title { font-size: clamp(2rem, 5vw, 3.25rem); line-height: 1.08; margin: var(--space-4) 0 var(--space-3); }
+.article-cover { width: 100%; border-radius: 20px; margin: var(--space-6) 0; aspect-ratio: 16 / 9; object-fit: cover; }
+.article-body { font-size: 1.1rem; line-height: 1.75; }
+.article-body h2 { font-size: 1.6rem; margin: 1.6em 0 .5em; }
+.article-body h3 { font-size: 1.25rem; margin: 1.3em 0 .4em; }
+.article-body ul, .article-body ol { padding-left: 1.4em; }
+.article-body blockquote { border-left: 3px solid #D4FF3D; margin: 1.2em 0; padding-left: 1em; color: var(--fg-mute); }
+.article-body pre { background: rgba(127,127,127,.12); border-radius: 10px; padding: 1em; overflow-x: auto; font-size: .9rem; }
+.article-body img { max-width: 100%; border-radius: 12px; }
+.article-body a { color: inherit; text-decoration: underline; }

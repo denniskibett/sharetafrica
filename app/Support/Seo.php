@@ -20,14 +20,14 @@ class Seo
         'contact' => ['contact', 'Contact: merchant onboarding, personal wallets, trade accounts, developer access, press and careers.', '0.6'],
     ];
 
-    /** Businesses Sharet owns and runs (also shown on /company#companies). */
+    /** Businesses Sharet owns and runs: name, site, what it does, sector (shown on /company#companies). */
     public const COMPANIES = [
-        ['Breve', 'https://breve.sharet.africa/', 'Business management for African businesses.'],
-        ['Aimzone Ventures', 'https://loans.sharet.africa/', 'Emergency funding and trade finance in Kenya.'],
-        ['scharge', 'https://scharge.sharet.africa/', 'Digital property management, starting in Kenya.'],
-        ['aiyotickets', 'https://aiyotickets.com/', 'Event and sports tickets, experiences and invitations, paid with M-Pesa.'],
-        ['eServiz', 'https://eserviz.aiyotickets.com/', 'Government errands, done for you.'],
-        ['Oteli', 'https://thewillishotel.co.ke/', 'Hotel management.'],
+        ['Breve', 'https://breve.sharet.africa/', 'Business management for African businesses.', 'Business software'],
+        ['Aimzone Ventures', 'https://loans.sharet.africa/', 'Emergency funding and trade finance in Kenya.', 'Finance'],
+        ['scharge', 'https://scharge.sharet.africa/', 'Digital property management, starting in Kenya.', 'Property'],
+        ['aiyotickets', 'https://aiyotickets.com/', 'Event and sports tickets, experiences and invitations, paid with M-Pesa.', 'Tickets & experiences'],
+        ['eServiz', 'https://eserviz.aiyotickets.com/', 'Government errands, done for you.', 'Government services'],
+        ['Oteli', 'https://thewillishotel.co.ke/', 'Hotel management, running The Willis Hotel.', 'Hospitality'],
     ];
 
     public static function organization(): array

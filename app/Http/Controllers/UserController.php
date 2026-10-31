@@ -2,47 +2,78 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\User;
+use App\Support\People;
+use App\Support\Table;
+use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
     /**
-     * Display a paginated list of users.
-     * Optional filters: status, intent, role, search.
+     * User management. The page is a shell; the table, stat cards and form options come from the
+     * same URL as JSON. Filters: ?status=, ?lane=, ?role=; ?search= matches name, email, phone.
      */
     public function index(Request $request)
     {
-        $query = User::query()->with(['company', 'roles']);
-
-        // Filter by onboarding_status
-        if ($request->filled('status')) {
-            $query->where('onboarding_status', $request->input('status'));
+        if (! $request->wantsJson()) {
+            return view('admin.users.index');
         }
 
-        // Filter by intent (lane)
-        if ($request->filled('intent')) {
-            $query->where('intent', $request->input('intent'));
-        }
+        $query = $this->filtered($request)->with(['company:id,name', 'roles:id,name']);
+        $lane = $request->query('lane') ?: null;
+        $base = fn () => User::query()->when($lane, fn ($q) => $q->where('intent', $lane));
+        [$newThisMonth, $delta] = People::growth($lane);
 
-        // Filter by Spatie role
-        if ($request->filled('role')) {
-            $query->role($request->input('role'));
-        }
+        return Table::respond($request, $query, fn (User $u) => [
+            'id' => $u->id,
+            'person' => Table::person($u, route('users.show', $u)),
+            'phone' => $u->phone,
+            'lane' => People::lane($u->intent),
+            'role' => $u->roles->pluck('name')->map(fn ($r) => str_replace('_', ' ', $r))->implode(', ') ?: '—',
+            'company' => $u->company?->name,
+            'status' => People::status($u->onboarding_status),
+            'joined' => Table::date($u->created_at),
+            'self' => $u->id === $request->user()->id,
+        ], ['name', 'email', 'phone'], ['name' => 'name', 'joined' => 'created_at'], [
+            'total' => $base()->count(), 'total_delta' => $delta, 'total_hint' => "$newThisMonth new this month",
+            'active' => $base()->where('onboarding_status', 'active')->count(), 'active_hint' => 'Fully set up',
+            'waiting' => $base()->where('onboarding_status', 'waiting_list')->count(), 'waiting_hint' => $base()->where('onboarding_status', 'invited')->count().' invited',
+            'staff' => $base()->role(['super_admin', 'admin', 'support', 'operations'])->count(), 'staff_hint' => 'Admins, support, operations',
+            'companies' => $base()->whereNotNull('company_id')->distinct('company_id')->count('company_id'), 'companies_hint' => 'With a company account',
+        ], extra: [
+            'roles' => Role::orderBy('name')->get(['id', 'name'])->map(fn ($r) => ['id' => $r->id, 'name' => str_replace('_', ' ', $r->name), 'key' => $r->name]),
+            'companies' => Company::orderBy('name')->get(['id', 'name']),
+            'lanes' => People::LANES,
+            'statuses' => collect(People::STATUS)->map(fn ($s) => $s[0]),
+        ]);
+    }
 
-        // Search by name / email / phone
-        if ($request->filled('q')) {
-            $search = $request->input('q');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-            });
-        }
+    /** CSV of the current filter (same filters as the table). */
+    public function export(Request $request)
+    {
+        $users = $this->filtered($request)->with('roles:id,name')->latest()->get();
 
-        $users = $query->latest()->paginate(20)->withQueryString();
+        return response()->streamDownload(function () use ($users) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Name', 'Email', 'Phone', 'Lane', 'Roles', 'Status', 'Joined']);
+            foreach ($users as $u) {
+                fputcsv($out, [$u->name, $u->email, $u->phone, People::lane($u->intent), $u->roles->pluck('name')->implode(' '),
+                    People::status($u->onboarding_status)['label'], $u->created_at?->toDateString()]);
+            }
+            fclose($out);
+        }, 'sharet-people-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv']);
+    }
 
-        return view('admin.users.index', compact('users'));
+    protected function filtered(Request $request)
+    {
+        return User::query()
+            ->when($request->filled('status'), fn ($q) => $q->where('onboarding_status', $request->query('status')))
+            ->when($request->filled('lane'), fn ($q) => $q->where('intent', $request->query('lane')))
+            ->when($request->filled('role'), fn ($q) => $q->role($request->query('role')))
+            ->when(($term = trim((string) $request->query('search'))) !== '' && $request->routeIs('users.export'),
+                fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%$term%")->orWhere('email', 'like', "%$term%")->orWhere('phone', 'like', "%$term%")));
     }
 
     /**
@@ -144,16 +175,13 @@ class UserController extends Controller
             abort(403, 'Only administrators can delete users.');
         }
 
-        // Prevent self-deletion
         if ($user->id === auth()->id()) {
-            return back()->with('error', 'You cannot delete your own account.');
+            return response()->json(['message' => 'You cannot remove your own account.'], 422);
         }
 
         $user->delete();
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('success', "{$user->name} has been removed.");
+        return response()->json(['message' => "{$user->name} has been removed."]);
     }
 
     /**

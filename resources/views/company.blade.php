@@ -18,28 +18,26 @@
             One clear bet.
           </h1>
           <p class="hero-sub">
-            Sharet was founded in 2026 by four operators who have spent a combined 42 years building payments infrastructure in East Africa — at a mobile money operator, a regional bank, a cross-border fintech, and a payment switch. Our names are below. Our licence application is public. Our customer list is short on purpose.
+            Sharet was founded in 2026 in Nairobi to make payments across East Africa cheaper and simpler: one wallet, one ledger, every rail. The people building it are named below. Our customer list is short on purpose.
           </p>
           <div class="hero-cta-row">
             <a class="btn btn--primary btn--lg" href="#team">Meet the team</a>
             <a class="btn btn--ghost btn--lg" href="#why-now">Why now</a>
           </div>
           <div class="hero-meta">
-            <span><strong>4</strong> · named founders</span>
-            <span aria-hidden="true">·</span>
-            <span><strong>42yr</strong> · combined East African payments experience</span>
+            <span><strong>Nairobi</strong> · headquarters</span>
             <span aria-hidden="true">·</span>
             <span><strong>2026</strong> · founded</span>
           </div>
         </div>
         <div class="hero-media">
-          <img fetchpriority="high" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="The Sharet founding team in their Nairobi office." />
+          <img fetchpriority="high" src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1200&q=80" alt="A team at work in a Nairobi office." />
           <div class="floating-tag ft-top">
             <span class="pill">Nairobi</span>
             HEADQUARTERS
           </div>
           <div class="floating-tag ft-bottom">
-            4 FOUNDERS · 42 YEARS COMBINED
+            EST. 2026 · NAIROBI
           </div>
         </div>
       </div>
@@ -104,11 +102,11 @@
       <div class="chapter-grid">
         <div>
           <span class="label">Chapter 01 · founding</span>
-          <h2>Four founders.<br/>Four prior<br/>employers.<br/>One thesis.</h2>
+          <h2>A small team.<br/>One thesis.</h2>
         </div>
         <div class="chapter-body">
           <p>
-            The four founders of Sharet met across a decade of working on payments in East Africa. Three of them had, at various points, tried to solve the same problem from the inside of larger institutions — a mobile money operator, a regional bank, a cross-border fintech — and watched the same constraints stop the same product every time. In 2026 they built the version that finally worked.
+            Sharet started from one observation: moving money between M-PESA, MTN, Airtel and the banks still costs too much and takes too long, because each rail is its own island. In 2026 we started building one ledger that sits across all of them.
           </p>
           <p>
             Sharet is privately held. It has taken no outside investment. It intends to remain owner-operated for the foreseeable future. The team is small on purpose, and it will stay small on purpose until the stack is proven in the market.
@@ -199,56 +197,28 @@
           <h2>Named founders.<br/>Named team.<br/>Real people.</h2>
         </div>
         <p class="lede">
-          Every person on the Sharet team is a named individual with a verifiable prior employer. We do not use anonymous roles. If we are asking you to trust us with money, you should know who we are.
+          Every person on the Sharet team is named. We do not use anonymous roles. If we are asking you to trust us with money, you should know who we are.
         </p>
       </div>
 
+      {{-- Team members are edited in the dashboard: Website › Team --}}
       <div class="team-grid">
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet CEO." /></div>
-          <h3>David Mwangi</h3>
-          <div class="t-role">Co-founder · CEO · ex-Safaricom M-PESA</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet CTO." /></div>
-          <h3>Sarah Achieng</h3>
-          <div class="t-role">Co-founder · CTO · ex-Equity Bank</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Treasury." /></div>
-          <h3>Michael Ochieng</h3>
-          <div class="t-role">Co-founder · Head of Treasury · ex-KCB</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Operations." /></div>
-          <h3>Grace Namugga</h3>
-          <div class="t-role">Co-founder · Head of Operations · ex-Flutterwave</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Lead Engineer." /></div>
-          <h3>Brian Otieno</h3>
-          <div class="t-role">Lead Engineer · ex-M-KOPA</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Compliance." /></div>
-          <h3>Aisha Mohammed</h3>
-          <div class="t-role">Head of Compliance · ex-CBK</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Regional Lead for Tanzania." /></div>
-          <h3>Joseph Mwakasege</h3>
-          <div class="t-role">Regional Lead · Tanzania · ex-Vodacom</div>
-        </div>
-        <div class="team-card">
-          <div class="t-img"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80" alt="Portrait of the Sharet Head of Partnerships." /></div>
-          <h3>Fatima Abdi</h3>
-          <div class="t-role">Head of Partnerships · ex-Cellulant</div>
-        </div>
+        @foreach (\App\Models\TeamMember::where('published', true)->orderBy('sort')->get() as $member)
+          <div class="team-card">
+            <div class="t-img">
+              @if ($member->photo_url)
+                <img loading="lazy" decoding="async" src="{{ $member->photo_url }}" alt="{{ $member->name }}, {{ $member->role }} at Sharet" />
+              @else
+                <span class="t-initials" aria-hidden="true">{{ $member->initials }}</span>
+              @endif
+            </div>
+            <h3>{{ $member->name }}</h3>
+            <div class="t-role">{{ $member->role }}</div>
+            @if ($member->bio)<p class="t-bio">{{ $member->bio }}</p>@endif
+            @if ($member->linkedin)<a class="t-link" href="{{ $member->linkedin }}" target="_blank" rel="noopener">LinkedIn ↗</a>@endif
+          </div>
+        @endforeach
       </div>
-
-      <p class="mono" style="text-align: center; color: var(--fg-mute); margin-top: var(--space-6);">
-        Names shown are the founding team as of September 2026 · full team list available on request
-      </p>
     </div>
   </section>
 
@@ -271,6 +241,32 @@
             <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  {{-- Companies Sharet runs outside payments (list: App\Support\Seo::COMPANIES); each site carries "A Sharet company" in its footer --}}
+  <section id="companies">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Our companies</span>
+          <h2>Six businesses.<br/>One parent.</h2>
+        </div>
+        <p class="lede">
+          Outside payments, Sharet owns and runs these companies. Each one has its own site, its own team and its own customers.
+        </p>
+      </div>
+
+      <div class="cap-bento">
+        @foreach (\App\Support\Seo::COMPANIES as [$name, $url, $about, $kind])
+          <a class="cap-card cap-card--third" href="{{ $url }}" target="_blank" rel="noopener">
+            <span class="cap-num">{{ $kind }}</span>
+            <h3>{{ $name }}</h3>
+            <p>{{ $about }}</p>
+            <span class="label">{{ rtrim(preg_replace('#^https?://#', '', $url), '/') }} ↗</span>
+          </a>
+        @endforeach
       </div>
     </div>
   </section>

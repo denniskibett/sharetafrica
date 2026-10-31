@@ -2,8 +2,12 @@
 
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\EmailDesignController;
+use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SystemController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\CompanySettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IntegrationController;
@@ -60,8 +64,11 @@ Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
 Route::middleware('auth')->group(function () {
 
-    // Single dashboard — role-specific cards built in DashboardController (Spatie roles + users.intent)
+    // Dashboard shell + its JSON (stat cards, charts, recent activity)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
+    Route::get('/dashboard/chart/{name}', [DashboardController::class, 'chart'])->name('dashboard.chart')->where('name', '[a-z]+');
+    Route::get('/dashboard/activity', [DashboardController::class, 'activity'])->name('dashboard.activity');
 
     // Waiting list status page (user side)
     Route::get('/waiting-list', [WaitingListController::class, 'show'])->name('waiting_list.show');
@@ -85,22 +92,34 @@ Route::middleware('auth')->group(function () {
         Route::post('/individual', 'storeIndividual')->name('individual.store');
     });
 
-    // Profile
+    // Profile (overview) and account settings: personal details, verification (KYC tiers), security
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile/verification', [ProfileController::class, 'updateVerification'])->name('profile.verification');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
-    Route::put('/profile/address', [ProfileController::class, 'updateAddress'])->name('profile.address.update');
     Route::get('/profile/data', [ProfileController::class, 'getUserData'])->name('profile.data');
 
     Route::get('/wallet', [\App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
 
+    // Business settings for each tenant (merchant / business company): bank-grade business profile
+    Route::get('/settings/business', [CompanySettingsController::class, 'edit'])->name('settings.company');
+    Route::put('/settings/business', [CompanySettingsController::class, 'update'])->name('settings.company.update');
+    Route::post('/settings/business/logo', [CompanySettingsController::class, 'logo'])->name('settings.company.logo');
+
+    // People lists and reports (admins and support)
+    Route::middleware('permission:admin.users')->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::view('/reports', 'reports.index')->name('reports.index');
+    });
+
     // Admin: people and the waiting list
     Route::middleware('role:admin|super_admin')->group(function () {
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
         Route::get('/admin/waiting-list', [WaitingListController::class, 'index'])->name('admin.waiting_list');
@@ -168,6 +187,7 @@ Route::middleware(['auth', 'permission:analytics.view'])
     ->prefix('admin/analytics')->name('admin.analytics.')->controller(AnalyticsController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::get('/series', 'series')->name('series');
         Route::get('/heatmap', 'heatmap')->name('heatmap');
         Route::get('/clicks', 'clicks')->name('clicks');
     });
@@ -184,6 +204,38 @@ Route::middleware(['auth', 'permission:admin.system'])->controller(EmailDesignCo
 });
 Route::middleware(['auth', 'permission:waiting_list.invite'])
     ->get('/admin/enquiries', [EmailDesignController::class, 'messages'])->name('admin.contact.index');
+
+/*
+|--------------------------------------------------------------------------
+| System (platform admins) and the public website's team and blog
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:admin.system'])->group(function () {
+    Route::get('/admin/system', [SystemController::class, 'index'])->name('admin.system.index');
+    Route::put('/admin/system', [SystemController::class, 'update'])->name('system.update');
+    Route::get('/admin/system/clear-cache', [SystemController::class, 'clearCache'])->name('system.clear-cache');
+    Route::post('/admin/system/maintenance', [SystemController::class, 'toggleMaintenance'])->name('system.toggle-maintenance');
+
+    Route::prefix('admin/team')->name('admin.team.')->controller(TeamController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::post('/{member}', 'update')->name('update')->whereNumber('member'); // POST: carries a photo upload
+        Route::delete('/{member}', 'destroy')->name('destroy')->whereNumber('member');
+    });
+
+    Route::prefix('admin/blog')->name('admin.posts.')->controller(PostController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/new', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{post}/edit', 'edit')->name('edit')->whereNumber('post');
+        Route::post('/{post}', 'update')->name('update')->whereNumber('post');
+        Route::delete('/{post}', 'destroy')->name('destroy')->whereNumber('post');
+    });
+});
+
+Route::get('/blog', [PostController::class, 'publicIndex'])->name('blog.index');
+Route::get('/blog/{slug}', [PostController::class, 'publicShow'])->name('blog.show')->where('slug', '[a-z0-9-]+');
 
 /*
 |--------------------------------------------------------------------------

@@ -47,6 +47,7 @@ class DashboardNav
                     ['label' => 'Settlements', 'route' => 'merchant.settle', 'icon' => 'building-library', 'tone' => 'sky'],
                     ['label' => 'QR codes', 'route' => 'merchant.qr', 'icon' => 'qr-code', 'tone' => 'amber'],
                     ['label' => 'Reconciliation', 'route' => 'merchant.reconcile', 'icon' => 'scale', 'tone' => 'indigo'],
+                    ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
                 ],
@@ -59,6 +60,7 @@ class DashboardNav
                     ['label' => 'Pay suppliers', 'route' => 'business.pay', 'icon' => 'paper-airplane', 'tone' => 'emerald'],
                     ['label' => 'Trade finance', 'route' => 'business.trade-finance', 'icon' => 'globe-europe-africa', 'tone' => 'amber'],
                     ['label' => 'Treasury', 'route' => 'business.treasury', 'icon' => 'building-library', 'tone' => 'indigo'],
+                    ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
                 ],
@@ -79,6 +81,7 @@ class DashboardNav
                 'items' => [
                     ['label' => 'Website analytics', 'route' => 'admin.analytics.index', 'icon' => 'chart-bar', 'tone' => 'teal', 'can' => 'analytics.view',
                         'roles' => ['support', 'operations'], 'active' => ['admin.analytics.*']],
+                    ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'document-chart-bar', 'tone' => 'violet', 'can' => 'admin.users', 'roles' => ['support', 'operations']],
                     ['label' => 'Reconciliation', 'route' => 'ops.reconciliation.index', 'icon' => 'scale', 'tone' => 'indigo'],
                     ['label' => 'Treasury pools', 'route' => 'ops.treasury.index', 'icon' => 'circle-stack', 'tone' => 'emerald'],
                     ['label' => 'Live rails', 'route' => 'ops.rails.index', 'icon' => 'signal', 'tone' => 'teal'],
@@ -91,7 +94,8 @@ class DashboardNav
                 'items' => [
                     ['label' => 'Website analytics', 'route' => 'admin.analytics.index', 'icon' => 'chart-bar', 'tone' => 'sky', 'can' => 'analytics.view',
                         'active' => ['admin.analytics.*']],
-                    ['label' => 'People', 'route' => 'users.index', 'icon' => 'users', 'tone' => 'indigo', 'active' => ['users.*']],
+                    ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'document-chart-bar', 'tone' => 'violet'],
+                    ['label' => 'User management', 'route' => 'users.index', 'icon' => 'users', 'tone' => 'indigo', 'active' => ['users.*']],
                     ['label' => 'Waiting list', 'route' => 'admin.waiting_list', 'icon' => 'queue-list', 'tone' => 'amber'],
                     ['label' => 'Enquiries', 'route' => 'admin.contact.index', 'icon' => 'inbox-arrow-down', 'tone' => 'sky', 'can' => 'waiting_list.invite'],
                     ['label' => 'Email designs', 'route' => 'admin.emails.index', 'icon' => 'envelope', 'tone' => 'rose', 'can' => 'admin.system',
@@ -99,14 +103,22 @@ class DashboardNav
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
                     ['label' => 'Roles & permissions', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'tone' => 'emerald', 'can' => 'admin.roles'],
-                    ['label' => 'System settings', 'route' => 'admin.system.index', 'icon' => 'adjustments-horizontal', 'tone' => 'slate'],
+                    ['label' => 'System', 'route' => 'admin.system.index', 'icon' => 'adjustments-horizontal', 'tone' => 'slate', 'can' => 'admin.system'],
+                ],
+            ],
+            [
+                'title' => 'Website',
+                'roles' => self::ADMIN,
+                'items' => [
+                    ['label' => 'Team', 'route' => 'admin.team.index', 'icon' => 'user-group', 'tone' => 'rose', 'can' => 'admin.system'],
+                    ['label' => 'Blog', 'route' => 'admin.posts.index', 'icon' => 'newspaper', 'tone' => 'sky', 'can' => 'admin.system', 'active' => ['admin.posts.*']],
                 ],
             ],
             [
                 'title' => 'Account',
                 'items' => [
                     ['label' => 'Profile', 'route' => 'profile.show', 'icon' => 'user-circle', 'tone' => 'rose'],
-                    ['label' => 'Settings', 'route' => 'profile.edit', 'icon' => 'cog-6-tooth', 'tone' => 'slate'],
+                    ['label' => 'Account settings', 'route' => 'profile.edit', 'icon' => 'cog-6-tooth', 'tone' => 'slate'],
                     ['label' => 'Sharet website', 'route' => 'home', 'icon' => 'globe-alt', 'tone' => 'teal'],
                 ],
             ],

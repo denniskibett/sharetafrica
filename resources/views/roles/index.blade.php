@@ -1,102 +1,139 @@
-{{-- Roles & permissions (Spatie). Built-in roles keep their names; their permissions can change. --}}
+{{-- Roles & permissions (Spatie). Data: RoleController@index as JSON. Built-in roles keep their names; their permissions can change.
+     Editing opens the slide-over: permissions grouped by area, with switches and "all in this area". --}}
 @extends('layouts.app')
 @section('title', 'Roles & permissions')
 
 @section('content')
-@php
-    $label = fn ($name) => ucfirst(str_replace(['_', '.'], [' ', ' · '], $name));
-    $permissionList = $permissions->flatten()->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'label' => $label($p->name), 'group' => explode('.', $p->name)[0]])->values();
-    $roleList = $roles->map(fn ($r) => [
-        'id' => $r->id, 'name' => $r->name, 'label' => $label($r->name), 'description' => $r->description,
-        'users' => $r->users_count, 'protected' => $r->is_protected, 'permissions' => $r->permission_ids,
-    ])->values();
-@endphp
+<div x-data="rolesPage('{{ route('admin.roles.index') }}')">
+  <x-ui.page-header title="Roles & permissions" subtitle="Choose what each role can open in the dashboard. Super admins can do everything.">
+    <x-ui.button icon="plus" @click="edit(null)">New role</x-ui.button>
+  </x-ui.page-header>
 
-<div x-data="rolesPage(@js($roleList), @js($permissionList), @js(url('admin/roles')))">
-  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-    <div>
-      <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Roles & permissions</h1>
-      <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Choose what each role can open in the dashboard. Super admins can do everything.</p>
-    </div>
-    <button type="button" @click="startNew()" class="inline-flex h-11 items-center gap-2 rounded-lg bg-violet-600 px-4 text-sm font-medium text-white hover:bg-violet-700">
-      <x-heroicon-o-plus class="h-5 w-5" /> New role
-    </button>
-  </div>
+  <x-ui.stats :cols="4" class="mb-6">
+    <x-ui.stat label="Roles" value="stats.roles" hint="stats.roles_hint" icon="shield-check" tone="violet" />
+    <x-ui.stat label="Custom roles" value="stats.custom" hint="stats.custom_hint" icon="sparkles" tone="amber" />
+    <x-ui.stat label="Permissions" value="stats.permissions" hint="stats.permissions_hint" icon="key" tone="sky" />
+    <x-ui.stat label="People with a role" value="stats.people" hint="stats.people_hint" icon="users" tone="emerald" />
+  </x-ui.stats>
 
-  <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-    <ul class="flex flex-col gap-2">
-      <template x-for="r in roles" :key="r.id">
-        <li>
-          <button type="button" @click="select(r)"
-                  class="flex w-full items-center gap-4 rounded-2xl border bg-white p-4 text-left transition dark:bg-white/[0.03]"
-                  :class="current?.id === r.id ? 'border-violet-400 ring-4 ring-violet-500/10' : 'border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700'">
-            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-              <x-heroicon-o-shield-check class="h-5 w-5" />
-            </span>
-            <span class="min-w-0 flex-1">
-              <span class="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
-                <span x-text="r.label"></span>
-                <span x-show="r.protected" class="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-gray-500 dark:bg-white/5 dark:text-gray-400">Built-in</span>
-              </span>
-              <span class="block truncate text-xs text-gray-500 dark:text-gray-400" x-text="r.description"></span>
-            </span>
-            <span class="shrink-0 text-xs text-gray-500 dark:text-gray-400" x-text="r.users + (r.users === 1 ? ' person' : ' people')"></span>
-          </button>
-        </li>
-      </template>
-    </ul>
-
-    <form x-show="current" x-cloak @submit.prevent="save()" class="h-fit rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:sticky lg:top-24">
-      <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300" for="role-name">Role name</label>
-      <input id="role-name" x-model="form.name" :readonly="current?.protected" required
-             class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 read-only:bg-gray-50 read-only:text-gray-500 focus:border-violet-400 focus:outline-none dark:border-gray-700 dark:text-white/90 dark:read-only:bg-white/5">
-      <p x-show="errors.name" class="mt-1 text-xs text-red-600" x-text="errors.name"></p>
-
-      <template x-for="(items, group) in grouped" :key="group">
-        <fieldset class="mt-5">
-          <legend class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400" x-text="group.replace('_', ' ')"></legend>
-          <div class="grid gap-2 sm:grid-cols-2">
-            <template x-for="p in items" :key="p.id">
-              <label class="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-800 dark:text-gray-300 dark:hover:bg-white/5">
-                <input type="checkbox" :value="p.id" x-model.number="form.permissions" class="rounded border-gray-300 text-violet-600 focus:ring-violet-500">
-                <span x-text="p.label"></span>
-              </label>
-            </template>
-          </div>
-        </fieldset>
-      </template>
-
-      <div class="mt-6 flex flex-wrap gap-3">
-        <button type="submit" :disabled="busy" class="h-11 rounded-lg bg-violet-600 px-5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50" x-text="current?.id ? 'Save changes' : 'Create role'"></button>
-        <button type="button" x-show="current?.id && !current?.protected" @click="destroy()" class="h-11 rounded-lg border border-red-200 px-5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10">Delete role</button>
+  <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+    <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Roles</h3>
+      <div class="relative">
+        <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <input type="search" x-model="search" placeholder="Search roles…" aria-label="Search roles" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-11 pr-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 sm:w-[280px]">
       </div>
-    </form>
+    </div>
+    <div class="custom-scrollbar overflow-x-auto">
+      <table class="min-w-full text-left text-sm">
+        <thead class="border-y border-gray-100 bg-gray-50 text-xs text-gray-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400">
+          <tr><th class="px-6 py-3 font-medium">Role</th><th class="px-6 py-3 font-medium">Access</th><th class="px-6 py-3 font-medium">People</th><th class="px-6 py-3 font-medium">Type</th><th class="px-6 py-3 text-right font-medium">Action</th></tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+          <tr x-show="loading"><td colspan="5" class="px-6 py-12 text-center text-gray-500">Loading…</td></tr>
+          <template x-for="r in filtered" :key="r.id">
+            <tr class="text-gray-700 hover:bg-gray-50/60 dark:text-gray-400 dark:hover:bg-white/[0.02]">
+              <td class="px-6 py-3">
+                <p class="font-medium text-gray-800 dark:text-white/90" x-text="r.label"></p>
+                <p class="max-w-md text-xs text-gray-500 dark:text-gray-400" x-text="r.description"></p>
+              </td>
+              <td class="whitespace-nowrap px-6 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="h-1.5 w-24 rounded-full bg-gray-100 dark:bg-white/5"><div class="h-1.5 rounded-full bg-gray-900 dark:bg-[#D4FF3D]" :style="`width: ${total ? Math.round(r.permissions.length / total * 100) : 0}%`"></div></div>
+                  <span class="text-xs" x-text="r.name === 'super_admin' ? 'Everything' : r.permissions.length + ' of ' + total"></span>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-3" x-text="sharet.number(r.users)"></td>
+              <td class="whitespace-nowrap px-6 py-3"><span :class="sharet.pill(r.protected ? 'neutral' : 'info')" x-text="r.protected ? 'Built-in' : 'Custom'"></span></td>
+              <td class="whitespace-nowrap px-6 py-3 text-right">
+                <x-ui.button variant="secondary" class="!h-9" icon="pencil-square" @click="edit(r)">Edit</x-ui.button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </div>
+
+  <x-ui.slide-over name="role" width="max-w-2xl" x-text="form.id ? 'Edit ' + form.label : 'New role'">
+    <form id="role-form" @submit.prevent="save()" class="space-y-6">
+      <x-ui.field label="Role name" name="name" required x-bind:disabled="form.protected" help="Lowercase with underscores, e.g. finance_officer. Built-in roles cannot be renamed." />
+
+      <div class="relative">
+        <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <input type="search" x-model="permQuery" placeholder="Find a permission…" aria-label="Find a permission" class="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-11 pr-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+      </div>
+
+      <template x-for="g in visibleGroups" :key="g.key">
+        <section class="rounded-xl border border-gray-200 dark:border-gray-800">
+          <div class="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3 dark:border-gray-800">
+            <div>
+              <h4 class="font-medium text-gray-900 dark:text-white" x-text="g.label"></h4>
+              <p class="text-xs text-gray-500" x-text="g.permissions.filter(p => form.permissions.includes(p.id)).length + ' of ' + g.permissions.length + ' on'"></p>
+            </div>
+            <button type="button" @click="toggleGroup(g)" class="text-xs font-medium text-gray-700 underline-offset-2 hover:underline dark:text-gray-300" x-text="groupOn(g) ? 'Turn all off' : 'Turn all on'"></button>
+          </div>
+          <ul class="divide-y divide-gray-100 dark:divide-gray-800">
+            <template x-for="p in g.permissions.filter(p => match(p))" :key="p.id">
+              <li class="flex items-center justify-between gap-4 px-4 py-3">
+                <span class="min-w-0"><span class="block text-sm text-gray-800 dark:text-gray-200" x-text="p.label"></span><code class="text-[11px] text-gray-400" x-text="p.name"></code></span>
+                <button type="button" role="switch" :aria-checked="form.permissions.includes(p.id)" @click="toggle(p.id)"
+                        class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                        :class="form.permissions.includes(p.id) ? 'bg-gray-900 dark:bg-[#D4FF3D]' : 'bg-gray-200 dark:bg-white/10'">
+                  <span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition dark:bg-gray-900" :class="form.permissions.includes(p.id) ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                </button>
+              </li>
+            </template>
+          </ul>
+        </section>
+      </template>
+    </form>
+    <x-slot:footer>
+      <x-ui.button variant="danger" x-show="form.id && !form.protected" class="mr-auto" icon="trash" @click="destroy()">Delete role</x-ui.button>
+      <x-ui.button variant="secondary" @click="close()">Cancel</x-ui.button>
+      <x-ui.button type="submit" form="role-form" x-bind:disabled="busy" x-text="form.id ? 'Save changes' : 'Create role'"></x-ui.button>
+    </x-slot:footer>
+  </x-ui.slide-over>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-  function rolesPage(roles, permissions, base) {
+  function rolesPage(url) {
     return {
-      roles, permissions, current: null, form: { name: '', permissions: [] }, errors: {}, busy: false,
-      get grouped() { return this.permissions.reduce((g, p) => ((g[p.group] ||= []).push(p), g), {}); },
-      select(r) { this.current = r; this.errors = {}; this.form = { name: r.name, permissions: [...r.permissions] }; },
-      startNew() { this.select({ id: null, name: '', permissions: [], protected: false }); },
+      roles: [], groups: [], stats: {}, loading: true, search: '', permQuery: '', busy: false, errors: {},
+      form: { id: null, name: '', label: '', protected: false, permissions: [] },
+      async init() { await this.load(); },
+      async load() {
+        const body = await (await fetch(url, { headers: { Accept: 'application/json' } })).json();
+        Object.assign(this, { roles: body.roles, groups: body.groups, stats: body.stats, loading: false });
+      },
+      get total() { return this.groups.reduce((n, g) => n + g.permissions.length, 0); },
+      get filtered() { const q = this.search.toLowerCase(); return this.roles.filter(r => (r.label + r.description).toLowerCase().includes(q)); },
+      match(p) { const q = this.permQuery.toLowerCase(); return !q || (p.label + p.name).toLowerCase().includes(q); },
+      get visibleGroups() { return this.groups.filter(g => g.permissions.some(p => this.match(p))); },
+      edit(r) {
+        this.errors = {}; this.permQuery = '';
+        this.form = r ? { id: r.id, name: r.name, label: r.label, protected: r.protected, permissions: [...r.permissions] } : { id: null, name: '', label: '', protected: false, permissions: [] };
+        sharet.panel('role');
+      },
+      toggle(id) { const i = this.form.permissions.indexOf(id); i >= 0 ? this.form.permissions.splice(i, 1) : this.form.permissions.push(id); },
+      groupOn(g) { return g.permissions.every(p => this.form.permissions.includes(p.id)); },
+      toggleGroup(g) {
+        const ids = g.permissions.map(p => p.id);
+        this.form.permissions = this.groupOn(g) ? this.form.permissions.filter(id => !ids.includes(id)) : [...new Set([...this.form.permissions, ...ids])];
+      },
       async save() {
         this.busy = true; this.errors = {};
         try {
-          const id = this.current.id;
-          const r = await sharet.send(id ? 'PUT' : 'POST', id ? `${base}/${id}` : base, this.form);
-          const saved = { ...this.current, id: r.role.id, name: r.role.name, label: r.role.name.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()), users: r.role.users_count, permissions: [...this.form.permissions], description: this.current.description || 'Custom role.' };
-          this.roles = id ? this.roles.map(x => x.id === id ? saved : x) : [...this.roles, saved];
-          this.current = saved;
+          await sharet.send(this.form.id ? 'PUT' : 'POST', this.form.id ? `${url}/${this.form.id}` : url, { name: this.form.name, permissions: this.form.permissions });
+          window.dispatchEvent(new CustomEvent('slide-over-close')); await this.load();
         } catch (e) { this.errors = Object.fromEntries(Object.entries(e.errors || {}).map(([k, v]) => [k, v[0]])); }
         this.busy = false;
       },
       async destroy() {
-        if (!confirm(`Delete the role "${this.current.label}"?`)) return;
-        try { await sharet.send('DELETE', `${base}/${this.current.id}`); this.roles = this.roles.filter(x => x.id !== this.current.id); this.current = null; } catch (e) {}
+        if (!await sharet.confirm({ title: `Delete ${this.form.label}?`, message: 'People with only this role lose the access it gave them.', tone: 'error', confirmText: 'Delete role' })) return;
+        try { await sharet.send('DELETE', `${url}/${this.form.id}`); window.dispatchEvent(new CustomEvent('slide-over-close')); await this.load(); } catch (e) {}
       },
     };
   }

@@ -2,222 +2,185 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ApiKey;
 use App\Models\Company;
 use App\Models\User;
+use App\Support\People;
+use App\Support\Table;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
+/**
+ * /dashboard. The page is a shell; its stat cards, charts and table load as JSON:
+ *   GET /dashboard/data          stats for the signed-in person's lane
+ *   GET /dashboard/chart/{name}  ApexCharts options (signups, lanes, funnel, money)
+ *   GET /dashboard/activity      recent wallet transactions (table JSON)
+ */
 class DashboardController extends Controller
 {
-    /**
-     * Single entry point for /dashboard.
-     * Builds $cardData based on the user's role and returns one view.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        /** @var User $user */
-        $user = auth()->user();
+        $user = $request->user();
 
-        // Waiting-list / onboarding users are redirected to the onboarding flow
         if ($user->isOnWaitingList() || $user->needsOnboarding()) {
             return redirect()->route('onboarding.welcome');
         }
 
-        $cardData = $this->buildCardData($user);
-
-        return view('dashboard', [
-            'cardData'   => $cardData,
-            'heading'    => $this->headingFor($user),
-            'subheading' => $this->subheadingFor($user),
-            'recentActivity' => $this->recentActivityFor($user),
-        ]);
+        return view('dashboard', ['lane' => $this->lane($user), 'user' => $user]);
     }
 
-    // ==========================================================
-    // CARD DATA — dispatcher
-    // =========================================================
-    protected function buildCardData(User $user): array
+    public function data(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json(['stats' => match ($this->lane($user)) {
+            'admin', 'ops' => $this->peopleStats(),
+            'techie' => $this->developerStats($user),
+            default => $this->walletStats($user),
+        }]);
+    }
+
+    public function chart(Request $request, string $name): JsonResponse
+    {
+        $user = $request->user();
+        $staff = in_array($this->lane($user), ['admin', 'ops'], true);
+        $days = in_array((int) $request->query('days'), [7, 30, 90], true) ? (int) $request->query('days') : 30;
+
+        return response()->json(match (true) {
+            $name === 'signups' && $staff => $this->signupsChart($days, $request->query('lane') ?: null),
+            $name === 'lanes' && $staff => $this->lanesChart(),
+            $name === 'funnel' && $staff => $this->funnelChart(),
+            $name === 'money' => $this->moneyChart($user),
+            default => abort(404),
+        });
+    }
+
+    public function activity(Request $request): JsonResponse
+    {
+        $wallet = $request->user()->getOrCreateWallet();
+
+        return Table::respond($request, $wallet->transactions()->getQuery(), fn ($tx) => [
+            'id' => $tx->id,
+            'type' => Table::pill($tx->type === 'deposit' ? 'Money in' : 'Money out', $tx->type === 'deposit' ? 'success' : 'info'),
+            'amount' => abs($tx->amount) / 100,
+            'status' => Table::pill($tx->confirmed ? 'Completed' : 'Pending', $tx->confirmed ? 'success' : 'warning'),
+            'date' => $tx->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+        ], [], ['date' => 'created_at', 'amount' => 'amount']);
+    }
+
+    /** admin | ops | individual | merchant | business | techie */
+    protected function lane(User $user): string
     {
         if ($user->hasAnyRole(['super_admin', 'admin'])) {
-            return $this->adminCardData();
+            return 'admin';
         }
-
         if ($user->hasAnyRole(['support', 'operations'])) {
-            return $this->opsCardData($user);
+            return 'ops';
         }
 
-        return match ($user->intent) {
-            'merchant'   => $this->merchantCardData($user),
-            'business'   => $this->businessCardData($user),
-            'techie'     => $this->developerCardData($user),
-            'individual' => $this->individualCardData($user),
-            default      => ['user_role' => 'waiting_list'],
-        };
+        return in_array($user->intent, ['merchant', 'business', 'techie'], true) ? $user->intent : 'individual';
     }
 
-    // ==========================================================
-    // INDIVIDUAL
-    // =========================================================
-    protected function individualCardData(User $user): array
+    protected function peopleStats(): array
+    {
+        [$newThisMonth, $delta] = People::growth();
+        $status = User::selectRaw('onboarding_status, count(*) as n')->groupBy('onboarding_status')->pluck('n', 'onboarding_status');
+
+        return [
+            'people' => User::count(),
+            'people_delta' => $delta,
+            'people_hint' => "$newThisMonth new this month",
+            'waiting' => (int) ($status['waiting_list'] ?? 0),
+            'waiting_hint' => ((int) ($status['invited'] ?? 0)).' invited',
+            'active' => (int) ($status['active'] ?? 0),
+            'active_hint' => User::where('onboarding_status', 'active')->where('onboarded_at', '>=', now()->startOfMonth())->count().' this month',
+            'companies' => Company::count(),
+            'companies_hint' => Company::whereNotNull('verified_at')->count().' verified',
+        ];
+    }
+
+    protected function walletStats(User $user): array
+    {
+        $tx = fn () => $user->getOrCreateWallet()->transactions();
+        $month = fn ($q) => $q->where('created_at', '>=', now()->startOfMonth());
+
+        return [
+            'balance' => $user->getWalletBalance(),
+            'balance_hint' => 'Available now',
+            'in' => $month($tx()->where('type', 'deposit'))->sum('amount') / 100,
+            'in_hint' => 'This month',
+            'out' => abs($month($tx()->where('type', 'withdraw'))->sum('amount')) / 100,
+            'out_hint' => 'This month',
+            'count' => $tx()->count(),
+            'count_hint' => $month($tx())->count().' this month',
+        ];
+    }
+
+    protected function developerStats(User $user): array
+    {
+        $keys = ApiKey::where('user_id', $user->id);
+
+        return [
+            'keys' => (clone $keys)->count(),
+            'keys_hint' => (clone $keys)->where('enabled', true)->count().' enabled',
+            'sandbox' => (clone $keys)->where('environment', 'sandbox')->count(),
+            'sandbox_hint' => 'Free test keys',
+            'live' => (clone $keys)->where('environment', 'live')->count(),
+            'live_hint' => 'Need approval',
+            'last_used' => optional((clone $keys)->max('last_used_at'), fn ($d) => Carbon::parse($d)->diffForHumans()) ?? 'Never',
+            'last_used_hint' => 'Last API call',
+        ];
+    }
+
+    protected function signupsChart(int $days, ?string $only = null): array
+    {
+        $lanes = $only && isset(People::LANES[$only]) ? [$only => People::LANES[$only]] : People::LANES;
+        $series = collect($lanes)->map(fn ($label, $lane) => ['name' => $label, 'data' => People::signupSeries($days, $lane)[1]])->values();
+        [$labels] = People::signupSeries($days);
+
+        return ['type' => 'area', 'series' => $series, 'xaxis' => ['categories' => $labels, 'tickAmount' => min($days, 10)]];
+    }
+
+    protected function lanesChart(): array
+    {
+        $counts = User::selectRaw('intent, count(*) as n')->groupBy('intent')->pluck('n', 'intent');
+
+        return [
+            'type' => 'donut',
+            'series' => collect(People::LANES)->keys()->map(fn ($k) => (int) ($counts[$k] ?? 0))->push((int) ($counts[''] ?? 0) + (int) ($counts[null] ?? 0))->values(),
+            'labels' => collect(People::LANES)->values()->push('Not chosen'),
+            'legend' => ['position' => 'bottom'],
+        ];
+    }
+
+    protected function funnelChart(): array
+    {
+        $status = User::selectRaw('onboarding_status, count(*) as n')->groupBy('onboarding_status')->pluck('n', 'onboarding_status');
+
+        return [
+            'type' => 'bar',
+            'series' => [['name' => 'People', 'data' => collect(People::STATUS)->keys()->map(fn ($k) => (int) ($status[$k] ?? 0))->values()]],
+            'xaxis' => ['categories' => collect(People::STATUS)->pluck(0)->values()],
+            'plotOptions' => ['bar' => ['horizontal' => true, 'borderRadius' => 4, 'barHeight' => '55%', 'distributed' => true]],
+            'legend' => ['show' => false],
+        ];
+    }
+
+    /** Money in vs out per month, last 6 months. */
+    protected function moneyChart(User $user): array
     {
         $wallet = $user->getOrCreateWallet();
+        $rows = DB::table('transactions')->where('wallet_id', $wallet->id)->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->get(['created_at', 'type', 'amount'])->map(fn ($r) => (object) ['m' => substr($r->created_at, 0, 7), 'type' => $r->type, 'total' => abs($r->amount)]);
+        $months = collect(range(5, 0))->map(fn ($ago) => now()->subMonthsNoOverflow($ago));
+        $sum = fn ($type) => $months->map(fn ($m) => round((float) $rows->where('m', $m->format('Y-m'))->where('type', $type)->sum('total') / 100, 2))->values();
 
         return [
-            'user_role'          => 'individual',
-            'wallet_balance'     => $user->getWalletBalance(),
-            'total_transactions' => $wallet->transactions()->count(),
-            'total_sent'         => $wallet->transactions()->where('type', 'withdraw')->sum('amount') / 100,
-            'total_received'     => $wallet->transactions()->where('type', 'deposit')->sum('amount') / 100,
+            'type' => 'bar',
+            'series' => [['name' => 'Money in', 'data' => $sum('deposit')], ['name' => 'Money out', 'data' => $sum('withdraw')]],
+            'xaxis' => ['categories' => $months->map->format('M')->values()],
         ];
-    }
-
-    // ==========================================================
-    // MERCHANT
-    // =========================================================
-    protected function merchantCardData(User $user): array
-    {
-        return [
-            'user_role'          => 'merchant',
-            'wallet_balance'     => $user->getWalletBalance(),
-            'received_today'     => 0,
-            'received_month'     => 0,
-            'settled_month'      => 0,
-            'pending_settlement' => 0,
-            'qr_payments'        => 0,
-            'company_name'       => $user->company?->name,
-        ];
-    }
-
-    // ==========================================================
-    // BUSINESS
-    // =========================================================
-    protected function businessCardData(User $user): array
-    {
-        return [
-            'user_role'            => 'business',
-            'wallet_balance'       => $user->getWalletBalance(),
-            'outstanding_invoices' => 0,
-            'paid_invoices'        => 0,
-            'total_suppliers'      => 0,
-            'trade_finance_active' => 0,
-            'trade_finance_limit'  => 0,
-            'payouts_this_month'   => 0,
-            'company_name'         => $user->company?->name,
-        ];
-    }
-
-    // ==========================================================
-    // TECHIE / DEVELOPER
-    // =========================================================
-    protected function developerCardData(User $user): array
-    {
-        return [
-            'user_role'       => 'techie',
-            'api_keys'        => 0,
-            'sandbox_calls'   => 0,
-            'live_calls'      => 0,
-            'webhooks'        => 0,
-            'error_rate'      => 0,
-            'api_calls_today' => 0,
-            'rate_limit'      => 1000,
-        ];
-    }
-
-    // ==========================================================
-    // ADMIN
-    // =========================================================
-    protected function adminCardData(): array
-    {
-        return [
-            'user_role'          => 'admin',
-            'total_users'        => User::count(),
-            'total_companies'    => Company::count(),
-            'waiting_list_count' => User::where('onboarding_status', 'waiting_list')->count(),
-            'invited_count'      => User::where('onboarding_status', 'invited')->count(),
-            'onboarded_count'    => User::where('onboarding_status', 'active')->count(),
-            'individual_count'   => User::where('intent', 'individual')->count(),
-            'merchant_count'     => User::where('intent', 'merchant')->count(),
-            'business_count'     => User::where('intent', 'business')->count(),
-            'techie_count'       => User::where('intent', 'techie')->count(),
-            'transactions_today' => 0,
-            'transactions_month' => 0,
-        ];
-    }
-
-    // ==========================================================
-    // OPS / SUPPORT
-    // =========================================================
-    protected function opsCardData(User $user): array
-    {
-        return [
-            'user_role'          => $user->hasRole('support') ? 'support' : 'operations',
-            'waiting_list_count' => User::where('onboarding_status', 'waiting_list')->count(),
-            'invited_count'      => User::where('onboarding_status', 'invited')->count(),
-            'in_progress_count'  => User::where('onboarding_status', 'in_progress')->count(),
-            'kyc_pending'        => 0,
-            'kyc_approved_today' => 0,
-            'rails_live'         => 2,
-            'rails_degraded'     => 0,
-            'rails_down'         => 0,
-            'liquidity_kes'      => 0,
-            'liquidity_tzs'      => 0,
-            'liquidity_ugx'      => 0,
-        ];
-    }
-
-    // ==========================================================
-    // HEADINGS
-    // =========================================================
-    protected function headingFor(User $user): string
-    {
-        if ($user->hasAnyRole(['super_admin', 'admin'])) {
-            return 'Admin overview';
-        }
-
-        if ($user->hasAnyRole(['support', 'operations'])) {
-            return $user->hasRole('support') ? 'Support desk' : 'Operations';
-        }
-
-        return match ($user->intent) {
-            'merchant'   => 'Merchant dashboard',
-            'business'   => 'Business dashboard',
-            'techie'     => 'Developer dashboard',
-            'individual' => 'Your wallet',
-            default      => 'Welcome',
-        };
-    }
-
-    protected function subheadingFor(User $user): string
-    {
-        if ($user->hasAnyRole(['super_admin', 'admin'])) {
-            return 'Platform-wide metrics — users, companies, lanes, waiting list.';
-        }
-
-        if ($user->hasRole('support')) {
-            return 'Waiting list, KYC queue, and user support.';
-        }
-
-        if ($user->hasRole('operations')) {
-            return 'Rails, liquidity, and reconciliation.';
-        }
-
-        return match ($user->intent) {
-            'merchant'   => 'Accept from any rail. Settle anywhere.',
-            'business'   => 'Pay abroad. Get paid from abroad. Settle locally.',
-            'techie'     => 'Build on the Sharet ledger. API, sandbox, webhooks.',
-            'individual' => 'Send, receive, and manage your Sharet balance.',
-            default      => 'Here is your Sharet overview.',
-        };
-    }
-
-    // ==========================================================
-    // RECENT ACTIVITY
-    // =========================================================
-    protected function recentActivityFor(User $user)
-    {
-        if (in_array($user->intent, ['individual', 'merchant', 'business'], true)) {
-            $wallet = $user->getOrCreateWallet();
-            return $wallet->transactions()->latest()->take(5)->get();
-        }
-
-        return collect();
     }
 }

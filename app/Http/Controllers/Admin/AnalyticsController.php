@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
  */
 class AnalyticsController extends Controller
 {
-    protected const RANGES = [7 => 'Last 7 days', 30 => 'Last 30 days', 90 => 'Last 90 days', 365 => 'Last 12 months'];
+    public const RANGES = [7 => 'Last 7 days', 30 => 'Last 30 days', 90 => 'Last 90 days', 365 => 'Last 12 months'];
 
     public function index(Request $request)
     {
@@ -58,6 +58,26 @@ class AnalyticsController extends Controller
             'clicks' => DB::table('page_clicks')->where('created_at', '>=', $from)->whereNotNull('target')->where('target', '!=', '')
                 ->selectRaw('target, path, count(*) as clicks')->groupBy('target', 'path')->orderByDesc('clicks')->limit(10)->get(),
             'duration' => fn ($ms) => $ms ? $this->duration((int) $ms) : '—',
+        ]);
+    }
+
+    /** Views and visitors per day as ApexCharts options (the "Views per day" chart). */
+    public function series(Request $request)
+    {
+        $days = $this->days($request);
+        $daily = DB::table('page_views')->where('created_at', '>=', now()->subDays($days - 1)->startOfDay())
+            ->selectRaw('date(created_at) as d, count(*) as views, count(distinct visitor) as visitors')->groupBy('d')->get()->keyBy('d');
+        $dates = collect(range($days - 1, 0))->map(fn ($ago) => now()->subDays($ago));
+
+        return response()->json([
+            'type' => 'bar',
+            'series' => [
+                ['name' => 'Page views', 'data' => $dates->map(fn ($d) => (int) ($daily[$d->toDateString()]->views ?? 0))->values()],
+                ['name' => 'Visitors', 'data' => $dates->map(fn ($d) => (int) ($daily[$d->toDateString()]->visitors ?? 0))->values()],
+            ],
+            'colors' => ['#7C3AED', '#9CCB1F'],
+            'xaxis' => ['categories' => $dates->map->format('j M')->values(), 'tickAmount' => min($days, 12), 'labels' => ['rotate' => 0, 'hideOverlappingLabels' => true]],
+            'plotOptions' => ['bar' => ['columnWidth' => $days > 90 ? '80%' : '55%', 'borderRadius' => 3, 'borderRadiusApplication' => 'end']],
         ]);
     }
 

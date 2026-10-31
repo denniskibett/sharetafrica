@@ -12,26 +12,39 @@ use Spatie\Permission\Models\Role;
 class RoleController extends Controller
 {
     /**
-     * Display a listing of roles.
+     * Roles & permissions. The page is a shell; roles, the permission catalogue and stats come as JSON.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::withCount('users')->with('permissions:id')
-            ->orderBy('name')
-            ->get();
+        if (! $request->wantsJson()) {
+            return view('roles.index');
+        }
 
-        $permissions = Permission::all()
-            ->groupBy(fn ($permission) => explode('.', $permission->name)[0] ?? 'other');
+        $roles = Role::withCount(['users', 'permissions'])->with('permissions:id')->orderBy('name')->get();
+        $permissions = Permission::orderBy('name')->get(['id', 'name']);
 
-        $roleConstants = $this->getRoleConstants();
+        return response()->json([
+            'roles' => $roles->map(fn ($r) => [
+                'id' => $r->id, 'name' => $r->name, 'label' => $this->label($r->name), 'description' => $this->roleDescription($r->name),
+                'users' => $r->users_count, 'count' => $r->permissions_count, 'protected' => $this->isProtectedRole($r->name),
+                'permissions' => $r->permissions->pluck('id'),
+            ]),
+            'groups' => $permissions->groupBy(fn ($p) => explode('.', $p->name)[0])->map(fn ($items, $group) => [
+                'key' => $group, 'label' => $this->label($group),
+                'permissions' => $items->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'label' => $this->label(explode('.', $p->name, 2)[1] ?? $p->name)])->values(),
+            ])->values(),
+            'stats' => [
+                'roles' => $roles->count(), 'roles_hint' => $roles->where('users_count', '>', 0)->count().' in use',
+                'custom' => $roles->reject(fn ($r) => $this->isProtectedRole($r->name))->count(), 'custom_hint' => 'Made by your team',
+                'permissions' => $permissions->count(), 'permissions_hint' => $permissions->groupBy(fn ($p) => explode('.', $p->name)[0])->count().' areas',
+                'people' => DB::table('model_has_roles')->distinct('model_id')->count('model_id'), 'people_hint' => 'Have at least one role',
+            ],
+        ]);
+    }
 
-        $roles->each(function ($role) {
-            $role->description = $this->roleDescription($role->name);
-            $role->is_protected = $this->isProtectedRole($role->name);
-            $role->permission_ids = $role->permissions->pluck('id');
-        });
-
-        return view('roles.index', compact('roles', 'permissions', 'roleConstants'));
+    private function label(string $name): string
+    {
+        return ucfirst(str_replace(['_', '.', '-'], ' ', $name));
     }
 
     /**

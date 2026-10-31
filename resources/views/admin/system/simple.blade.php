@@ -968,8 +968,8 @@
     }
 
     // Toggle maintenance mode
-    function toggleMaintenance() {
-        if (confirm('Are you sure you want to toggle maintenance mode?')) {
+    async function toggleMaintenance() {
+        if (await sharet.confirm({ title: 'Change maintenance mode?', message: 'Turning it on shows visitors a maintenance notice until you turn it off again.', confirmText: 'Change it' })) {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '{{ route("system.toggle-maintenance") }}';

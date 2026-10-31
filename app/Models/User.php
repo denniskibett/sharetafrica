@@ -62,6 +62,7 @@ class User extends Authenticatable implements Wallet, Customer
     protected $hidden = [
         'password',
         'remember_token',
+        'kyc', // encrypted verification details; read through ProfileController only
     ];
 
     /**
@@ -73,6 +74,7 @@ class User extends Authenticatable implements Wallet, Customer
         'onboarded_at' => 'datetime',
         'social' => 'array',
         'status' => 'boolean',
+        'kyc_submitted_at' => 'datetime',
     ];
 
     // ==========================================================

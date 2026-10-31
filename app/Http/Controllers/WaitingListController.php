@@ -6,6 +6,8 @@ use App\Mail\SharetMail;
 use App\Models\User;
 use App\Models\WaitingListEntry;
 use App\Support\Outbox;
+use App\Support\People;
+use App\Support\Table;
 use Illuminate\Http\Request;
 
 /**
@@ -27,14 +29,30 @@ class WaitingListController extends Controller
         return view('waiting-list.show', ['user' => $user]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $people = User::where('onboarding_status', 'waiting_list')
-            ->with('waitingListEntry')
-            ->latest()
-            ->get(['id', 'name', 'email', 'phone', 'intent', 'created_at']);
+        if (! $request->wantsJson()) {
+            return view('waiting-list.index');
+        }
 
-        return view('waiting-list.index', ['people' => $people]);
+        $query = User::where('onboarding_status', 'waiting_list')->with('waitingListEntry')
+            ->when($request->filled('lane'), fn ($q) => $q->where('intent', $request->query('lane')));
+        $waiting = User::where('onboarding_status', 'waiting_list');
+
+        return Table::respond($request, $query, fn (User $p) => [
+            'id' => $p->id,
+            'person' => Table::person($p),
+            'phone' => $p->phone,
+            'lane' => People::lane($p->intent),
+            'source' => ucfirst(str_replace(['-', '_'], ' ', $p->waitingListEntry?->source ?? 'sign-up')),
+            'status' => People::status('waiting_list'),
+            'joined' => Table::date($p->created_at),
+        ], ['name', 'email', 'phone'], ['name' => 'name', 'joined' => 'created_at'], [
+            'waiting' => (clone $waiting)->count(), 'waiting_hint' => 'Need an invite',
+            'week' => (clone $waiting)->where('created_at', '>=', now()->subDays(7))->count(), 'week_hint' => 'Joined in the last 7 days',
+            'invited' => User::where('onboarding_status', 'invited')->count(), 'invited_hint' => 'Invited, not set up yet',
+            'converted' => User::where('onboarding_status', 'active')->whereNotNull('invited_at')->count(), 'converted_hint' => 'Invited and now active',
+        ], extra: ['lanes' => People::LANES]);
     }
 
     public function invite(Request $request, User $user)

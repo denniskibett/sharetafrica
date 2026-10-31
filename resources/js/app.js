@@ -2,6 +2,8 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
+import focus from '@alpinejs/focus';
+import { dataTable, chart, alertModal, profile, installHelpers } from './dashboard';
 
 /**
  * Dashboard forms save in the background: sharet.send() returns the JSON reply, shows a toast,
@@ -10,10 +12,12 @@ import persist from '@alpinejs/persist';
 window.sharet = {
     async send(method, url, data = null) {
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        // FormData (file uploads) goes as multipart; anything else as JSON
+        const multipart = data instanceof FormData;
         const res = await fetch(url, {
             method,
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
-            body: data ? JSON.stringify(data) : null,
+            headers: { 'Accept': 'application/json', ...(multipart ? {} : { 'Content-Type': 'application/json' }), 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+            body: multipart ? data : (data ? JSON.stringify(data) : null),
             credentials: 'same-origin',
         });
         const body = await res.json().catch(() => ({}));
@@ -73,6 +77,12 @@ document.addEventListener('submit', async (e) => {
     button && (button.disabled = false);
 });
 
+installHelpers(window.sharet);
+Alpine.data('dataTable', dataTable);
+Alpine.data('chart', chart);
+Alpine.data('alertModal', alertModal);
+Alpine.data('profile', profile);
 Alpine.plugin(persist);
+Alpine.plugin(focus);
 window.Alpine = Alpine;
 Alpine.start();

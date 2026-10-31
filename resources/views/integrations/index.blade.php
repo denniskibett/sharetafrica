@@ -99,7 +99,11 @@
       <template x-if="editing">
         <div>
           <h4 class="mb-1 text-xl font-semibold text-gray-800 dark:text-white/90" x-text="editing.name"></h4>
-          <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Secret fields are write-only. Leave them blank to keep what is saved.</p>
+          <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">Secret fields are write-only. Leave them blank to keep what is saved.</p>
+          <div x-show="editing.fields.some(f => f.sandbox !== undefined || f.key === 'environment')" class="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-sky-50 px-4 py-3 text-sm text-sky-800 dark:bg-sky-500/10 dark:text-sky-200">
+            <span>Test first: the sandbox moves no real money.</span>
+            <button type="button" @click="useSandbox()" class="font-medium underline">Use sandbox test values</button>
+          </div>
 
           <div class="space-y-4">
             <template x-for="f in editing.fields" :key="f.key">
@@ -213,8 +217,13 @@
       },
       openSettings(p) {
         this.errors = {};
-        this.form = Object.fromEntries(p.fields.map(f => [f.key, f.secret ? '' : (p.values[f.key] ?? (f.type === 'select' ? Object.keys(f.options)[0] : ''))]));
+        // A new connection starts in the provider's sandbox, with its published test values filled in
+        this.form = Object.fromEntries(p.fields.map(f => [f.key, f.secret && p.connected ? '' : (p.values[f.key] ?? (p.connected ? '' : f.sandbox) ?? (f.type === 'select' ? Object.keys(f.options)[0] : ''))]));
         this.editing = p;
+      },
+      useSandbox() {
+        this.editing.fields.forEach(f => { if (f.sandbox !== undefined) this.form[f.key] = f.sandbox; });
+        if ('environment' in this.form) this.form.environment = 'sandbox';
       },
       async save() {
         this.busy = true; this.errors = {};

@@ -11,6 +11,7 @@
         <a href="{{ route('trade') }}" @if(request()->routeIs('trade')) aria-current="page" @endif>Trade</a>
         <a href="{{ route('developers') }}" @if(request()->routeIs('developers')) aria-current="page" @endif>Developers</a>
         <a href="{{ route('company') }}" @if(request()->routeIs('company')) aria-current="page" @endif>Company</a>
+        <a href="{{ route('blog.index') }}" @if(request()->routeIs('blog.*')) aria-current="page" @endif>Blog</a>
         <a href="{{ route('contact') }}" @if(request()->routeIs('contact')) aria-current="page" @endif>Contact</a>
       </div>
       <div class="nav-cta-row">
@@ -31,5 +32,6 @@
   <a href="{{ route('trade') }}">Trade</a>
   <a href="{{ route('developers') }}">Developers</a>
   <a href="{{ route('company') }}">Company</a>
+  <a href="{{ route('blog.index') }}">Blog</a>
   <a href="{{ route('contact') }}">Contact</a>
 </div>

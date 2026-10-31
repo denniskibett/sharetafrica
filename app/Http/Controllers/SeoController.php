@@ -19,7 +19,11 @@ class SeoController extends Controller
                 'lastmod' => Carbon::createFromTimestamp(is_file($file) ? filemtime($file) : time())->toAtomString(),
                 'priority' => $priority,
             ];
-        });
+        })->values()->push(['loc' => route('blog.index'), 'lastmod' => now()->startOfDay()->toAtomString(), 'priority' => '0.7']);
+
+        foreach (\App\Models\Post::published()->latest('published_at')->get(['slug', 'updated_at']) as $post) {
+            $urls->push(['loc' => route('blog.show', $post->slug), 'lastmod' => $post->updated_at->toAtomString(), 'priority' => '0.6']);
+        }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n".'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n";
         foreach ($urls as $u) {

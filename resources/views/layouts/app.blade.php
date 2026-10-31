@@ -121,7 +121,8 @@
 
         /* ===== ORIGINAL PRIMARY/SECONDARY CLASSES (KEPT INTACT) ===== */
         /* Primary color utility classes */
-        .bg-primary { background-color: var(--primary-color); }
+        /* The brand primary is lime: anything sitting on it uses near-black text, never white */
+        .bg-primary, .bg-primary.text-white { background-color: var(--primary-color); color: #0A0A0C; }
         .bg-primary-10 { background-color: var(--primary-10); }
         .bg-primary-20 { background-color: var(--primary-20); }
         .bg-primary-30 { background-color: var(--primary-30); }
@@ -214,7 +215,7 @@
         /* Button variations */
         .btn-primary {
             background-color: var(--primary-color);
-            color: white;
+            color: #0A0A0C;
             transition: all 0.2s ease;
         }
         .btn-primary:hover {
@@ -341,14 +342,16 @@
         @include('partials.header')
 
         <main class="flex-1">
-            <div class="mx-auto w-full p-4 transition-[max-width] duration-300 md:p-6 2xl:p-8"
-                 :class="sidebarToggle ? 'max-w-[1760px]' : 'max-w-[1440px]'">
+            {{-- Full width on every screen: the content fills what the sidebar leaves, collapsed or not --}}
+            <div class="w-full p-4 md:p-6 2xl:p-8">
                 @yield('content')
                 {{ $slot ?? '' }}
             </div>
         </main>
     </div>
 </div>
+
+<x-ui.alert-modal />
 
 {{-- Toasts from sharet.toast() / sharet.send() --}}
 <div x-data="{ toasts: [] }"

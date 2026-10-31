@@ -96,11 +96,22 @@
           </div>
           <div class="flex flex-col gap-1 border-y border-gray-100 py-2 dark:border-gray-800">
             <a href="{{ route('profile.show') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
-              <x-heroicon-o-user-circle class="h-5 w-5 text-rose-500" /> Profile
+              <x-heroicon-o-user-circle class="h-5 w-5 text-slate-500" /> Profile
             </a>
             <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
-              <x-heroicon-o-cog-6-tooth class="h-5 w-5 text-slate-500" /> Settings
+              <x-heroicon-o-cog-6-tooth class="h-5 w-5 text-slate-500" /> Account settings
             </a>
+            {{-- System for platform admins; Business settings for each tenant (merchant / business company) --}}
+            @if ($user->can('admin.system') && Route::has('admin.system.index'))
+              <a href="{{ route('admin.system.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
+                <x-heroicon-o-adjustments-horizontal class="h-5 w-5 text-slate-500" /> System
+              </a>
+            @endif
+            @if (in_array($user->intent, ['merchant', 'business'], true) || $user->company_id)
+              <a href="{{ route('settings.company') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5">
+                <x-heroicon-o-building-storefront class="h-5 w-5 text-slate-500" /> Business settings
+              </a>
+            @endif
           </div>
           <form method="POST" action="{{ route('logout') }}" class="pt-2">
             @csrf
