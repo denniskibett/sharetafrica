@@ -12,9 +12,9 @@
     $actions = [['send', 'Send', 'paper-airplane', 'bg-[#050507] text-[#D4FF3D]'], ['receive', 'Receive', 'arrow-down-tray', 'bg-black/10'], ['withdraw', 'Withdraw', 'banknotes', 'bg-black/10']];
 @endphp
 <section x-data="{ hidden: $persist(false).as('walletHidden'), copy(text, what) { navigator.clipboard?.writeText(text); sharet.toast(what + ' copied') } }"
-         class="relative isolate flex min-h-[300px] flex-col gap-5 overflow-hidden rounded-[24px] bg-gradient-to-br from-[#D4FF3D] to-[#B8E62A] p-6 text-[#050507] shadow-[0_20px_40px_-24px_rgba(5,5,7,0.45)]">
+         class="relative isolate flex min-h-[300px] flex-col gap-5 overflow-hidden rounded-[24px] bg-gradient-to-br from-[#D4FF3D] to-[#B8E62A] p-6 text-[#050507]">
   {{-- the Sharet mark, large and faint --}}
-  <svg viewBox="0 0 182 154" aria-hidden="true" class="pointer-events-none absolute -right-10 -top-6 -z-10 h-64 w-auto opacity-[0.07]">
+  <svg viewBox="0 0 182 154" aria-hidden="true" class="pointer-events-none absolute -right-10 -top-6 -z-10 h-64 w-auto opacity-[0.04]">
     <polygon fill="#050507" points="0,0 138.69,0 181.73,35.87 138.69,71.74 0,71.74"></polygon>
     <polygon fill="#050507" points="181.73,81.3 43.04,81.3 0,117.17 43.04,153.04 181.73,153.04"></polygon>
   </svg>
