@@ -41,7 +41,7 @@ class Seo
             'name' => 'Sharet Africa',
             'alternateName' => 'Sharet',
             'url' => $base.'/',
-            'logo' => asset('images/logo/logo-icon.svg'),
+            'logo' => asset('images/logo/apple-touch-icon.png'),
             'image' => asset('images/og/sharet-og.png'),
             'description' => 'Cheaper payments across East Africa. One wallet and one ledger across M-PESA, MTN, Airtel, Vodacom and banks.',
             'foundingDate' => '2026',

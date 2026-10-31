@@ -34,8 +34,10 @@
 <body>
   <main>
     <a class="brand" href="{{ url('/') }}">
-      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="5" fill="#D4FF3D"/><path d="M6 6h16v9.6L14 22l-8-6.4z" fill="#050507"/></svg>
-      Sharet!
+      <picture>
+        <source srcset="{{ asset('images/brand/sharet-logo-on-dark.svg') }}" media="(prefers-color-scheme: dark)">
+        <img src="{{ asset('images/brand/sharet-logo-on-light.svg') }}" alt="Sharet Africa" height="44" style="display:block;height:44px;width:auto">
+      </picture>
     </a>
 
     <div class="code"><span>{{ $code }}</span></div>

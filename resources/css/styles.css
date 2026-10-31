@@ -1307,3 +1307,8 @@ form[aria-busy="true"] button[type="submit"] { opacity: .6; pointer-events: none
 .tile-section .status--live { color: #3F6212; }
 .tile-section .status--soon { color: #A16207; }
 .tile-section .status--planned { color: #5A5A55; }
+
+/* Brand kit logo (public/images/brand) in the site header and footer */
+.brand-logo { display: block; height: 40px; width: auto; }
+.brand-logo--footer { height: 56px; }
+@media (max-width: 720px) { .brand-logo { height: 34px; } }

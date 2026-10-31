@@ -34,8 +34,8 @@
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
         <tr><td style="padding:0 4px 20px;">
           <a href="{{ url('/') }}" style="text-decoration:none;">
-            <img class="logo-light" src="{{ asset('images/email/sharet-logo.png') }}" width="135" height="30" alt="Sharet" style="display:block; border:0;">
-            <img class="logo-dark" src="{{ asset('images/email/sharet-logo-dark.png') }}" width="135" height="30" alt="Sharet" style="border:0;">
+            <img class="logo-light" src="{{ asset('images/email/sharet-logo.png') }}" width="139" height="40" alt="Sharet Africa" style="display:block; border:0;">
+            <img class="logo-dark" src="{{ asset('images/email/sharet-logo-dark.png') }}" width="139" height="40" alt="Sharet Africa" style="border:0;">
           </a>
         </td></tr>
 

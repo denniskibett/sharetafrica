@@ -3,7 +3,7 @@
   <div class="container container--wide">
     <div class="footer-top">
       <div class="footer-brand">
-        <span class="brand"><span class="brand-mark" aria-hidden="true"></span> Sharet!</span>
+        <span class="brand"><img class="brand-logo brand-logo--footer" src="{{ asset('images/brand/sharet-logo-on-dark.svg') }}" alt="Sharet Africa" width="200" height="64" loading="lazy"></span>
         <p>Cheaper payments across East Africa. Any rail. The other person doesn't need Sharet. One wallet, one ledger, many rails.</p>
         <span class="label">Nairobi HQ · regional by appointment</span>
       </div>

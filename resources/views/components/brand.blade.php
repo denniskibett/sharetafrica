@@ -1,11 +1,12 @@
-{{-- Sharet logo: the website's lime mark + wordmark. `mark-only` for the collapsed sidebar; text follows light/dark. --}}
+{{-- Sharet Africa logo from the brand kit (public/images/brand). Light/dark versions swap with the theme.
+     `mark-only` shows just the symbol (collapsed sidebar, small spaces). --}}
 @props(['size' => 32, 'markOnly' => false])
-<span {{ $attributes->merge(['class' => 'inline-flex items-center gap-2.5']) }}>
-    <svg width="{{ $size }}" height="{{ $size }}" viewBox="0 0 28 28" aria-hidden="true" class="shrink-0">
-        <rect width="28" height="28" rx="5" fill="#D4FF3D"/>
-        <path d="M6 6h16v9.6L14 22l-8-6.4z" fill="#050507"/>
-    </svg>
-    @unless ($markOnly)
-        <span class="font-outfit text-xl font-extrabold uppercase tracking-tight text-gray-900 dark:text-white">Sharet<span class="text-lime-500 dark:text-[#D4FF3D]">!</span></span>
-    @endunless
+<span {{ $attributes->merge(['class' => 'inline-flex items-center']) }}>
+    @if ($markOnly)
+        <img src="{{ asset('images/brand/sharet-symbol-on-light.svg') }}" alt="Sharet Africa" style="height: {{ $size }}px" class="w-auto dark:hidden">
+        <img src="{{ asset('images/brand/sharet-symbol-on-dark.svg') }}" alt="Sharet Africa" style="height: {{ $size }}px" class="hidden w-auto dark:block">
+    @else
+        <img src="{{ asset('images/brand/sharet-logo-on-light.svg') }}" alt="Sharet Africa" style="height: {{ round($size * 1.25) }}px" class="w-auto dark:hidden">
+        <img src="{{ asset('images/brand/sharet-logo-on-dark.svg') }}" alt="Sharet Africa" style="height: {{ round($size * 1.25) }}px" class="hidden w-auto dark:block">
+    @endif
 </span>
