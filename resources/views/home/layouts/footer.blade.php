@@ -30,7 +30,6 @@
         <ul>
           <li><a href="{{ route('company') }}">About</a></li>
           <li><a href="{{ route('company') }}#team">Team</a></li>
-          <li><a href="{{ route('company') }}#companies">Our companies</a></li>
           <li><a href="{{ route('contact') }}#careers">Careers</a></li>
           <li><a href="{{ route('contact') }}#press">Press</a></li>
         </ul>

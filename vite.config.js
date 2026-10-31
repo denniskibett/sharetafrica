@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/styles.css',
                 'resources/js/site.js',
+                ''
             ],
             refresh: true,
         }),
@@ -17,6 +18,7 @@ export default defineConfig({
     build: {
         manifest: 'manifest.json',
         outDir: 'public/build',
+
         rollupOptions: {
             input: [
                 'resources/css/app.css',

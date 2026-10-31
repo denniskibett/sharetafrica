@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::controller(HomeController::class)->group(function () {
+    // Pages
     Route::get('/', 'index')->name('home');
     Route::get('/merchants', 'merchants')->name('merchants');
     Route::get('/personal', 'personal')->name('personal');
@@ -21,6 +23,13 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/developers', 'developers')->name('developers');
     Route::get('/company', 'company')->name('company');
     Route::get('/contact', 'contact')->name('contact');
+
+    // Form submissions (public — do NOT require auth)
+    Route::post('/personal/signup', 'storePersonalSignup')->name('personal.signup');
+    Route::post('/merchants/signup', 'storeMerchantSignup')->name('merchants.signup');
+    Route::post('/trade/apply', 'storeTradeApplication')->name('trade.apply');
+    Route::post('/developers/apply', 'storeDeveloperApplication')->name('developers.apply');
+    Route::post('/contact/send', 'storeContact')->name('contact.send');
 });
 
 /*
@@ -33,46 +42,15 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Dashboard router
+    | Single dashboard — RBAC handled inside via Spatie
     |--------------------------------------------------------------------------
     */
 
-
-    
-
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
-
-        if ($user->hasRole(['super_admin', 'admin'])) {
-            return redirect()->route('dashboard.admin');
-        }
-
-        if ($user->hasRole(['support', 'operations'])) {
-            return redirect()->route('dashboard.ops');
-        }
-
-        if ($user->hasRole('individual')) {
-            return redirect()->route('dashboard.individual');
-        }
-
-        if ($user->hasRole('merchant')) {
-            return redirect()->route('dashboard.merchant');
-        }
-
-        if ($user->hasRole('business')) {
-            return redirect()->route('dashboard.business');
-        }
-
-        if ($user->hasRole('techie')) {
-            return redirect()->route('dashboard.developer');
-        }
-
-        return redirect()->route('waiting_list.show');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------
-    | Waiting list
+    | Waiting list (user-side)
     |--------------------------------------------------------------------------
     */
 
@@ -85,7 +63,6 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
-
         Route::get('/', [OnboardingController::class, 'welcome'])->name('welcome');
         Route::get('/choose-lane', [OnboardingController::class, 'chooseLane'])->name('choose_lane');
         Route::post('/choose-lane', [OnboardingController::class, 'storeLane'])->name('store_lane');
@@ -116,101 +93,39 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
     Route::put('/profile/address', [ProfileController::class, 'updateAddress'])->name('profile.address.update');
     Route::get('/profile/data', [ProfileController::class, 'getUserData'])->name('profile.data');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Individual dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:individual'])->group(function () {
-    Route::get('/wallet', function () {
-        return view('dashboard.individual');
-    })->name('dashboard.individual');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Merchant dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:merchant'])->group(function () {
-    Route::get('/merchant', function () {
-        return view('dashboard.merchant');
-    })->name('dashboard.merchant');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Business dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:business'])->group(function () {
-    Route::get('/business', function () {
-        return view('dashboard.business');
-    })->name('dashboard.business');
-});
-
-Route::resource('wallet', WalletController::class);
-
-
-/*
-|--------------------------------------------------------------------------
-| Developer / Techie dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:techie'])->group(function () {
-    Route::get('/developer', function () {
-        return view('dashboard.developer');
-    })->name('dashboard.developer');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Admin dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:admin|super_admin'])->group(function () {
-
-    Route::get('/admin', function () {
-        return view('dashboard.admin');
-    })->name('dashboard.admin');
 
     /*
     |--------------------------------------------------------------------------
-    | Waiting list management
+    | Wallet
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/admin/waiting-list', [UserController::class, 'index'])->name('admin.waiting_list');
-    Route::post('/admin/waiting-list/{user}/invite', [UserController::class, 'invite'])->name('admin.waiting_list.invite');
+    Route::resource('wallet', WalletController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Users — admin-only
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('users', UserController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin — waiting list management
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('role:admin|super_admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/waiting-list', [UserController::class, 'index'])->name('waiting_list');
+        Route::post('/waiting-list/{user}/invite', [UserController::class, 'invite'])->name('waiting_list.invite');
+    });
 });
 
 /*
 |--------------------------------------------------------------------------
-| Operations / Support dashboard
+| Authentication (Breeze/Fortify)
 |--------------------------------------------------------------------------
 */
 
-Route::middleware([
-    'auth',
-    'role:support|operations|admin|super_admin',
-])->group(function () {
-
-    Route::get('/ops', function () {
-        return view('dashboard.ops');
-    })->name('dashboard.ops');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Authentication
-|--------------------------------------------------------------------------
-*/
-
-require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';              

@@ -216,53 +216,68 @@
 
   {{-- Intake --}}
   <section id="intake" class="snug tile-section">
-    <div class="container container--narrow">
-      <div class="section-head">
-        <div>
-          <span class="label">Create your wallet</span>
-          <h2>Minutes to set up.<br/>Free to hold.</h2>
-        </div>
-        <p class="lede">
-          Sign up with your phone number. Verify your identity with a standard Kenyan, Tanzanian, or Ugandan ID. Your wallet is live in minutes. No monthly fees. No minimum balance.
-        </p>
+      <div class="container container--narrow">
+          <div class="section-head">
+              <div>
+                  <span class="label">Join the list</span>
+                  <h2>Minutes to<br/>join. Free to<br/>hold.</h2>
+              </div>
+              <p class="lede">
+                  Sign up with your phone number. We will invite you as soon as your wallet is ready in your market. No monthly fees. No minimum balance.
+              </p>
+          </div>
+
+          @include('partials.alert.flash')
+
+          <form class="form-card" method="POST" action="{{ route('personal.signup') }}">
+              @csrf
+
+              <div class="form-row">
+                  <div class="form-field">
+                      <label for="p-name">Your name</label>
+                      <input id="p-name" name="name" type="text" required
+                            value="{{ old('name') }}"
+                            placeholder="Brian Otieno" />
+                      @error('name')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+                  <div class="form-field">
+                      <label for="p-phone">Phone number</label>
+                      <input id="p-phone" name="phone" type="tel"
+                            value="{{ old('phone') }}"
+                            placeholder="+254 712 XXX XXX" />
+                      @error('phone')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+              </div>
+
+              <div class="form-row">
+                  <div class="form-field">
+                      <label for="p-email">Email</label>
+                      <input id="p-email" name="email" type="email" required
+                            value="{{ old('email') }}"
+                            placeholder="brian @ email.com" />
+                      @error('email')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+                  <div class="form-field">
+                      <label for="p-country">Country</label>
+                      <select id="p-country" name="country">
+                          <option value="KE" @selected(old('country') === 'KE')>Kenya</option>
+                          <option value="TZ" @selected(old('country') === 'TZ')>Tanzania</option>
+                          <option value="UG" @selected(old('country') === 'UG')>Uganda</option>
+                          <option value=""  @selected(old('country') === '')>Diaspora (outside East Africa)</option>
+                      </select>
+                      @error('country')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+              </div>
+
+              <div class="form-actions">
+                  <small>By submitting, you agree to Sharet's terms of service and privacy policy. We will reply to the email above.</small>
+                  <button type="submit" class="btn btn--primary btn--lg">
+                      Join the waiting list
+                      <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+              </div>
+          </form>
       </div>
-
-      <form class="form-card" onsubmit="event.preventDefault(); this.querySelector('button[type=submit]').textContent='Thank you — we will be in touch.';">
-        <div class="form-row">
-          <div class="form-field">
-            <label for="p-name">Your name</label>
-            <input id="p-name" name="name" type="text" required placeholder="Brian Otieno" />
-          </div>
-          <div class="form-field">
-            <label for="p-phone">Phone number</label>
-            <input id="p-phone" name="phone" type="tel" required placeholder="+254 712 XXX XXX" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="p-email">Email</label>
-            <input id="p-email" name="email" type="email" required placeholder="brian @ email.com" />
-          </div>
-          <div class="form-field">
-            <label for="p-country">Country</label>
-            <select id="p-country" name="country">
-              <option>Kenya</option>
-              <option>Tanzania</option>
-              <option>Uganda</option>
-              <option>Diaspora (outside East Africa)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <small>By submitting, you agree to Sharet's terms of service and privacy policy. We will reply to the email above.</small>
-          <button type="submit" class="btn btn--primary btn--lg">Create wallet
-            <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </form>
-    </div>
   </section>
 
   {{-- Closing --}}

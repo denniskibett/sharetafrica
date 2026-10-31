@@ -275,60 +275,6 @@
     </div>
   </section>
 
-  {{-- Companies — businesses Sharet runs outside payments; each site carries "A Sharet company" in its footer --}}
-  <section id="companies">
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Our companies</span>
-          <h2>Six businesses.<br/>One parent.</h2>
-        </div>
-        <p class="lede">
-          Outside payments, Sharet owns and runs these companies. Each one has its own site, its own team and its own customers.
-        </p>
-      </div>
-
-      <div class="cap-bento">
-        <a class="cap-card cap-card--third" href="https://breve.sharet.africa/" target="_blank" rel="noopener">
-          <span class="cap-num">Business software</span>
-          <h3>Breve</h3>
-          <p>Business management for African businesses.</p>
-          <span class="label">breve.sharet.africa ↗</span>
-        </a>
-        <a class="cap-card cap-card--third" href="https://loans.sharet.africa/" target="_blank" rel="noopener">
-          <span class="cap-num">Finance</span>
-          <h3>Aimzone Ventures</h3>
-          <p>Emergency funding and trade finance in Kenya.</p>
-          <span class="label">loans.sharet.africa ↗</span>
-        </a>
-        <a class="cap-card cap-card--third" href="https://scharge.sharet.africa/" target="_blank" rel="noopener">
-          <span class="cap-num">Property</span>
-          <h3>scharge</h3>
-          <p>Digital property management, starting in Kenya.</p>
-          <span class="label">scharge.sharet.africa ↗</span>
-        </a>
-        <a class="cap-card cap-card--third" href="https://aiyotickets.com/" target="_blank" rel="noopener">
-          <span class="cap-num">Tickets &amp; experiences</span>
-          <h3>aiyotickets</h3>
-          <p>Event and sports tickets, experiences and invitations, paid with M-Pesa.</p>
-          <span class="label">aiyotickets.com ↗</span>
-        </a>
-        <a class="cap-card cap-card--third" href="https://eserviz.aiyotickets.com/" target="_blank" rel="noopener">
-          <span class="cap-num">Government services</span>
-          <h3>eServiz</h3>
-          <p>Government errands, done for you.</p>
-          <span class="label">eserviz.aiyotickets.com ↗</span>
-        </a>
-        <a class="cap-card cap-card--third" href="https://thewillishotel.co.ke/" target="_blank" rel="noopener">
-          <span class="cap-num">Hospitality</span>
-          <h3>Oteli</h3>
-          <p>Hotel management, running The Willis Hotel.</p>
-          <span class="label">thewillishotel.co.ke ↗</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
   {{-- Offices --}}
   <section class="snug">
     <div class="container container--wide">

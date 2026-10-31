@@ -477,61 +477,72 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
 
   {{-- Intake --}}
   <section id="intake">
-    <div class="container container--narrow">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Get started</span>
-          <h2>Request sandbox.<br/>Or license the stack.</h2>
-        </div>
-        <p class="lede">
-          Every request is read by a human on the engineering team. Sandbox access is granted within one working day. Licensing conversations are scheduled within a week.
-        </p>
+      <div class="container container--narrow">
+          <div class="section-head">
+              <div>
+                  <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Get started</span>
+                  <h2>Request sandbox.<br/>Or license the stack.</h2>
+              </div>
+              <p class="lede">
+                  Every request is read by a human on the engineering team. Sandbox access is granted within one working day. Licensing conversations are scheduled within a week.
+              </p>
+          </div>
+
+          <form class="form-card" method="POST" action="{{ route('developers.apply') }}">
+              @csrf
+
+              <div class="form-row">
+                  <div class="form-field">
+                      <label for="d-name">Your name</label>
+                      <input id="d-name" name="name" type="text" required
+                            value="{{ old('name') }}" placeholder="Brian Otieno" />
+                      @error('name')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+                  <div class="form-field">
+                      <label for="d-company">Company / project</label>
+                      <input id="d-company" name="company" type="text"
+                            value="{{ old('company') }}" placeholder="Nairobi Fintech Ltd." />
+                  </div>
+              </div>
+
+              <div class="form-row">
+                  <div class="form-field">
+                      <label for="d-email">Work email</label>
+                      <input id="d-email" name="email" type="email" required
+                            value="{{ old('email') }}" placeholder="brian @ nairobifintech.co.ke" />
+                      @error('email')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+                  <div class="form-field">
+                      <label for="d-interest">What are you interested in?</label>
+                      <select id="d-interest" name="interest" required>
+                          <option value="sandbox"         @selected(old('interest') === 'sandbox')>Sandbox access — I want to test the API</option>
+                          <option value="production_keys" @selected(old('interest') === 'production_keys')>Production keys — I am ready to go live</option>
+                          <option value="white_label"     @selected(old('interest') === 'white_label')>White-label WaaS — I want my own branded wallet</option>
+                          <option value="licensing"       @selected(old('interest') === 'licensing')>Licensing — I want to discuss the full stack</option>
+                          <option value="bespoke_rail"    @selected(old('interest') === 'bespoke_rail')>Bespoke rail — I need a corridor Sharet does not yet support</option>
+                      </select>
+                      @error('interest')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+              </div>
+
+              <div class="form-row form-row--full">
+                  <div class="form-field">
+                      <label for="d-brief">Tell us what you are building</label>
+                      <textarea id="d-brief" name="brief" required
+                                placeholder="What are you building, which rails do you need, and what is the timeline?">{{ old('brief') }}</textarea>
+                      @error('brief')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+              </div>
+
+              <div class="form-actions">
+                  <small>We reply within one working day. No newsletter signup. No third-party sharing.</small>
+                  <button type="submit" class="btn btn--primary btn--lg">
+                      Send request
+                      <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+              </div>
+          </form>
       </div>
-
-      <form class="form-card" onsubmit="event.preventDefault(); this.querySelector('button[type=submit]').textContent='Thank you — we will be in touch.';">
-        <div class="form-row">
-          <div class="form-field">
-            <label for="d-name">Your name</label>
-            <input id="d-name" name="name" type="text" required placeholder="Brian Otieno" />
-          </div>
-          <div class="form-field">
-            <label for="d-company">Company / project</label>
-            <input id="d-company" name="company" type="text" placeholder="Nairobi Fintech Ltd." />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="d-email">Work email</label>
-            <input id="d-email" name="email" type="email" required placeholder="brian @ nairobifintech.co.ke" />
-          </div>
-          <div class="form-field">
-            <label for="d-interest">What are you interested in?</label>
-            <select id="d-interest" name="interest">
-              <option>Sandbox access — I want to test the API</option>
-              <option>Production keys — I am ready to go live</option>
-              <option>White-label WaaS — I want my own branded wallet</option>
-              <option>Licensing — I want to discuss the full stack</option>
-              <option>Bespoke rail — I need a corridor Sharet does not yet support</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="d-brief">Tell us what you are building</label>
-            <textarea id="d-brief" name="brief" required placeholder="What are you building, which rails do you need, and what is the timeline?"></textarea>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <small>We reply within one working day. No newsletter signup. No third-party sharing.</small>
-          <button type="submit" class="btn btn--primary btn--lg">Send request
-            <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </form>
-    </div>
   </section>
 
   {{-- Closing --}}

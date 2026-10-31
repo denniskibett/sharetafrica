@@ -1,15 +1,28 @@
-<div class="grid gap-6 lg:grid-cols-4">
-    @foreach ([
-        ['label' => 'API Keys',      'value' => $stats['apiKeys'] ?? 0,   'route' => 'developer.api-keys.index'],
-        ['label' => 'Webhooks',      'value' => $stats['webhooks'] ?? 0,  'route' => 'developer.webhooks.index'],
-        ['label' => 'Requests Today','value' => $stats['requests'] ?? 0,  'route' => 'developer.logs'],
-        ['label' => 'Sandbox',       'value' => 'Live',                   'route' => 'developer.sandbox'],
-    ] as $card)
-        <a href="{{ route($card['route']) }}"
-           class="rounded-xl border border-gray-200 bg-white p-5 transition hover:border-primary-30 hover:bg-primary-10
-                  dark:border-gray-700 dark:bg-gray-900">
-            <p class="text-xs uppercase tracking-widest text-gray-400">{{ $card['label'] }}</p>
-            <p class="mt-2 text-2xl font-semibold text-gray-800 dark:text-white">{{ $card['value'] }}</p>
-        </a>
-    @endforeach
-</div>
+@extends('layouts.app')
+
+@section('content')
+    <div class="mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800 dark:text-white/90">Developer Dashboard</h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Build on the Sharet ledger. API, sandbox, webhooks.</p>
+    </div>
+
+    @include('partials.card.card-dashboard', ['cardData' => $cardData])
+
+    <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-4">Developer tools</h2>
+        <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <a href="#" class="rounded-lg border border-gray-200 p-4 text-center hover:bg-primary-10 dark:border-gray-700">
+                <span class="block text-sm font-medium">API Keys</span>
+            </a>
+            <a href="#" class="rounded-lg border border-gray-200 p-4 text-center hover:bg-primary-10 dark:border-gray-700">
+                <span class="block text-sm font-medium">Sandbox</span>
+            </a>
+            <a href="#" class="rounded-lg border border-gray-200 p-4 text-center hover:bg-primary-10 dark:border-gray-700">
+                <span class="block text-sm font-medium">Webhooks</span>
+            </a>
+            <a href="#" class="rounded-lg border border-gray-200 p-4 text-center hover:bg-primary-10 dark:border-gray-700">
+                <span class="block text-sm font-medium">Docs</span>
+            </a>
+        </div>
+    </div>
+@endsection

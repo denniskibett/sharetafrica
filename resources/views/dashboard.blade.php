@@ -1,209 +1,252 @@
 {{-- resources/views/dashboard.blade.php --}}
 @extends('layouts.app')
 
-@section('title', auth()->user()->dashboard_title ?? 'Dashboard')
+@section('title', ($heading ?? 'Dashboard') . ' · Sharet Africa')
 
 @section('content')
-<div x-data="dashboard()" x-init="init()">
-    <div class="container-fluid px-4 py-4">
+<div class="container-fluid px-4 py-6">
 
-        {{-- ============================================================
-             WELCOME HEADER (all roles)
-        ============================================================ --}}
-        <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">
-                    <span x-text="welcomeMessage">Welcome</span>,
-                    {{ auth()->user()->first_name ?: auth()->user()->name }}
-                </h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{ now()->format('l, d F Y') }} ·
-                    <span class="font-medium text-primary">{{ auth()->user()->dashboard_title ?? 'Dashboard' }}</span>
-                </p>
-            </div>
-
-            {{-- Wallet balance chip --}}
-            @if (method_exists(auth()->user(), 'isOnboarded') && auth()->user()->isOnboarded())
-                <a href="{{ route('wallet.index') }}"
-                   class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-2 shadow-sm transition hover:border-primary-30 hover:bg-primary-10
-                          dark:border-gray-700 dark:bg-gray-800">
-                    <svg class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                    <div class="text-left">
-                        <p class="text-[10px] uppercase tracking-widest text-gray-400">Wallet balance</p>
-                        <p class="text-sm font-semibold text-gray-800 dark:text-white">
-                            {{ config('wallet.default_currency', 'KES') }}
-                            {{ number_format((float) auth()->user()->balanceFloat, 2) }}
-                        </p>
-                    </div>
-                </a>
-            @endif
+    {{-- ============================================================
+         HEADER
+         ============================================================ --}}
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {{ now()->format('l, d M Y') }}
+            </p>
+            <h1 class="mt-1 text-2xl font-semibold text-gray-800 dark:text-white/90">
+                {{ $heading ?? 'Dashboard' }}, {{ auth()->user()->first_name ?: auth()->user()->name }}
+            </h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                {{ $subheading ?? '' }}
+            </p>
         </div>
 
-        {{-- ============================================================
-             WAITING LIST — user has no lane yet
-        ============================================================ --}}
-        @if (auth()->user()->onboarding_status === 'waiting_list')
-            <div class="rounded-2xl border border-primary-20 bg-gradient-to-br from-primary-10 to-secondary-10 p-8 text-center">
-                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white">
-                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">You're on the waiting list</h2>
-                <p class="mx-auto mt-2 max-w-lg text-sm text-gray-600 dark:text-gray-300">
-                    Thanks for joining Sharet Africa. We're onboarding new users in waves so we can give every account the attention it deserves.
-                    You'll get an email the moment your spot opens.
-                </p>
-                <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-                    <a href="{{ route('waiting_list.show') }}"
-                       class="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white hover:brightness-95">
-                        View waiting list status
-                    </a>
-                    <a href="{{ route('profile.index') }}"
-                       class="rounded-full border border-primary-30 px-5 py-2 text-sm font-medium text-primary hover:bg-primary-10">
-                        Complete your profile
-                    </a>
-                </div>
+        @if(auth()->user()->company)
+            <div class="rounded-full border border-gray-200 bg-white px-4 py-2 text-sm dark:border-gray-800 dark:bg-white/[0.03]">
+                <span class="text-gray-500 dark:text-gray-400">Company:</span>
+                <span class="font-medium text-gray-800 dark:text-white/90">
+                    {{ auth()->user()->company->name }}
+                </span>
             </div>
         @endif
-
-        {{-- ============================================================
-             INVITED — user picked a lane, needs to finish onboarding
-        ============================================================ --}}
-        @if (auth()->user()->onboarding_status === 'invited')
-            <div class="rounded-2xl border border-primary-20 bg-white p-8 dark:bg-gray-900">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Ready to get started</h2>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    You've been invited to join Sharet Africa. Pick the lane that fits you best and finish your onboarding.
-                </p>
-                <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    @foreach ([
-                        ['intent' => 'individual', 'title' => 'Individual', 'desc' => 'Personal wallet, send money', 'route' => 'onboarding.individual'],
-                        ['intent' => 'merchant', 'title' => 'Merchant', 'desc' => 'Accept payments, settle', 'route' => 'onboarding.merchant'],
-                        ['intent' => 'business', 'title' => 'Business', 'desc' => 'Trade, invoices, treasury', 'route' => 'onboarding.business'],
-                        ['intent' => 'techie', 'title' => 'Developer', 'desc' => 'API, sandbox, webhooks', 'route' => 'onboarding.developer'],
-                    ] as $lane)
-                        <a href="{{ route($lane['route']) }}"
-                           class="rounded-xl border border-gray-200 p-5 transition hover:border-primary-30 hover:bg-primary-10
-                                  dark:border-gray-700">
-                            <h3 class="text-base font-semibold text-gray-800 dark:text-white">{{ $lane['title'] }}</h3>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $lane['desc'] }}</p>
-                            <span class="mt-3 inline-block text-xs font-medium text-primary">Start →</span>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        @endif
-
-        {{-- ============================================================
-             ACTIVE USER — role-specific dashboard
-        ============================================================ --}}
-        @if (auth()->user()->onboarding_status === 'active')
-
-            {{-- ADMIN / SUPER ADMIN --}}
-            @hasanyrole('admin|super_admin')
-                @include('partials.dashboard.admin', [
-                    'stats' => $stats ?? [],
-                    'waitingList' => $waitingList ?? collect(),
-                    'recentUsers' => $recentUsers ?? collect(),
-                    'companies' => $companies ?? collect(),
-                ])
-            @endhasanyrole
-
-            {{-- SUPPORT / OPERATIONS --}}
-            @hasanyrole('support|operations')
-                @include('partials.dashboard.ops', [
-                    'stats' => $stats ?? [],
-                    'reconciliation' => $reconciliation ?? [],
-                    'treasury' => $treasury ?? [],
-                    'rails' => $rails ?? [],
-                    'tickets' => $tickets ?? collect(),
-                ])
-            @endhasanyrole
-
-            {{-- MERCHANT --}}
-            @role('merchant')
-                @include('partials.dashboard.merchant', [
-                    'stats' => $stats ?? [],
-                    'recentPayments' => $recentPayments ?? collect(),
-                    'settlements' => $settlements ?? collect(),
-                    'qrCodes' => $qrCodes ?? collect(),
-                ])
-            @endrole
-
-            {{-- BUSINESS --}}
-            @role('business')
-                @include('partials.dashboard.business', [
-                    'stats' => $stats ?? [],
-                    'invoices' => $invoices ?? collect(),
-                    'suppliers' => $suppliers ?? collect(),
-                    'tradeFinance' => $tradeFinance ?? collect(),
-                    'treasury' => $treasury ?? [],
-                ])
-            @endrole
-
-            {{-- DEVELOPER / TECHIE --}}
-            @role('techie')
-                @include('partials.dashboard.developer', [
-                    'stats' => $stats ?? [],
-                    'apiKeys' => $apiKeys ?? collect(),
-                    'webhooks' => $webhooks ?? collect(),
-                    'recentLogs' => $recentLogs ?? collect(),
-                ])
-            @endrole
-
-            {{-- INDIVIDUAL --}}
-            @role('individual')
-                @include('partials.dashboard.individual', [
-                    'stats' => $stats ?? [],
-                    'recentTransfers' => $recentTransfers ?? collect(),
-                    'contacts' => $contacts ?? collect(),
-                ])
-            @endrole
-
-        @endif
-
     </div>
+
+    {{-- ============================================================
+         CARDS — rendered by the shared partial
+         ============================================================ --}}
+    @include('partials.card.card-dashboard', ['cardData' => $cardData ?? []])
+
+    {{-- ============================================================
+         RECENT ACTIVITY — wallet lanes only
+         ============================================================ --}}
+    @php
+        $role = $cardData['user_role'] ?? 'guest';
+    @endphp
+
+    @if(in_array($role, ['individual', 'merchant', 'business']))
+        <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Recent activity</h2>
+                <a href="{{ route('wallet.index') }}"
+                   class="text-sm font-medium text-primary hover:underline">
+                    View all
+                </a>
+            </div>
+
+            @if(($recentActivity ?? collect())->isEmpty())
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    No transactions yet. Your wallet activity will appear here.
+                </p>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="border-b border-gray-200 dark:border-gray-800">
+                            <tr class="text-left text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <th class="py-2">Type</th>
+                                <th class="py-2">Amount</th>
+                                <th class="py-2">Status</th>
+                                <th class="py-2">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @foreach($recentActivity as $tx)
+                                <tr>
+                                    <td class="py-3 capitalize">{{ $tx->type }}</td>
+                                    <td class="py-3 font-medium">
+                                        {{ $tx->amount_float < 0 ? '-' : '+' }}
+                                        KES {{ number_format(abs($tx->amount_float), 2) }}
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-600">
+                                            {{ $tx->confirmed ? 'Completed' : 'Pending' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 text-gray-500 dark:text-gray-400">
+                                        {{ $tx->created_at->format('d M Y, H:i') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- ============================================================
+         DEVELOPER — recent API activity panel
+         ============================================================ --}}
+    @if($role === 'techie')
+        <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div class="mb-4 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Recent API activity</h2>
+                <a href="#" class="text-sm font-medium text-primary hover:underline">View logs</a>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Once you make your first API call, recent requests and errors will appear here.
+            </p>
+        </div>
+    @endif
+
+    {{-- ============================================================
+         ADMIN — waiting list + lane breakdown
+         ============================================================ --}}
+    @if($role === 'admin')
+        <div class="mt-6 grid gap-6 lg:grid-cols-2">
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Waiting list</h2>
+                    <a href="{{ route('admin.waiting_list') }}"
+                       class="text-sm font-medium text-primary hover:underline">
+                        Manage
+                    </a>
+                </div>
+
+                @php
+                    $waitingUsers = \App\Models\User::where('onboarding_status', 'waiting_list')
+                        ->latest()
+                        ->take(5)
+                        ->get();
+                @endphp
+
+                @if($waitingUsers->isEmpty())
+                    <p class="text-sm text-gray-500 dark:text-gray-400">No users waiting.</p>
+                @else
+                    <ul class="space-y-3">
+                        @foreach($waitingUsers as $u)
+                            <li class="flex items-center justify-between rounded-lg border border-gray-100 p-3 dark:border-gray-800">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800 dark:text-white/90">
+                                        {{ $u->name }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $u->email }}</p>
+                                </div>
+                                <form method="POST" action="{{ route('admin.waiting_list.invite', $u) }}">
+                                    @csrf
+                                    <button type="submit"
+                                            class="rounded-lg bg-primary px-3 py-1 text-xs font-medium text-white hover:brightness-95">
+                                        Invite
+                                    </button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">By lane</h2>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">Individuals</span>
+                        <span class="font-medium">{{ $cardData['individual_count'] ?? 0 }}</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">Merchants</span>
+                        <span class="font-medium">{{ $cardData['merchant_count'] ?? 0 }}</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">Businesses</span>
+                        <span class="font-medium">{{ $cardData['business_count'] ?? 0 }}</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">Techies</span>
+                        <span class="font-medium">{{ $cardData['techie_count'] ?? 0 }}</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    @endif
+
+    {{-- ============================================================
+         SUPPORT / OPS — waiting list + rails
+         ============================================================ --}}
+    @if(in_array($role, ['support', 'operations']))
+        <div class="mt-6 grid gap-6 lg:grid-cols-2">
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                <div class="mb-4 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Waiting list</h2>
+                    <a href="{{ route('admin.waiting_list') }}"
+                       class="text-sm font-medium text-primary hover:underline">
+                        Manage
+                    </a>
+                </div>
+                <p class="text-3xl font-bold text-gray-800 dark:text-white/90">
+                    {{ $cardData['waiting_list_count'] ?? 0 }}
+                </p>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                    {{ $cardData['invited_count'] ?? 0 }} invited ·
+                    {{ $cardData['in_progress_count'] ?? 0 }} in progress
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                <h2 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Rails status</h2>
+                <ul class="space-y-3 text-sm">
+                    <li class="flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                            <span class="text-gray-500 dark:text-gray-400">Live</span>
+                        </span>
+                        <span class="font-medium">{{ $cardData['rails_live'] ?? 0 }}</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-yellow-500"></span>
+                            <span class="text-gray-500 dark:text-gray-400">Degraded</span>
+                        </span>
+                        <span class="font-medium">{{ $cardData['rails_degraded'] ?? 0 }}</span>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-red-500"></span>
+                            <span class="text-gray-500 dark:text-gray-400">Down</span>
+                        </span>
+                        <span class="font-medium">{{ $cardData['rails_down'] ?? 0 }}</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    @endif
+
+    {{-- ============================================================
+         WAITING LIST — nothing else on the page
+         ============================================================ --}}
+    @if($role === 'waiting_list')
+        <div class="mt-6 rounded-2xl border border-yellow-200 bg-yellow-50 p-6 dark:border-yellow-900 dark:bg-yellow-900/20">
+            <h2 class="text-lg font-semibold text-yellow-800 dark:text-yellow-300">
+                You are on the waiting list
+            </h2>
+            <p class="mt-2 text-sm text-yellow-700 dark:text-yellow-400">
+                We will notify you as soon as your Sharet account is ready for onboarding. In the meantime, feel free to read our <a href="{{ route('home') }}" class="underline">homepage</a> or reach out on the <a href="{{ route('contact') }}" class="underline">contact page</a>.
+            </p>
+        </div>
+    @endif
+
 </div>
-
-<style>
-    [x-cloak] { display: none !important; }
-</style>
-
-<script>
-function dashboard() {
-    return {
-        userName: '{{ auth()->user()->first_name ?: auth()->user()->name }}',
-        userRole: '{{ auth()->user()->getRoleNames()->first() ?? "user" }}',
-        intent: '{{ auth()->user()->intent ?? "undecided" }}',
-        onboardingStatus: '{{ auth()->user()->onboarding_status ?? "waiting_list" }}',
-        welcomeMessage: '',
-
-        init() {
-            this.setWelcomeMessage();
-        },
-
-        setWelcomeMessage() {
-            const hour = new Date().getHours();
-            if (hour < 12)      this.welcomeMessage = 'Good morning';
-            else if (hour < 18) this.welcomeMessage = 'Good afternoon';
-            else                this.welcomeMessage = 'Good evening';
-        }
-    };
-}
-
-/**
- * Shared helpers used by the dashboard partials.
- * Kept global so inline onclick handlers still work.
- */
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard');
-    });
-}
-</script>
 @endsection

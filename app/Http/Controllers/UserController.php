@@ -3,177 +3,246 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Borrower; 
-use App\Models\Broker;
-use App\Models\Loans;
-use App\Models\Repayments;
-use App\Models\Penalties;
-use App\Models\Disbursement;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class UserController extends Controller
 {
-    public function index()
+    /**
+     * Display a paginated list of users.
+     * Optional filters: status, intent, role, search.
+     */
+    public function index(Request $request)
     {
-        // Fetch all users
-        $users = User::all();
-        return view('users.index', compact('users'));
+        $query = User::query()->with(['company', 'roles']);
+
+        // Filter by onboarding_status
+        if ($request->filled('status')) {
+            $query->where('onboarding_status', $request->input('status'));
+        }
+
+        // Filter by intent (lane)
+        if ($request->filled('intent')) {
+            $query->where('intent', $request->input('intent'));
+        }
+
+        // Filter by Spatie role
+        if ($request->filled('role')) {
+            $query->role($request->input('role'));
+        }
+
+        // Search by name / email / phone
+        if ($request->filled('q')) {
+            $search = $request->input('q');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->latest()->paginate(20)->withQueryString();
+
+        return view('admin.users.index', compact('users'));
     }
 
-    public function show($id)
+    /**
+     * Show a single user profile.
+     */
+    public function show(User $user)
     {
-        $user = User::with([
-            'loans',
-            'disbursements',
-            'repayments'
-        ])->findOrFail($id);
-    
-        $totalLoans = $user->loans->sum('amount');
-        $totalDisbursed = $user->disbursements->sum('amount');
-        $totalRepaid = $user->repayments->sum('amount');
-    
-        return view('users.show', compact(
-            'user',
-            'totalLoans',
-            'totalDisbursed',
-            'totalRepaid'
-        ));
-    }
-    
+        $user->load(['company', 'roles', 'inviter', 'verifier']);
 
-    public function create()
-    {
-        $brokers = Broker::all();
-        return view('users.create', compact('brokers'));
+        return view('admin.users.show', compact('user'));
     }
-    
-    public function store(Request $request)
+
+    /**
+     * Invite a waiting-list user to start onboarding.
+     * Sets onboarding_status = 'invited', records the inviter + timestamp.
+     */
+    public function invite(User $user)
     {
-        // Validate the request data with role-specific rules
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'phone' => 'required|unique:users,phone',
-            'role' => 'required|in:admin,broker,borrower',
-    
-            // Broker-specific fields
-            'penalty_client' => 'required_if:role,broker|numeric|nullable',
-            'penalty_broker' => 'required_if:role,broker|numeric|nullable',
-            'interest_client' => 'required_if:role,broker|numeric|nullable',
-            'interest_broker' => 'required_if:role,broker|numeric|nullable',
-            'cert_no' => 'required_if:role,broker|unique:brokers,cert_no|nullable',
-    
-            // Borrower-specific fields
-            'national_id' => 'required_if:role,borrower|string|max:20|unique:borrowers,national_id|nullable',
-            'client_type' => 'required_if:role,borrower|in:0,1|nullable',
-            'status' => 'required_if:role,borrower|in:0,1|nullable',
-            'broker_id' => 'nullable|exists:brokers,id',
+        // Guard: only users on the waiting list can be invited
+        if ($user->onboarding_status !== 'waiting_list') {
+            return back()->with('error', 'This user is not on the waiting list.');
+        }
+
+        // Guard: only an admin/super_admin can invite (belt-and-braces, the route already gates this)
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403, 'Only administrators can invite users.');
+        }
+
+        $user->update([
+            'onboarding_status' => 'invited',
+            'invited_at'        => now(),
+            'invited_by'        => auth()->id(),
         ]);
-    
-        // Create the user
-        $user = User::create([
-            'name' => $validatedData['name'],
-            'email' => $validatedData['email'],
-            'password' => bcrypt($validatedData['password']),
-            'phone' => $validatedData['phone'],
-            'role' => $validatedData['role'],
+
+        return back()->with('success', "{$user->name} has been invited to onboarding.");
+    }
+
+    /**
+     * Revoke an invite. Sends the user back to the waiting list.
+     */
+    public function uninvite(User $user)
+    {
+        if ($user->onboarding_status !== 'invited') {
+            return back()->with('error', 'This user has not been invited.');
+        }
+
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403, 'Only administrators can revoke invites.');
+        }
+
+        $user->update([
+            'onboarding_status' => 'waiting_list',
+            'invited_at'        => null,
+            'invited_by'        => null,
         ]);
-    
-        // Handle role-specific data
-        switch ($validatedData['role']) {
-            case 'broker':
-                Broker::create([
-                    'user_id' => $user->id,
-                    'penalty_client' => $validatedData['penalty_client'],
-                    'penalty_broker' => $validatedData['penalty_broker'],
-                    'interest_client' => $validatedData['interest_client'],
-                    'interest_broker' => $validatedData['interest_broker'],
-                    'cert_no' => $validatedData['cert_no'],
-                ]);
-                break;
-    
-            case 'borrower':
-                Borrower::create([
-                    'user_id' => $user->id,
-                    'broker_id' => $validatedData['broker_id'] ?? null,
-                    'national_id' => $validatedData['national_id'],
-                    'client_type' => $validatedData['client_type'],
-                    'status' => $validatedData['status'],
-                ]);
-                break;
-    
-            // No additional data needed for 'admin' role
-        }
-    
-        // Redirect with success message
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
-    }
-    
 
-    public function edit(User $user)
-    {
-        $brokers = Broker::all();
-        $broker = $user->broker;
-        $borrower = $user->borrower;
-    
-        return view('users.edit', compact('user', 'brokers', 'broker', 'borrower'));
+        return back()->with('success', "{$user->name}'s invite has been revoked.");
     }
 
-    public function update(Request $request, User $user)
+    /**
+     * Soft-delete a user.
+     */
+    public function destroy(User $user)
     {
-        $rules = [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|min:6',
-            'phone' => 'required|unique:users,phone,' . $user->id,
-            'national_id' => 'required_if:role,borrower|string|max:20|unique:borrowers,national_id,' . optional($user->borrower)->id,
-            'broker_id' => 'nullable|exists:brokers,id',
-            'client_type' => 'required_if:role,borrower|in:0,1',
-            'status' => 'required_if:role,borrower|in:0,1',
-            'penalty_client' => 'required_if:role,broker|numeric',
-            'penalty_broker' => 'required_if:role,broker|numeric',
-            'interest_client' => 'required_if:role,broker|numeric',
-            'interest_broker' => 'required_if:role,broker|numeric',
-            'cert_no' => 'required_if:role,broker|unique:brokers,cert_no,' . optional($user->broker)->id,
-        ];
-    
-        $request->validate($rules);
-    
-        // Update user
-        $userData = $request->only('name', 'email', 'phone');
-        if ($request->filled('password')) {
-            $userData['password'] = bcrypt($request->password);
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403, 'Only administrators can delete users.');
         }
-        $user->update($userData);
-    
-        // Update related model
-        if ($user->role === 'borrower') {
-            $borrowerData = $request->only('broker_id', 'national_id', 'client_type', 'status');
-            if ($user->borrower) {
-                $user->borrower->update($borrowerData);
-            } else {
-                $user->borrower()->create($borrowerData);
-            }
-        } elseif ($user->role === 'broker') {
-            $brokerData = $request->only('penalty_client', 'penalty_broker', 'interest_client', 'interest_broker', 'cert_no');
-            if ($user->broker) {
-                $user->broker->update($brokerData);
-            } else {
-                $user->broker()->create($brokerData);
-            }
-        }
-    
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
-    }
 
-    public function destroy($id)
-    {
-        // Delete the user
-        $user = User::findOrFail($id);
+        // Prevent self-deletion
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
         $user->delete();
 
-        return redirect()->route('users.index');
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', "{$user->name} has been removed.");
+    }
+
+    /**
+     * Optional: Restore a soft-deleted user.
+     */
+    public function restore($id)
+    {
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403);
+        }
+
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+
+        return back()->with('success', "{$user->name} has been restored.");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | WAITING LIST — focused actions
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Show only the users on the waiting list.
+     * Used by the admin waiting-list page.
+     */
+    public function waitingList(Request $request)
+    {
+        $users = User::with(['roles', 'inviter'])
+            ->where('onboarding_status', 'waiting_list')
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.waiting_list.index', compact('users'));
+    }
+
+    /**
+     * Bulk-invite multiple users at once.
+     * POST with user_ids[].
+     */
+    public function bulkInvite(Request $request)
+    {
+        $request->validate([
+            'user_ids'   => 'required|array|min:1',
+            'user_ids.*' => 'integer|exists:users,id',
+        ]);
+
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403);
+        }
+
+        $count = User::whereIn('id', $request->user_ids)
+            ->where('onboarding_status', 'waiting_list')
+            ->update([
+                'onboarding_status' => 'invited',
+                'invited_at'        => now(),
+                'invited_by'        => auth()->id(),
+            ]);
+
+        return back()->with('success', "{$count} users invited to onboarding.");
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | REVIEW — approve or reject after onboarding
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Approve a user who has completed their onboarding form.
+     * Pivots them to their chosen lane + role.
+     */
+    public function approve(User $user)
+    {
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403);
+        }
+
+        if ($user->onboarding_status !== 'in_progress') {
+            return back()->with('error', 'This user is not awaiting review.');
+        }
+
+        $intent = $user->intent;
+        $role = match ($intent) {
+            'merchant'   => 'merchant',
+            'business'   => 'business',
+            'techie'     => 'techie',
+            'individual' => 'individual',
+            default      => null,
+        };
+
+        if (!$role) {
+            return back()->with('error', 'This user has not chosen a lane.');
+        }
+
+        $user->pivotTo($intent, $role);
+        $user->update(['verified_by' => auth()->id()]);
+
+        return back()->with('success', "{$user->name} is now active.");
+    }
+
+    /**
+     * Reject a user's onboarding.
+     */
+    public function reject(Request $request, User $user)
+    {
+        if (!auth()->user()->hasAnyRole(['admin', 'super_admin'])) {
+            abort(403);
+        }
+
+        $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $user->update([
+            'onboarding_status' => 'rejected',
+        ]);
+
+        // Optional: store the reason if you add a column later
+        // $user->update(['rejection_reason' => $request->reason]);
+
+        return back()->with('success', "{$user->name}'s onboarding has been rejected.");
     }
 }

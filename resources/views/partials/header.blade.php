@@ -1,3 +1,4 @@
+{{--resources/views/partials/header.blade.php--}}
 <header
   x-data="{menuToggle: false}"
   class="sticky top-0 z-99999 flex w-full border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:border-b"
