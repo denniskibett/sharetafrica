@@ -392,7 +392,7 @@
                                     <a href="{{ route('users.show', $user->id) }}" class="p-1.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user->id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Edit">
+                                    <a href="{{ route('users.show', $user->id) }}" class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Open">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     @if(!$isSysadmin)
@@ -1033,7 +1033,7 @@
             return;
         }
 
-        fetch('{{ route("users.create") }}', {
+        fetch('{{ route("users.store") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1142,7 +1142,7 @@
         }
 
         var ids = Array.from(selectedIds);
-        var url = new URL('{{ route("users.create") }}');
+        var url = new URL('{{ route("users.index") }}');
         url.searchParams.append('ids', ids.join(','));
 
         var search = document.getElementById('searchInput') ? document.getElementById('searchInput').value : '';
@@ -1165,7 +1165,7 @@
     }
 
     function exportUsers() {
-        var url = new URL('{{ route("users.create") }}');
+        var url = new URL('{{ route("users.index") }}');
 
         var search = document.getElementById('searchInput') ? document.getElementById('searchInput').value : '';
         var role = document.getElementById('roleFilter') ? document.getElementById('roleFilter').value : '';

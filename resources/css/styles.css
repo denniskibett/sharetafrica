@@ -11,6 +11,67 @@
    cool-dark with one saturated accent.
    ============================================================================ */
 
+/* ---------- Flash messages ---------- */
+.flash {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    letter-spacing: 0.04em;
+    line-height: 1.5;
+    margin-bottom: var(--space-5);
+}
+
+.flash p { margin: 0; }
+.flash ul { margin: 0; padding-left: var(--space-5); }
+
+.flash__icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.flash--success {
+    background: rgba(212, 255, 61, 0.08);
+    border: 1px solid var(--rule-lime);
+    color: var(--lime);
+}
+
+.flash--success .flash__icon {
+    background: var(--lime);
+    color: var(--ink-000);
+}
+
+.flash--error {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #FCA5A5;
+}
+
+.flash--error .flash__icon {
+    background: #EF4444;
+    color: #FFF;
+}
+
+/* Field-level errors */
+.form-error {
+    display: block;
+    margin-top: var(--space-2);
+    color: var(--lime);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+}
+
 /* ---------- 1. Tokens ---------------------------------------------------- */
 :root {
   /* Palette — charcoal ground + electric lime accent.
@@ -689,8 +750,6 @@ p:last-child { margin-bottom: 0; }
 }
 .cap-card--wide { grid-column: span 6; }
 .cap-card--std  { grid-column: span 3; }
-.cap-card--third { grid-column: span 4; }
-a.cap-card { color: inherit; text-decoration: none; }
 .cap-card--tall { grid-column: span 4; grid-row: span 2; aspect-ratio: 4 / 5; padding: 0; overflow: hidden; }
 .cap-card--tall img { width: 100%; height: 100%; object-fit: cover; }
 .cap-card--tall .cap-tall-meta {
@@ -1175,7 +1234,7 @@ a.cap-card { color: inherit; text-decoration: none; }
   .work-item--md, .work-item--sm { grid-column: span 3; }
   .cap-bento { grid-template-columns: repeat(6, 1fr); }
   .cap-card--wide, .cap-card--tall { grid-column: span 6; }
-  .cap-card--std, .cap-card--third { grid-column: span 3; }
+  .cap-card--std { grid-column: span 3; }
   .cap-card--tall { grid-row: auto; aspect-ratio: 16 / 10; }
   .process-grid { grid-template-columns: repeat(2, 1fr); }
   .split, .split--reverse { grid-template-columns: 1fr; }
@@ -1203,7 +1262,7 @@ a.cap-card { color: inherit; text-decoration: none; }
   .work-grid { grid-template-columns: 1fr; }
   .work-item--xl, .work-item--lg, .work-item--md, .work-item--sm { grid-column: span 1; }
   .cap-bento { grid-template-columns: 1fr; }
-  .cap-card--wide, .cap-card--std, .cap-card--third, .cap-card--tall { grid-column: span 1; }
+  .cap-card--wide, .cap-card--std, .cap-card--tall { grid-column: span 1; }
   .process-grid { grid-template-columns: 1fr; }
   .team-grid { grid-template-columns: 1fr; }
   .awards-strip { grid-template-columns: 1fr; }

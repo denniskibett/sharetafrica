@@ -43,11 +43,17 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
+            'onboarding_status' => 'waiting_list',
+            'status' => true,
         ]);
 
-        // Everyone starts on the waiting list; the team assigns a lane (individual, merchant…) later.
-        // The role is never taken from the form.
+        // Everyone starts on the waiting list (same as the website forms); an admin invites them,
+        // then they choose their lane in onboarding. The role is never taken from the form.
         $user->assignRole(\Spatie\Permission\Models\Role::findOrCreate('waiting_list', 'web'));
+        \App\Models\WaitingListEntry::firstOrCreate(['user_id' => $user->id], [
+            'intent' => 'undecided', 'source' => 'register', 'status' => 'pending',
+            'ip_address' => $request->ip(), 'user_agent' => substr((string) $request->userAgent(), 0, 500),
+        ]);
 
         event(new Registered($user));
         Outbox::later($user->email, SharetMail::waitingList($user));

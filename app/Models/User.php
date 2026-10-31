@@ -11,6 +11,11 @@ use Bavix\Wallet\Traits\HasWallet;
 use Bavix\Wallet\Traits\CanPay;
 use Bavix\Wallet\Interfaces\Wallet;
 use Bavix\Wallet\Interfaces\Customer;
+use App\Models\Company;
+use App\Models\WaitingListEntry;
+use App\Models\Enquiry;
+use App\Models\DeveloperApplication;
+use App\Models\TradeApplication;
 
 class User extends Authenticatable implements Wallet, Customer
 {
@@ -271,5 +276,32 @@ class User extends Authenticatable implements Wallet, Customer
     public function getFormattedWalletBalance(): string
     {
         return 'KES ' . number_format($this->getWalletBalance(), 2);
+    }
+
+    // Inside app/Models/User.php, in the RELATIONSHIPS section:
+
+    public function waitingListEntry()
+    {
+        return $this->hasOne(WaitingListEntry::class);
+    }
+
+    public function waitingListEntries()
+    {
+        return $this->hasMany(WaitingListEntry::class);
+    }
+
+    public function enquiries()
+    {
+        return $this->hasMany(Enquiry::class);
+    }
+
+    public function developerApplications()
+    {
+        return $this->hasMany(DeveloperApplication::class);
+    }
+
+    public function tradeApplications()
+    {
+        return $this->hasMany(TradeApplication::class);
     }
 }

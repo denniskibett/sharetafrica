@@ -4,14 +4,15 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\EmailDesignController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\ApiKeyController;
-use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TrackController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WaitingListController;
-use App\Http\Controllers\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::controller(HomeController::class)->group(function () {
+    // Pages
     Route::get('/', 'index')->name('home');
     Route::get('/merchants', 'merchants')->name('merchants');
     Route::get('/personal', 'personal')->name('personal');
@@ -28,6 +30,15 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/developers', 'developers')->name('developers');
     Route::get('/company', 'company')->name('company');
     Route::get('/contact', 'contact')->name('contact');
+
+    // Form submissions (public — do NOT require auth); thank-you emails are sent from HomeController
+    Route::middleware('throttle:10,10')->group(function () {
+        Route::post('/personal/signup', 'storePersonalSignup')->name('personal.signup');
+        Route::post('/merchants/signup', 'storeMerchantSignup')->name('merchants.signup');
+        Route::post('/trade/apply', 'storeTradeApplication')->name('trade.apply');
+        Route::post('/developers/apply', 'storeDeveloperApplication')->name('developers.apply');
+        Route::post('/contact/send', 'storeContact')->name('contact.send');
+    });
 });
 
 /*
@@ -38,7 +49,6 @@ Route::controller(HomeController::class)->group(function () {
 
 Route::post('/t', TrackController::class)->middleware('throttle:240,1')
     ->withoutMiddleware([\App\Http\Middleware\ApplyIntegrations::class])->name('track');
-Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,10')->name('contact.store');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
@@ -50,85 +60,32 @@ Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
 Route::middleware('auth')->group(function () {
 
-    /*
-    |--------------------------------------------------------------------------
-    | Dashboard router
-    |--------------------------------------------------------------------------
-    */
+    // Single dashboard — role-specific cards built in DashboardController (Spatie roles + users.intent)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-
-    
-
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
-
-        if ($user->hasRole(['super_admin', 'admin'])) {
-            return redirect()->route('dashboard.admin');
-        }
-
-        if ($user->hasRole(['support', 'operations'])) {
-            return redirect()->route('dashboard.ops');
-        }
-
-        if ($user->hasRole('individual')) {
-            return redirect()->route('dashboard.individual');
-        }
-
-        if ($user->hasRole('merchant')) {
-            return redirect()->route('dashboard.merchant');
-        }
-
-        if ($user->hasRole('business')) {
-            return redirect()->route('dashboard.business');
-        }
-
-        if ($user->hasRole('techie')) {
-            return redirect()->route('dashboard.developer');
-        }
-
-        return redirect()->route('waiting_list.show');
-    })->name('dashboard');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Waiting list
-    |--------------------------------------------------------------------------
-    */
-
+    // Waiting list status page (user side)
     Route::get('/waiting-list', [WaitingListController::class, 'show'])->name('waiting_list.show');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Onboarding
-    |--------------------------------------------------------------------------
-    */
+    // Onboarding: invited people choose their lane and fill in their details
+    Route::prefix('onboarding')->name('onboarding.')->controller(OnboardingController::class)->group(function () {
+        Route::get('/', 'welcome')->name('welcome');
+        Route::get('/choose-lane', 'chooseLane')->name('choose_lane');
+        Route::post('/choose-lane', 'storeLane')->name('store_lane');
 
-    // OnboardingController is not written yet; registering it would break route:cache on deploy
-    if (class_exists(OnboardingController::class)) Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/merchant', 'merchant')->name('merchant');
+        Route::post('/merchant', 'storeMerchant')->name('merchant.store');
 
-        Route::get('/', [OnboardingController::class, 'welcome'])->name('welcome');
-        Route::get('/choose-lane', [OnboardingController::class, 'chooseLane'])->name('choose_lane');
-        Route::post('/choose-lane', [OnboardingController::class, 'storeLane'])->name('store_lane');
+        Route::get('/business', 'business')->name('business');
+        Route::post('/business', 'storeBusiness')->name('business.store');
 
-        Route::get('/merchant', [OnboardingController::class, 'merchant'])->name('merchant');
-        Route::post('/merchant', [OnboardingController::class, 'storeMerchant'])->name('merchant.store');
+        Route::get('/developer', 'developer')->name('developer');
+        Route::post('/developer', 'storeDeveloper')->name('developer.store');
 
-        Route::get('/business', [OnboardingController::class, 'business'])->name('business');
-        Route::post('/business', [OnboardingController::class, 'storeBusiness'])->name('business.store');
-
-        Route::get('/developer', [OnboardingController::class, 'developer'])->name('developer');
-        Route::post('/developer', [OnboardingController::class, 'storeDeveloper'])->name('developer.store');
-
-        Route::get('/individual', [OnboardingController::class, 'individual'])->name('individual');
-        Route::post('/individual', [OnboardingController::class, 'storeIndividual'])->name('individual.store');
+        Route::get('/individual', 'individual')->name('individual');
+        Route::post('/individual', 'storeIndividual')->name('individual.store');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Profile
-    |--------------------------------------------------------------------------
-    */
-
+    // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -136,92 +93,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
     Route::put('/profile/address', [ProfileController::class, 'updateAddress'])->name('profile.address.update');
     Route::get('/profile/data', [ProfileController::class, 'getUserData'])->name('profile.data');
-});
 
-/*
-|--------------------------------------------------------------------------
-| Individual dashboard
-|--------------------------------------------------------------------------
-*/
+    Route::get('/wallet', [\App\Http\Controllers\WalletController::class, 'index'])->name('wallet.index');
 
-Route::middleware(['auth', 'role:individual'])->group(function () {
-    Route::get('/wallet', function () {
-        return view('dashboard.individual');
-    })->name('dashboard.individual');
-});
+    // Admin: people and the waiting list
+    Route::middleware('role:admin|super_admin')->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
-/*
-|--------------------------------------------------------------------------
-| Merchant dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:merchant'])->group(function () {
-    Route::get('/merchant', function () {
-        return view('dashboard.merchant');
-    })->name('dashboard.merchant');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Business dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:business'])->group(function () {
-    Route::get('/business', function () {
-        return view('dashboard.business');
-    })->name('dashboard.business');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Developer / Techie dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:techie'])->group(function () {
-    Route::get('/developer', function () {
-        return view('dashboard.developer');
-    })->name('dashboard.developer');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Admin dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth', 'role:admin|super_admin'])->group(function () {
-
-    Route::get('/admin', function () {
-        return view('dashboard.admin');
-    })->name('dashboard.admin');
-
-    /*
-    |--------------------------------------------------------------------------
-    | Waiting list management
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/admin/waiting-list', [WaitingListController::class, 'index'])->name('admin.waiting_list');
-    Route::post('/admin/waiting-list/{user}/assign', [WaitingListController::class, 'assign'])->name('admin.waiting_list.assign');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Operations / Support dashboard
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware([
-    'auth',
-    'role:support|operations|admin|super_admin',
-])->group(function () {
-
-    Route::get('/ops', function () {
-        return view('dashboard.ops');
-    })->name('dashboard.ops');
+        Route::get('/admin/waiting-list', [WaitingListController::class, 'index'])->name('admin.waiting_list');
+        Route::post('/admin/waiting-list/{user}/invite', [WaitingListController::class, 'invite'])->name('admin.waiting_list.invite');
+    });
 });
 
 /*
@@ -290,7 +174,7 @@ Route::middleware(['auth', 'permission:analytics.view'])
 
 /*
 |--------------------------------------------------------------------------
-| Email designs + contact form inbox
+| Email designs + enquiries inbox
 |--------------------------------------------------------------------------
 */
 
@@ -299,7 +183,7 @@ Route::middleware(['auth', 'permission:admin.system'])->controller(EmailDesignCo
     Route::get('/admin/emails/{key}', 'show')->name('admin.emails.show')->where('key', '[a-z-]+');
 });
 Route::middleware(['auth', 'permission:waiting_list.invite'])
-    ->get('/admin/contact-messages', [EmailDesignController::class, 'messages'])->name('admin.contact.index');
+    ->get('/admin/enquiries', [EmailDesignController::class, 'messages'])->name('admin.contact.index');
 
 /*
 |--------------------------------------------------------------------------

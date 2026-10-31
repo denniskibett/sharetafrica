@@ -33,7 +33,7 @@
           </div>
         </div>
         <div class="hero-media">
-          <img fetchpriority="high" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet operations desk with a laptop, a reconciliation sheet, and a Nairobi coffee cup." />
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet operations desk with a laptop, a reconciliation sheet, and a Nairobi coffee cup." />
           <div class="floating-tag ft-top">
             <span class="pill">Inbox</span>
             HELLO @ SHARET.AFRICA
@@ -89,88 +89,94 @@
 
   {{-- Intake --}}
   <section id="intake">
-    <div class="container container--narrow">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Intake</span>
-          <h2>Tell us who<br/>you are first.</h2>
-        </div>
-        <p class="lede">
-          Pick the audience that fits you best. The form will then ask the questions that matter to your use of Sharet. Every note goes to a real person on the team.
-        </p>
+      <div class="container container--narrow">
+          <div class="section-head">
+              <div>
+                  <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Intake</span>
+                  <h2>Tell us who<br/>you are first.</h2>
+              </div>
+              <p class="lede">
+                  Pick the audience that fits you best. The form will route your note to the right person. Every note goes to a real person on the team.
+              </p>
+          </div>
+
+          {{-- site.js sends this in the background (no reload) and shows the reply in .form-status; plain post still works --}}
+          <form class="form-card" method="POST" action="{{ route('contact.send') }}" data-async-form>
+              @csrf
+              <div class="form-status" role="status" aria-live="polite" hidden></div>
+
+              <div class="form-row form-row--full">
+                  <div class="form-field">
+                      <label for="c-audience">I am a…</label>
+                      <select id="c-audience" name="audience" required>
+                          <option value="">Select one</option>
+                          <option value="merchant"    @selected(old('audience') === 'merchant')>Merchant — I want to accept payments from any rail</option>
+                          <option value="individual"  @selected(old('audience') === 'individual')>Individual — I want to send money across East Africa</option>
+                          <option value="trader"      @selected(old('audience') === 'trader')>Trader — I import or export and need to settle across borders</option>
+                          <option value="developer"   @selected(old('audience') === 'developer')>Developer or platform — I want to build on the Sharet API</option>
+                          <option value="institution" @selected(old('audience') === 'institution')>Institution — I want to license the Sharet stack</option>
+                          <option value="press"       @selected(old('audience') === 'press')>Press — I am a journalist or media outlet</option>
+                          <option value="career"      @selected(old('audience') === 'career')>Candidate — I am looking for a job at Sharet</option>
+                          <option value="other"       @selected(old('audience') === 'other')>Something else</option>
+                      </select>
+                      @error('audience')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+              </div>
+
+              <div class="form-row">
+                  <div class="form-field">
+                      <label for="c-name">Your name</label>
+                      <input id="c-name" name="name" type="text" required
+                            value="{{ old('name') }}" placeholder="Amina Wanjiru" />
+                      @error('name')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+                  <div class="form-field">
+                      <label for="c-business">Business / project (if relevant)</label>
+                      <input id="c-business" name="business" type="text"
+                            value="{{ old('business') }}" placeholder="Nairobi Events Co." />
+                  </div>
+              </div>
+
+              <div class="form-row">
+                  <div class="form-field">
+                      <label for="c-email">Email</label>
+                      <input id="c-email" name="email" type="email" required
+                            value="{{ old('email') }}" placeholder="amina @ nairobievents.co.ke" />
+                      @error('email')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+                  <div class="form-field">
+                      <label for="c-phone">Phone number (optional)</label>
+                      <input id="c-phone" name="phone" type="tel"
+                            value="{{ old('phone') }}" placeholder="+254 712 XXX XXX" />
+                  </div>
+              </div>
+
+              <div class="form-row form-row--full">
+                  <div class="form-field">
+                      <label for="c-country">Country</label>
+                      <input id="c-country" name="country" type="text"
+                            value="{{ old('country') }}" placeholder="Kenya" />
+                  </div>
+              </div>
+
+              <div class="form-row form-row--full">
+                  <div class="form-field">
+                      <label for="c-brief">What brings you here?</label>
+                      <textarea id="c-brief" name="brief" required
+                                placeholder="One paragraph is enough. Tell us what you do, what you need, and where the pain is today.">{{ old('brief') }}</textarea>
+                      @error('brief')<span class="form-error">{{ $message }}</span>@enderror
+                  </div>
+              </div>
+
+              <div class="form-actions">
+                  <small>By submitting, you agree we will reply to the email above. No newsletter signup. No third-party sharing.</small>
+                  <button type="submit" class="btn btn--primary btn--lg">
+                      Send first note
+                      <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+              </div>
+          </form>
       </div>
-
-      {{-- Posts to ContactController; site.js sends it in the background (no reload) and shows the reply here --}}
-      <form class="form-card" method="POST" action="{{ route('contact.store') }}" data-async-form>
-        @csrf
-        <div class="hp-field" aria-hidden="true"><label>Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-        <div class="form-status" role="status" aria-live="polite" @if (! session('contact_status')) hidden @endif>{{ session('contact_status') }}</div>
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="c-audience">I am a…</label>
-            <select id="c-audience" name="audience" required data-error-for="audience">
-              <option value="">Select one</option>
-              <option>Merchant — I want to accept payments from any rail</option>
-              <option>Individual — I want to send money across East Africa</option>
-              <option>Trader — I import or export and need to settle across borders</option>
-              <option>Developer or platform — I want to build on the Sharet API</option>
-              <option>Institution — I want to license the Sharet stack (white-label)</option>
-              <option>Press — I am a journalist or media outlet</option>
-              <option>Candidate — I am looking for a job at Sharet</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="c-name">Your name</label>
-            <input id="c-name" name="name" type="text" required placeholder="Amina Wanjiru" />
-          </div>
-          <div class="form-field">
-            <label for="c-business">Business / project (if relevant)</label>
-            <input id="c-business" name="business" type="text" placeholder="Nairobi Events Co." />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-field">
-            <label for="c-email">Email</label>
-            <input id="c-email" name="email" type="email" required placeholder="amina @ nairobievents.co.ke" />
-          </div>
-          <div class="form-field">
-            <label for="c-phone">Phone number (optional)</label>
-            <input id="c-phone" name="phone" type="tel" placeholder="+254 712 XXX XXX" />
-          </div>
-        </div>
-
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="c-country">Country</label>
-            <select id="c-country" name="country">
-              <option>Kenya</option>
-              <option>Tanzania</option>
-              <option>Uganda</option>
-              <option>Diaspora — outside East Africa</option>
-              <option>Other African market</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="c-brief">What brings you here?</label>
-            <textarea id="c-brief" name="brief" required placeholder="One paragraph is enough. Tell us what you do, what you need, and where the pain is today."></textarea>
-          </div>
-        </div>
-
-        <div class="form-actions">
-          <small>By submitting, you agree we will reply to the email above. No newsletter signup. No third-party sharing.</small>
-          <button type="submit" class="btn btn--primary btn--lg">Send first note
-            <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </form>
-    </div>
   </section>
 
   {{-- Locations --}}
@@ -194,7 +200,7 @@
           </a>
         </div>
         <div class="split-img">
-          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa with Sharet's three offices marked." />
+          <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa with Sharet's three offices marked." />
           <span class="ft-corner">Nairobi · Kampala · Dar es Salaam</span>
         </div>
       </div>

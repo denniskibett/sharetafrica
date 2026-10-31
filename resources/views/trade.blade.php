@@ -430,99 +430,129 @@
     </div>
   </section>
 
-  {{-- Section 10: Intake --}}
-  <section id="intake" class="snug">
+{{-- Section 10: Intake --}}
+<section id="intake" class="snug">
     <div class="container container--narrow">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Start trading on Sharet · 10</span>
-          <h2>Tell us your<br/>corridor.</h2>
-        </div>
-        <p class="lede">
-          Onboarding for trade accounts typically takes one to two weeks depending on regulatory scope and credit application. Tell us your corridors, volumes, and financing needs, and we will get you set up.
-        </p>
-      </div>
-
-      <form class="form-card" onsubmit="event.preventDefault(); this.querySelector('button[type=submit]').textContent='Thank you — we will be in touch.';">
-        <div class="form-row">
-          <div class="form-field">
-            <label for="t-name">Your name</label>
-            <input id="t-name" name="name" type="text" required placeholder="Grace Mwangi" />
-          </div>
-          <div class="form-field">
-            <label for="t-business">Business name</label>
-            <input id="t-business" name="business" type="text" required placeholder="Nairobi Electronics Ltd." />
-          </div>
+        <div class="section-head">
+            <div>
+                <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Start trading on Sharet · 10</span>
+                <h2>Tell us your<br/>corridor.</h2>
+            </div>
+            <p class="lede">
+                Onboarding for trade accounts typically takes one to two weeks. Tell us your corridors, volumes, and financing needs.
+            </p>
         </div>
 
-        <div class="form-row">
-          <div class="form-field">
-            <label for="t-email">Email</label>
-            <input id="t-email" name="email" type="email" required placeholder="grace @ nairobielectronics.co.ke" />
-          </div>
-          <div class="form-field">
-            <label for="t-phone">Phone number</label>
-            <input id="t-phone" name="phone" type="tel" required placeholder="+254 722 XXX XXX" />
-          </div>
-        </div>
+        <form class="form-card" method="POST" action="{{ route('trade.apply') }}">
+            @csrf
 
-        <div class="form-row">
-          <div class="form-field">
-            <label for="t-type">Trade type</label>
-            <select id="t-type" name="type">
-              <option>Importer — paying suppliers abroad</option>
-              <option>Exporter — receiving from buyers abroad</option>
-              <option>Both — two-way trade</option>
-              <option>Diaspora — sending home</option>
-              <option>Intra-Africa trader — buying/selling within East Africa</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="t-corridor">Main corridor</label>
-            <input id="t-corridor" name="corridor" type="text" placeholder="Kenya ↔ China · Kenya ↔ UAE" />
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="t-name">Your name</label>
+                    <input id="t-name" name="name" type="text" required
+                           value="{{ old('name') }}" placeholder="Grace Mwangi" />
+                    @error('name')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-field">
+                    <label for="t-business">Business name</label>
+                    <input id="t-business" name="business" type="text" required
+                           value="{{ old('business') }}" placeholder="Nairobi Electronics Ltd." />
+                    @error('business')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
 
-        <div class="form-row">
-          <div class="form-field">
-            <label for="t-interest">What do you need?</label>
-            <select id="t-interest" name="interest">
-              <option>Send a payment abroad</option>
-              <option>Receive a payment from abroad</option>
-              <option>Trade across East Africa</option>
-              <option selected>Apply for a trade credit line</option>
-              <option>All of the above</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="t-volume">Monthly trade volume (approx.)</label>
-            <input id="t-volume" name="volume" type="text" placeholder="e.g. USD 50,000 – 200,000" />
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="t-email">Email</label>
+                    <input id="t-email" name="email" type="email" required
+                           value="{{ old('email') }}" placeholder="grace @ nairobielectronics.co.ke" />
+                    @error('email')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-field">
+                    <label for="t-phone">Phone number</label>
+                    <input id="t-phone" name="phone" type="tel" required
+                           value="{{ old('phone') }}" placeholder="+254 722 XXX XXX" />
+                    @error('phone')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
 
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="t-credit">If applying for credit — expected order size and frequency</label>
-            <input id="t-credit" name="credit" type="text" placeholder="e.g. KES 3–5M per order · monthly" />
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="t-trade_type">Trade type</label>
+                    <select id="t-trade_type" name="trade_type" required>
+                        <option value="importer"     @selected(old('trade_type') === 'importer')>Importer — paying suppliers abroad</option>
+                        <option value="exporter"     @selected(old('trade_type') === 'exporter')>Exporter — receiving from buyers abroad</option>
+                        <option value="both"         @selected(old('trade_type') === 'both')>Both — two-way trade</option>
+                        <option value="diaspora"     @selected(old('trade_type') === 'diaspora')>Diaspora — sending home</option>
+                        <option value="intra_africa" @selected(old('trade_type') === 'intra_africa')>Intra-Africa trader</option>
+                    </select>
+                    @error('trade_type')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-field">
+                    <label for="t-corridor">Main corridor</label>
+                    <select id="t-corridor" name="corridor" data-corridor-select="t-corridor-other-wrapper">
+                      <option value="">Select a corridor</option>
+                      @foreach(\App\Models\Corridor::grouped() as $groupLabel => $corridors)
+                          <optgroup label="{{ $groupLabel }}">
+                              @foreach($corridors as $code => $label)
+                                  <option value="{{ $code }}" @selected(old('corridor') === $code)>
+                                      {{ $label }}
+                                  </option>
+                              @endforeach
+                          </optgroup>
+                      @endforeach
+                  </select>
+                </div>
+            </div>
 
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="t-brief">Tell us about your trade</label>
-            <textarea id="t-brief" name="brief" required placeholder="What do you buy or sell, who are your suppliers or buyers, how do you settle today, and where is the credit gap?"></textarea>
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="t-need">What do you need?</label>
+                    <select id="t-need" name="need" required>
+                        <option value="payment_abroad"      @selected(old('need') === 'payment_abroad')>Send a payment abroad</option>
+                        <option value="receive_from_abroad" @selected(old('need') === 'receive_from_abroad')>Receive a payment from abroad</option>
+                        <option value="intra_africa"        @selected(old('need') === 'intra_africa')>Trade across East Africa</option>
+                        <option value="credit_line"         @selected(old('need') === 'credit_line')>Apply for a trade credit line</option>
+                        <option value="all"                 @selected(old('need') === 'all')>All of the above</option>
+                    </select>
+                    @error('need')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-field">
+                    <label for="t-monthly_volume">Monthly trade volume (approx.)</label>
+                    <input id="t-monthly_volume" name="monthly_volume" type="text"
+                           value="{{ old('monthly_volume') }}"
+                           placeholder="e.g. USD 50,000 – 200,000" />
+                </div>
+            </div>
 
-        <div class="form-actions">
-          <small>By submitting, you agree we will reply to the email above. No newsletter signup. No third-party sharing.</small>
-          <button type="submit" class="btn btn--primary btn--lg">Start onboarding
-            <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </form>
+            <div class="form-row form-row--full">
+                <div class="form-field">
+                    <label for="t-expected_order_size">If applying for credit — expected order size and frequency</label>
+                    <input id="t-expected_order_size" name="expected_order_size" type="text"
+                           value="{{ old('expected_order_size') }}"
+                           placeholder="e.g. KES 3–5M per order · monthly" />
+                </div>
+            </div>
+
+            <div class="form-row form-row--full">
+                <div class="form-field">
+                    <label for="t-brief">Tell us about your trade</label>
+                    <textarea id="t-brief" name="brief" required
+                              placeholder="What do you buy or sell, who are your suppliers or buyers, and where is the credit gap?">{{ old('brief') }}</textarea>
+                    @error('brief')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <small>By submitting, you agree we will reply to the email above. No newsletter signup. No third-party sharing.</small>
+                <button type="submit" class="btn btn--primary btn--lg">
+                    Submit trade application
+                    <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </form>
     </div>
-  </section>
+</section>
 
   {{-- Closing --}}
   <section class="closing-cta">

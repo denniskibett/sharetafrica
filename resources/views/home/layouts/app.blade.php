@@ -63,6 +63,7 @@
   @include('home.layouts.header')
 
   <main id="main">
+    @include('partials.alert.flash')
     @yield('content')
   </main>
 

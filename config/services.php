@@ -18,14 +18,14 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_KEY'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
-    ],
-
-    'resend' => [
-        'key' => env('RESEND_KEY'),
     ],
 
     'slack' => [
@@ -33,6 +33,18 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+    ],
+    
+    'google' => [
+        'analytics_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
+    'kenyasms' => [
+        'key' => env('KENYASMS_KEY'),
+        'url' => env('KENYASMS_URL', 'https://kenyasms.com/api/v1'),
+        'sender_id' => env('KENYASMS_SENDER_ID'),
+        'default_type' => env('KENYASMS_DEFAULT_TYPE', 'transactional'),
+        'sandbox' => env('KENYASMS_SANDBOX', false),
     ],
 
 ];

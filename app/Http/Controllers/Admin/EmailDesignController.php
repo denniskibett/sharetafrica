@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\SharetMail;
-use App\Models\ContactMessage;
+use App\Models\Enquiry;
 
-/** Administration › Email designs (preview every email) and Contact messages (website form inbox). */
+/** Administration › Email designs (preview every email) and Enquiries (website contact form, live `enquiries` table). */
 class EmailDesignController extends Controller
 {
     public function index()
@@ -29,6 +29,6 @@ class EmailDesignController extends Controller
 
     public function messages()
     {
-        return view('admin.contact.index', ['messages' => ContactMessage::latest()->paginate(25)]);
+        return view('admin.contact.index', ['messages' => Enquiry::with('user:id,name,email,phone,country')->latest()->paginate(25)]);
     }
 }

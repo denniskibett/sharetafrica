@@ -26,13 +26,14 @@ class DashboardNav
                 'title' => 'Menu',
                 'items' => [
                     ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'squares-2x2', 'tone' => 'violet',
-                        'active' => ['dashboard', 'dashboard.individual', 'dashboard.merchant', 'dashboard.business', 'dashboard.developer', 'dashboard.admin', 'waiting_list.show']],
+                        'active' => ['dashboard', 'waiting_list.show', 'onboarding.*']],
                 ],
             ],
             [
                 'title' => 'Wallet',
                 'roles' => ['individual'],
                 'items' => [
+                    ['label' => 'Wallet', 'route' => 'wallet.index', 'icon' => 'wallet', 'tone' => 'violet'],
                     ['label' => 'Send money', 'route' => 'wallet.transfer', 'icon' => 'paper-airplane', 'tone' => 'emerald'],
                     ['label' => 'Receive money', 'route' => 'wallet.deposit', 'icon' => 'arrow-down-tray', 'tone' => 'sky'],
                     ['label' => 'My QR code', 'route' => 'individual.qr', 'icon' => 'qr-code', 'tone' => 'amber'],
@@ -76,7 +77,6 @@ class DashboardNav
                 'title' => 'Operations',
                 'roles' => self::OPS,
                 'items' => [
-                    ['label' => 'Operations desk', 'route' => 'dashboard.ops', 'icon' => 'lifebuoy', 'tone' => 'sky'],
                     ['label' => 'Website analytics', 'route' => 'admin.analytics.index', 'icon' => 'chart-bar', 'tone' => 'teal', 'can' => 'analytics.view',
                         'roles' => ['support', 'operations'], 'active' => ['admin.analytics.*']],
                     ['label' => 'Reconciliation', 'route' => 'ops.reconciliation.index', 'icon' => 'scale', 'tone' => 'indigo'],
@@ -91,8 +91,9 @@ class DashboardNav
                 'items' => [
                     ['label' => 'Website analytics', 'route' => 'admin.analytics.index', 'icon' => 'chart-bar', 'tone' => 'sky', 'can' => 'analytics.view',
                         'active' => ['admin.analytics.*']],
+                    ['label' => 'People', 'route' => 'users.index', 'icon' => 'users', 'tone' => 'indigo', 'active' => ['users.*']],
                     ['label' => 'Waiting list', 'route' => 'admin.waiting_list', 'icon' => 'queue-list', 'tone' => 'amber'],
-                    ['label' => 'Contact messages', 'route' => 'admin.contact.index', 'icon' => 'inbox-arrow-down', 'tone' => 'sky', 'can' => 'waiting_list.invite'],
+                    ['label' => 'Enquiries', 'route' => 'admin.contact.index', 'icon' => 'inbox-arrow-down', 'tone' => 'sky', 'can' => 'waiting_list.invite'],
                     ['label' => 'Email designs', 'route' => 'admin.emails.index', 'icon' => 'envelope', 'tone' => 'rose', 'can' => 'admin.system',
                         'active' => ['admin.emails.*']],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
@@ -150,8 +151,9 @@ class DashboardNav
         return collect(self::for($user))->firstWhere('title', $title);
     }
 
+    /** Lanes come from Spatie roles or, as on the live site, from users.intent (most people have no role). */
     protected static function allowed(?User $user, ?array $roles): bool
     {
-        return $roles === null || ($user && $user->hasAnyRole($roles));
+        return $roles === null || ($user && ($user->hasAnyRole($roles) || in_array($user->intent, $roles, true)));
     }
 }

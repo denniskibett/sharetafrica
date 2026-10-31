@@ -23,7 +23,7 @@
     <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('admin.users.index') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                <a href="{{ route('users.index') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
                     <i class="fas fa-arrow-left"></i>
                 </a>
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
@@ -34,11 +34,11 @@
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">View and manage user information</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('admin.users.edit', $user->id) }}" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition">
+            <a href="{{ route('users.show', $user->id) }}" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition">
                 <i class="fas fa-edit"></i> Edit User
             </a>
             @if(!$isSysadmin)
-                <button onclick="if(confirm('Delete user {{ $user->name }}?')) { fetch('{{ route('admin.users.destroy', $user->id) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r=>r.json()).then(d=>{ if(d.success){ window.location.href='{{ route('admin.users.index') }}'; } else { alert(d.message); } }); }" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 transition">
+                <button onclick="if(confirm('Delete user {{ $user->name }}?')) { fetch('{{ route('users.destroy', $user->id) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r=>r.json()).then(d=>{ if(d.success){ window.location.href='{{ route('users.index') }}'; } else { alert(d.message); } }); }" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 transition">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             @endif
@@ -212,7 +212,7 @@
                         <i class="fas fa-home text-emerald-600 dark:text-emerald-400"></i>
                         Tenant Information
                     </h3>
-                    <a href="{{ route('admin.tenants.show', $user->tenant->id) }}" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    <a href="{{ Route::has('admin.tenants.show') ? route('admin.tenants.show', $user->tenant->id) : '#' }}" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
                         View Full Profile <i class="fas fa-arrow-right ml-1"></i>
                     </a>
                 </div>
@@ -334,14 +334,14 @@
                         </button>
                         @endif
                         @if(!$isSysadmin)
-                        <button onclick="if(confirm('Delete user {{ $user->name }}?')) { fetch('{{ route('admin.users.destroy', $user->id) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r=>r.json()).then(d=>{ if(d.success){ window.location.href='{{ route('admin.users.index') }}'; } else { alert(d.message); } }); }" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition group">
+                        <button onclick="if(confirm('Delete user {{ $user->name }}?')) { fetch('{{ route('users.destroy', $user->id) }}', { method: 'DELETE', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } }).then(r=>r.json()).then(d=>{ if(d.success){ window.location.href='{{ route('users.index') }}'; } else { alert(d.message); } }); }" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition group">
                             <div class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 transition">
                                 <i class="fas fa-trash"></i>
                             </div>
                             <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Delete</span>
                         </button>
                         @endif
-                        <button onclick="window.location.href='{{ route('admin.users.edit', $user->id) }}'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition group">
+                        <button onclick="window.location.href='{{ route('users.show', $user->id) }}'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition group">
                             <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition">
                                 <i class="fas fa-edit"></i>
                             </div>

@@ -240,81 +240,98 @@
     </div>
   </section>
 
-  {{-- Intake --}}
-  <section id="intake" class="snug">
+{{-- Intake --}}
+<section id="intake" class="snug">
     <div class="container container--narrow">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Onboard as a merchant</span>
-          <h2>Start in<br/>one working day.</h2>
-        </div>
-        <p class="lede">
-          Tell us a little about your business and we will get you set up. Verification typically happens within one working day. No long setup, no developer work, no multi-week contracting.
-        </p>
-      </div>
-
-      <form class="form-card" onsubmit="event.preventDefault(); this.querySelector('button[type=submit]').textContent='Thank you — we will be in touch.';">
-        <div class="form-row">
-          <div class="form-field">
-            <label for="m-name">Your name</label>
-            <input id="m-name" name="name" type="text" required placeholder="Amina Wanjiru" />
-          </div>
-          <div class="form-field">
-            <label for="m-business">Business name</label>
-            <input id="m-business" name="business" type="text" required placeholder="Nairobi Events Co." />
-          </div>
+        <div class="section-head">
+            <div>
+                <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Onboard as a merchant</span>
+                <h2>Start in<br/>one working day.</h2>
+            </div>
+            <p class="lede">
+                Tell us about your business and we will get you set up. Verification typically happens within one working day.
+            </p>
         </div>
 
-        <div class="form-row">
-          <div class="form-field">
-            <label for="m-email">Email</label>
-            <input id="m-email" name="email" type="email" required placeholder="amina @ nairobievents.co.ke" />
-          </div>
-          <div class="form-field">
-            <label for="m-phone">Phone number</label>
-            <input id="m-phone" name="phone" type="tel" required placeholder="+254 712 XXX XXX" />
-          </div>
-        </div>
+        <form class="form-card" method="POST" action="{{ route('merchants.signup') }}">
+            @csrf
 
-        <div class="form-row">
-          <div class="form-field">
-            <label for="m-country">Country of operation</label>
-            <select id="m-country" name="country">
-              <option>Kenya</option>
-              <option>Tanzania</option>
-              <option>Uganda</option>
-              <option>Multiple East African markets</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="m-rails">Rails you accept from today</label>
-            <input id="m-rails" name="rails" type="text" placeholder="M-PESA · MTN · Airtel · Card" />
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="m-name">Your name</label>
+                    <input id="m-name" name="name" type="text" required
+                           value="{{ old('name') }}" placeholder="Amina Wanjiru" />
+                    @error('name')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-field">
+                    <label for="m-business">Business name</label>
+                    <input id="m-business" name="business" type="text" required
+                           value="{{ old('business') }}" placeholder="Nairobi Events Co." />
+                    @error('business')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
 
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="m-volume">Monthly transaction volume (approx.)</label>
-            <input id="m-volume" name="volume" type="text" placeholder="e.g. KES 500,000 – 2M" />
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="m-email">Email</label>
+                    <input id="m-email" name="email" type="email" required
+                           value="{{ old('email') }}" placeholder="amina @ nairobievents.co.ke" />
+                    @error('email')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+                <div class="form-field">
+                    <label for="m-phone">Phone number</label>
+                    <input id="m-phone" name="phone" type="tel" required
+                           value="{{ old('phone') }}" placeholder="+254 712 XXX XXX" />
+                    @error('phone')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
 
-        <div class="form-row form-row--full">
-          <div class="form-field">
-            <label for="m-brief">Tell us about your business</label>
-            <textarea id="m-brief" name="brief" required placeholder="What does your business do, who pays you, how do they pay today, and where is the pain?"></textarea>
-          </div>
-        </div>
+            <div class="form-row">
+                <div class="form-field">
+                    <label for="m-country">Country of operation</label>
+                    <select id="m-country" name="country">
+                        <option value="KE" @selected(old('country') === 'KE')>Kenya</option>
+                        <option value="TZ" @selected(old('country') === 'TZ')>Tanzania</option>
+                        <option value="UG" @selected(old('country') === 'UG')>Uganda</option>
+                        <option value=""  @selected(old('country') === '')>Multiple East African markets</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="m-rails">Rails you accept from today</label>
+                    <input id="m-rails" name="rails" type="text"
+                           value="{{ old('rails') }}"
+                           placeholder="M-PESA · MTN · Airtel · Card" />
+                </div>
+            </div>
 
-        <div class="form-actions">
-          <small>By submitting, you agree we will reply to the email above. No newsletter signup. No third-party sharing.</small>
-          <button type="submit" class="btn btn--primary btn--lg">Start onboarding
-            <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
-      </form>
+            <div class="form-row form-row--full">
+                <div class="form-field">
+                    <label for="m-volume">Monthly transaction volume (approx.)</label>
+                    <input id="m-volume" name="volume" type="text"
+                           value="{{ old('volume') }}"
+                           placeholder="e.g. KES 500,000 – 2M" />
+                </div>
+            </div>
+
+            <div class="form-row form-row--full">
+                <div class="form-field">
+                    <label for="m-brief">Tell us about your business</label>
+                    <textarea id="m-brief" name="brief" required
+                              placeholder="What does your business do, who pays you, how do they pay today, and where is the pain?">{{ old('brief') }}</textarea>
+                    @error('brief')<span class="form-error">{{ $message }}</span>@enderror
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <small>By submitting, you agree we will reply to the email above. No newsletter signup. No third-party sharing.</small>
+                <button type="submit" class="btn btn--primary btn--lg">
+                    Start onboarding
+                    <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+        </form>
     </div>
-  </section>
+</section>
 
   {{-- Closing --}}
   <section class="closing-cta">
