@@ -18,3 +18,4 @@ scripts/
 .DS_Store
 .phpunit.result.cache
 bootstrap/cache/*.php
+docs/
