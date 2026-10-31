@@ -1,0 +1,1 @@
+@include('errors.layout', ['code' => 403, 'title' => 'This page is not open to you', 'message' => 'Your account does not have access to this page. If you think it should, contact support and quote the reference below.', 'tone' => '#FDA4AF'])

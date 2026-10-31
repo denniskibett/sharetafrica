@@ -1,29 +1,22 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
-            </div>
+@section('content')
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Settings</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Your details, password and account.</p>
+  </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
-            </div>
+  <div class="grid gap-6 xl:grid-cols-2">
+    <section class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+      @include('profile.partials.update-profile-information-form')
+    </section>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
-                </div>
-            </div>
-        </div>
-    </div>
-</x-app-layout>
+    <section class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+      @include('profile.partials.update-password-form')
+    </section>
+
+    <section class="rounded-2xl border border-red-200 bg-white p-5 dark:border-red-500/20 dark:bg-white/[0.03] sm:p-6 xl:col-span-2">
+      @include('profile.partials.delete-user-form')
+    </section>
+  </div>
+@endsection

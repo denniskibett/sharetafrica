@@ -1,0 +1,1 @@
+@include('errors.layout', ['code' => 419, 'title' => 'Your session expired', 'message' => 'For your security, forms expire after a while. Reload the page and try again — nothing was sent.', 'tone' => '#FCD34D', 'retry' => true])

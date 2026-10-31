@@ -1,13 +1,5 @@
 @extends('layouts.app')
-@section('content')
-  <div class="container container--wide">
-    <div class="dashboard-header">
-      <h1>Admin Dashboard</h1>
-      <p>Welcome, {{ auth()->user()->name }}! You have administrative privileges.</p>
-    </div>
 
-    <div class="dashboard-cards">
-     
-    </div>
-  </div>
+@section('content')
+  @include('dashboard._home', ['title' => 'Admin overview', 'groups' => ['Administration', 'Operations', 'Account'], 'intro' => 'Run the platform: people, integrations, roles and settings.'])
 @endsection

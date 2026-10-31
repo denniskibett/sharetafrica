@@ -1,0 +1,1 @@
+@include('errors.layout', ['code' => 429, 'title' => 'Slow down a little', 'message' => 'We received too many requests from you in a short time. Wait a minute, then try again.', 'tone' => '#FCD34D', 'retry' => true])

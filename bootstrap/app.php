@@ -19,5 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Error pages show this reference; the log line carries the same one
+        $exceptions->context(fn () => ['ref' => \App\Support\ErrorRef::get(), 'url' => request()->fullUrl()]);
     })->create();

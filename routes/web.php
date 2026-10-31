@@ -4,7 +4,6 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OnboardingController;
-use App\Http\Controllers\WalletController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -84,7 +83,8 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+    // OnboardingController is not written yet; registering it would break route:cache on deploy
+    if (class_exists(OnboardingController::class)) Route::prefix('onboarding')->name('onboarding.')->group(function () {
 
         Route::get('/', [OnboardingController::class, 'welcome'])->name('welcome');
         Route::get('/choose-lane', [OnboardingController::class, 'chooseLane'])->name('choose_lane');
@@ -153,9 +153,6 @@ Route::middleware(['auth', 'role:business'])->group(function () {
         return view('dashboard.business');
     })->name('dashboard.business');
 });
-
-Route::resource('wallet', WalletController::class);
-
 
 /*
 |--------------------------------------------------------------------------

@@ -1,0 +1,1 @@
+@include('errors.layout', ['code' => 404, 'title' => 'We could not find that page', 'message' => 'The link may be old or mistyped. Check the address, or head back to the Sharet home page.', 'tone' => '#D4FF3D'])

@@ -1,8 +1,8 @@
 import './bootstrap';
 
-// import Alpine from 'alpinejs';
+import Alpine from 'alpinejs';
+import persist from '@alpinejs/persist';
 
-// window.Alpine = Alpine;
-
-// Alpine.start();
-console.log('✅ Core app.js loaded');
+Alpine.plugin(persist);
+window.Alpine = Alpine;
+Alpine.start();

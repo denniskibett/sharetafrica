@@ -1,0 +1,1 @@
+@include('errors.layout', ['code' => 503, 'title' => 'Back shortly', 'message' => 'Sharet is being updated. This usually takes a few minutes. Your money and data are safe.', 'tone' => '#7DD3FC', 'retry' => true])

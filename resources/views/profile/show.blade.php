@@ -7,7 +7,7 @@
 </div>
 <!-- Breadcrumb End -->
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-200" 
+<div class="w-full text-gray-800 dark:text-gray-200"
      x-data="profileData()" 
      x-init="initProfile()">
     

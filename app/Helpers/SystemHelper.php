@@ -145,10 +145,10 @@ class SystemHelper
         }
 
         return match($type){
-            'dark' => asset('public/images/logo/logo-dark.svg'),
-            'icon' => asset('public/images/logo/logo-icon.svg'),
-            'auth' => asset('public/images/logo/auth-logo.svg'),
-            default => asset('public/images/logo/logo.svg'),
+            'dark' => asset('images/logo/logo-dark.svg'),
+            'icon' => asset('images/logo/logo-icon.svg'),
+            'auth' => asset('images/logo/auth-logo.svg'),
+            default => asset('images/logo/logo.svg'),
         };
     }
 
@@ -156,8 +156,8 @@ class SystemHelper
     {
         $logo = self::get('logo');
         if ($logo) {
-            if (file_exists(public_path('public/images/logo/' . $logo))) {
-                return asset('public/images/logo/' . $logo);
+            if (file_exists(public_path('images/logo/' . $logo))) {
+                return asset('images/logo/' . $logo);
             }
             
             if (file_exists(storage_path('app/public/' . $logo))) {

@@ -17,22 +17,25 @@
         <meta name="keywords" content="{{ SystemHelper::metaKeywords() }}">
     @endif
 
-    {{-- Dynamic Favicon --}}
-    <link rel="icon" type="image/x-icon" href="{{ SystemHelper::faviconUrl() }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ SystemHelper::faviconUrl() }}">
-    <link rel="apple-touch-icon" href="{{ SystemHelper::faviconUrl() }}">
+    {{-- Favicon: the Sharet mark --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" href="{{ SystemHelper::faviconUrl() }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo/logo-icon.svg') }}">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0A0A0C" media="(prefers-color-scheme: dark)">
 
-    {{-- Fonts --}}
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {{-- Light/dark before first paint: saved choice, else the device setting (no white flash on dark phones) --}}
+    <script>
+        (function () {
+            var saved = null;
+            try { saved = JSON.parse(localStorage.getItem('darkMode')); } catch (e) {}
+            var dark = saved === null ? window.matchMedia('(prefers-color-scheme: dark)').matches : saved;
+            document.documentElement.classList.toggle('dark', dark);
+        })();
+    </script>
+    <style>[x-cloak]{display:none!important}</style>
 
-   
-    <!-- Vite Assets -->
-    @vite([
-        'resources/css/app.css',
-        'resources/js/app.js',
-        'resources/js/bootstrap.js',
-        'resources/js/index.js',
-    ])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 
     <style>    
@@ -311,35 +314,33 @@
 
 </head>
 
-<body class="font-outfit antialiased bg-gray-100"
+{{-- sidebarToggle: collapsed sidebar on large screens (remembered), open drawer on phones (never remembered).
+     Content width: one standard width for every page; it grows when the sidebar is collapsed. --}}
+<body class="bg-gray-50 font-outfit text-gray-800 antialiased dark:bg-gray-900 dark:text-gray-200"
       x-data="{
-          page: '{{ request()->segment(1) ?? 'dashboard' }}',
-          loaded: true,
-          darkMode: JSON.parse(localStorage.getItem('darkMode')) || false,
-          stickyMenu: false,
+          darkMode: document.documentElement.classList.contains('dark'),
+          collapsed: $persist(false).as('sidebarCollapsed'),
           sidebarToggle: false,
-          scrollTop: false,
-          selected: $persist('{{ ucfirst(request()->segment(1) ?? 'Dashboard') }}')
       }"
-      x-init="$watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-      :class="{'dark bg-gray-900': darkMode}">
-
-@include('partials.preloader')
+      x-init="
+          sidebarToggle = window.innerWidth >= 1024 && collapsed;
+          $watch('sidebarToggle', v => { if (window.innerWidth >= 1024) collapsed = v });
+          $watch('darkMode', v => { document.documentElement.classList.toggle('dark', v); localStorage.setItem('darkMode', JSON.stringify(v)) });
+      ">
 
 <div class="flex h-screen overflow-hidden">
     @include('partials.sidebar')
 
-    <div class="relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto">
-
-        {{-- Header --}}
+    <div class="relative flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
         @include('partials.header')
 
-
-        {{-- Page Content --}}
-        <main class="flex-1 p-6">
-            @yield('content')
+        <main class="flex-1">
+            <div class="mx-auto w-full p-4 transition-[max-width] duration-300 md:p-6 2xl:p-8"
+                 :class="sidebarToggle ? 'max-w-[1760px]' : 'max-w-[1440px]'">
+                @yield('content')
+                {{ $slot ?? '' }}
+            </div>
         </main>
-
     </div>
 </div>
 

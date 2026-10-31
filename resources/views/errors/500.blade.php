@@ -1,0 +1,1 @@
+@include('errors.layout', ['code' => 500, 'title' => 'Something went wrong on our side', 'message' => 'We have logged the problem. Try again in a moment; if it keeps happening, contact support and quote the reference below.', 'tone' => '#FDA4AF', 'retry' => true])
