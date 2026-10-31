@@ -21,6 +21,7 @@ class PostController extends Controller
         }
 
         $query = Post::query()->with('author:id,name')->when($request->filled('status'), fn ($q) => $q->where('status', $request->query('status')));
+        $reads = $this->reads();
 
         return Table::respond($request, $query, fn (Post $p) => [
             'id' => $p->id,
@@ -29,11 +30,57 @@ class PostController extends Controller
             'status' => $p->status === 'published' ? Table::pill($p->published_at?->isFuture() ? 'Scheduled' : 'Published', $p->published_at?->isFuture() ? 'info' : 'success') : Table::pill('Draft', 'neutral'),
             'date' => Table::date($p->published_at ?? $p->updated_at),
             'url' => $p->status === 'published' ? route('blog.show', $p->slug) : null,
+            'views' => (int) ($reads['/blog/'.$p->slug]->views ?? 0),
+            'readers' => (int) ($reads['/blog/'.$p->slug]->readers ?? 0),
+            'read_through' => isset($reads['/blog/'.$p->slug]) && $reads['/blog/'.$p->slug]->views ? round($reads['/blog/'.$p->slug]->finished / $reads['/blog/'.$p->slug]->views * 100).'%' : '—',
         ], ['title', 'excerpt'], ['title' => 'title', 'date' => 'updated_at'], [
             'total' => Post::count(), 'total_hint' => 'All posts',
             'published' => Post::published()->count(), 'published_hint' => 'Live on /blog',
             'drafts' => Post::where('status', 'draft')->count(), 'drafts_hint' => 'Not published yet',
         ], '-updated_at');
+    }
+
+    /**
+     * How one post is doing, from our own analytics (page_views for /blog/{slug}): views, readers,
+     * reading time, how far people scroll, how many read to the end, where they came from, and views per day.
+     */
+    public function stats(Request $request, Post $post)
+    {
+        $views = \Illuminate\Support\Facades\DB::table('page_views')->where('path', '/blog/'.$post->slug);
+        $t = (clone $views)->selectRaw('count(*) as views, count(distinct visitor) as readers,
+            avg(case when duration_ms between 1000 and 1800000 then duration_ms end) as ms, avg(scroll_pct) as scroll,
+            sum(case when scroll_pct >= 75 then 1 else 0 end) as finished')->first();
+        $minutes = $post->reading_minutes;
+
+        if ($request->query('chart')) {
+            $daily = (clone $views)->where('created_at', '>=', now()->subDays(29)->startOfDay())
+                ->selectRaw('date(created_at) as d, count(*) as n')->groupBy('d')->pluck('n', 'd');
+            $days = collect(range(29, 0))->map(fn ($a) => now()->subDays($a));
+
+            return response()->json(['type' => 'bar', 'series' => [['name' => 'Views', 'data' => $days->map(fn ($d) => (int) ($daily[$d->toDateString()] ?? 0))->values()]],
+                'xaxis' => ['categories' => $days->map->format('j M')->values(), 'tickAmount' => 10]]);
+        }
+
+        $avgSeconds = $t->ms ? (int) round($t->ms / 1000) : 0;
+
+        return response()->json(['stats' => [
+            'views' => (int) $t->views, 'views_hint' => 'All time',
+            'readers' => (int) $t->readers, 'readers_hint' => 'Counted per day, no cookies',
+            'time' => $avgSeconds ? ($avgSeconds >= 60 ? intdiv($avgSeconds, 60).'m '.($avgSeconds % 60).'s' : $avgSeconds.'s') : '—',
+            'time_hint' => "Post takes about $minutes min to read",
+            'read_through' => $t->views ? round($t->finished / $t->views * 100).'%' : '—', 'read_through_hint' => 'Scrolled at least 75%',
+            'scroll' => $t->scroll ? round($t->scroll).'%' : '—',
+            // A rough "is it working" signal: people stay for at least half the reading time and most scroll past halfway
+            'verdict' => ! $t->views ? 'No readers yet' : (($avgSeconds >= $minutes * 30 && $t->scroll >= 50) ? 'People are reading it' : 'People leave early: tighten the opening'),
+        ], 'sources' => (clone $views)->whereNotNull('referrer_host')->selectRaw('referrer_host as label, count(*) as n')->groupBy('referrer_host')->orderByDesc('n')->limit(5)->get()]);
+    }
+
+    /** Totals per blog path for the list. */
+    protected function reads()
+    {
+        return \Illuminate\Support\Facades\DB::table('page_views')->where('path', 'like', '/blog/%')
+            ->selectRaw('path, count(*) as views, count(distinct visitor) as readers, sum(case when scroll_pct >= 75 then 1 else 0 end) as finished')
+            ->groupBy('path')->get()->keyBy('path');
     }
 
     public function create()

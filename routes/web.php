@@ -242,6 +242,7 @@ Route::middleware(['auth', 'permission:admin.system'])->group(function () {
         Route::get('/new', 'create')->name('create');
         Route::post('/', 'store')->name('store');
         Route::get('/{post}/edit', 'edit')->name('edit')->whereNumber('post');
+        Route::get('/{post}/stats', 'stats')->name('stats')->whereNumber('post');
         Route::post('/{post}', 'update')->name('update')->whereNumber('post');
         Route::delete('/{post}', 'destroy')->name('destroy')->whereNumber('post');
     });

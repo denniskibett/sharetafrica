@@ -17,6 +17,31 @@
     <x-ui.button type="submit" icon="check" x-bind:disabled="busy" x-text="status === 'published' ? 'Save & publish' : 'Save draft'">Save</x-ui.button>
   </x-ui.page-header>
 
+  @if ($post->exists)
+    {{-- How this post is doing (our own analytics for /blog/{slug}) --}}
+    <div class="mb-6" x-data="{ stats: {}, sources: [] }" x-init="const r = await (await fetch('{{ route('admin.posts.stats', $post) }}', { headers: { Accept: 'application/json' } })).json(); stats = r.stats; sources = r.sources">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">How this post is doing</h2>
+        <span :class="sharet.pill(stats.verdict === 'People are reading it' ? 'success' : stats.views ? 'warning' : 'neutral')" x-text="stats.verdict"></span>
+      </div>
+      <x-ui.stats :cols="4" class="mb-6">
+        <x-ui.stat label="Views" value="stats.views" hint="stats.views_hint" icon="eye" tone="sky" />
+        <x-ui.stat label="Readers" value="stats.readers" hint="stats.readers_hint" icon="users" tone="violet" />
+        <x-ui.stat label="Time on page" value="stats.time" format="raw" hint="stats.time_hint" icon="clock" tone="emerald" />
+        <x-ui.stat label="Read to the end" value="stats.read_through" format="raw" hint="stats.read_through_hint" icon="check-badge" tone="lime" />
+      </x-ui.stats>
+      <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <x-ui.chart :url="route('admin.posts.stats', $post).'?chart=1'" title="Views per day" subtitle="Last 30 days" :height="220" />
+        <x-ui.card title="Where readers came from">
+          <ul class="divide-y divide-gray-100 text-sm dark:divide-gray-800">
+            <template x-for="s in sources" :key="s.label"><li class="flex justify-between py-2"><span x-text="s.label"></span><span class="text-gray-500" x-text="s.n"></span></li></template>
+            <li x-show="!sources.length" class="py-2 text-gray-500">Direct visits only so far, or no readers yet.</li>
+          </ul>
+        </x-ui.card>
+      </div>
+    </div>
+  @endif
+
   <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
     <div class="space-y-5">
       <div>

@@ -88,6 +88,21 @@ class DashboardPagesTest extends TestCase
         $this->get('/blog/'.$post->slug)->assertOk()->assertSee('<h2>Why</h2>', false);
     }
 
+    public function test_each_post_has_its_own_reading_statistics(): void
+    {
+        $this->actingAs($this->admin());
+        $post = \App\Models\Post::create(['title' => 'Stats', 'slug' => 'stats', 'body' => str_repeat('word ', 440), 'status' => 'published', 'published_at' => now()]);
+        foreach ([[90000, 90], [60000, 80], [30000, 10]] as $i => [$ms, $scroll]) {
+            \Illuminate\Support\Facades\DB::table('page_views')->insert(['visitor' => "v$i", 'view_key' => "k$i", 'path' => '/blog/stats', 'duration_ms' => $ms, 'scroll_pct' => $scroll, 'device' => 'mobile', 'created_at' => now()]);
+        }
+
+        $this->getJson("/admin/blog/{$post->id}/stats")->assertOk()
+            ->assertJsonPath('stats.views', 3)->assertJsonPath('stats.readers', 3)->assertJsonPath('stats.read_through', '67%')
+            ->assertJsonPath('stats.verdict', 'People are reading it');
+        $this->getJson("/admin/blog/{$post->id}/stats?chart=1")->assertOk()->assertJsonPath('type', 'bar');
+        $this->getJson('/admin/blog')->assertOk()->assertJsonPath('data.0.views', 3);
+    }
+
     public function test_rich_text_keeps_safe_formatting_only(): void
     {
         $clean = RichText::clean('<p style="color:red" onclick="x()">Hi <strong>there</strong> <a href="https://sharet.africa">site</a></p><iframe src="x"></iframe><img src="https://evil.test/a.png">');

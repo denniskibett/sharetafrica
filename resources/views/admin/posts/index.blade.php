@@ -19,6 +19,9 @@
       ['key' => 'title', 'label' => 'Title', 'type' => 'link', 'sort' => 'title'],
       ['key' => 'author', 'label' => 'Author', 'type' => 'muted'],
       ['key' => 'status', 'label' => 'Status', 'type' => 'pill'],
+      ['key' => 'views', 'label' => 'Views', 'type' => 'number'],
+      ['key' => 'readers', 'label' => 'Readers', 'type' => 'number'],
+      ['key' => 'read_through', 'label' => 'Read to the end', 'type' => 'muted'],
       ['key' => 'date', 'label' => 'Date', 'type' => 'muted', 'sort' => 'date'],
   ]">
     <x-slot:filters>
