@@ -53,6 +53,8 @@ app/
   Console/Commands/
     LedgerCheck.php            ledger:check (hourly; alerts on any failure)
     RampResolve.php            ramp:resolve (every minute; status checks, quote expiry)
+    ReconRun.php               recon:run (daily 00:30; import and match yesterday's statement)
+  Recon/Reconciler.php         statement matching, fix from statement, suspense, maker-checker sign-off
   Providers/
     V2ServiceProvider.php      wires routes/v2.php, commands and the schedule; v1 files stay untouched
 config/
@@ -69,6 +71,8 @@ resources/views/ledger/
   partials/journal.blade.php   journal detail in the slide-over
 resources/views/pay/
   index.blade.php  show.blade.php  partials/form.blade.php  partials/status.blade.php
+resources/views/reconciliation/
+  index.blade.php  show.blade.php  partials/run.blade.php  partials/signoff.blade.php
 routes/
   v2.php
 scripts/
@@ -78,9 +82,10 @@ tests/
   Feature/Ledger/LedgerPagesTest.php  staff pages and JSON, access control
   Unit/MoneyTest.php                  parsing, formatting, rounding
   Feature/Ramp/RampOrdersTest.php     every journey, failure, refund, duplicate and limit
+  Feature/Recon/ReconciliationTest.php  clean day, missed callback, suspense, two-person sign-off, screens
 .sharet-version                       "v2" (v1 has no file)
 docs/v2/
-  README.md  LEDGER.md  SWITCHING.md  RAILS.md  ORDERS.md
+  README.md  LEDGER.md  SWITCHING.md  RAILS.md  ORDERS.md  RECONCILIATION.md
 ```
 
 ## Documentation plan
@@ -92,6 +97,7 @@ docs/v2/
 | `docs/v2/SWITCHING.md` | Running v1 and v2 side by side and switching for an audit | done |
 | `docs/v2/RAILS.md` | The PaymentRail interface, the simulator, how to add Cashia, callbacks, status checks | done (simulator) |
 | `docs/v2/ORDERS.md` | Ramp order states, quotes, refunds, the unknown-state worker | done |
+| `docs/v2/RECONCILIATION.md` | Statement import, matching, breaks, suspense, sign-off | done |
 | `docs/v2/RISK.md` | The Django risk service, score bands, fallback rules | with the risk service |
 | `docs/v2/RUNBOOKS.md` | Outages, reversals, late money, daily close, kill switch | before launch |
 | `docs/v2/DEPLOY.md` | Servers, CI, release steps (amazonblue deploy pattern) | before launch |
@@ -108,7 +114,7 @@ points at the local copy `sharet_live_copy`; v1's local database is untouched. A
 2. Payment rails interface — **done, with the simulator**; Cashia and Daraja adapters next (integrations side)
 3. Ramp orders: quote, states, idempotency, refunds, unknown-state worker — **done**
 4. Personal flows: pay a phone, paybill, till, bank — **done** (receipts by SMS next)
-5. Reconciliation: statement import, matching, suspense, daily sign-off
+5. Reconciliation: statement import, matching, suspense, daily sign-off — **done**
 6. Risk service (Django) + fallback rules in Laravel
 7. Staff consoles: support, operations, finance, compliance, kill switch
 8. Hardening: load test, security review, restore drill
