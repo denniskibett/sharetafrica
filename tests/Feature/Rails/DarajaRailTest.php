@@ -93,6 +93,26 @@ class DarajaRailTest extends TestCase
         $this->postJson('/rails/daraja/callback/wrong', [])->assertNotFound();
     }
 
+    public function test_still_processing_waits_and_a_late_confirmation_is_booked_not_dropped(): void
+    {
+        $this->fakeSafaricom(['ResultCode' => '4999', 'ResultDesc' => 'The transaction is still under processing']);
+        $orders = app(RampOrders::class);
+        $o = $orders->confirm($orders->topUp($jane = $this->jane(), '500'));
+        $this->assertSame('collecting', $orders->refresh($o)->status, 'still on the phone: keep waiting');
+
+        // the 1 November case: an early answer had already marked it failed, then M-PESA confirms
+        \App\Models\RailRequest::whereKey($o->collect_request_id)->update(['status' => 'failed', 'failure' => 'The transaction is still under processing']);
+        RampOrder::whereKey($o->id)->update(['status' => 'failed']);
+        $this->stkResult('0')->assertOk();
+        $this->stkResult('0')->assertOk(); // repeated: still booked once
+
+        $this->assertSame('paid', $o->fresh()->status);
+        $this->assertSame(50000, $orders->walletBalance($jane));
+        $this->assertSame('TKA1B2C3D4', $o->fresh()->reference());
+        $this->assertCount(2, \App\Models\RailRequest::find($o->collect_request_id)->meta['callbacks'], 'every payload kept');
+        $this->assertTrue(\App\Ledger\Invariants::passed(app(\App\Ledger\Invariants::class)->run()));
+    }
+
     public function test_real_collection_can_be_limited_to_named_accounts(): void
     {
         $this->fakeSafaricom();

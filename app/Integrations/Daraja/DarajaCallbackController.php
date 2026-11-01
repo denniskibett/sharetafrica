@@ -22,14 +22,23 @@ class DarajaCallbackController
         $rail = RailRequest::where('rail', 'daraja')->where('provider_reference', $cb['CheckoutRequestID'] ?? '-')->first();
 
         if ($rail) {
-            $meta = collect($cb['CallbackMetadata']['Item'] ?? [])->pluck('Value', 'Name');
+            // keep every payload Safaricom sends, whatever we do with it
+            $meta = $rail->meta ?? [];
+            $meta['callbacks'] = array_merge($meta['callbacks'] ?? [], [['at' => now()->toIso8601String(), 'body' => $cb]]);
+            $rail->forceFill(['meta' => $meta])->save();
+            $items = collect($cb['CallbackMetadata']['Item'] ?? [])->pluck('Value', 'Name');
             $code = (string) ($cb['ResultCode'] ?? '');
             $result = match (true) {
                 $code !== '0' => RailResult::failed(DarajaRail::reason($code, $cb['ResultDesc'] ?? null), $rail->provider_reference),
-                (int) round(((float) $meta->get('Amount', 0)) * 100) !== $rail->amount => RailResult::unknown('M-PESA reported a different amount: left for reconciliation.'),
-                default => RailResult::succeeded((string) $meta->get('MpesaReceiptNumber'), $rail->provider_reference),
+                (int) round(((float) $items->get('Amount', 0)) * 100) !== $rail->amount => RailResult::unknown('M-PESA reported a different amount: left for reconciliation.'),
+                default => RailResult::succeeded((string) $items->get('MpesaReceiptNumber'), $rail->provider_reference),
             };
-            $result->final() ? $orders->apply($rail, $result) : report(new \RuntimeException("Daraja callback for {$rail->reference}: {$result->message}"));
+            match (true) {
+                ! $result->final() => report(new \RuntimeException("Daraja callback for {$rail->reference}: {$result->message}")),
+                // M-PESA confirms money we had already given up on: book it, never drop it
+                $rail->status === 'failed' && $result->status === 'succeeded' => $orders->lateCollect($rail, $result),
+                default => $orders->apply($rail, $result),
+            };
         }
 
         return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);

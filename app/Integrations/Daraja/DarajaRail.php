@@ -66,6 +66,9 @@ class DarajaRail implements PaymentRail
             'CheckoutRequestID' => $request->provider_reference,
         ]);
         $code = $res->json('ResultCode');
+        if (in_array((string) $code, ['4999', '500.001.1001'], true) || str_contains(strtolower((string) $res->json('ResultDesc')), 'processing')) {
+            return RailResult::pending($request->provider_reference); // the customer has not finished on the phone yet
+        }
 
         return match (true) {
             $code === '0' || $code === 0 => RailResult::succeeded($request->receipt ?: 'Q'.strtoupper(substr(md5($request->provider_reference), 0, 9)), $request->provider_reference),

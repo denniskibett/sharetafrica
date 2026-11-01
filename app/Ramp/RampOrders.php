@@ -237,6 +237,34 @@ class RampOrders
         $next && $this->send($next);
     }
 
+    /**
+     * Money M-PESA confirms after we marked the collection failed (a late callback, or a status check that answered
+     * too early). The money is real, so it is booked: a top-up completes; any other payment's money goes to the payer's
+     * wallet (the payment itself stays failed and is not sent). Idempotent: the same journal key as a normal collection.
+     */
+    public function lateCollect(RailRequest $request, RailResult $result): ?RampOrder
+    {
+        return DB::transaction(function () use ($request, $result) {
+            $req = RailRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            $o = RampOrder::where('collect_request_id', $req->id)->lockForUpdate()->first();
+            if (! $o || $req->status !== 'failed' || $o->status !== 'failed' || ($req->meta['role'] ?? null) !== 'collect') {
+                return $o;
+            }
+            $req->fill(['status' => 'succeeded', 'receipt' => $result->receipt, 'failure' => null, 'completed_at' => now()])->save();
+            $topUp = $o->destination_type === 'wallet';
+            $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
+                Ledger::debit($this->ledger->account($this->rails->account($o->rail, 'collect')), $o->total),
+                Ledger::credit($this->ledger->account('2100', $o->user), $o->total),
+            ], ['source' => $o, 'memo' => 'Late M-PESA confirmation from '.$o->payer_phone.' · '.$result->receipt]);
+            $o->failure = null;
+            $this->move($o, $topUp ? 'paid' : 'failed', $topUp
+                ? "M-PESA confirmed · {$result->receipt} · added to your wallet"
+                : "M-PESA confirmed late · {$result->receipt} · KES ".Money::format($o->total).' added to your wallet instead');
+
+            return $o;
+        });
+    }
+
     /** One status check per waiting order that has been quiet for a while (php artisan ramp:resolve, every minute). */
     public function resolveWaiting(): int
     {
