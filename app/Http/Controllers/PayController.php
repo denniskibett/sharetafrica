@@ -164,15 +164,15 @@ class PayController extends Controller
             $order = $this->orders->refresh($order);
         }
 
-        return response()->json(['order' => $order->present($request->user()) + ['reference' => $this->reference($order)]]);
+        return response()->json(['order' => $order->present($request->user()) + ['reference' => $order->reference(), 'receipt' => $order->receipt($request->user())]]);
     }
 
-    /** The code to quote for a payment: the M-PESA receipt of the money that arrived, else Sharet's own reference. */
-    private function reference(RampOrder $order): string
+    /** The receipt as a PDF to keep or forward (same lines as the panel and the email). */
+    public function receipt(Request $request, RampOrder $order)
     {
-        $id = $order->destination_type === 'wallet' ? $order->collect_request_id : $order->payout_request_id;
+        $this->own($request, $order);
 
-        return ($id ? \App\Models\RailRequest::find($id)?->receipt : null) ?: 'SH'.strtoupper(substr(str_replace('-', '', $order->uuid), 0, 8));
+        return \App\Support\Receipt::pdf($order, $request->user())->download('sharet-receipt-'.$order->sharetReference().'.pdf');
     }
 
     /** The payer, or (to view only) the Sharet user a transfer went to. */

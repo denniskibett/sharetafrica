@@ -39,5 +39,6 @@ Route::middleware(['auth', 'throttle:60,1'])
         Route::post('transfer', 'transfer')->name('transfer')->middleware('throttle:20,1');
         Route::post('pin', 'pin')->name('pin')->middleware('throttle:10,1');
         Route::post('{order}/confirm', 'confirm')->name('confirm')->middleware('throttle:10,1');
+        Route::get('{order}/receipt', 'receipt')->name('receipt');
         Route::get('{order}', 'show')->name('show');
     });

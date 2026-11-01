@@ -33,6 +33,22 @@ class SharetMail extends Mailable
         return new Content(view: 'emails.message', with: $this->data + ['subjectLine' => $this->subjectLine]);
     }
 
+    /** A finished payment above the receipt threshold (App\Support\Receipt), with the PDF attached. */
+    public static function transactionReceipt(\App\Models\RampOrder $order, User $viewer): self
+    {
+        $p = $order->present($viewer);
+        $in = $p['incoming'] || $p['top_up'];
+
+        return new self(($in ? 'You received ' : 'You sent ').'KES '.$p[$in ? 'amount' : 'total'].' · '.$order->reference(), [
+            'preheader' => $p['title'].' · '.$p['state']['label'],
+            'eyebrow' => 'Sharet receipt',
+            'heading' => ($in ? '+ KES ' : '− KES ').$p[$in ? 'amount' : 'total'],
+            'lines' => [$p['title'].'. '.$p['state']['label'].'.', 'Your receipt is below and attached as a PDF.'],
+            'details' => $order->receipt($viewer),
+            'after' => ['If you did not make this payment, reply to this email straight away.'],
+        ]);
+    }
+
     /** Contact form audience codes (HomeController::storeContact) as people read them. */
     public const AUDIENCES = [
         'merchant' => 'Merchant', 'individual' => 'Individual', 'trader' => 'Trader / importer / exporter',

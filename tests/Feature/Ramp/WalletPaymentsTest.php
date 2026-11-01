@@ -178,4 +178,33 @@ class WalletPaymentsTest extends TestCase
         $mpesa = $this->postJson('/pay/quote', ['type' => 'phone', 'phone' => '0722111222', 'amount' => '100'])->json('order');
         $this->postJson("/pay/{$mpesa['uuid']}/confirm")->assertOk();
     }
+
+    public function test_receipts_download_as_pdf_and_payments_from_the_threshold_are_emailed(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        config(['pricing.receipt_email_min' => 100000]); // KES 1,000.00
+        $jane = $this->person('0712345678');
+        $juma = $this->person('0722333444', 'Juma Otieno');
+
+        $small = $this->settle($this->orders->confirm($this->orders->topUp($jane, '500')));
+        \Illuminate\Support\Facades\Mail::assertNothingSent(); // below the threshold
+
+        $this->settle($this->orders->confirm($this->orders->topUp($jane, '2,000')));
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\SharetMail::class, fn ($m) => $m->hasTo($jane->email) && str_contains($m->subjectLine, 'You received KES 2,000.00'));
+
+        $t = $this->orders->transfer($jane, '@'.Handle::for($juma), '1,500');
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\SharetMail::class, fn ($m) => $m->hasTo($juma->email) && str_contains($m->subjectLine, 'You received KES 1,500.00'));
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\SharetMail::class, fn ($m) => $m->hasTo($jane->email) && str_contains($m->subjectLine, 'You sent KES 1,500.00'));
+
+        $lines = $t->receipt($jane);
+        $this->assertSame('Juma Otieno (@juma.otieno)', $lines['Recipient']);
+        $this->assertSame('@juma.otieno', $lines['Account ID']);
+        $this->assertSame('Sharet wallet', $lines['Bank']);
+        $this->assertArrayHasKey('Transaction ID', $lines);
+        $this->assertArrayHasKey('Date', $lines);
+
+        $this->actingAs($jane)->get("/pay/{$small->uuid}/receipt")->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->actingAs($jane)->getJson("/pay/{$small->uuid}")->assertJsonPath('order.receipt.Bank', 'Sharet wallet');
+        $this->actingAs(User::factory()->create())->get("/pay/{$small->uuid}/receipt")->assertNotFound();
+    }
 }

@@ -27,6 +27,7 @@ return [
     ],
     'markup_bp' => 2000,      // 20% on top of Safaricom's charge
     'excise_bp' => 1500,      // 15% of our markup
+    'receipt_email_min' => (int) env('RECEIPT_EMAIL_MIN', 100_000), // finished payments from KES 1,000.00 get an emailed receipt (PDF attached)
     'min_amount' => 1000,     // 10.00
     'quote_minutes' => 10,
 

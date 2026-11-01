@@ -32,6 +32,16 @@ class RampOrder extends Model
         'quote_expires_at' => 'datetime',
     ];
 
+    /** When a payment finishes (paid or refunded), email its receipt if it is big enough, after the transaction commits. */
+    protected static function booted(): void
+    {
+        static::saved(function (RampOrder $o) {
+            if (($o->wasRecentlyCreated || $o->wasChanged('status')) && in_array($o->status, ['paid', 'refunded'], true)) {
+                \Illuminate\Support\Facades\DB::afterCommit(fn () => \App\Support\Receipt::notify($o->fresh()));
+            }
+        });
+    }
+
     public function getRouteKeyName(): string
     {
         return 'uuid';
@@ -92,6 +102,67 @@ class RampOrder extends Model
         };
     }
 
+    /** The code to quote: the M-PESA receipt of the money that arrived, else Sharet's own reference. */
+    public function reference(): string
+    {
+        $id = $this->destination_type === 'wallet' ? $this->collect_request_id : $this->payout_request_id;
+
+        return ($id ? RailRequest::find($id)?->receipt : null) ?: $this->sharetReference();
+    }
+
+    public function sharetReference(): string
+    {
+        return 'SH'.strtoupper(substr(str_replace('-', '', $this->uuid), 0, 8));
+    }
+
+    /**
+     * The receipt, one definition for the panel, the PDF and the email: recipient, account, bank or network,
+     * transaction ID, date and the money. As $viewer sees it (a recipient never sees the sender's number).
+     *
+     * @return array<string, string>
+     */
+    public function receipt(?User $viewer = null): array
+    {
+        $d = $this->destination;
+        $p = $this->present($viewer);
+        $bank = config('pricing.banks.'.($d['bank'] ?? ''));
+
+        return array_filter([
+            'Recipient' => match ($this->destination_type) {
+                'sharet' => ($d['name'] ?? '').' (@'.($d['handle'] ?? '').')',
+                'wallet' => 'Your Sharet wallet',
+                'phone' => 'M-PESA '.($d['phone'] ?? ''),
+                'paybill' => 'Paybill '.($d['paybill'] ?? ''),
+                'till' => 'Till '.($d['till'] ?? ''),
+                'bank' => $bank ?? 'Bank',
+                default => $this->recipient(),
+            },
+            'Account ID' => match ($this->destination_type) {
+                'sharet' => '@'.($d['handle'] ?? ''),
+                'wallet' => '@'.($this->sender?->handle ?? ''),
+                'phone' => $d['phone'] ?? null,
+                'paybill' => $d['account'] ?? null,
+                'till' => $d['till'] ?? null,
+                'bank' => $d['account'] ?? null,
+                default => null,
+            },
+            'Bank' => match ($this->destination_type) {
+                'bank' => $bank ?? 'Bank',
+                'sharet', 'wallet' => 'Sharet wallet',
+                default => 'M-PESA (Safaricom)',
+            },
+            'From' => $p['from'],
+            'Transaction ID' => $this->reference(),
+            'Sharet reference' => $this->sharetReference(),
+            'Date' => $this->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+            'Amount' => 'KES '.Money::format($this->amount),
+            'Fee and duty' => $p['incoming'] || $this->destination_type === 'wallet' ? null : 'KES '.Money::format($this->fee + $this->excise + $this->rounding),
+            'Total' => $p['incoming'] ? null : 'KES '.Money::format($this->total),
+            'Status' => $p['state']['label'],
+            'Note' => $this->note,
+        ], fn ($v) => filled($v));
+    }
+
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -149,7 +220,6 @@ class RampOrder extends Model
                 'wallet' => 'arrow-down-tray', 'sharet' => 'at-symbol', 'paybill' => 'building-office', 'till' => 'shopping-bag',
                 'bank' => 'building-library', default => $this->funding === 'wallet' && ($this->destination['phone'] ?? null) === $this->payer_phone ? 'banknotes' : 'device-phone-mobile',
             },
-            'receipt' => $this->status === 'paid' ? collect($this->timeline)->last()['text'] ?? null : null,
             'quote_expires_at' => $this->quote_expires_at?->toIso8601String(),
             'timeline' => array_map(fn ($e) => $e + ['icon' => self::stepIcon($e['text'])], $this->timeline ?? []),
             'date' => $this->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
