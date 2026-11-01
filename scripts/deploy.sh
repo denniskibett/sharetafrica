@@ -67,7 +67,7 @@ say "2. Back up the live site and database to $BACKUP"
 run "mkdir -p $BACKUP && cd $LIVE && \
   set -a && . ./.env && set +a && \
   mysqldump -h\"\$DB_HOST\" -u\"\$DB_USERNAME\" -p\"\$DB_PASSWORD\" --single-transaction --routines \"\$DB_DATABASE\" | gzip > $BACKUP/\$DB_DATABASE.sql.gz && \
-  tar --exclude=./node_modules -czf $BACKUP/public_html.tar.gz -C $LIVE . && \
+  { tar --exclude=./node_modules --warning=no-file-changed -czf $BACKUP/public_html.tar.gz -C $LIVE . || [ \$? -eq 1 ]; } && \
   ls -la $BACKUP"
 
 say "3. Upload release to $RELEASE"

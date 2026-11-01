@@ -47,6 +47,11 @@ class RampOrders
             throw ValidationException::withMessages(['phone' => 'That is your own number.']);
         }
 
+        // someone whose money is real (real collections) must not have it "sent" by the simulator: refuse until payouts are real
+        if ($this->rails->collecting($user) !== $this->rails->default() && $this->rails->default() === 'simulator') {
+            throw ValidationException::withMessages(['amount' => 'Sending to M-PESA and banks is not live yet: your money stays safe in your wallet. Sharet @name transfers work.']);
+        }
+
         $price = Pricing::quote($cents);
         $this->checkLimits($user, $price['total']);
         if ($funding === 'wallet' && $this->walletBalance($user) < $price['total']) {

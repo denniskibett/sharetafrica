@@ -134,6 +134,23 @@ class DarajaRailTest extends TestCase
         $this->assertSame('daraja', $orders->topUp($tester, '500')->rail);
     }
 
+    public function test_real_money_is_never_sent_by_the_simulator(): void
+    {
+        $this->fakeSafaricom();
+        $orders = app(RampOrders::class);
+        $o = $orders->confirm($orders->topUp($jane = $this->jane(), '500'));
+        $this->stkResult('0');
+        $this->assertSame(50000, $orders->walletBalance($jane));
+        try {
+            $orders->quote($jane, 'phone', ['phone' => '0722111222'], '100', null, 'wallet');
+            $this->fail('real wallet money was quoted for a simulated payout');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertStringContainsString('not live yet', $e->errors()['amount'][0]);
+        }
+        $juma = User::factory()->create(['phone' => '0722333444']);
+        $this->assertSame('paid', $orders->transfer($jane, '@'.\App\Support\Handle::for($juma), '100')->status, '@name transfers stay inside Sharet');
+    }
+
     public function test_payouts_are_refused_until_b2c_credentials_exist(): void
     {
         $this->assertSame('failed', app(DarajaRail::class)->payout(new \App\Models\RailRequest(['amount' => 100]))->status);
