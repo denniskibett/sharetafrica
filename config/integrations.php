@@ -121,7 +121,7 @@ return [
         'color' => '#6366F1',
         'logo' => 'images/integrations/email.svg',
         'fields' => [
-            'host' => ['label' => 'SMTP host', 'required' => true, 'placeholder' => 'mail.sharet.africa', 'help' => 'Our CyberPanel mail server is mail.sharet.africa (port 587, TLS).'],
+            'host' => ['label' => 'SMTP host', 'required' => true, 'placeholder' => 'sharet.africa', 'help' => 'Our CyberPanel mail server: sharet.africa, port 587, TLS, with the full mailbox address as the username.'],
             'port' => ['label' => 'Port', 'type' => 'number', 'required' => true, 'placeholder' => '587'],
             'encryption' => ['label' => 'Encryption', 'type' => 'select', 'options' => ['tls' => 'TLS', 'ssl' => 'SSL', '' => 'None']],
             'username' => ['label' => 'Username'],

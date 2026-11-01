@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 
 /**
- * php artisan db:backup — a compressed dump of the whole database (with the ledger's triggers) into
- * storage/app/backups, readable only by the site user, keeping the last --keep days. Scheduled nightly; the password
+ * php artisan db:backup — a compressed dump of the whole database (with the ledger's triggers) into DB_BACKUP_PATH
+ * (live: a hidden folder in the site's home, outside the web folder and every release; default storage/app/backups),
+ * readable only by the site user, keeping the last --keep days. Scheduled nightly; the password
  * goes through a private options file, never the command line (so `ps` never shows it).
  */
 class DbBackup extends Command
@@ -26,8 +27,9 @@ class DbBackup extends Command
             return self::SUCCESS;
         }
 
-        $dir = storage_path('app/backups');
+        $dir = rtrim(config('database.backup_path') ?: storage_path('app/backups'), '/');
         File::ensureDirectoryExists($dir, 0700);
+        @chmod($dir, 0700);
         $file = $dir.'/'.$db['database'].'-'.now('Africa/Nairobi')->format('Ymd-His').'.sql.gz';
         $cnf = tempnam(sys_get_temp_dir(), 'dbb');
         file_put_contents($cnf, "[client]\nuser=\"{$db['username']}\"\npassword=\"".addcslashes((string) $db['password'], '"\\')."\"\nhost=\"{$db['host']}\"\nport={$db['port']}\n");
