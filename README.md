@@ -36,8 +36,9 @@ The full plan, build order and decisions: [`docs/v2/README.md`](https://github.c
 
 | Branch | Version | Deploys to |
 |---|---|---|
-| `main` | v1, the original site | `sharet.africa` (kept deployable for audits) |
-| `v2` | the money platform | `v2.sharet.africa`; `sharet.africa` during the current test |
+| `main` | v1 in production | `sharet.africa` (kept deployable for audits) |
+| `staging` | a copy of `main` where its changes are tried first | a staging site, then merged into `main` |
+| `v2` | the money platform | `v2.sharet.africa` once its DNS propagates; `sharet.africa` during the current test |
 | `archive/main-2026-09` | the September snapshot this repository started from | — |
 
 v2 only **adds** to the database (it never alters a v1 table), so the live site can switch between v1 and v2 for an

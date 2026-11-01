@@ -1,10 +1,10 @@
 # Runs the whole test suite on every push and pull request. Its job name ("tests") is the status check
-# to require in GitHub's branch protection for main and v2.
+# to require in GitHub's branch protection for main, staging and v2.
 name: tests
 
 on:
   push:
-    branches: [main, v2, 'feature/**']
+    branches: [main, staging, v2, 'feature/**']
   pull_request:
 
 permissions:
