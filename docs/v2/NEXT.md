@@ -31,7 +31,10 @@ Checked on 1 Nov: initiator and credential empty, utility float KES 0.00, payout
 - **Backups off the server:** CyberPanel remote backups (S3 / Backblaze / another server). Nightly dumps go to
   `/home/sharet.africa/.db-backups` once the cron runs.
 - **Footer** for the `*.sharet.africa` sites: which footer, which sites.
-- **Git remote:** none yet; give a repository URL to push `main` and `v2`.
+- **Git remote + CI/CD:** none yet. Give a GitHub repository URL; then push `main` and `v2` and add GitHub Actions:
+  tests on every push, `main` → deploys v1 to `sharet.africa`, `v2` → deploys v2 to `v2.sharet.africa` (same steps as
+  `scripts/deploy.sh`, server SSH key as a GitHub secret). Both versions then run side by side and the two local folders
+  (`sharetafricanew` = main, `sharetafricanew-v2` = v2, one repository as a git worktree) can become one.
 
 ## Test data to reset before real launch
 
