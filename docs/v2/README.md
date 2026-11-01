@@ -115,6 +115,7 @@ docs/v2/                                   + this documentation
 | Document | Covers | Status |
 |---|---|---|
 | `README.md` | This file: rules, tree, plan, build order | done |
+| `NEXT.md` | Where we left off and what's waiting | living |
 | `LEDGER.md` | Accounts, journals, postings, holds, idempotency, invariants | done |
 | `ORDERS.md` | Payment states, quotes, refunds, wallet payments, Sharet PIN, tariff | done |
 | `RAILS.md` | The PaymentRail interface, the simulator, adding Cashia / Daraja | done (simulator) |
