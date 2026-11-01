@@ -87,7 +87,7 @@ class DashboardNav
                     ['label' => 'Ledger', 'route' => 'ledger.index', 'icon' => 'book-open', 'tone' => 'violet', 'can' => 'admin.reconciliation', 'active' => ['ledger.*']],
                     ['label' => 'Treasury pools', 'route' => 'ops.treasury.index', 'icon' => 'circle-stack', 'tone' => 'emerald'],
                     ['label' => 'Live rails', 'route' => 'ops.rails.index', 'icon' => 'signal', 'tone' => 'teal'],
-                    ['label' => 'Support tickets', 'route' => 'ops.support.index', 'icon' => 'chat-bubble-left-right', 'tone' => 'rose'],
+                    ['label' => 'Support desk', 'route' => 'ops.support.index', 'icon' => 'chat-bubble-left-right', 'tone' => 'rose', 'active' => ['ops.support.*']],
                 ],
             ],
             [

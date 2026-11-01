@@ -43,6 +43,10 @@ return [
         'allow_in_production' => (bool) env('RAIL_SIMULATOR_IN_PRODUCTION', false),
     ],
 
+    // Rails that answer by callback: no status query until this many seconds have passed without one, so the callback
+    // (with the full payload and the real receipt) decides, and a query never answers while the customer is on the PIN.
+    'callback_wait' => ['daraja' => 60],
+
     // Payments still waiting this long get a status check from `ramp:resolve` (never a blind retry).
     'status_check_after_seconds' => 60,
 ];

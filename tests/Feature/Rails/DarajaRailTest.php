@@ -88,6 +88,7 @@ class DarajaRailTest extends TestCase
         $this->fakeSafaricom(['ResultCode' => '1037', 'ResultDesc' => 'timeout']);
         $orders = app(RampOrders::class);
         $o = $orders->confirm($orders->topUp($this->jane(), '500'));
+        $this->travel(61)->seconds();
         $this->assertSame('failed', $orders->refresh($o)->status);
 
         $this->postJson('/rails/daraja/callback/wrong', [])->assertNotFound();
@@ -98,7 +99,12 @@ class DarajaRailTest extends TestCase
         $this->fakeSafaricom(['ResultCode' => '4999', 'ResultDesc' => 'The transaction is still under processing']);
         $orders = app(RampOrders::class);
         $o = $orders->confirm($orders->topUp($jane = $this->jane(), '500'));
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), 'stkpushquery')); // nothing asked yet
+        $orders->refresh($o);
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), 'stkpushquery')); // within the callback wait: no query
+        $this->travel(61)->seconds();
         $this->assertSame('collecting', $orders->refresh($o)->status, 'still on the phone: keep waiting');
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'stkpushquery')); // no callback after the wait: ask
 
         // the 1 November case: an early answer had already marked it failed, then M-PESA confirms
         \App\Models\RailRequest::whereKey($o->collect_request_id)->update(['status' => 'failed', 'failure' => 'The transaction is still under processing']);
@@ -111,6 +117,10 @@ class DarajaRailTest extends TestCase
         $this->assertSame('TKA1B2C3D4', $o->fresh()->reference());
         $this->assertCount(2, \App\Models\RailRequest::find($o->collect_request_id)->meta['callbacks'], 'every payload kept');
         $this->assertTrue(\App\Ledger\Invariants::passed(app(\App\Ledger\Invariants::class)->run()));
+        $case = \App\Models\SupportCase::where('ramp_order_id', $o->id)->sole(); // one case, however many callbacks
+        $this->assertSame('LATE_CONFIRMATION', $case->reason);
+        $this->assertSame('CS-'.(10000 + $case->id), $case->number);
+        $this->assertTrue($case->sla_due_at->isFuture());
     }
 
     public function test_real_collection_can_be_limited_to_named_accounts(): void

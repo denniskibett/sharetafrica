@@ -190,6 +190,10 @@ class RampOrders
             default => null,
         };
         $request = $id ? RailRequest::find($id) : null;
+        $wait = (int) config('rails.callback_wait.'.$request?->rail, 0);
+        if ($request && $wait && empty($request->meta['callbacks']) && $request->created_at->gt(now()->subSeconds($wait))) {
+            return $order->fresh(); // the rail answers by callback: give it time before asking
+        }
         if ($request && ! $request->final()) {
             try {
                 $this->apply($request, $this->rails->for($request->rail)->status($request), fromStatusCheck: true);
@@ -260,6 +264,9 @@ class RampOrders
             $this->move($o, $topUp ? 'paid' : 'failed', $topUp
                 ? "M-PESA confirmed · {$result->receipt} · added to your wallet"
                 : "M-PESA confirmed late · {$result->receipt} · KES ".Money::format($o->total).' added to your wallet instead');
+
+            \App\Models\SupportCase::raise($o, 'LATE_CONFIRMATION', 'M-PESA confirmed KES '.Money::format($o->total).' ('.$result->receipt.') after the payment was shown as failed. Tell the customer it is '
+                .($topUp ? 'in their wallet.' : 'in their wallet and the payment was not sent.'));
 
             return $o;
         });

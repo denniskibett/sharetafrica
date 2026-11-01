@@ -3,6 +3,7 @@
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\PayController;
 use App\Http\Controllers\ReconciliationController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 
 // v2 money platform. Loaded by App\Providers\V2ServiceProvider inside the web middleware group.
@@ -26,6 +27,16 @@ Route::middleware(['auth', 'permission:admin.reconciliation'])
         Route::post('{day}/sign-off', 'signOff')->name('sign-off')->whereNumber('day');
         Route::post('lines/{line}/fix', 'fix')->name('fix')->whereNumber('line');
         Route::post('lines/{line}/park', 'park')->name('park')->whereNumber('line');
+    });
+
+// Support desk: the cases queue (fills the menu's existing "Support tickets" link; support, operations, admins)
+Route::middleware(['auth', 'role:support|operations|admin|super_admin'])
+    ->prefix('ops/support')->name('ops.support.')->controller(SupportController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('next', 'next')->name('next');
+        Route::post('{case}/assign', 'assign')->name('assign')->whereNumber('case');
+        Route::post('{case}/close', 'close')->name('close')->whereNumber('case');
     });
 
 // Personal transactions: history page + the dashboard money panel's JSON (personal accounts first; business on hold)
