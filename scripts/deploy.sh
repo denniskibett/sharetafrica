@@ -59,7 +59,7 @@ fi
 
 say "1. Local checks"
 [ -z "$(git status --porcelain)" ] || { echo "Commit or stash your changes first."; exit 1; }
-php -d memory_limit=1G vendor/bin/phpunit --testsuite Feature >/dev/null 2>&1 || echo "  (some tests fail; known failures are listed in the deploy notes, continuing)"
+php -d memory_limit=1G vendor/bin/phpunit --testsuite Feature >/dev/null 2>&1 || echo "  (some tests fail; known failures are listed in docs/v2/DEPLOY.md, continuing)"
 npm ci --silent && npm run build >/dev/null
 echo "  commit $(git rev-parse --short HEAD), assets built"
 
