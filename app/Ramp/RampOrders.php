@@ -107,7 +107,7 @@ class RampOrders
                 $o = RampOrder::create([
                     'uuid' => (string) Str::uuid(), 'user_id' => $from->id, 'recipient_user_id' => $to->id, 'rail' => 'internal',
                     'destination_type' => 'sharet', 'destination' => ['handle' => Handle::for($to), 'name' => $to->name],
-                    'payer_phone' => (string) $from->phone, 'funding' => 'wallet',
+                    'payer_phone' => filled($from->phone) ? Destination::phone((string) $from->phone, 'payer') : '', 'funding' => 'wallet',
                     'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents, 'currency' => config('ledger.currency'),
                     'note' => $note ? Str::limit(strip_tags($note), 140, '') : null, 'status' => 'paid', 'quote_expires_at' => now(),
                     'timeline' => [$this->event('Sent from your wallet to @'.Handle::for($to))],

@@ -57,6 +57,18 @@ email real customers) and no live provider keys.
 | Receipts (PDF) | `storage/fonts` must exist and belong to the site user (the PDF font cache). The deploy copies `storage/` from live, so it carries over after the first time |
 | New settings | Add them to the live `.env` before deploying (the release copies it); keep a dated copy of the old one |
 
+## Backups and protection
+
+- **Nightly database backup:** `php artisan db:backup` at 01:30 Nairobi (scheduler cron needed): a gzip dump with the
+  ledger's triggers into `storage/app/backups/` (mode 600, kept 14 days). The password goes through a private options
+  file, never the command line. Each deploy also dumps the database into `backups/<timestamp>/`.
+- **Off the server:** both live on the same disk as the site. Copy them off nightly (CyberPanel's remote backups to S3 /
+  Backblaze / another server), or a lost server loses its backups too.
+- **Injection:** all queries go through Laravel's query builder with bound values; the few raw SQL fragments are fixed
+  column names written in code, never user input. CSRF on every form, sessions on HTTPS.
+- **The ledger defends itself:** postings and journals are insert-only (database triggers refuse UPDATE and DELETE), so
+  even a compromised app account cannot rewrite money history; `ledger:check` hourly flags any imbalance.
+
 ## v2 on live in test mode (1 November 2026)
 
 While `v2.sharet.africa` waits for DNS, v2 runs on `sharet.africa`:

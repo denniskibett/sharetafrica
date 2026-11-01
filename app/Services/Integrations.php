@@ -104,7 +104,9 @@ class Integrations
                 'africastalking' => self::ok(Http::timeout(10)->acceptJson()->withHeaders(['apiKey' => $c['api_key'] ?? ''])
                     ->get((($c['username'] ?? '') === 'sandbox' ? 'https://api.sandbox.africastalking.com' : 'https://api.africastalking.com').'/version1/user', ['username' => $c['username'] ?? '']),
                     "Africa's Talking accepted the username and key."),
-                'kenyasms' => self::ok(Http::timeout(10)->get($c['api_url'] ?? ''), 'The API address answers. Send a test SMS to confirm the key.', anyAnswer: true),
+                // the balance endpoint proves the key works without sending anything
+                'kenyasms' => self::ok(Http::timeout(10)->acceptJson()->withToken($c['api_key'] ?? '')
+                    ->get(rtrim(($c['api_url'] ?? '') ?: \App\Integrations\Sms\KenyaSms::DEFAULT_URL, '/').'/account/balance'), 'Connected: the key reads your KenyaSMS balance.'),
                 'smtp' => self::smtp($c),
                 default => [true, 'Saved. This provider has no connection test.'],
             };

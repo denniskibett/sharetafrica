@@ -98,10 +98,9 @@ return [
         'color' => '#0EA5E9',
         'logo' => 'images/integrations/kenyasms.png',
         'fields' => [
-            'api_url' => ['label' => 'API URL', 'type' => 'url', 'required' => true, 'placeholder' => 'https://'],
-            'partner_id' => ['label' => 'Partner ID'],
-            'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true],
-            'sender_id' => ['label' => 'Sender ID / shortcode', 'required' => true],
+            'api_url' => ['label' => 'API URL', 'type' => 'url', 'required' => true, 'placeholder' => 'https://kenyasms.com/api/v1', 'sandbox' => 'https://kenyasms.com/api/v1'],
+            'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true, 'help' => 'Developers → API Keys on kenyasms.com (ks_live_…). Needs the sms.send scope.'],
+            'sender_id' => ['label' => 'Sender ID', 'required' => true, 'placeholder' => 'SHARET', 'help' => 'Your approved sender name, up to 11 characters.'],
         ],
     ],
     'africastalking' => [

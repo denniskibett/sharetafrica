@@ -32,13 +32,23 @@ class RampOrder extends Model
         'quote_expires_at' => 'datetime',
     ];
 
-    /** When a payment finishes (paid or refunded), email its receipt if it is big enough, after the transaction commits. */
+    /**
+     * When a payment changes state, tell the customer after the transaction commits: an SMS for the prompt and the
+     * result (CustomerMessages), and the emailed receipt when it finishes big enough (Receipt).
+     */
     protected static function booted(): void
     {
         static::saved(function (RampOrder $o) {
-            if (($o->wasRecentlyCreated || $o->wasChanged('status')) && in_array($o->status, ['paid', 'refunded'], true)) {
-                \Illuminate\Support\Facades\DB::afterCommit(fn () => \App\Support\Receipt::notify($o->fresh()));
+            if (! $o->wasRecentlyCreated && ! $o->wasChanged('status')) {
+                return;
             }
+            \Illuminate\Support\Facades\DB::afterCommit(function () use ($o) {
+                $fresh = $o->fresh();
+                \App\Support\CustomerMessages::order($fresh);
+                if (in_array($fresh->status, ['paid', 'refunded'], true)) {
+                    \App\Support\Receipt::notify($fresh);
+                }
+            });
         });
     }
 

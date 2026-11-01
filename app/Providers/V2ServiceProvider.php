@@ -31,6 +31,7 @@ class V2ServiceProvider extends ServiceProvider
             $schedule->command('ledger:check')->hourly()->withoutOverlapping();
             $schedule->command('ramp:resolve')->everyMinute()->withoutOverlapping();
             $schedule->command('recon:run')->dailyAt('00:30')->withoutOverlapping();
+            $schedule->command('db:backup')->dailyAt('01:30')->timezone('Africa/Nairobi')->withoutOverlapping();
         });
     }
 }

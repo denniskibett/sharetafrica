@@ -21,3 +21,11 @@ One definition, three places: the receipt panel, a PDF to download, and an email
 
 Tests: `tests/Feature/Ramp/WalletPaymentsTest.php` (lines, PDF download, owner-only access, threshold, both people on
 a transfer).
+
+## SMS (KenyaSMS)
+
+`App\Support\CustomerMessages` texts the payer as a payment moves: when the M-PESA prompt goes out ("approve KES X on
+your phone"), and when it ends (paid, added to wallet, not paid, refunded), with the reference. On an @name transfer the
+person paid gets their own message. Sent through `App\Integrations\Sms\KenyaSms` (`POST {api_url}/sms/send`, Bearer
+key, sender ID from the KenyaSMS integration), once per payment and status (KenyaSMS `idempotency_key`), after the
+database commits. Not set up, or KenyaSMS down: payments carry on and the failure is reported.
