@@ -22,7 +22,7 @@ final class Receipt
         return Pdf::loadView('pay.receipt-pdf', [
             'order' => $order->present($viewer), 'lines' => $order->receipt($viewer),
             'qr' => 'data:image/png;base64,'.base64_encode((new Writer(new GDLibRenderer(220, 2)))->writeString(self::qrText($order, $viewer))),
-        ])->setPaper('a4');
+        ])->setPaper('a5');
     }
 
     /** What the receipt's QR code holds: a plain-text summary any phone camera can read, even offline. */
