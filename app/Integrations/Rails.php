@@ -22,6 +22,19 @@ class Rails
         return config('rails.collect') && $allowed ? config('rails.collect') : $this->default();
     }
 
+    /** The rail that pays out for this person (config rails.payout, limited by rails.collect_only_for), else the default. */
+    public function paying(?\App\Models\User $user = null): string
+    {
+        return config('rails.payout') && $this->isNamed($user) ? config('rails.payout') : $this->default();
+    }
+
+    private function isNamed(?\App\Models\User $user): bool
+    {
+        $only = config('rails.collect_only_for');
+
+        return empty($only) || ($user && in_array(strtolower($user->email), array_map('strtolower', $only), true));
+    }
+
     public function for(?string $name = null): PaymentRail
     {
         $name ??= $this->default();

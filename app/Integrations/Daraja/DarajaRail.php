@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * Safaricom Daraja (docs/v2/RAILS.md). Credentials come from the M-Pesa integration (live when it is on and filled,
- * else the sandbox: Integrations::mpesa()). Collections are STK push (Lipa na M-PESA online); the answer arrives by
- * callback (DarajaCallbackController) or an STK query. Payouts need B2C initiator credentials, so until they are in the
- * integration a payout is refused and never sent.
+ * else the sandbox: Integrations::mpesa()). Collections are STK push (Lipa na M-PESA online), answered by callback
+ * (DarajaCallbackController) or an STK query. Payouts are B2C to phones and B2B to paybills, tills and banks, answered by
+ * result callback (DarajaResultController); they need the initiator name and security credential in the integration.
  */
 class DarajaRail implements PaymentRail
 {
@@ -46,14 +46,75 @@ class DarajaRail implements PaymentRail
             : RailResult::failed('M-PESA did not send the prompt: '.($res->json('errorMessage') ?? $res->json('ResponseDescription') ?? 'HTTP '.$res->status()));
     }
 
+    /**
+     * Pay out from the shortcode's utility account: B2C to a phone, B2B to a paybill or till, a bank through its paybill.
+     * Safaricom answers by result callback (DarajaResultController); this only says whether it was accepted.
+     */
     public function payout(RailRequest $request): RailResult
     {
-        return RailResult::failed('Payouts through M-PESA need B2C initiator credentials in the M-Pesa integration.');
+        [$c, $base] = $this->connection();
+        if (blank($c['initiator_name'] ?? null) || blank($c['security_credential'] ?? null)) {
+            return RailResult::failed('Payouts through M-PESA need the initiator name and security credential in the M-Pesa integration.');
+        }
+        $to = $this->destination($request);
+        $common = [
+            'Initiator' => $c['initiator_name'],
+            'SecurityCredential' => $c['security_credential'],
+            'Amount' => intdiv($request->amount, 100),
+            'PartyA' => $c['shortcode'],
+            'Remarks' => 'Sharet '.substr(strtoupper(str_replace('ramp:', '', $request->reference)), 0, 8),
+            'QueueTimeOutURL' => route('rails.daraja.timeout', self::callbackToken()),
+            'ResultURL' => route('rails.daraja.result', self::callbackToken()),
+        ];
+        $res = $to['type'] === 'phone'
+            ? $this->http($base)->post('/mpesa/b2c/v3/paymentrequest', $common + [
+                'OriginatorConversationID' => self::originator($request),
+                'InitiatorName' => $c['initiator_name'],
+                'CommandID' => 'BusinessPayment',
+                'PartyB' => $to['party'],
+                'Occasion' => 'Sharet',
+            ])
+            : $this->http($base)->post('/mpesa/b2b/v1/paymentrequest', $common + [
+                'CommandID' => $to['type'] === 'till' ? 'BusinessBuyGoods' : 'BusinessPayBill',
+                'SenderIdentifierType' => '4',
+                'RecieverIdentifierType' => '4',
+                'PartyB' => $to['party'],
+                'AccountReference' => mb_substr($to['account'] ?? 'Sharet', 0, 13),
+            ]);
+
+        return $res->json('ResponseCode') === '0'
+            ? RailResult::pending($res->json('ConversationID'))
+            : RailResult::failed('M-PESA did not accept the payout: '.($res->json('errorMessage') ?? $res->json('ResponseDescription') ?? 'HTTP '.$res->status()));
+    }
+
+    /** Where a payout goes: a phone (B2C), a paybill or till (B2B), or a bank through its paybill (config pricing.bank_paybills). */
+    private function destination(RailRequest $request): array
+    {
+        $type = $request->meta['destination_type'] ?? 'phone';
+        $d = (array) ($request->meta['destination'] ?? []);
+
+        return match ($type) {
+            'paybill' => ['type' => 'paybill', 'party' => $d['paybill'], 'account' => $d['account'] ?? null],
+            'till' => ['type' => 'till', 'party' => $d['till']],
+            'bank' => ['type' => 'paybill', 'party' => config('pricing.bank_paybills.'.($d['bank'] ?? ''))
+                ?? throw new \RuntimeException('No M-PESA paybill for bank '.($d['bank'] ?? '?')), 'account' => $d['account'] ?? null],
+            default => ['type' => 'phone', 'party' => $request->party],
+        };
+    }
+
+    /** Our id for a payout, echoed back in the result: lets the callback find the request even without the ConversationID. */
+    public static function originator(RailRequest $request): string
+    {
+        return 'SHARET-'.$request->id.'-'.substr(md5($request->reference), 0, 8);
     }
 
     /** STK query by CheckoutRequestID. The M-PESA receipt only comes by callback, so a query success uses our reference. */
     public function status(RailRequest $request): RailResult
     {
+        if ($request->kind === 'payout') {
+            // payouts answer only by result callback; the Transaction Status API (also async) is the fallback to add
+            return RailResult::unknown('Waiting for the M-PESA result.');
+        }
         if (! $request->provider_reference) {
             return RailResult::unknown('The prompt was never acknowledged.');
         }

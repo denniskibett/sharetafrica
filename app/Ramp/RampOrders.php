@@ -48,7 +48,7 @@ class RampOrders
         }
 
         // someone whose money is real (real collections) must not have it "sent" by the simulator: refuse until payouts are real
-        if ($this->rails->collecting($user) !== $this->rails->default() && $this->rails->default() === 'simulator') {
+        if ($this->rails->collecting($user) !== $this->rails->default() && $this->rails->paying($user) === 'simulator') {
             throw ValidationException::withMessages(['amount' => 'Sending to M-PESA and banks is not live yet: your money stays safe in your wallet. Sharet @name transfers work.']);
         }
 
@@ -61,7 +61,7 @@ class RampOrders
         return RampOrder::create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $user->id,
-            'rail' => $this->rails->default(),
+            'rail' => $this->rails->paying($user),
             'destination_type' => $type,
             'destination' => $dest,
             'payer_phone' => $payer,
@@ -172,6 +172,9 @@ class RampOrders
                     Ledger::credit($this->ledger->account('2200', $o), $o->total),
                 ], ['source' => $o, 'memo' => "From wallet to {$o->recipient()}"]);
                 $req = $this->newRequest($o, 'payout', $this->party($o), $o->amount);
+                if (! $this->reserveFloat($req)) {
+                    throw ValidationException::withMessages(['amount' => "Sharet's M-PESA float is low right now: nothing was taken. Try again shortly."]);
+                }
                 $o->payout_request_id = $req->id;
                 $this->move($o, 'paying', 'Taken from your wallet. Sending to '.$o->recipient());
 
@@ -195,6 +198,9 @@ class RampOrders
             default => null,
         };
         $request = $id ? RailRequest::find($id) : null;
+        if ($request?->meta['awaiting_float'] ?? false) {
+            return $order->fresh(); // never sent yet: nothing to ask the rail about
+        }
         $wait = (int) config('rails.callback_wait.'.$request?->rail, 0);
         if ($request && $wait && empty($request->meta['callbacks']) && $request->created_at->gt(now()->subSeconds($wait))) {
             return $order->fresh(); // the rail answers by callback: give it time before asking
@@ -324,7 +330,7 @@ class RampOrders
             }
             $topUp = $o->destination_type === 'wallet';
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
-                Ledger::debit($this->ledger->account($this->rails->account($o->rail, 'collect')), $o->total),
+                Ledger::debit($this->ledger->account($this->rails->account($req->rail, 'collect')), $o->total),
                 Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $o->total),
             ], ['source' => $o, 'memo' => ($topUp ? 'Wallet top-up from ' : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
             if ($topUp) {
@@ -336,23 +342,24 @@ class RampOrders
             $o->payout_request_id = $payout->id;
             $this->move($o, 'paying', "Paid by M-PESA {$req->receipt}. Sending to {$o->recipient()}");
 
-            return $payout;
+            return $this->reserveFloat($payout) ? $payout : $this->awaitFloat($o, $payout);
         }
 
         if ($role === 'payout' && $o->status === 'paying') {
             if ($ok) {
                 $legs = array_values(array_filter([
                     Ledger::debit($orderAcct, $o->total),
-                    Ledger::credit($this->ledger->account($this->rails->account($o->rail, 'payout')), $o->amount),
+                    Ledger::credit($this->ledger->account($this->rails->account($req->rail, 'payout')), $o->amount),
                     $o->fee ? Ledger::credit($this->ledger->account('4100'), $o->fee) : null,
                     $o->excise ? Ledger::credit($this->ledger->account('2300'), $o->excise) : null,
                     $o->rounding ? Ledger::credit($this->ledger->account('4900'), $o->rounding) : null,
                 ]));
-                $this->ledger->post("ramp:{$o->uuid}:paid", 'ramp_payout', $legs, ['source' => $o, 'memo' => "Paid {$o->recipient()} · ref {$req->receipt}"]);
+                $this->settleFloat($req, "ramp:{$o->uuid}:paid", 'ramp_payout', $legs, ['source' => $o, 'memo' => "Paid {$o->recipient()} · ref {$req->receipt}"]);
                 $this->move($o, 'paid', "Received by {$o->recipient()} · ref {$req->receipt}");
 
                 return null;
             }
+            $this->releaseFloat($req);
             if ($o->funding === 'wallet') {
                 $this->ledger->post("ramp:{$o->uuid}:refunded", 'wallet_refund', [
                     Ledger::debit($orderAcct, $o->total),
@@ -366,19 +373,20 @@ class RampOrders
             $o->refund_request_id = $refund->id;
             $this->move($o, 'refunding', "Could not pay the recipient ({$req->failure}). Refunding ".Money::format($o->total).' to '.$o->payer_phone, $req->failure);
 
-            return $refund;
+            return $this->reserveFloat($refund) ? $refund : $this->awaitFloat($o, $refund);
         }
 
         if ($role === 'refund' && $o->status === 'refunding') {
             if ($ok) {
-                $this->ledger->post("ramp:{$o->uuid}:refunded", 'ramp_refund', [
+                $this->settleFloat($req, "ramp:{$o->uuid}:refunded", 'ramp_refund', [
                     Ledger::debit($orderAcct, $o->total),
-                    Ledger::credit($this->ledger->account($this->rails->account($o->rail, 'payout')), $o->total),
+                    Ledger::credit($this->ledger->account($this->rails->account($req->rail, 'payout')), $o->total),
                 ], ['source' => $o, 'memo' => "Refunded to {$o->payer_phone} · ref {$req->receipt}"]);
                 $this->move($o, 'refunded', 'Refunded in full to '.$o->payer_phone." · ref {$req->receipt}");
 
                 return null;
             }
+            $this->releaseFloat($req);
             $this->move($o, 'refund_failed', 'Refund could not be sent: our team has been alerted', $req->failure);
         }
 
@@ -401,7 +409,7 @@ class RampOrders
     private function newRequest(RampOrder $o, string $role, string $party, int $amount): RailRequest
     {
         return RailRequest::create([
-            'rail' => $o->rail,
+            'rail' => $role === 'collect' ? $this->rails->collecting($o->user) : $this->rails->paying($o->user),
             'kind' => $role === 'collect' ? 'collect' : 'payout',
             'reference' => "ramp:{$o->uuid}:{$role}",
             'amount' => $amount,
@@ -410,6 +418,74 @@ class RampOrders
             'meta' => ['role' => $role, 'order' => $o->uuid, 'destination_type' => $role === 'payout' ? $o->destination_type : 'phone', 'destination' => $role === 'payout' ? $o->destination : null],
             'status' => 'pending',
         ]);
+    }
+
+    /**
+     * Escrow for the float: hold the payout's amount on its rail's payout account until M-PESA's result, so two payouts
+     * can never spend the same float and nothing is sent the books can't cover. False = not enough float.
+     */
+    private function reserveFloat(RailRequest $req): bool
+    {
+        try {
+            $this->ledger->hold($this->ledger->account($this->rails->account($req->rail, 'payout')), $req->amount, 'float:'.$req->reference, 'Payout in flight');
+
+            return true;
+        } catch (LedgerException $e) {
+            if ($e->reason !== 'insufficient_funds') {
+                throw $e;
+            }
+
+            return false;
+        }
+    }
+
+    /** M-PESA confirmed the payout: the hold becomes the posting (Ledger::capture). Older payouts without a hold just post. */
+    private function settleFloat(RailRequest $req, string $key, string $type, array $legs, array $options): void
+    {
+        \App\Models\LedgerHold::where('reference', 'float:'.$req->reference)->where('status', 'open')->exists()
+            ? $this->ledger->capture('float:'.$req->reference, $key, $type, $legs, $options)
+            : $this->ledger->post($key, $type, $legs, $options);
+    }
+
+    private function releaseFloat(RailRequest $req): void
+    {
+        if (\App\Models\LedgerHold::where('reference', 'float:'.$req->reference)->where('status', 'open')->exists()) {
+            $this->ledger->release('float:'.$req->reference);
+        }
+    }
+
+    /** Not enough float to send: keep it unsent, tell the desk, and let ramp:resolve send it once the float is topped up. */
+    private function awaitFloat(RampOrder $o, RailRequest $req): ?RailRequest
+    {
+        $req->forceFill(['meta' => ($req->meta ?? []) + ['awaiting_float' => true]])->save();
+        $o->timeline = array_merge($o->timeline ?? [], [$this->event('Waiting for Sharet to top up its M-PESA float before sending')]);
+        $o->save();
+        \App\Models\SupportCase::raise($o, 'FLOAT_LOW', 'KES '.Money::format($req->amount).' is waiting to be sent: the M-PESA float is too low. Move money to the utility account, record it (ledger:float), and it goes out within a minute.', 15);
+
+        return null;
+    }
+
+    /** ramp:resolve: send the payouts that waited for float, oldest first, as far as the float now allows. */
+    public function sendAwaitingFloat(): int
+    {
+        $sent = 0;
+        RailRequest::whereIn('status', ['pending'])->where('meta->awaiting_float', true)->orderBy('id')->each(function (RailRequest $req) use (&$sent) {
+            $go = DB::transaction(function () use ($req) {
+                $r = RailRequest::whereKey($req->id)->lockForUpdate()->first();
+                if (! ($r->meta['awaiting_float'] ?? false) || ! $this->reserveFloat($r)) {
+                    return false;
+                }
+                $r->forceFill(['meta' => array_diff_key($r->meta, ['awaiting_float' => 1])])->save();
+
+                return true;
+            });
+            if ($go) {
+                $this->send($req->fresh());
+                $sent++;
+            }
+        });
+
+        return $sent;
     }
 
     private function party(RampOrder $o): string

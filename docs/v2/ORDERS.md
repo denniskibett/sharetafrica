@@ -62,3 +62,22 @@ Money leaving a wallet (wallet payments, withdrawals, @name transfers) needs the
 `POST /pay/pin` sets it (first time; changing it needs the current one), and `confirm` / `transfer` check it. Stored
 hashed; easy PINs (1234, 0000…) refused; 5 wrong tries pause wallet payments for 15 minutes. Money from M-PESA is
 approved by the M-PESA PIN on the phone, so no Sharet PIN is asked.
+
+## M-PESA payouts (Daraja B2C / B2B) and the float escrow
+
+- **Who pays out:** `RAIL_PAYOUT=daraja` sends payouts through Safaricom (with `RAIL_COLLECT_ONLY_FOR` limiting both to
+  named accounts while testing). Phones get B2C (`BusinessPayment`), paybills and tills B2B (`BusinessPayBill` /
+  `BusinessBuyGoods`), banks B2B to the bank's paybill (`config/pricing.php` `bank_paybills`, account = bank account).
+  Needs the initiator name and security credential in the M-Pesa integration; without them a payout is refused, never
+  sent.
+- **Escrow, both sides:** the customer's money sits in the payment's own `2200` account until M-PESA's result; and when
+  a payout is created, its amount is **held** on the rail's payout account (`1120`, the paybill's utility account) with
+  the reference `float:<request>`. The result callback (`/rails/daraja/result/{secret}`) completes the double entry by
+  *capturing* the hold into the payout posting; a failure *releases* it and refunds. Two payouts can never spend the same
+  float, and nothing is sent that the books can't cover. A queue timeout (`/rails/daraja/timeout/{secret}`) is never a
+  failure: the payout keeps waiting. Every payload is kept on the request (`meta.results`, `meta.timeouts`).
+- **Float too low:** a wallet send is refused before anything is taken. A payout due after an M-PESA collection waits
+  unsent (`meta.awaiting_float`), opens a `FLOAT_LOW` support case, and `ramp:resolve` sends it as soon as the float allows.
+- **Topping up the float:** collections land in the working account (`1110`), payouts leave the utility account
+  (`1120`). Move money in the M-PESA portal, then record it: `php artisan ledger:float 1110 1120 5,000 --note="portal"`.
+- Payout status checks wait for the result callback; the Transaction Status API is the fallback still to add.

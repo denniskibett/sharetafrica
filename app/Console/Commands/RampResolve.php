@@ -16,7 +16,8 @@ class RampResolve extends Command
     {
         $expired = $orders->expireQuotes();
         $moved = $orders->resolveWaiting();
-        $this->info("Expired {$expired} quote(s); {$moved} waiting order(s) moved on.");
+        $floated = $orders->sendAwaitingFloat();
+        $this->info("Expired {$expired} quote(s); {$moved} waiting order(s) moved on; {$floated} payout(s) sent once float allowed.");
 
         return self::SUCCESS;
     }

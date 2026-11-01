@@ -15,6 +15,7 @@ class SupportCase extends Model
 {
     public const REASONS = [
         'LATE_CONFIRMATION' => 'M-PESA confirmed after the payment showed as failed',
+        'FLOAT_LOW' => 'A payout is waiting for M-PESA float',
         'PAYOUT_UNKNOWN' => 'Payout status unknown',
         'STK_NOT_RECEIVED' => 'M-PESA prompt not received',
         'NOT_RECEIVED' => 'Recipient says not received',

@@ -26,6 +26,10 @@ class V2ServiceProvider extends ServiceProvider
         // Safaricom posts STK results here: no session or CSRF; the secret path segment is the guard
         Route::post('rails/daraja/callback/{token}', \App\Integrations\Daraja\DarajaCallbackController::class)
             ->middleware('throttle:120,1')->name('rails.daraja.callback');
+        Route::post('rails/daraja/result/{token}', [\App\Integrations\Daraja\DarajaResultController::class, 'result'])
+            ->middleware('throttle:120,1')->name('rails.daraja.result');
+        Route::post('rails/daraja/timeout/{token}', [\App\Integrations\Daraja\DarajaResultController::class, 'timeout'])
+            ->middleware('throttle:120,1')->name('rails.daraja.timeout');
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             $schedule->command('ledger:check')->hourly()->withoutOverlapping();

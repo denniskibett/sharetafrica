@@ -38,6 +38,12 @@ return [
         'standard' => ['per_order' => 25_000_000, 'per_day' => 50_000_000],   // 250,000.00 / 500,000.00
     ],
 
+    // Each bank's M-PESA paybill, for paying a bank account (account number = the bank account). CHECK before going live.
+    'bank_paybills' => [
+        'equity' => '247247', 'kcb' => '522522', 'ncba' => '880100', 'imbank' => '542542',
+        'coop' => '400200', 'absa' => '303030', 'stanbic' => '600100', 'family' => '222111',
+    ],
+
     'banks' => [
         'equity' => 'Equity Bank', 'kcb' => 'KCB Bank', 'ncba' => 'NCBA Bank', 'imbank' => 'I&M Bank',
         'coop' => 'Co-operative Bank', 'absa' => 'Absa Bank', 'stanbic' => 'Stanbic Bank', 'family' => 'Family Bank',

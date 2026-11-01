@@ -14,6 +14,8 @@ return [
     // The rail that collects money for "Add money" (wallet top-ups). Lets real M-PESA collections run while payouts
     // stay on the default rail, e.g. RAIL_COLLECT=daraja before B2C credentials exist. Empty = the default rail.
     'collect' => env('RAIL_COLLECT'),
+    // The rail that pays out (B2C / B2B), e.g. RAIL_PAYOUT=daraja once the initiator credentials are in. Empty = default.
+    'payout' => env('RAIL_PAYOUT'),
     // While testing real collections on a live site, only these account emails use it (comma-separated); empty = all.
     'collect_only_for' => array_filter(array_map('trim', explode(',', (string) env('RAIL_COLLECT_ONLY_FOR', '')))),
 
@@ -28,7 +30,9 @@ return [
         'simulator' => ['collect' => '1130', 'payout' => '1130'],
         'cashia' => ['collect' => '1130', 'payout' => '1130'],
         'gladys' => ['collect' => '1140', 'payout' => '1140'],
-        'daraja' => ['collect' => '1110', 'payout' => '1120'],
+        // collections land in the paybill's working account, payouts leave its utility account (move float between
+        // them in the M-PESA portal, then record it: php artisan ledger:float 1110 1120 <amount>)
+        'daraja' => ['collect' => '1110', 'payout' => env('RAIL_DARAJA_PAYOUT_ACCOUNT', '1120')],
     ],
 
     'simulator' => [
