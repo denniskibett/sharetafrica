@@ -29,8 +29,9 @@
           @include('pay.partials.icon', ['expr' => 'order', 'class' => 'h-7 w-7'])
         </span>
         <p class="mt-1 text-sm text-gray-500" x-text="order?.title"></p>
-        <p class="text-[32px] leading-tight tabular-nums"
-           :class="{ 'text-app-in': order?.flow === 'in', 'text-app-out': order?.flow === 'out', 'text-app-muted line-through': order?.flow === 'none', 'text-app-wait': order?.flow === 'pending' }" x-text="order?.signed"></p>
+        <p class="text-xs text-gray-500"><span x-text="order?.from"></span> → <span x-text="order?.to"></span></p>
+        <p class="text-[40px] font-bold leading-tight tabular-nums"
+           :class="{ 'text-app-in': order?.flow === 'in', 'text-app-out': order?.flow === 'out', 'text-app-muted line-through': order?.flow === 'none', 'text-app-wait': order?.flow === 'pending' }" x-text="order?.signed.replace(/^([+−])/, '$1 KES ')"></p>
         <span :class="sharet.pill(order?.state.tone)" x-text="order?.state.label"></span>
       </div>
 

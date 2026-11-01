@@ -3,11 +3,21 @@
 <section class="rounded-2xl border border-app-line bg-app-panel p-5">
   <h2 class="mb-4 text-base font-semibold">This month</h2>
   <div class="grid grid-cols-3 gap-3">
-    @foreach ([['Money in', 'month_in', 'arrow-down-left'], ['Money out', 'month_out', 'arrow-up-right'], ['Fees paid', 'month_fees', 'receipt-percent']] as [$label, $key, $icon])
-      <div class="rounded-xl bg-app-tile p-3">
-        <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-5 w-5', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
-        <p class="mt-2 text-xs text-app-muted">{{ $label }}</p>
-        <p class="truncate text-[15px] tabular-nums" @class(['text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out']) x-text="stats.{{ $key }} ?? '—'"></p>
+    @php
+      $tiles = [
+        ['Money in', 'month_in', 'arrow-down-left', "(stats.month_in_count ?? 0) + ' in'"],
+        ['Money out', 'month_out', 'arrow-up-right', "(stats.month_out_count ?? 0) + ' out'"],
+        ['Fees paid', 'month_fees', 'receipt-percent', "'On ' + (stats.month_out_count ?? 0) + ' payments'"],
+      ];
+    @endphp
+    @foreach ($tiles as [$label, $key, $icon, $second])
+      <div class="min-w-0 rounded-xl bg-app-tile p-3">
+        <div class="flex items-center justify-between gap-1">
+          <p class="truncate text-xs text-app-muted">{{ $label }}</p>
+          <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-4 w-4 shrink-0', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
+        </div>
+        <p @class(['mt-1.5 truncate text-xl font-bold tabular-nums md:text-2xl', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out']) x-text="stats.{{ $key }} ?? '—'"></p>
+        <p class="truncate text-[11px] text-app-muted" x-text="{{ $second }}"></p>
       </div>
     @endforeach
   </div>

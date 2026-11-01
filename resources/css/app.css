@@ -601,7 +601,7 @@ span.flatpickr-weekday,
 .sharet-app .text-gray-500, .sharet-app .text-gray-400 { color: rgb(var(--app-muted)) !important; }
 
 /* Accents: lime instead of violet/blue; lime surfaces always carry dark text */
-.sharet-app .bg-primary, .sharet-app .dark\:bg-\[\#D4FF3D\] { background-color: #D4FF3D !important; color: #050507 !important; }
+.sharet-app .bg-primary, .dark .sharet-app .dark\:bg-\[\#D4FF3D\] { background-color: #D4FF3D !important; color: #050507 !important; }
 .sharet-app .focus\:border-violet-300:focus, .sharet-app .focus\:border-violet-400:focus { border-color: rgb(var(--app-accent)) !important; }
 .sharet-app .focus\:ring-violet-500\/10:focus { --tw-ring-color: rgba(212, 255, 61, 0.2) !important; }
 .dark .sharet-app input, .dark .sharet-app select, .dark .sharet-app textarea { color-scheme: dark; }

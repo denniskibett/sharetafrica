@@ -427,7 +427,7 @@ class RampOrders
         if ($total > $limits['per_order']) {
             throw ValidationException::withMessages(['amount' => 'Your limit per payment is KES '.Money::format($limits['per_order']).'. Upgrade your verification to send more.']);
         }
-        $today = RampOrder::where('user_id', $user->id)->where('destination_type', '!=', 'wallet')->where('created_at', '>=', now()->startOfDay())
+        $today = RampOrder::where('user_id', $user->id)->where('destination_type', '!=', 'wallet')->where('created_at', '>=', now('Africa/Nairobi')->startOfDay()->utc()) // a Kenyan day
             ->whereIn('status', ['collecting', 'paying', 'paid', 'refunding'])->when($exceptOrder, fn ($q) => $q->whereKeyNot($exceptOrder))->sum('total');
         if ($today + $total > $limits['per_day']) {
             throw ValidationException::withMessages(['amount' => 'This would pass your daily limit of KES '.Money::format($limits['per_day']).'. Upgrade your verification to send more.']);

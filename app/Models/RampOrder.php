@@ -107,6 +107,13 @@ class RampOrder extends Model
             'id' => $this->id,
             'uuid' => $this->uuid,
             'recipient' => $incoming ? 'From @'.($this->sender?->handle ?? 'sharet').' · '.$this->sender?->name : $this->recipient(),
+            // where the money came from and went, for one-line lists and receipts
+            'from' => match (true) {
+                $incoming => '@'.($this->sender?->handle ?? 'sharet'),
+                $this->funding === 'wallet' => 'Your wallet',
+                default => 'M-PESA '.$this->payer_phone,
+            },
+            'to' => $incoming || $this->destination_type === 'wallet' ? 'Your wallet' : $this->recipient(),
             'incoming' => $incoming,
             'note' => $this->note,
             'amount' => Money::format($this->amount),

@@ -18,12 +18,26 @@
     <p class="mt-1 text-sm text-app-muted">Everything in and out of your wallet.</p>
   </div>
 
+  {{-- Big numbers, then a second line: what it is made of, and last month to compare --}}
   <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-    @foreach ([['Wallet', 'wallet', 'wallet'], ['In this month', 'month_in', 'arrow-down-left'], ['Out this month', 'month_out', 'arrow-up-right'], ['Fees this month', 'month_fees', 'receipt-percent']] as [$label, $key, $icon])
-      <div class="rounded-2xl border border-app-line bg-app-panel p-4">
-        <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-5 w-5', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
-        <p class="mt-2 text-xs text-app-muted">{{ $label }} · KES</p>
-        <p class="text-lg tabular-nums" @class(['text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out']) x-text="stats.{{ $key }} ?? '—'"></p>
+    @php
+      $cards = [
+        ['Wallet', 'wallet', 'wallet', "stats.waiting ? stats.waiting + ' on the way' : 'All settled'"],
+        ['In this month', 'month_in', 'arrow-down-left', "(stats.month_in_count ?? 0) + ' in · last month ' + (stats.last_in ?? '0.00')"],
+        ['Out this month', 'month_out', 'arrow-up-right', "(stats.month_out_count ?? 0) + ' out · last month ' + (stats.last_out ?? '0.00')"],
+        ['Fees this month', 'month_fees', 'receipt-percent', "'On ' + (stats.month_out_count ?? 0) + ' payments · free up to 100'"],
+      ];
+    @endphp
+    @foreach ($cards as [$label, $key, $icon, $second])
+      <div class="rounded-2xl border border-app-line bg-app-panel p-4 md:p-5">
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-sm text-app-muted">{{ $label }}</p>
+          <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-5 w-5', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
+        </div>
+        <p @class(['mt-2 truncate text-[26px] font-bold leading-tight tabular-nums md:text-[30px]', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out'])>
+          <span class="text-sm font-semibold text-app-muted">KES</span> <span x-text="stats.{{ $key }} ?? '—'"></span>
+        </p>
+        <p class="mt-1 truncate text-xs text-app-muted" x-text="{{ $second }}"></p>
       </div>
     @endforeach
   </div>
@@ -44,7 +58,7 @@
       </div>
     </div>
     @if (config('rails.default') === 'simulator')<p class="mb-2 text-xs text-app-muted">Test mode: payments are simulated, no real money moves.</p>@endif
-    <ul x-show="rows.length">
+    <ul x-show="rows.length" class="space-y-1.5">
       <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
     </ul>
     <p x-show="!loading && !rows.length" x-cloak class="py-10 text-center text-sm text-app-muted">No transactions here yet.</p>

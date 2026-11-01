@@ -47,7 +47,7 @@
         <p class="font-semibold">No transactions yet</p>
         <p class="max-w-xs text-sm text-app-muted">Receive into your wallet, or send to any M-PESA number, paybill, till, bank or Sharet @name.</p>
       </div>
-      <ul x-show="rows.length" x-cloak>
+      <ul x-show="rows.length" x-cloak class="space-y-1.5">
         <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
       </ul>
   </section>

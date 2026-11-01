@@ -28,19 +28,19 @@
       </button>
       <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-[min(360px,calc(100vw-2rem))] rounded-2xl border border-app-line bg-app-panel p-3 shadow-xl">
         <p class="px-2 pb-1 text-sm font-semibold">Latest payments</p>
-        <ul x-show="rows.length" class="px-2" @click="open = false">
+        <ul x-show="rows.length" class="space-y-1 [&_.row-meta]:!hidden" @click="open = false">
           <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
         </ul>
         <p x-show="!rows.length" class="px-2 py-6 text-center text-sm text-app-muted">Payment alerts will show here.</p>
         <a href="{{ route('pay.index') }}" class="mt-1 block rounded-lg px-2 py-2 text-center text-sm font-medium text-app-soft hover:bg-app-tile">See all transactions</a>
       </div>
     </div>
-    <button type="button" @click="$dispatch('account-sheet')" class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-app-raised text-sm font-semibold md:hidden" aria-label="Account">
+    <button type="button" @click="$dispatch('account-sheet')" class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#050507] text-[#D4FF3D] dark:bg-[#D4FF3D] dark:text-[#050507] text-sm font-semibold md:hidden" aria-label="Account">
       @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
     </button>
     <div class="relative hidden md:block" x-data="{ open: false }" @click.outside="open = false">
       <button type="button" @click="open = !open" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-app-tile" aria-label="Account menu">
-        <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-app-raised text-sm font-semibold">
+        <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#050507] text-[#D4FF3D] dark:bg-[#D4FF3D] dark:text-[#050507] text-sm font-semibold">
           @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
         </span>
         <x-heroicon-o-chevron-down class="h-4 w-4 text-app-muted" />

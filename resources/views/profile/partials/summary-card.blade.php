@@ -1,7 +1,7 @@
-{{-- Profile header: photo, name, lane and contact details. Reads `data` from profile(). --}}
+{{-- Profile header: photo, name, lane, contact details and Edit profile. Reads `data` from profile(). --}}
 <x-ui.card class="mb-6">
   <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
-    <span class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-2xl font-bold text-[#D4FF3D]">
+    <span class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#050507] text-[#D4FF3D] dark:bg-[#D4FF3D] dark:text-[#050507] text-2xl font-bold">
       <img x-show="data.user.avatar" :src="data.user.avatar" alt="" class="h-full w-full object-cover">
       <span x-show="!data.user.avatar" x-text="data.user.initials"></span>
     </span>
@@ -18,5 +18,6 @@
       <div><dt class="text-xs text-gray-500">Email</dt><dd class="font-medium text-gray-800 dark:text-white/90" x-text="data.user.email"></dd></div>
       <div><dt class="text-xs text-gray-500">Phone</dt><dd class="font-medium text-gray-800 dark:text-white/90" x-text="data.user.phone || 'Not added'"></dd></div>
     </dl>
+    <x-ui.button icon="pencil-square" href="{{ route('profile.edit') }}" class="shrink-0">Edit profile</x-ui.button>
   </div>
 </x-ui.card>

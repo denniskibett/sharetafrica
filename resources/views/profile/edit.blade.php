@@ -11,9 +11,7 @@
 <div x-data="profile('{{ route('profile.data') }}')">
   <div x-data="{ tab: ['personal', 'verification', 'security', 'close'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'personal' }"
        x-effect="history.replaceState(null, '', '#' + tab)">
-    <x-ui.page-header title="Account settings" subtitle="Keep your details current. Verified details unlock higher limits and more services.">
-      <x-ui.button variant="secondary" icon="user-circle" href="{{ route('profile.show') }}">View profile</x-ui.button>
-    </x-ui.page-header>
+    <x-ui.page-header title="Account settings" subtitle="Keep your details current. Verified details unlock higher limits and more services." />
 
     <div class="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <nav class="flex gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800 dark:bg-white/[0.03] lg:h-fit lg:flex-col" aria-label="Settings">

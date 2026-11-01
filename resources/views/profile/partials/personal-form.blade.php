@@ -1,8 +1,9 @@
 {{-- Personal details + photo (multipart PATCH /profile). --}}
 <x-ui.card title="Personal details" subtitle="Use your name as it appears on your ID. Your phone number is your M-Pesa / mobile money line.">
+  <x-slot:actions><x-ui.button variant="secondary" icon="user-circle" href="{{ route('profile.show') }}">View profile</x-ui.button></x-slot:actions>
   <form @submit.prevent="const f = new FormData($el); f.set('_method', 'PATCH'); submit('POST', '{{ route('profile.update') }}', f)" class="space-y-6">
     <div class="flex flex-wrap items-center gap-5">
-      <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gray-900 text-2xl font-bold text-[#D4FF3D]">
+      <span class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-[#050507] text-[#D4FF3D] dark:bg-[#D4FF3D] dark:text-[#050507] text-2xl font-bold">
         <img x-show="data.user.avatar" :src="data.user.avatar" alt="" class="h-full w-full object-cover">
         <span x-show="!data.user.avatar" x-text="data.user.initials"></span>
       </span>

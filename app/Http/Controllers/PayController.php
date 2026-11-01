@@ -68,11 +68,13 @@ class PayController extends Controller
     /** This month in and out, fees paid, today's use against the limits, and people paid recently (dashboard column). */
     private function summary(\App\Models\User $me): array
     {
-        $month = now()->startOfMonth();
+        $month = now('Africa/Nairobi')->startOfMonth()->utc(); // days and months start at midnight in Kenya
         $paid = RampOrder::where('status', 'paid')->where('created_at', '>=', $month);
         $out = (clone $paid)->where('user_id', $me->id)->where('destination_type', '!=', 'wallet');
+        $inQuery = fn ($q) => $q->where(fn ($q) => $q->where('recipient_user_id', $me->id)->orWhere(fn ($q) => $q->where('user_id', $me->id)->where('destination_type', 'wallet')));
+        $lastMonth = RampOrder::where('status', 'paid')->whereBetween('created_at', [now('Africa/Nairobi')->subMonthNoOverflow()->startOfMonth()->utc(), $month]);
         $limits = config('pricing.limits.'.($me->kyc_level ?: 'none')) ?? config('pricing.limits.none');
-        $today = (int) RampOrder::where('user_id', $me->id)->where('destination_type', '!=', 'wallet')->where('created_at', '>=', now()->startOfDay())
+        $today = (int) RampOrder::where('user_id', $me->id)->where('destination_type', '!=', 'wallet')->where('created_at', '>=', now('Africa/Nairobi')->startOfDay()->utc())
             ->whereIn('status', ['collecting', 'paying', 'paid', 'refunding'])->sum('total');
         $recent = RampOrder::where('user_id', $me->id)->where('status', 'paid')->where('destination_type', '!=', 'wallet')->latest('id')->limit(20)->get()
             ->unique(fn ($o) => json_encode($o->destination))->take(4)
@@ -80,8 +82,12 @@ class PayController extends Controller
                 'payload' => ['mode' => 'send'] + ($o->destination_type === 'sharet' ? ['to' => '@'.$o->destination['handle']] : ['type' => $o->destination_type, 'dest' => $o->destination])])->values();
 
         return [
-            'month_in' => \App\Ledger\Money::format((int) (clone $paid)->where(fn ($q) => $q->where('recipient_user_id', $me->id)
-                ->orWhere(fn ($q) => $q->where('user_id', $me->id)->where('destination_type', 'wallet')))->sum('amount')),
+            'month_in' => \App\Ledger\Money::format((int) $inQuery(clone $paid)->sum('amount')),
+            'month_in_count' => $inQuery(clone $paid)->count(),
+            'month_out_count' => (clone $out)->count(),
+            'last_in' => \App\Ledger\Money::format((int) $inQuery(clone $lastMonth)->sum('amount')),
+            'last_out' => \App\Ledger\Money::format((int) (clone $lastMonth)->where('user_id', $me->id)->where('destination_type', '!=', 'wallet')->sum('total')),
+            'waiting' => RampOrder::where('user_id', $me->id)->whereIn('status', ['collecting', 'paying', 'refunding'])->count(),
             'month_out' => \App\Ledger\Money::format((int) (clone $out)->sum('total')),
             'month_fees' => \App\Ledger\Money::format((int) (clone $out)->sum(\DB::raw('fee + excise + rounding'))),
             'today_used' => \App\Ledger\Money::format($today),
