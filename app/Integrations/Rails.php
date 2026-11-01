@@ -13,6 +13,15 @@ class Rails
         return config('rails.default');
     }
 
+    /** The rail for this person's wallet top-ups (config rails.collect, limited by rails.collect_only_for), else the default. */
+    public function collecting(?\App\Models\User $user = null): string
+    {
+        $only = config('rails.collect_only_for');
+        $allowed = empty($only) || ($user && in_array(strtolower($user->email), array_map('strtolower', $only), true));
+
+        return config('rails.collect') && $allowed ? config('rails.collect') : $this->default();
+    }
+
     public function for(?string $name = null): PaymentRail
     {
         $name ??= $this->default();

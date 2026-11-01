@@ -80,7 +80,7 @@ class RampOrders
         return RampOrder::create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $user->id,
-            'rail' => $this->rails->default(),
+            'rail' => $this->rails->collecting($user),
             'destination_type' => 'wallet',
             'destination' => ['wallet' => 'Sharet wallet'],
             'payer_phone' => $payer,

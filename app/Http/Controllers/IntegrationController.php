@@ -144,6 +144,7 @@ class IntegrationController extends Controller
             'category' => $d['category'],
             'description' => $d['description'],
             'color' => $d['color'],
+            'logo' => isset($d['logo']) ? asset($d['logo']) : null,
             'group' => $d['group'] ?? null,
             'environment' => $d['environment'] ?? null,
             'fields' => collect($d['fields'])->map(fn ($f, $k) => $f + ['key' => $k, 'type' => $f['type'] ?? 'text'])->values(),

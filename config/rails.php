@@ -11,10 +11,16 @@
 return [
     'default' => env('RAIL_DEFAULT', 'simulator'),
 
+    // The rail that collects money for "Add money" (wallet top-ups). Lets real M-PESA collections run while payouts
+    // stay on the default rail, e.g. RAIL_COLLECT=daraja before B2C credentials exist. Empty = the default rail.
+    'collect' => env('RAIL_COLLECT'),
+    // While testing real collections on a live site, only these account emails use it (comma-separated); empty = all.
+    'collect_only_for' => array_filter(array_map('trim', explode(',', (string) env('RAIL_COLLECT_ONLY_FOR', '')))),
+
     'adapters' => [
         'simulator' => App\Integrations\Simulator\SimulatorRail::class,
         // 'cashia' => App\Integrations\Cashia\CashiaRail::class,   (to integrate)
-        // 'daraja' => App\Integrations\Daraja\DarajaRail::class,   (to integrate)
+        'daraja' => App\Integrations\Daraja\DarajaRail::class,     // collections (STK push); payouts need B2C credentials
     ],
 
     // Ledger accounts that mirror each rail's real money: where collections land and where payouts leave from.

@@ -49,7 +49,10 @@
       <article class="flex flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="relative flex-1 p-5 pb-7">
           <div class="mb-5 flex items-center gap-3">
-            <span class="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm"
+            <span x-show="p.logo" class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-gray-200 dark:ring-white/10">
+              <img :src="p.logo" :alt="p.name + ' logo'" class="max-h-full max-w-full object-contain" loading="lazy">
+            </span>
+            <span x-show="!p.logo" class="flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm"
                   :style="`background:${p.color}`" x-text="initials(p.name)"></span>
             <span class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300" x-text="p.category"></span>
           </div>
