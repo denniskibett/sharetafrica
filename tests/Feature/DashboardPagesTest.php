@@ -117,7 +117,8 @@ class DashboardPagesTest extends TestCase
         $this->get('/profile')->assertOk()->assertSee('class="sharet-app', false);
 
         $this->actingAs($this->admin());
-        $this->get('/dashboard')->assertOk()->assertSee('Admin overview')->assertDontSee('class="sharet-app', false);
+        // Staff share the Sharet UI theme (one look for every role) but keep the admin dashboard, not the customer app
+        $this->get('/dashboard')->assertOk()->assertSee('Admin overview')->assertSee('sharet-staff', false)->assertDontSee('aria-label="App"', false);
     }
 
     public function test_people_lists_need_permission(): void

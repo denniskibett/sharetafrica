@@ -20,7 +20,7 @@
          class="flex min-h-[300px] flex-col items-center gap-5 rounded-2xl border border-app-line bg-app-panel p-6 text-center">
 
   <div class="flex w-full items-center justify-between">
-    <span class="rv-pill"><span class="h-2 w-2 rounded-full bg-app-lime ring-2 ring-app-lime/30"></span>Personal · KES</span>
+    <span class="rv-pill"><span class="h-2 w-2 rounded-full bg-app-lime ring-2 ring-app-lime/30"></span>Wallet · KES</span>
     <button type="button" @click="hidden = !hidden" class="flex h-10 w-10 items-center justify-center rounded-full bg-app-tile hover:bg-app-raised" :aria-label="hidden ? 'Show balance' : 'Hide balance'">
       <x-heroicon-o-eye x-show="hidden" class="h-5 w-5" /><x-heroicon-o-eye-slash x-show="!hidden" class="h-5 w-5" />
     </button>
