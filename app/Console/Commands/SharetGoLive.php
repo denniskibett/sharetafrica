@@ -59,6 +59,12 @@ class SharetGoLive extends Command
         $sms = Integration::whereNull('company_id')->where('provider', 'kenyasms')->first();
         $this->row('SMS', filled(config('sms.kenyasms.api_key')) || filled($sms?->credentials['api_key'] ?? null), filled(config('sms.kenyasms.api_key')) || $sms ? 'Key set' : 'No key', 'Enter the KenyaSMS key in Integrations → KenyaSMS and press Test');
 
+        // FX (fiat only): today's Safaricom reference rates recorded
+        $missing = collect(config('fx.pairs'))->reject(function ($pair) {
+            try { app(\App\Fx\Rates::class)->reference($pair); return true; } catch (\App\Fx\FxException) { return false; }
+        });
+        $this->row("Today's FX rates", $missing->isEmpty(), $missing->isEmpty() ? 'All pairs recorded' : 'Missing: '.$missing->implode(', '), 'Each morning: php artisan fx:rate KES/UGX <Safaricom rate> (cross-border pauses without it)', false);
+
         // Safety
         $dir = rtrim(config('database.backup_path') ?: storage_path('app/backups'), '/');
         $latest = collect(glob($dir.'/*.gz') ?: [])->map(fn ($f) => filemtime($f))->max();
