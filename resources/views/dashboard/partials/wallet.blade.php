@@ -39,8 +39,8 @@
       <x-heroicon-o-at-symbol class="h-4 w-4" />{{ $handle }}<x-heroicon-o-document-duplicate class="h-4 w-4 text-app-muted" />
     </button>
     @if ($mpesa)
-      <button type="button" @click="copy('{{ str_replace(' ', '', $mpesa) }}', 'Your M-PESA number')" class="rv-pill hover:bg-app-raised" aria-label="Copy your M-PESA number">
-        <x-heroicon-o-device-phone-mobile class="h-4 w-4" /><span class="app-num" x-text="hidden ? @js($hiddenPhone) : @js($mpesa)">{{ $mpesa }}</span><x-heroicon-o-document-duplicate class="h-4 w-4 text-app-muted" />
+      <button type="button" @click="copy('{{ str_replace(' ', '', $mpesa) }}', 'Your M-PESA number')" class="rv-pill hover:bg-app-raised" aria-label="Copy your M-PESA number (your Sharet wallet number)">
+        <img src="{{ asset('images/partners/mpesa.svg') }}" alt="M-PESA" class="h-3.5 w-auto"><span class="app-num" x-text="hidden ? @js($hiddenPhone) : @js($mpesa)">{{ $mpesa }}</span><x-heroicon-o-document-duplicate class="h-4 w-4 text-app-muted" />
       </button>
     @endif
   </div>
