@@ -43,10 +43,20 @@ real M-PESA collection only for the tester account).
 | ✓ | Decision |
 |---|---|
 | ☐ | Revolut-style structure: huge headline "Money that moves the way Kenya does.", one idea per section, photo panels with real app UI, pricing table, safety section, closing band. |
-| ☐ | **Six East African photos from Unsplash** (Kilifi, Nairobi ×2, Kampala ×2, Entebbe), contrast and colour boosted, credited in the footer. Unsplash licence: free for commercial use, no permission needed. Files and credits: `public/images/site/`. |
-| ☐ | Placeholders you must fill or approve: **[LICENSED PARTNER]** (who holds customer money), **[NUMBER]** people, **[FEE]** / **[RATE]** in the pricing table, App Store / Google Play badges (no native app yet). |
-| ☐ | Legal line in the footer: "Sharet Africa Ltd is not a bank. Payment services are provided with [LICENSED PARTNER], authorised by the Central Bank of Kenya…" (**lawyer to confirm wording**). |
+| ☐ | **Six East African photos from Unsplash** (Kilifi, Nairobi ×2, Kampala ×2, Entebbe), contrast and colour boosted (2000px JPEG + 1200px WebP for the web). Unsplash licence: free for commercial use, credit not required, so **no visible credits**; photographer names are kept hidden in a code comment and in `public/images/site/credits.json`. |
+| ☐ | **Cashia named as the licensed partner:** "Payment services are provided with Cashia (Kashia Services Limited), licensed by the Central Bank of Kenya as a payment service provider", with a "Check on CBK's licensed directory" link. Kashia is on CBK's directory, but **Cashia must agree in writing before this goes on the live site.** |
+| ☐ | **No CBK logo.** A regulator's logo on our site reads as CBK endorsing Sharet; CBK doesn't allow that kind of use. We name the licensed partner in text and link to CBK's directory instead. Ask Cashia/your lawyer if you want anything stronger. |
+| ☐ | No made-up user count: the closing band says "Join the first Sharet members in Kenya and Uganda." Put a real number there once you have one you can stand behind. |
+| ☐ | Legal line in the footer: "Sharet Africa Ltd is not a bank…" (**lawyer to confirm wording**). |
 | ☐ | Trade finance shown as "coming soon" with **Aimzone Ventures** named as funding partner. OK to name them publicly? |
+
+**Sample figures now in the designs (placeholders replaced; confirm or give me the real ones):**
+FX from a sample Safaricom rate of KES/UGX 28.65 and KES/USD 0.00775 → customer 1 KES = UGX 28.22, USD 0.0076 (KES 131.67 per USD) ·
+send to M-Pesa "from KES 9, free up to 100" (from `config/pricing.php`) · withdraw to bank by PesaLink **KES 50** ·
+send to Uganda **KES 50** + rate · SWIFT **KES 2,500** · card top-up fee **KES 150** on KES 5,000 ·
+Uganda cash-out **UGX 1,500** · trade finance **3.5% for 60 days**, late fee **0.1% a day**, two approvers above **KES 500,000** ·
+supplier early payment **1.8%** · lender on-time rate 96% · KPLC ~33 kWh per KES 1,000 · digital-asset price KES 130.21 (Phase 3 sample) ·
+Sharet's bank account for transfers shown as "Shown in your app" (no real I&M account number yet) · references (M-PESA, PesaLink, MTN) are format samples.
 
 ## 5. Brands and logos
 
