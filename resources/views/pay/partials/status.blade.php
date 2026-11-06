@@ -16,7 +16,7 @@
           }" x-text="order?.state.label"></span>
   </div>
 
-  <dl class="divide-y divide-gray-100 rounded-xl bg-gray-50 px-4 text-sm dark:divide-gray-800 dark:bg-white/5">
+  <dl class="divide-y divide-gray-100 rounded-2xl bg-gray-50 px-4 text-sm dark:divide-gray-800 dark:bg-white/5">
     <div class="flex justify-between py-2" x-show="!order?.top_up"><dt class="text-gray-500">They receive</dt><dd class="tabular-nums" x-text="'KES ' + order?.amount"></dd></div>
     <div class="flex justify-between py-2" x-show="!order?.top_up"><dt class="text-gray-500">Fee (M-PESA charge + Sharet)</dt><dd class="tabular-nums" x-text="'KES ' + order?.fee"></dd></div>
     <div class="flex justify-between py-2" x-show="!order?.top_up"><dt class="text-gray-500">Excise duty (15% of the Sharet part)</dt><dd class="tabular-nums" x-text="'KES ' + order?.excise"></dd></div>

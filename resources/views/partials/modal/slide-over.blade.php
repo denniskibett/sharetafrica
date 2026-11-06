@@ -15,8 +15,8 @@
   <div x-show="open" x-trap.noscroll="open"
        x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
        x-transition:leave="transform transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
-       class="absolute inset-y-0 right-0 flex w-full {{ $width }} flex-col bg-white shadow-xl dark:bg-gray-900">
-    <div class="flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-800">
+       class="sheet-panel absolute inset-y-0 right-0 flex w-full {{ $width }} flex-col bg-white shadow-xl dark:bg-gray-900">
+    <div class="sheet-head flex items-start justify-between gap-4 border-b border-gray-200 px-6 py-5 dark:border-gray-800">
       <button type="button" @click="close()" class="-ml-2 flex items-center gap-1 rounded-lg p-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5 sm:hidden" aria-label="Back">
         <x-heroicon-o-chevron-left class="h-6 w-6" /> Back</button>
       <div class="min-w-0 flex-1">

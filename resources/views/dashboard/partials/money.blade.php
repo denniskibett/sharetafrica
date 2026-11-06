@@ -3,19 +3,21 @@
      M-PESA options follow Daraja: B2C to a phone (send, or withdraw to your own number), B2B to a paybill or till, and
      to a bank through its paybill. Open with sharet.panel('money', { mode, to, type, dest }). All JSON, no reloads. --}}
 @php
-    $input = 'h-12 w-full rounded-xl border border-gray-300 bg-transparent px-4 text-base text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
-    $label = 'mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400';
+    // Sharet UI, Revolut-style: filled grey fields, pill buttons, colour only in the icons
+    $input = 'h-12 w-full rounded-2xl border-0 bg-app-tile px-4 text-base text-app-ink placeholder:text-app-faint focus:outline-none focus:ring-2 focus:ring-app-ink/70';
+    $label = 'mb-1.5 block text-[13px] font-medium text-app-muted';
     $err = 'mt-1 text-xs text-red-600';
-    $tile = 'flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm';
-    $primary = 'h-12 w-full rounded-xl bg-gray-900 text-sm font-semibold text-white disabled:opacity-50 dark:bg-[#D4FF3D] dark:text-gray-900';
+    $tile = 'flex w-full items-center gap-3 rounded-2xl border-2 bg-app-tile px-3 py-2.5 text-left text-sm transition hover:bg-app-raised';
+    $primary = 'h-12 w-full rounded-full bg-app-lime text-[15px] font-semibold text-[#050507] disabled:opacity-40';
     $verified = in_array($user->kyc_level, ['basic', 'standard'], true);
     $receiveUrl = route('dashboard', ['panel' => 'send', 'to' => '@'.$handle]);
     $destinations = [
-        ['sharet', 'Sharet wallet', '@name · free, instant', 'at-symbol'],
-        ['phone', 'M-PESA number', 'Any Safaricom line', 'device-phone-mobile'],
-        ['paybill', 'Paybill', 'Bills, rent, school fees', 'building-office'],
-        ['till', 'Till (Buy goods)', 'Shops and merchants', 'shopping-bag'],
-        ['bank', 'Bank account', 'Through the bank\'s paybill', 'building-library'],
+        // [key, label, hint, icon, colour by meaning: Sharet lime, people blue, bills and tills violet, banks orange]
+        ['sharet', 'Sharet wallet', '@name · free, instant', 'at-symbol', 'bg-app-lime text-[#050507]'],
+        ['phone', 'M-PESA number', 'Any Safaricom line', 'device-phone-mobile', 'bg-app-send/15 text-app-send'],
+        ['paybill', 'Paybill', 'Bills, rent, school fees', 'building-office', 'bg-app-pay/15 text-app-pay'],
+        ['till', 'Till (Buy goods)', 'Shops and merchants', 'shopping-bag', 'bg-app-pay/15 text-app-pay'],
+        ['bank', 'Bank account', 'Through the bank\'s paybill', 'building-library', 'bg-orange-500/15 text-orange-600 dark:text-orange-300'],
     ];
 @endphp
 <x-ui.slide-over name="money" title="Money" width="max-w-[720px]" x-text="({ send: 'Send money', receive: 'Receive money', withdraw: 'Withdraw' })[payload.mode] || 'Money'">
@@ -23,10 +25,10 @@
                             payer: @js($user->phone), receiveUrl: @js($receiveUrl), pinSet: @js(\App\Support\TransactionPin::isSet($user)) })"
        @slide-over.window="$event.detail.name === 'money' && start($event.detail.payload || {})" class="space-y-5">
 
-    <div x-show="step === 'who' || mode === 'receive'" class="grid grid-cols-3 gap-1 rounded-xl bg-gray-100 p-1 text-sm dark:bg-white/5" role="tablist">
+    <div x-show="step === 'who' || mode === 'receive'" class="grid grid-cols-3 gap-1 rounded-full bg-app-tile p-1 text-sm" role="tablist">
       @foreach (['send' => 'Send', 'receive' => 'Receive', 'withdraw' => 'Withdraw'] as $key => $text)
         <button type="button" role="tab" @click="setMode('{{ $key }}')" :aria-selected="mode === '{{ $key }}'"
-                :class="mode === '{{ $key }}' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white' : 'text-gray-500'" class="h-10 rounded-lg font-semibold">{{ $text }}</button>
+                :class="mode === '{{ $key }}' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-10 rounded-full font-semibold">{{ $text }}</button>
       @endforeach
     </div>
 
@@ -35,16 +37,16 @@
       <button type="button" @click="back()" class="flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-300"><x-heroicon-o-chevron-left class="h-5 w-5" /> Back</button>
       <ol class="flex gap-1.5" aria-label="Steps">
         <template x-for="s in ['who', 'amount', 'review', 'pin']" :key="s">
-          <li class="h-1.5 w-8 rounded-full" :class="steps().indexOf(s) <= steps().indexOf(step) ? 'bg-gray-900 dark:bg-[#D4FF3D]' : 'bg-gray-200 dark:bg-white/10'"></li>
+          <li class="h-1.5 w-8 rounded-full" :class="steps().indexOf(s) <= steps().indexOf(step) ? 'bg-app-ink' : 'bg-app-tile'"></li>
         </template>
       </ol>
     </div>
 
     @unless ($verified)
-      <div x-show="mode !== 'receive' || receiveFrom === 'mpesa'" class="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-sm dark:border-amber-500/30 dark:bg-amber-500/10">
+      <div x-show="mode !== 'receive' || receiveFrom === 'mpesa'" class="rounded-2xl bg-app-wait/10 p-5 text-sm">
         <p class="font-semibold text-gray-900 dark:text-white">Verify your account to move money</p>
         <p class="mt-1 text-gray-600 dark:text-gray-300">Photograph your ID (front and back) and take three selfies. It takes about two minutes, and we read your details from the ID.</p>
-        <a href="{{ route('profile.edit') }}#verification" class="mt-4 inline-flex h-11 items-center rounded-xl bg-gray-900 px-5 font-semibold text-white dark:bg-[#D4FF3D] dark:text-gray-900">Verify now</a>
+        <a href="{{ route('profile.edit') }}#verification" class="mt-4 inline-flex h-11 items-center rounded-full bg-app-lime px-5 font-semibold text-[#050507]">Verify now</a>
       </div>
     @endunless
 
@@ -55,8 +57,8 @@
         <p class="{{ $label }}">Recent</p>
         <div class="grid gap-2 sm:grid-cols-2">
           <template x-for="(p, i) in recent()" :key="i">
-            <button type="button" @click="pick(p.payload)" class="{{ $tile }} border-gray-200 hover:border-gray-900 dark:border-gray-800 dark:hover:border-[#D4FF3D]">
-              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5">@include('pay.partials.icon', ['expr' => 'p'])</span>
+            <button type="button" @click="pick(p.payload)" class="{{ $tile }} border-transparent">
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-app-panel">@include('pay.partials.icon', ['expr' => 'p'])</span>
               <span class="min-w-0 truncate font-medium" x-text="p.label"></span>
             </button>
           </template>
@@ -65,10 +67,10 @@
       <div>
         <p class="{{ $label }}">Send to</p>
         <div class="grid gap-2 sm:grid-cols-2">
-          @foreach ($destinations as [$key, $text, $hint, $icon])
+          @foreach ($destinations as [$key, $text, $hint, $icon, $tone])
             <button type="button" @click="setTo('{{ $key }}')" class="{{ $tile }}" aria-label="{{ $text }}: {{ $hint }}" :aria-pressed="to === '{{ $key }}'"
-                    :class="to === '{{ $key }}' ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800'">
-              <x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5 shrink-0" />
+                    :class="to === '{{ $key }}' ? 'border-app-ink' : 'border-transparent'">
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $tone }}"><x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" /></span>
               <span class="min-w-0"><span class="block font-semibold">{{ $text }}</span><span class="block truncate text-xs text-gray-500">{{ $hint }}</span></span>
             </button>
           @endforeach
@@ -94,9 +96,9 @@
     <form x-show="step === 'who' && mode === 'withdraw'" @submit.prevent="next()" class="space-y-4">
       <p class="{{ $label }}">Withdraw to</p>
       <div class="grid gap-2 sm:grid-cols-2">
-        <button type="button" @click="setTo('phone')" class="{{ $tile }}" :class="to === 'phone' ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800'">
+        <button type="button" @click="setTo('phone')" class="{{ $tile }}" :class="to === 'phone' ? 'border-app-ink' : 'border-transparent'">
           <x-heroicon-o-device-phone-mobile class="h-5 w-5" /><span><span class="block font-semibold">My M-PESA</span><span class="block text-xs text-gray-500">{{ $user->phone ?: 'Add your number first' }}</span></span></button>
-        <button type="button" @click="setTo('bank')" class="{{ $tile }}" :class="to === 'bank' ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800'">
+        <button type="button" @click="setTo('bank')" class="{{ $tile }}" :class="to === 'bank' ? 'border-app-ink' : 'border-transparent'">
           <x-heroicon-o-building-library class="h-5 w-5" /><span><span class="block font-semibold">My bank</span><span class="block text-xs text-gray-500">Through the bank's paybill</span></span></button>
       </div>
       <div x-show="to === 'bank'">@include('dashboard.partials.money-bank')</div>
@@ -116,16 +118,16 @@
         <p class="{{ $err }}" x-text="errors.amount?.[0] || errors.payer?.[0]"></p>
         <div class="mt-4 flex flex-wrap justify-center gap-2">
           <template x-for="v in ['100', '500', '1,000', '2,000', '5,000']" :key="v">
-            <button type="button" @click="form.amount = v" class="tabular-nums h-9 rounded-full border border-gray-300 px-4 text-sm dark:border-gray-700" x-text="v"></button>
+            <button type="button" @click="form.amount = v" class="tabular-nums h-9 rounded-full bg-app-tile px-4 text-sm font-semibold hover:bg-app-raised" x-text="v"></button>
           </template>
         </div>
       </div>
       <fieldset x-show="mode === 'send' && to !== 'sharet'">
         <legend class="{{ $label }}">Pay from</legend>
         <div class="grid grid-cols-2 gap-2">
-          <button type="button" @click="funding = 'wallet'" class="{{ $tile }}" :class="funding === 'wallet' ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800'">
+          <button type="button" @click="funding = 'wallet'" class="{{ $tile }}" :class="funding === 'wallet' ? 'border-app-ink' : 'border-transparent'">
             <x-heroicon-o-wallet class="h-5 w-5" /><span>Wallet <span class="block text-xs text-gray-500 tabular-nums" x-text="'KES ' + wallet"></span></span></button>
-          <button type="button" @click="funding = 'mpesa'" class="{{ $tile }}" :class="funding === 'mpesa' ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800'">
+          <button type="button" @click="funding = 'mpesa'" class="{{ $tile }}" :class="funding === 'mpesa' ? 'border-app-ink' : 'border-transparent'">
             <x-heroicon-o-device-phone-mobile class="h-5 w-5" /><span>M-PESA <span class="block text-xs text-gray-500">{{ $user->phone ?: 'Add your number' }}</span></span></button>
         </div>
       </fieldset>
@@ -137,7 +139,7 @@
     {{-- 3. REVIEW --}}
     <div x-show="step === 'review'" x-cloak class="space-y-4">
       <template x-if="quote"><div x-data="{ get order() { return quote } }">@include('pay.partials.status')</div></template>
-      <dl x-show="!quote" class="divide-y divide-gray-100 rounded-xl bg-gray-50 px-4 text-sm dark:divide-gray-800 dark:bg-white/5">
+      <dl x-show="!quote" class="divide-y divide-app-line rounded-2xl bg-app-tile px-4 text-sm">
         <div class="flex justify-between py-3"><dt class="text-gray-500">To</dt><dd class="font-medium" x-text="destLabel()"></dd></div>
         <div class="flex justify-between py-3"><dt class="text-gray-500">Fee</dt><dd class="tabular-nums">Free</dd></div>
         <div class="flex justify-between py-3 font-semibold"><dt>From your wallet</dt><dd class="tabular-nums" x-text="'KES ' + form.amount"></dd></div>
@@ -150,7 +152,7 @@
 
     {{-- 4. PIN (create it the first time) --}}
     <form x-show="step === 'pin'" x-cloak @submit.prevent="pinSet ? confirm() : createPin()" class="space-y-5 text-center">
-      <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-white/5"><x-heroicon-o-lock-closed class="h-7 w-7" /></span>
+      <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-app-lime/25 text-app-accent"><x-heroicon-o-lock-closed class="h-7 w-7" /></span>
       <div x-show="pinSet">
         <p class="text-lg font-semibold">Enter your Sharet PIN</p>
         <p class="text-sm text-gray-500" x-text="'Approve KES ' + (quote?.total || form.amount) + ' to ' + destLabel()"></p>
@@ -161,10 +163,10 @@
       </div>
       <label for="m-pin" class="sr-only">PIN</label>
       <input id="m-pin" x-ref="pin" x-model="form.pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••"
-             class="mx-auto block h-14 w-44 rounded-xl border border-gray-300 bg-transparent text-center text-3xl tracking-[0.6em] dark:border-gray-700 dark:text-white">
+             class="mx-auto block h-14 w-44 rounded-2xl border-0 bg-app-tile text-center text-3xl tracking-[0.6em] text-app-ink focus:ring-2 focus:ring-app-ink/70">
       <div x-show="!pinSet"><label for="m-pin2" class="{{ $label }}">Type it again</label>
         <input id="m-pin2" x-model="form.pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••"
-               class="mx-auto block h-14 w-44 rounded-xl border border-gray-300 bg-transparent text-center text-3xl tracking-[0.6em] dark:border-gray-700 dark:text-white"></div>
+               class="mx-auto block h-14 w-44 rounded-2xl border-0 bg-app-tile text-center text-3xl tracking-[0.6em] text-app-ink focus:ring-2 focus:ring-app-ink/70"></div>
       <p class="{{ $err }}" x-text="errors.pin?.[0] || errors.pin_confirmation?.[0] || errors.amount?.[0] || errors.order?.[0]"></p>
       <button type="submit" :disabled="busy || form.pin.length !== 4" class="{{ $primary }}" x-text="busy ? 'One moment…' : (pinSet ? 'Approve' : 'Save PIN')"></button>
     </form>
@@ -172,16 +174,16 @@
 
     {{-- RECEIVE: your @name and QR for other Sharet wallets; or add from your own M-PESA --}}
     <div x-show="mode === 'receive' && step === 'who'" class="space-y-5">
-      <div class="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1 text-sm dark:bg-white/5">
-        <button type="button" @click="receiveFrom = 'sharet'" :class="receiveFrom === 'sharet' ? 'bg-white shadow-sm dark:bg-gray-800' : 'text-gray-500'" class="h-9 rounded-lg font-medium">From a Sharet wallet</button>
-        <button type="button" @click="receiveFrom = 'mpesa'" :class="receiveFrom === 'mpesa' ? 'bg-white shadow-sm dark:bg-gray-800' : 'text-gray-500'" class="h-9 rounded-lg font-medium">From my M-PESA</button>
+      <div class="grid grid-cols-2 gap-1 rounded-full bg-app-tile p-1 text-sm">
+        <button type="button" @click="receiveFrom = 'sharet'" :class="receiveFrom === 'sharet' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-9 rounded-full font-medium">From a Sharet wallet</button>
+        <button type="button" @click="receiveFrom = 'mpesa'" :class="receiveFrom === 'mpesa' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-9 rounded-full font-medium">From my M-PESA</button>
       </div>
-      <div x-show="receiveFrom === 'sharet'" class="rounded-2xl border border-gray-200 p-5 text-center dark:border-gray-800">
+      <div x-show="receiveFrom === 'sharet'" class="rounded-2xl bg-app-tile p-5 text-center">
         <p class="text-sm text-gray-500">Free and instant between Sharet wallets</p>
         <p class="mt-2 text-2xl font-semibold">{{ '@'.$handle }}</p>
         <canvas x-ref="qr" class="mx-auto mt-4 rounded-xl bg-white p-2" width="220" height="220" aria-label="Your QR code"></canvas>
         <p class="mt-3 text-xs text-gray-500">They scan this with their phone camera, or send to your @name.</p>
-        <button type="button" @click="navigator.clipboard?.writeText('{{ '@'.$handle }}'); sharet.toast('Copied {{ '@'.$handle }}')" class="mt-3 inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-medium dark:border-gray-700">
+        <button type="button" @click="navigator.clipboard?.writeText('{{ '@'.$handle }}'); sharet.toast('Copied {{ '@'.$handle }}')" class="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-app-tile px-4 text-sm font-semibold hover:bg-app-raised">
           <x-heroicon-o-document-duplicate class="h-5 w-5" /> Copy my @name</button>
       </div>
       @if ($verified)
@@ -200,7 +202,7 @@
     {{-- 5. DONE: the payment, following itself --}}
     <div x-show="step === 'status'" x-cloak>
       @include('pay.partials.status')
-      <button type="button" x-show="order?.final" @click="close()" class="mt-4 h-12 w-full rounded-xl border border-gray-300 text-sm font-semibold dark:border-gray-700">Done</button>
+      <button type="button" x-show="order?.final" @click="close()" class="mt-4 h-12 w-full rounded-full bg-app-tile text-sm font-semibold hover:bg-app-raised">Done</button>
     </div>
   </div>
 </x-ui.slide-over>

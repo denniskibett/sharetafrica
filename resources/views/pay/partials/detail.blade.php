@@ -37,7 +37,7 @@
       </div>
 
       {{-- Transaction ID first, large and copyable: the code people quote --}}
-      <div class="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 px-4 py-3 dark:border-gray-800">
+      <div class="flex items-center justify-between gap-3 rounded-2xl bg-gray-50 px-4 py-3 dark:bg-white/5">
         <div class="min-w-0">
           <p class="text-xs text-gray-500">Transaction ID</p>
           <p class="truncate text-xl font-semibold tracking-wider tabular-nums" x-text="order?.reference"></p>

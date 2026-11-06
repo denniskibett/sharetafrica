@@ -32,9 +32,9 @@
       <div class="rounded-2xl border border-app-line bg-app-panel p-4 md:p-5">
         <div class="flex items-center justify-between gap-2">
           <p class="text-sm text-app-muted">{{ $label }}</p>
-          <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-5 w-5', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
+          <span @class(['flex h-9 w-9 items-center justify-center rounded-full', 'bg-app-in/15 text-app-in' => $key === 'month_in', 'bg-orange-500/15 text-orange-600 dark:text-orange-300' => $key === 'month_out', 'bg-app-lime text-[#050507]' => $key === 'wallet', 'bg-app-tile text-app-muted' => $key === 'month_fees'])><x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" /></span>
         </div>
-        <p @class(['mt-2 truncate text-[26px] font-bold leading-tight tabular-nums md:text-[30px]', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out'])>
+        <p @class(['mt-2 truncate text-[26px] font-bold leading-tight tabular-nums md:text-[30px]', 'text-app-in' => $key === 'month_in', 'text-app-ink' => $key === 'month_out'])>
           <span class="text-sm font-semibold text-app-muted">KES</span> <span x-text="stats.{{ $key }} ?? '—'"></span>
         </p>
         <p class="mt-1 truncate text-xs text-app-muted" x-text="{{ $second }}"></p>
@@ -48,13 +48,13 @@
     <div class="mb-2 flex flex-wrap items-center justify-between gap-3">
       <h2 class="text-base font-semibold">All transactions</h2>
       <div class="flex flex-wrap items-center gap-2">
-      <div class="flex gap-1 rounded-lg bg-app-tile p-1 text-sm" role="tablist">
+      <div class="flex gap-1 rounded-full bg-app-tile p-1 text-sm" role="tablist">
         @foreach (['' => 'All', 'paid' => 'Done', 'collecting' => 'Waiting', 'refunded' => 'Refunded'] as $value => $text)
           <button type="button" role="tab" @click="filter = '{{ $value }}'; load()" :aria-selected="filter === '{{ $value }}'"
-                  :class="filter === '{{ $value }}' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-8 rounded-md px-3 font-medium">{{ $text }}</button>
+                  :class="filter === '{{ $value }}' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-8 rounded-full px-3 font-medium">{{ $text }}</button>
         @endforeach
       </div>
-      <a href="{{ route('dashboard', ['panel' => 'send']) }}" class="flex h-10 items-center gap-2 rounded-xl bg-app-lime px-4 text-sm font-semibold text-[#050507] hover:bg-[#E2FF73]"><x-heroicon-o-paper-airplane class="h-5 w-5" /> Send money</a>
+      <a href="{{ route('dashboard', ['panel' => 'send']) }}" class="flex h-10 items-center gap-2 rounded-full bg-app-lime px-4 text-sm font-semibold text-[#050507]"><x-heroicon-o-paper-airplane class="h-5 w-5" /> Send money</a>
       </div>
     </div>
     @if (config('rails.default') === 'simulator')<p class="mb-2 text-xs text-app-muted">Test mode: payments are simulated, no real money moves.</p>@endif
@@ -62,7 +62,7 @@
       <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
     </ul>
     <p x-show="!loading && !rows.length" x-cloak class="py-10 text-center text-sm text-app-muted">No transactions here yet.</p>
-    <button type="button" x-show="page < last" x-cloak @click="load(true)" :disabled="loading" class="mt-3 h-11 w-full rounded-xl bg-app-tile text-sm font-medium hover:bg-app-raised" x-text="loading ? 'Loading…' : 'Show more'"></button>
+    <button type="button" x-show="page < last" x-cloak @click="load(true)" :disabled="loading" class="mt-3 h-11 w-full rounded-full bg-app-tile text-sm font-semibold hover:bg-app-raised" x-text="loading ? 'Loading…' : 'Show more'"></button>
   </section>
 </div>
 @endsection

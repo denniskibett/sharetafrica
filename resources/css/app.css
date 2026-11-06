@@ -641,3 +641,9 @@ span.flatpickr-weekday,
 .sharet-staff .text-brand-500, .sharet-staff .dark\:text-brand-400 { color: rgb(var(--app-accent)) !important; }
 .sharet-staff .bg-brand-500 { background-color: #0A0A0C !important; color: #fff !important; }
 .sharet-staff .bg-brand-50 { background-color: rgb(var(--app-tile)) !important; }
+
+/* Slide-over panels (money, receipt, staff forms): a rounded sheet with a quiet header */
+.sharet-app .sheet-panel { background-color: rgb(var(--app-panel)) !important; }
+@media (min-width: 640px) { .sharet-app .sheet-panel { inset-block: 12px; right: 12px; border-radius: 28px; overflow: hidden; } }
+.sharet-app .sheet-head { border-color: transparent !important; padding-bottom: 8px; }
+.sharet-app .sheet-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
