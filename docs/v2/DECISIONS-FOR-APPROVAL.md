@@ -5,6 +5,20 @@ Tick what you approve; for anything you don't, the "to change" column says where
 Nothing here is live for real customers yet: sharet.africa runs v2 in **test mode** (simulated money,
 real M-PESA collection only for the tester account).
 
+## 0. Rollout order (you decided, 7 Nov)
+
+**Kenya pilot first, Tanzania next, Uganda after.** The website and the app designs now say so: Tanzania shows
+"next" (Vodacom M-Pesa, Airtel Money, Mixx by Yas, banks), Uganda "later". Code still lists UGX/TZS/RWF as
+offered FX pairs; cross-border sending is not switched on anywhere, so nothing is promised early.
+
+| ✓ | Website decision |
+|---|---|
+| ☐ | Headline: **"Every wallet. Every border. One app."** with wallet-to-wallet and cross-border as the two lead sections. |
+| ☐ | **Wallet to wallet:** M-PESA, Airtel Money, T-Kash and PesaLink logos with "Sharet ↔ Sharet free", "M-Pesa ↔ Airtel ↔ T-Kash" and "any wallet ↔ any bank". Uses those brands' logos: **check each brand's rules** before launch. |
+| ☐ | **Across borders:** Kenya pilot now → Tanzania next → Uganda after, sample KES 10,000 → TZS 202,909 (sample rate 1 KES = TZS 20.29), fee KES 50, "Join the cross-border waitlist". |
+| ☐ | **Brand presence:** dark closing band with a slowly drifting Sharet-mark pattern, and a giant cropped "sharet." wordmark in the footer. |
+| ☐ | **Motion:** incoming-payment alert slides in, balance card floats, dots travel between wallets, "Tanzania next" pulses. All off for reduced-motion users. |
+
 ## 1. Money rules
 
 | ✓ | Decision | Now | To change |
