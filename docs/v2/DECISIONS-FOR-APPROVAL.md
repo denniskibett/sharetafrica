@@ -16,8 +16,11 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 | ☐ | Headline: **"Every wallet. Every border. One app."** with wallet-to-wallet and cross-border as the two lead sections. |
 | ☐ | **Wallet to wallet:** M-PESA, Airtel Money, T-Kash and PesaLink logos with "Sharet ↔ Sharet free", "M-Pesa ↔ Airtel ↔ T-Kash" and "any wallet ↔ any bank". Uses those brands' logos: **check each brand's rules** before launch. |
 | ☐ | **Across borders:** Kenya pilot now → Tanzania next → Uganda after, sample KES 10,000 → TZS 202,909 (sample rate 1 KES = TZS 20.29), fee KES 50, "Join the cross-border waitlist". |
-| ☐ | **Brand presence:** a plain dark closing band (pattern removed at your request) and a giant cropped "sharet." wordmark in the footer. The Sharet-mark pattern stays only on the supplier card (wallet style 4). |
-| ☐ | **Motion:** incoming-payment alert slides in, balance card floats, dots travel between wallets, "Tanzania next" pulses. All off for reduced-motion users. |
+| ☐ | **Brand presence:** a plain dark closing band, "Join Sharet Kenya. Tanzania next." (your wording). The big footer wordmark was tried and removed at your request. The Sharet-mark pattern stays only on the supplier card (wallet style 4). |
+| ☐ | **Motion:** the hero is four photo scenes (Kilifi, Nairobi, Tanzania next, everyday) that cross-fade with a slow zoom and change the money cards with them; no arrows or dots. Wallet cards glide sideways; app phones swap screens; business chart bars grow. All off for reduced-motion users. |
+| ☐ | **Wallets drawn as debit-style cards** (M-PESA, Airtel Money, T-Kash, PesaLink, Sharet) to show they're linked in one app. These are illustrations, not cards we issue, but they use those brands' logos and colours: **check each brand's rules**, or switch to plain tiles. |
+| ☐ | **"In the app" section:** three phones (home, Send to Tanzania, a sample business "Mwangi Hardware" with KES 184,350 takings) with floating cards. Business figures are samples. |
+| ☐ | **App Store and Google Play badges** drawn with their marks. Before launch use Apple's and Google's official badge artwork, and only once the apps are live in the stores. |
 
 ## 1. Money rules
 
@@ -60,7 +63,7 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 | ☐ | **Six East African photos from Unsplash** (Kilifi, Nairobi ×2, Kampala ×2, Entebbe), contrast and colour boosted (2000px JPEG + 1200px WebP for the web). Unsplash licence: free for commercial use, credit not required, so **no visible credits**; photographer names are kept hidden in a code comment and in `public/images/site/credits.json`. |
 | ☐ | **Cashia named as the licensed partner:** "Payment services are provided with Cashia (Kashia Services Limited), licensed by the Central Bank of Kenya as a payment service provider", with a "Check on CBK's licensed directory" link. Kashia is on CBK's directory, but **Cashia must agree in writing before this goes on the live site.** |
 | ☐ | **No CBK logo.** A regulator's logo on our site reads as CBK endorsing Sharet; CBK doesn't allow that kind of use. We name the licensed partner in text and link to CBK's directory instead. Ask Cashia/your lawyer if you want anything stronger. |
-| ☐ | No made-up user count: the closing band says "Join the first Sharet members in Kenya and Uganda." Put a real number there once you have one you can stand behind. |
+| ☐ | No made-up user count: the closing band says "Join Sharet Kenya. Tanzania next." Put a real number there once you have one you can stand behind. |
 | ☐ | Legal line in the footer: "Sharet Africa Ltd is not a bank…" (**lawyer to confirm wording**). |
 | ☐ | Trade finance shown as "coming soon" with **Aimzone Ventures** named as funding partner. OK to name them publicly? |
 
