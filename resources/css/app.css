@@ -614,3 +614,30 @@ span.flatpickr-weekday,
 .sharet-app .bg-gray-900:not(.dark\:bg-\[\#D4FF3D\]) { background-color: #0A0A0C; color: #F4F4F0; }
 .dark .sharet-app .bg-gray-900:not(.dark\:bg-\[\#D4FF3D\]) { background-color: #232328; }
 .sharet-app .shadow-theme-xs { box-shadow: none; }
+
+
+/* ===== Sharet UI · Revolut-style layer (Nov 2026). Light first: a soft paper background, plain white cards with a
+   gentle shadow and no borders, big bold numbers, round action buttons, plain list rows with colour only in the
+   icon (send blue, money in green, withdraw orange, pay violet, abroad teal, trade amber; lime = Sharet's own
+   action). No glow, no glass, no motion beyond the balance count-up. Same --app-* channels, so dark mode and the
+   staff dashboards (body.sharet-app.sharet-staff) follow automatically. */
+.sharet-app { --app-bg: 246 246 243; --app-panel: 255 255 255; --app-tile: 241 241 237; --app-raised: 230 230 225;
+  --app-send: 47 107 255; --app-pay: 122 77 255; --app-abroad: 13 148 136; --app-trade: 202 138 4; }
+.dark .sharet-app { --app-send: 120 160 255; --app-pay: 170 140 255; --app-abroad: 45 212 191; --app-trade: 251 191 36; }
+
+.sharet-app main .bg-app-panel { border-color: transparent !important; border-radius: 24px;
+  box-shadow: 0 1px 2px rgb(10 10 12 / 0.04), 0 10px 30px -18px rgb(10 10 12 / 0.18); }
+.dark .sharet-app main .bg-app-panel { border-color: rgb(var(--app-ink) / 0.06) !important; box-shadow: none; }
+.sharet-app main h2 { letter-spacing: -0.01em; }
+.sharet-app .rv-balance { font-family: 'Inter Tight Variable', 'Inter Tight', sans-serif; font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.sharet-app .rv-act { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: rgb(var(--app-ink)); }
+.sharet-app .rv-act > span { width: 52px; height: 52px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; transition: transform .15s, filter .15s; }
+.sharet-app .rv-act:hover > span { transform: scale(1.05); }
+.sharet-app .rv-pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px; padding: 6px 12px; font-size: 13px; font-weight: 600; background: rgb(var(--app-tile)); }
+
+/* Staff dashboards: the same palette; the admin sidebar's violet accents become ink + lime */
+.sharet-staff .menu-item-active { background: #D4FF3D !important; color: #050507 !important; }
+.sharet-staff .menu-item-icon-active { fill: #050507 !important; }
+.sharet-staff .text-brand-500, .sharet-staff .dark\:text-brand-400 { color: rgb(var(--app-accent)) !important; }
+.sharet-staff .bg-brand-500 { background-color: #0A0A0C !important; color: #fff !important; }
+.sharet-staff .bg-brand-50 { background-color: rgb(var(--app-tile)) !important; }

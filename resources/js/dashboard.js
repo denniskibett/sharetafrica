@@ -74,7 +74,8 @@ export const pill = (tone) => 'inline-flex shrink-0 items-center whitespace-nowr
 
 let apex;
 const isDark = () => document.documentElement.classList.contains('dark');
-const PALETTE = ['#7C3AED', '#9CCB1F', '#0EA5E9', '#F59E0B', '#F43F5E', '#14B8A6'];
+// Sharet UI colours: send blue, Sharet lime (deepened to read on white), money-in green, withdraw orange, pay violet, abroad teal
+const PALETTE = ['#2F6BFF', '#8DB511', '#1F9D55', '#F2711C', '#7A4DFF', '#0EA5A4'];
 
 export function chart({ url = null, options = null, params = {}, height = 300 } = {}) {
     return {

@@ -34,7 +34,7 @@
         (function () {
             var saved = null;
             try { saved = JSON.parse(localStorage.getItem('darkMode')); } catch (e) {}
-            var dark = saved === null ? window.matchMedia('(prefers-color-scheme: dark)').matches : saved;
+            var dark = saved === null ? ({!! $customer ? 'false' : "window.matchMedia('(prefers-color-scheme: dark)').matches" !!}) : saved; // the customer app starts light (Revolut-style); dark stays one tap away
             document.documentElement.classList.toggle('dark', dark);
         })();
     </script>
@@ -342,7 +342,8 @@
 {{-- sidebarToggle: from tablet width up the sidebar is a column beside the content (true = collapsed to icons; tablets
      start collapsed, the choice is remembered on desktop). On phones it is a drawer (true = open).
      Content width: one standard width for every page; it grows when the sidebar is collapsed. --}}
-<body class="bg-gray-50 font-outfit text-gray-800 antialiased dark:bg-gray-900 dark:text-gray-200"
+{{-- Staff share the customer app's Sharet UI theme (sharet-app): one look for every role --}}
+<body class="sharet-app sharet-staff bg-app-bg text-app-ink antialiased"
       x-data="{
           darkMode: document.documentElement.classList.contains('dark'),
           collapsed: $persist(false).as('sidebarCollapsed'),

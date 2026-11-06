@@ -63,6 +63,11 @@ module.exports = {
           out: "rgb(var(--app-out) / <alpha-value>)",
           wait: "rgb(var(--app-wait) / <alpha-value>)",
           info: "rgb(var(--app-info) / <alpha-value>)",
+          // Sharet UI: one colour per money action (send blue, pay violet, abroad teal, trade amber)
+          send: "rgb(var(--app-send) / <alpha-value>)",
+          pay: "rgb(var(--app-pay) / <alpha-value>)",
+          abroad: "rgb(var(--app-abroad) / <alpha-value>)",
+          trade: "rgb(var(--app-trade) / <alpha-value>)",
         },
         success: {
           50: "#d1fae5", // Light success color
