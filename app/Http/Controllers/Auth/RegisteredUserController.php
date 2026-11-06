@@ -56,11 +56,12 @@ class RegisteredUserController extends Controller
 
         \App\Support\Footprint::record($user, $request, 'register');
 
-        event(new Registered($user));
+        $codeFirst = \App\Support\EmailCode::enabled();
+        $codeFirst ? \App\Support\EmailCode::require($user) : event(new Registered($user));
         Outbox::later($user->email, SharetMail::waitingList($user));
     
         Auth::login($user);
     
-        return redirect(route('dashboard', absolute: false));
+        return redirect($codeFirst ? route('verification.code') : route('dashboard', absolute: false));
     }
 }

@@ -6,6 +6,9 @@
 */
 return [
 
+    // Sign-up email code (App\Support\EmailCode). Keep false until `php artisan sharet:mail-test` reaches the inbox.
+    'email_code_on_signup' => (bool) env('EMAIL_CODE_ON_SIGNUP', false),
+
     // Where the two kill switches are kept (tests point this at a temp file)
     'lockdown_file' => env('LOCKDOWN_FILE'),
 

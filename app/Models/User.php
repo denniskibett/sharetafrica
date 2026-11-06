@@ -78,6 +78,7 @@ class User extends Authenticatable implements Wallet, Customer
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'email_code_required_at' => 'datetime',
         'invited_at' => 'datetime',
         'onboarded_at' => 'datetime',
         'social' => 'array',

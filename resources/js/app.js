@@ -4,6 +4,8 @@ import '@fontsource-variable/inter-tight';
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import { installPasswordEyes } from './password-eye';
+installPasswordEyes();
 import persist from '@alpinejs/persist';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';

@@ -36,6 +36,11 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    // Sign-up email code (only when EMAIL_CODE_ON_SIGNUP is on)
+    Route::get('verify-email/code', [\App\Http\Controllers\Auth\EmailCodeController::class, 'show'])->name('verification.code');
+    Route::post('verify-email/code', [\App\Http\Controllers\Auth\EmailCodeController::class, 'verify'])->middleware('throttle:10,1')->name('verification.code.verify');
+    Route::post('verify-email/code/resend', [\App\Http\Controllers\Auth\EmailCodeController::class, 'resend'])->middleware('throttle:3,1')->name('verification.code.resend');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

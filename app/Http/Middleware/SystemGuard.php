@@ -50,6 +50,13 @@ class SystemGuard
             return $this->refuse($request, 403, 'This account is not active. Contact support@sharet.africa.', 'inactive account', ['user' => $user->id]);
         }
 
+        // 4b. New accounts that still owe their email code see only the code page
+        if ($user && \App\Support\EmailCode::pending($user) && ! $request->routeIs('verification.code*', 'logout')) {
+            return $request->expectsJson()
+                ? $this->refuse($request, 403, 'Confirm your email address first: enter the code we sent you.', 'email code pending')
+                : redirect()->route('verification.code');
+        }
+
         // 5. Staff money consoles
         if ($this->starts($route, config('security.staff_money_routes', []))) {
             $allowed = config('security.staff_allowed_ips', []);

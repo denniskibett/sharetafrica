@@ -185,6 +185,7 @@ class SharetMail extends Mailable
             'developer-received' => ['Developer request received', self::applicationReceived($user, 'developer')],
             'invited' => ['Waiting list: invited to finish setting up', self::invited($user)],
             'password-reset' => ['Password reset', self::passwordReset('https://sharet.africa/reset-password/…')],
+            'email-code' => ['Sign-up: email code', self::emailCode('482913')],
             'verify-email' => ['Verify email address', self::verifyEmail('https://sharet.africa/verify-email/…')],
             'test' => ['Test email (Integrations › Email)', self::test($user, 'smtp.example.com')],
         ];
@@ -195,6 +196,19 @@ class SharetMail extends Mailable
         return self::action('Reset your Sharet password', 'Account security', 'Reset your password',
             ['We received a request to reset the password for your Sharet account.'], 'Choose a new password', $url,
             ['This link expires in '.config('auth.passwords.users.expire', 60).' minutes. If you did not ask for a reset, ignore this email: your password stays the same.']);
+    }
+
+    /** Sign-up email code (App\Support\EmailCode). */
+    public static function emailCode(string $code): self
+    {
+        return new self("{$code} is your Sharet code", [
+            'preheader' => "Your Sharet code is {$code}. It expires in ".\App\Support\EmailCode::TTL_MINUTES.' minutes.',
+            'eyebrow' => 'Confirm your email',
+            'heading' => $code,
+            'lines' => ['Enter this code on the Sharet sign-up page to confirm this is your email address.',
+                'It expires in '.\App\Support\EmailCode::TTL_MINUTES.' minutes. Sharet staff will never ask you for it.'],
+            'after' => ['If you did not create a Sharet account, ignore this email.'],
+        ]);
     }
 
     public static function verifyEmail(string $url): self
