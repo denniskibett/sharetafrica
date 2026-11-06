@@ -19,11 +19,11 @@ class HomeRates
         return [$code, self::COUNTRIES[$code]];
     }
 
-    /** e.g. "1 KES = UGX 28.22 · USD 0.0077", or null before treasury records today's rates. */
+    /** "1 KES = USD 0.0076" (customer rate), or null before treasury records today's rate. */
     public static function line(): ?string
     {
         $parts = [];
-        foreach (['UGX' => 2, 'USD' => 4] as $to => $dp) {
+        foreach (['USD' => 4] as $to => $dp) {
             try {
                 $q = app(Rates::class)->quote('KES', $to, 100);   // KES 1.00
                 $parts[] = $to.' '.number_format((float) $q['customer_rate'], $dp);

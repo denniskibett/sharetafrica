@@ -6,7 +6,7 @@
     $tabs = [
         ['Home', route('dashboard'), 'home', request()->routeIs('dashboard')],
         ['Activity', route('pay.index'), 'arrows-right-left', request()->routeIs('pay.*')],
-        ['Receive', route('dashboard', ['panel' => 'receive']), 'arrow-down-tray', false],
+        ['Receive', route('dashboard', ['panel' => 'receive']), 'arrow-down-left', false],
     ];
     $onDash = request()->routeIs('dashboard');
     $panel = fn ($mode) => $onDash ? "@click.prevent=\"sharet.panel('money', { mode: '{$mode}' })\"" : '';
@@ -21,7 +21,7 @@
       </a>
     @endforeach
     <a href="{{ route('dashboard', ['panel' => 'send']) }}" {!! $panel('send') !!} class="-mt-6 flex h-14 w-14 items-center justify-center rounded-full bg-app-lime text-[#050507] shadow-lg" aria-label="Send money">
-      <x-heroicon-o-paper-airplane class="h-6 w-6" />
+      <x-heroicon-o-arrow-up-right class="h-6 w-6" />
     </a>
     @foreach (array_slice($tabs, 2) as [$label, $url, $icon, $current])
       <a href="{{ $url }}" {!! $panel('receive') !!} @class(['flex h-[52px] w-16 flex-col items-center justify-center gap-1 text-[11px]', 'text-app-ink font-semibold' => $current, 'text-app-muted' => ! $current])>

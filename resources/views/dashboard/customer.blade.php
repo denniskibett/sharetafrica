@@ -17,6 +17,13 @@
      x-init="load()"
      @wallet-changed.window="load()">
 
+
+  {{-- Wallet and this month side by side (half each), then the money chart and transactions across the full width --}}
+  <div class="grid gap-6 lg:grid-cols-2">
+    @include('dashboard.partials.wallet')
+    @include('dashboard.partials.summary')
+  </div>
+
   @unless ($verified)
     <a href="{{ route('profile.edit') }}#verification" class="flex items-center gap-4 rounded-2xl border border-app-accent/40 bg-app-panel p-4 hover:border-app-accent">
       <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-lime text-[#050507]"><x-heroicon-o-identification class="h-6 w-6" /></span>
@@ -27,12 +34,6 @@
       <x-heroicon-o-chevron-right class="h-5 w-5 shrink-0 text-app-accent" />
     </a>
   @endunless
-
-  {{-- Wallet and this month side by side (half each), then the money chart and transactions across the full width --}}
-  <div class="grid gap-6 lg:grid-cols-2">
-    @include('dashboard.partials.wallet')
-    @include('dashboard.partials.summary')
-  </div>
 
   @include('pay.partials.chart')
 

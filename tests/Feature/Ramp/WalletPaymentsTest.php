@@ -133,7 +133,7 @@ class WalletPaymentsTest extends TestCase
         $juma = $this->person('0722333444', 'Juma Otieno');
         $this->actingAs($jane);
 
-        $this->get('/dashboard')->assertOk()->assertSee('Wallet · KES')->assertSee('@jane.wanjiru');
+        $this->get('/dashboard')->assertOk()->assertSee('Available balance')->assertSee('@jane.wanjiru');
         $this->get('/wallet')->assertRedirect('/dashboard');
         $order = $this->postJson('/pay/top-up', ['amount' => '500'])->assertOk()->assertJsonPath('order.top_up', true)->json('order');
         $this->postJson("/pay/{$order['uuid']}/confirm")->assertOk();

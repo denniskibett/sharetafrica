@@ -54,7 +54,7 @@
                   :class="filter === '{{ $value }}' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-8 rounded-full px-3 font-medium">{{ $text }}</button>
         @endforeach
       </div>
-      <a href="{{ route('dashboard', ['panel' => 'send']) }}" class="flex h-10 items-center gap-2 rounded-full bg-app-lime px-4 text-sm font-semibold text-[#050507]"><x-heroicon-o-paper-airplane class="h-5 w-5" /> Send money</a>
+      <a href="{{ route('dashboard', ['panel' => 'send']) }}" class="flex h-10 items-center gap-2 rounded-full bg-app-lime px-4 text-sm font-semibold text-[#050507]"><x-heroicon-o-arrow-up-right class="h-5 w-5" /> Send money</a>
       </div>
     </div>
     @if (config('rails.default') === 'simulator')<p class="mb-2 text-xs text-app-muted">Test mode: payments are simulated, no real money moves.</p>@endif

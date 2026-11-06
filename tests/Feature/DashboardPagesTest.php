@@ -113,7 +113,7 @@ class DashboardPagesTest extends TestCase
     public function test_customers_get_the_sharet_app_and_staff_the_admin_dashboard(): void
     {
         $this->actingAs(User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant']));
-        $this->get('/dashboard')->assertOk()->assertSee('class="sharet-app', false)->assertSee('Wallet · KES')->assertDontSee('Admin overview');
+        $this->get('/dashboard')->assertOk()->assertSee('class="sharet-app', false)->assertSee('Available balance')->assertDontSee('Admin overview');
         $this->get('/profile')->assertOk()->assertSee('class="sharet-app', false);
 
         $this->actingAs($this->admin());

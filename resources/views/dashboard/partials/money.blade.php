@@ -223,6 +223,7 @@
       start(p) {
         clearTimeout(this.timer); this.quote = null; this.order = null; this.errors = {}; this.form = blank();
         this.setMode(p.mode || 'send');
+        if (p.from) this.receiveFrom = p.from; // receive: 'sharet' (QR, @name) or 'mpesa' (add money by STK)
         if (p.to) { this.to = 'sharet'; this.form.handle = p.to; }
         if (p.type) { this.to = p.type; Object.assign(this.form, p.dest || {}); }
         if (p.to || p.type) this.step = 'amount';
