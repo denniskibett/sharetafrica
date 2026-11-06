@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\Identity;
 use App\Support\Kyc;
 use App\Support\People;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $kyc = Kyc::data($user);
-        unset($kyc['documents']);
+        unset($kyc['documents'], $kyc['audit']);
         $progress = Kyc::progress($user);
         $level = Kyc::refreshLevel($user);
 
@@ -68,15 +69,14 @@ class ProfileController extends Controller
     public function update(Request $request): RedirectResponse|JsonResponse
     {
         $user = $request->user();
+        Identity::clean($request);
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+?[0-9 ]{9,15}$/', Rule::unique('users')->ignore($user->id)],
+            ...Identity::rules(phoneRequired: false, ignoreId: $user->id),
             'bio' => 'nullable|string|max:500',
             'country' => 'nullable|string|max:100',
             'city' => 'nullable|string|max:100',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ], ['phone.regex' => 'Use a phone number like +254 712 345 678.']);
+        ], Identity::MESSAGES);
 
         if ($request->hasFile('avatar')) {
             $user->avatar && Storage::disk('public')->delete($user->avatar);
@@ -125,7 +125,9 @@ class ProfileController extends Controller
 
         $data['kra_pin'] = isset($data['kra_pin']) ? strtoupper($data['kra_pin']) : null;
         $data['pep'] = (bool) ($data['pep'] ?? false);
-        Kyc::save($user, $data + ['documents' => Kyc::data($user)['documents'] ?? []]);
+        // Merge: keep the documents, what the ID photo said and the footprint log
+        Kyc::save($user, $data + Kyc::data($user));
+        \App\Support\Footprint::record($user, $request, 'kyc_details');
         $p = Kyc::progress($user->fresh())['standard'];
 
         return response()->json(['message' => $p['complete']
@@ -154,6 +156,7 @@ class ProfileController extends Controller
             Kyc::storeDocument($request->user(), $type, $data);
         }
 
+        \App\Support\Footprint::record($request->user()->fresh(), $request, 'kyc_'.$type);
         $user = $request->user()->fresh();
         $kyc = Kyc::data($user);
         $read = array_intersect_key($kyc['id_read'][$type] ?? [], array_flip(['full_name', 'id_number', 'date_of_birth']));

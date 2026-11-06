@@ -149,7 +149,8 @@ class ReconciliationTest extends TestCase
     {
         $this->orders->confirm($this->orders->quote($this->payer(), 'phone', ['phone' => '0722111222'], '700'));
         $maker = $this->staff();
-        $this->actingAs($maker);
+        // Money consoles ask for the password again every 15 minutes (SystemGuard)
+        $this->actingAs($maker)->withSession(['auth.password_confirmed_at' => time()]);
 
         $this->get('/ops/reconciliation')->assertOk()->assertSee('Reconciliation');
         $day = $this->postJson('/ops/reconciliation/run', ['day' => $this->today])->assertOk()->json('day');

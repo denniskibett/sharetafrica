@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\SharetMail;
 use App\Models\User;
+use App\Support\Identity;
 use App\Support\Outbox;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -31,12 +32,10 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User ::class],
+        Identity::clean($request);
+        $request->validate(Identity::rules(phoneRequired: true) + [
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phone' => ['required', 'string', 'max:15', 'unique:'.User ::class],
-        ]);
+        ], Identity::MESSAGES);
 
         $user = User::create([
             'name' => $request->name,
@@ -54,6 +53,8 @@ class RegisteredUserController extends Controller
             'intent' => 'undecided', 'source' => 'register', 'status' => 'pending',
             'ip_address' => $request->ip(), 'user_agent' => substr((string) $request->userAgent(), 0, 500),
         ]);
+
+        \App\Support\Footprint::record($user, $request, 'register');
 
         event(new Registered($user));
         Outbox::later($user->email, SharetMail::waitingList($user));

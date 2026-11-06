@@ -13,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // Mail goes out through the company's (or platform's) SMTP saved in Integrations
-        $middleware->web(append: [\App\Http\Middleware\ApplyIntegrations::class]);
+        // SystemGuard (lockdown, ledger freeze, inactive accounts, staff money consoles) runs once the route and session are known
+        $middleware->web(append: [\App\Http\Middleware\ApplyIntegrations::class, \App\Http\Middleware\SystemGuard::class]);
+        $middleware->api(append: [\App\Http\Middleware\SystemGuard::class]);
         $middleware->prepend(\App\Http\Middleware\SecurityHeaders::class); // every response, API and errors included
         // Analytics beacons are anonymous and carry no state change worth forging
         $middleware->validateCsrfTokens(except: ['t']);

@@ -222,6 +222,7 @@ Route::middleware(['auth', 'permission:admin.system'])->group(function () {
     Route::put('/admin/system', [SystemController::class, 'update'])->name('system.update');
     Route::post('/admin/system/clear-cache', [SystemController::class, 'clearCache'])->name('system.clear-cache');
     Route::post('/admin/system/maintenance', [SystemController::class, 'toggleMaintenance'])->name('system.toggle-maintenance');
+    Route::post('/admin/system/lockdown', [SystemController::class, 'lockdown'])->middleware('role:super_admin')->name('system.lockdown');
 
     Route::prefix('admin/team')->name('admin.team.')->controller(TeamController::class)->group(function () {
         Route::get('/', 'index')->name('index');

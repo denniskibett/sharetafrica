@@ -19,6 +19,13 @@ use App\Models\TradeApplication;
 
 class User extends Authenticatable implements Wallet, Customer
 {
+
+    /** No user is saved with an invalid name, email or phone, whatever creates it (App\Support\Identity). */
+    protected static function booted(): void
+    {
+        static::saving(fn (User $user) => \App\Support\Identity::assertValid($user));
+    }
+
     use HasFactory, Notifiable, SoftDeletes;
     use HasRoles;
     use HasWallet, CanPay;

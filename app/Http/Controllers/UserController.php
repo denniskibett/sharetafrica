@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use App\Models\User;
+use App\Support\Identity;
 use App\Support\Kyc;
 use App\Support\People;
 use App\Support\Table;
@@ -83,15 +84,14 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        Identity::clean($request);
         $data = $request->validate([
-            'name' => 'required|string|max:120',
-            'email' => 'required|email|max:190|unique:users,email',
-            'phone' => 'nullable|string|max:32|unique:users,phone',
+            ...Identity::rules(phoneRequired: false),
             'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)],
             'role_id' => 'required|exists:roles,id',
             'company_id' => 'nullable|exists:companies,id',
             'status' => 'nullable|boolean',
-        ]);
+        ], Identity::MESSAGES);
 
         $role = \Spatie\Permission\Models\Role::findOrFail($data['role_id']);
         $user = User::create([
@@ -141,6 +141,7 @@ class UserController extends Controller
                 ['Politically exposed', array_key_exists('pep', $kyc) ? ($kyc['pep'] ? 'Yes' : 'No') : null],
             ])->values(),
             'documents' => Kyc::documents($user, 'profile.document'),
+            'footprint' => \App\Support\Footprint::forStaff($user),
             'stats' => [
                 'balance' => $user->getWalletBalance(),
                 'transactions' => $user->getOrCreateWallet()->transactions()->count(),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Identity;
 use App\Models\Company;
 use App\Models\DeveloperApplication;
 use App\Models\Enquiry;
@@ -47,12 +48,11 @@ class HomeController extends Controller
 
     public function storePersonalSignup(Request $request)
     {
+        Identity::clean($request);
         $data = $request->validate([
-            'name'    => 'required|string|max:120',
-            'email'   => 'required|email|max:190',
-            'phone'   => 'nullable|string|max:32',
+            ...Identity::rules(phoneRequired: false, unique: false),
             'country' => 'nullable|string|size:2',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'individual');
 
@@ -67,16 +67,15 @@ class HomeController extends Controller
 
     public function storeMerchantSignup(Request $request)
     {
+        Identity::clean($request);
         $data = $request->validate([
-            'name'     => 'required|string|max:120',
+            ...Identity::rules(phoneRequired: true, unique: false),
             'business' => 'required|string|max:190',
-            'email'    => 'required|email|max:190',
-            'phone'    => 'required|string|max:32',
             'country'  => 'nullable|string|size:2',
             'rails'    => 'nullable|string|max:255',
             'volume'   => 'nullable|string|max:60',
             'brief'    => 'nullable|string|max:2000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'merchant');
 
@@ -96,11 +95,10 @@ class HomeController extends Controller
 
     public function storeTradeApplication(Request $request)
     {
+        Identity::clean($request);
         $data = $request->validate([
-            'name'                => 'required|string|max:120',
+            ...Identity::rules(phoneRequired: true, unique: false),
             'business'            => 'required|string|max:190',
-            'email'               => 'required|email|max:190',
-            'phone'               => 'required|string|max:32',
             'trade_type'          => 'required|in:importer,exporter,both,diaspora,intra_africa',
             'corridor'            => 'nullable|string|max:190',
             'corridor_other'      => 'nullable|string|max:190|required_if:corridor,OTHER',
@@ -108,7 +106,7 @@ class HomeController extends Controller
             'monthly_volume'      => 'nullable|string|max:60',
             'expected_order_size' => 'nullable|string|max:120',
             'brief'               => 'nullable|string|max:2000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'business');
 
@@ -162,13 +160,13 @@ class HomeController extends Controller
 
     public function storeDeveloperApplication(Request $request)
     {
+        Identity::clean($request);
         $data = $request->validate([
-            'name'     => 'required|string|max:120',
+            ...Identity::rules(phoneRequired: false, unique: false),
             'company'  => 'nullable|string|max:190',
-            'email'    => 'required|email|max:190',
             'interest' => 'required|in:sandbox,production_keys,white_label,licensing,bespoke_rail',
             'brief'    => 'required|string|max:2000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'techie');
 
@@ -208,15 +206,14 @@ class HomeController extends Controller
 
     public function storeContact(Request $request)
     {
+        Identity::clean($request);
         $data = $request->validate([
+            ...Identity::rules(phoneRequired: false, unique: false),
             'audience' => 'required|in:merchant,individual,trader,developer,institution,press,career,other',
-            'name'     => 'required|string|max:120',
             'business' => 'nullable|string|max:190',
-            'email'    => 'required|email|max:190',
-            'phone'    => 'nullable|string|max:32',
             'country'  => 'nullable|string|max:60',
             'brief'    => 'required|string|max:3000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, $this->intentFromAudience($data['audience']));
 

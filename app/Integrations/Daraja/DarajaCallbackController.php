@@ -33,12 +33,17 @@ class DarajaCallbackController
                 (int) round(((float) $items->get('Amount', 0)) * 100) !== $rail->amount => RailResult::unknown('M-PESA reported a different amount: left for reconciliation.'),
                 default => RailResult::succeeded((string) $items->get('MpesaReceiptNumber'), $rail->provider_reference),
             };
-            match (true) {
-                ! $result->final() => report(new \RuntimeException("Daraja callback for {$rail->reference}: {$result->message}")),
-                // M-PESA confirms money we had already given up on: book it, never drop it
-                $rail->status === 'failed' && $result->status === 'succeeded' => $orders->lateCollect($rail, $result),
-                default => $orders->apply($rail, $result),
-            };
+            try {
+                match (true) {
+                    ! $result->final() => report(new \RuntimeException("Daraja callback for {$rail->reference}: {$result->message}")),
+                    // M-PESA confirms money we had already given up on: book it, never drop it
+                    $rail->status === 'failed' && $result->status === 'succeeded' => $orders->lateCollect($rail, $result),
+                    default => $orders->apply($rail, $result),
+                };
+            } catch (\App\Ledger\LedgerException $e) {
+                // Ledger frozen: the payload is kept above; `php artisan ramp:resolve` books it once the ledger reopens
+                throw_unless($e->reason === 'ledger_frozen', $e);
+            }
         }
 
         return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);

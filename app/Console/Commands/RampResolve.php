@@ -14,6 +14,11 @@ class RampResolve extends Command
 
     public function handle(RampOrders $orders): int
     {
+        if (\App\Security\Lockdown::ledgerFrozen()) {
+            $this->warn('Ledger frozen: nothing resolved. Waiting payments are kept and booked once it reopens.');
+
+            return self::SUCCESS;
+        }
         $expired = $orders->expireQuotes();
         $moved = $orders->resolveWaiting();
         $floated = $orders->sendAwaitingFloat();

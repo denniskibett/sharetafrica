@@ -52,6 +52,15 @@ return [
 
     'channels' => [
 
+        // Lockdowns, ledger freezes and every request SystemGuard refuses (kept 90 days)
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', env('LOG_STACK', 'single')),

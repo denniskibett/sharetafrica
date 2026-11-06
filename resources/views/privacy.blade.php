@@ -23,6 +23,7 @@
       <ul>
         <li><strong>Account details</strong>: your name, email, M-Pesa number and password (stored only as a one-way hash).</li>
         <li><strong>Verification details</strong>, when you choose bank-grade verification: ID type and number, date of birth, KRA PIN, address, occupation, income band, source of funds, next of kin, photos of your ID, three selfies and your signature. These are encrypted, kept on private storage, and seen only by our compliance team.</li>
+        <li><strong>Sign-up and verification records</strong>: when you create an account or send verification details, we record the IP address, approximate country, browser and device description, browser languages, the page used and the time. We use these to prevent fraud and identity theft and to meet our anti-money-laundering duties. They are encrypted with your verification details and seen only by our compliance team. (This is separate from website use below, which stays anonymous.)</li>
         <li><strong>Business details</strong>, if you register a business: its registration, tax and contact details, its directors and owners, and its settlement account.</li>
         <li><strong>Messages</strong> you send through our forms, and our replies.</li>
         <li><strong>Payments</strong> you make or receive through your Sharet wallet.</li>

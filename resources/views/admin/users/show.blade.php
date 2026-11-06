@@ -23,6 +23,7 @@
     <div class="space-y-6">
       @include('admin.users.partials.details')
       @include('admin.users.partials.timeline')
+      @include('admin.users.partials.footprint')
     </div>
     <div class="space-y-6">
       @include('admin.users.partials.documents')

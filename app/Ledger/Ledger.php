@@ -71,6 +71,7 @@ class Ledger
      */
     public function post(string $key, string $type, array $legs, array $options = []): LedgerJournal
     {
+        \App\Security\Lockdown::assertLedgerOpen(); // the kill switch: nothing posts while frozen
         $currency = $options['currency'] ?? config('ledger.currency');
         $lines = $this->lines($legs);
         $payload = $this->payloadHash($type, $currency, $lines);
@@ -173,6 +174,7 @@ class Ledger
     /** Set money aside in an account. The same reference returns the same open hold. */
     public function hold(LedgerAccount $account, int $cents, string $reference, ?string $reason = null, ?\DateTimeInterface $expiresAt = null): LedgerHold
     {
+        \App\Security\Lockdown::assertLedgerOpen(); // the kill switch: nothing posts while frozen
         $cents = self::positive($cents);
 
         return DB::transaction(function () use ($account, $cents, $reference, $reason, $expiresAt) {
@@ -216,6 +218,7 @@ class Ledger
     /** Take held money: the hold is released and the journal posted in one transaction (both happen, or neither). */
     public function capture(LedgerHold|string $hold, string $key, string $type, array $legs, array $options = []): LedgerJournal
     {
+        \App\Security\Lockdown::assertLedgerOpen(); // the kill switch: nothing posts while frozen
         return DB::transaction(function () use ($hold, $key, $type, $legs, $options) {
             DB::table('ledger_chain')->where('id', 1)->lockForUpdate()->first();
             $locked = $this->lockHold($hold);

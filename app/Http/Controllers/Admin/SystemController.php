@@ -27,6 +27,7 @@ class SystemController extends Controller
                 'secondary_color', 'contact_email', 'contact_phone', 'address', 'meta_description', 'meta_keywords', 'pagination_limit', 'custom_css', 'custom_js']),
             'files' => ['logo' => $file($system->logo), 'logo_dark' => $file($system->logo_dark), 'logo_icon' => $file($system->logo_icon), 'favicon' => $file($system->favicon)],
             'maintenance' => (bool) $system->maintenance_mode,
+            'lockdown' => $this->lockdownState($request),
             'timezones' => \DateTimeZone::listIdentifiers(\DateTimeZone::AFRICA),
             'currencies' => ['KES' => 'Kenyan shilling', 'UGX' => 'Ugandan shilling', 'TZS' => 'Tanzanian shilling', 'RWF' => 'Rwandan franc', 'USD' => 'US dollar', 'EUR' => 'Euro'],
         ]);
@@ -143,5 +144,36 @@ class SystemController extends Controller
         return request()->wantsJson()
             ? response()->json(['message' => $system->maintenance_mode ? 'Maintenance mode is on.' : 'Maintenance mode is off.', 'maintenance' => (bool) $system->maintenance_mode])
             : back()->with('success', 'Maintenance mode updated!');
+    }
+
+    /** The two kill switches (super admins only, password re-entered every time). */
+    public function lockdown(Request $request)
+    {
+        $data = $request->validate([
+            'switch' => 'required|in:system,ledger',
+            'on' => 'required|boolean',
+            'reason' => 'required_if:on,true|nullable|string|max:300',
+            'password' => 'required|current_password',
+        ], ['password.current_password' => 'That password is not right.', 'reason.required_if' => 'Say why, so the team knows.']);
+
+        \App\Security\Lockdown::set($data['switch'], (bool) $data['on'], $data['reason'] ?? null, $request->user()->email);
+        $label = $data['switch'] === 'system' ? 'System lockdown' : 'Ledger freeze';
+
+        return response()->json(['message' => $label.((bool) $data['on'] ? ' is on.' : ' is off.'), 'lockdown' => $this->lockdownState($request)]);
+    }
+
+    protected function lockdownState(Request $request): array
+    {
+        $s = \App\Security\Lockdown::state();
+        $at = fn ($k) => isset($s[$k]) ? \Illuminate\Support\Carbon::parse($s[$k])->timezone('Africa/Nairobi')->format('j M Y, H:i') : null;
+
+        return [
+            'system' => \App\Security\Lockdown::systemLocked(), 'ledger' => \App\Security\Lockdown::ledgerFrozen(),
+            'system_env' => (bool) config('security.system_lockdown'), 'ledger_env' => (bool) config('security.ledger_freeze'),
+            'system_reason' => $s['system_reason'] ?? null, 'system_by' => $s['system_by'] ?? null, 'system_at' => $at('system_at'),
+            'ledger_reason' => $s['ledger_reason'] ?? null, 'ledger_by' => $s['ledger_by'] ?? null, 'ledger_at' => $at('ledger_at'),
+            'can' => $request->user()->hasRole('super_admin'),
+            'break_glass' => in_array($request->ip(), config('security.lockdown_allow_ips', []), true),
+        ];
     }
 }
