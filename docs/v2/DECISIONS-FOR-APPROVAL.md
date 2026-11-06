@@ -19,7 +19,7 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 | ☐ | **Brand presence:** a plain dark closing band, "Join Sharet Kenya. Tanzania next." (your wording). The big footer wordmark was tried and removed at your request. The Sharet-mark pattern stays only on the supplier card (wallet style 4). |
 | ☐ | **Motion:** the hero is four photo scenes (Kilifi, Nairobi, Tanzania next, everyday) that cross-fade with a slow zoom and change the money cards with them; no arrows or dots. Wallet cards glide sideways; app phones swap screens; business chart bars grow. All off for reduced-motion users. |
 | ☐ | **Wallets drawn as debit-style cards** (M-PESA, Airtel Money, T-Kash, PesaLink, Sharet) to show they're linked in one app. These are illustrations, not cards we issue, but they use those brands' logos and colours: **check each brand's rules**, or switch to plain tiles. |
-| ☐ | **"In the app" section:** three phones (home, Send to Tanzania, a sample business "Mwangi Hardware" with KES 184,350 takings) with floating cards. Business figures are samples. |
+| ☐ | **"Your money, on your phone" section (customer-centric):** one phone that plays through home → Send to Tanzania (recipient, amount, delivered) → paying a till, with floating cards (money from Akinyi, Tanzania rate, Naivas payment). Placed above the safety section, which now sits above "Everything you pay for". Sample customer on the website is **Juma Jones**. |
 | ☐ | **App Store and Google Play badges** drawn with their marks. Before launch use Apple's and Google's official badge artwork, and only once the apps are live in the stores. |
 
 ## 1. Money rules
