@@ -8,7 +8,7 @@
         <span x-show="!data.user.avatar" x-text="data.user.initials"></span>
       </span>
       <div class="flex flex-wrap gap-2">
-        <label class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+        <label class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-5 text-sm font-semibold text-gray-800 hover:bg-gray-200 dark:bg-white/[0.06] dark:text-gray-200">
           <x-heroicon-o-camera class="h-5 w-5" /> Change photo
           <input type="file" name="avatar" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="data.user.avatar = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : data.user.avatar">
         </label>
@@ -26,7 +26,7 @@
       <x-ui.field label="Town / city" name="city" model="data.user.city" placeholder="Nairobi" autocomplete="address-level2" />
     </div>
     <x-ui.field label="About you" name="bio">
-      <textarea id="f-bio" name="bio" x-model="data.user.bio" rows="3" maxlength="500" class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"></textarea>
+      <textarea id="f-bio" name="bio" x-model="data.user.bio" rows="3" maxlength="500" class="w-full px-4 py-3 ui-input rounded-2xl border-0 bg-gray-100 text-[15px] focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:bg-white/[0.06] dark:text-white/90"></textarea>
     </x-ui.field>
     <div class="flex justify-end"><x-ui.button type="submit" icon="check" x-bind:disabled="busy">Save details</x-ui.button></div>
   </form>

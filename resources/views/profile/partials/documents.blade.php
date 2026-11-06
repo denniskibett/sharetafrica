@@ -62,7 +62,7 @@
       <x-ui.button x-show="!shot && stream" icon="camera" @click="capture()">Take photo</x-ui.button>
       <x-ui.button x-show="shot" variant="secondary" icon="arrow-path" @click="start()">Retake</x-ui.button>
       <x-ui.button x-show="shot" icon="check" @click="uploadDoc(payload.type, shot).then(ok => ok && close())">Use this photo</x-ui.button>
-      <label x-show="error" class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">
+      <label x-show="error" class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-5 text-sm font-semibold text-gray-800 hover:bg-gray-200 dark:bg-white/[0.06] dark:text-gray-200">
         <x-heroicon-o-arrow-up-tray class="h-5 w-5" /> Upload instead
         <input type="file" accept="image/jpeg,image/png" capture="user" class="sr-only" @change="uploadDoc(payload.type, $event.target.files[0], { minWidth: 640, minHeight: 480 }).then(ok => ok && close())">
       </label>
@@ -76,7 +76,7 @@
   <div x-data="signaturePad()" x-effect="open && $nextTick(() => { init(); clear() })" class="space-y-4">
     <p class="text-sm text-gray-600 dark:text-gray-300">Sign with your finger or mouse, the way you sign official documents.</p>
     <canvas x-ref="pad" @pointerdown="down($event)" @pointermove="move($event)" @pointerup="up()" @pointerleave="up()"
-            class="h-56 w-full touch-none rounded-xl border-2 border-dashed border-gray-300 bg-white dark:border-gray-700" aria-label="Signature pad"></canvas>
+            class="h-56 w-full touch-none rounded-2xl border-2 border-dashed border-gray-300 bg-white dark:border-gray-700" aria-label="Signature pad"></canvas>
     <div class="flex justify-between gap-2">
       <x-ui.button variant="secondary" icon="arrow-path" @click="clear()">Clear</x-ui.button>
       <x-ui.button icon="check" x-bind:disabled="!signed" @click="uploadDoc('signature', image()).then(ok => ok && close())">Save signature</x-ui.button>

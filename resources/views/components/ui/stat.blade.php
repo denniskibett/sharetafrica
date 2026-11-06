@@ -3,22 +3,23 @@
 @props(['label', 'value', 'format' => 'number', 'delta' => null, 'hint' => null, 'icon' => null, 'tone' => 'violet'])
 @php
     $tones = [
-        'violet' => 'bg-violet-100 text-violet-600 dark:bg-violet-500/15 dark:text-violet-300',
-        'emerald' => 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300',
-        'sky' => 'bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-300',
-        'amber' => 'bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300',
-        'rose' => 'bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300',
-        'indigo' => 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300',
-        'teal' => 'bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300',
-        'lime' => 'bg-gray-900 text-[#D4FF3D] dark:bg-[#D4FF3D]/15 dark:text-[#D4FF3D]',
+        // Sharet UI colours by meaning: pay violet, money in green, send blue, trade amber, danger red, abroad teal, Sharet lime
+        'violet' => 'bg-app-pay/15 text-app-pay',
+        'emerald' => 'bg-app-in/15 text-app-in',
+        'sky' => 'bg-app-send/15 text-app-send',
+        'amber' => 'bg-app-trade/15 text-app-trade',
+        'rose' => 'bg-app-out/15 text-app-out',
+        'indigo' => 'bg-app-send/15 text-app-send',
+        'teal' => 'bg-app-abroad/15 text-app-abroad',
+        'lime' => 'bg-app-lime text-[#050507]',
     ];
     $text = match ($format) { 'money' => "sharet.money($value)", 'raw' => "($value) ?? '—'", default => "sharet.number($value)" };
 @endphp
-<div {{ $attributes->merge(['class' => 'rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6']) }}>
+<div {{ $attributes->merge(['class' => 'ui-card rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6']) }}>
   <div class="flex items-start justify-between gap-3">
     <h4 @class(['font-bold text-gray-800 dark:text-white/90', 'text-2xl md:text-[28px] md:leading-9' => $format !== 'raw', 'text-lg leading-7 md:text-xl' => $format === 'raw']) x-text="{{ $text }}">—</h4>
     @if ($icon)
-      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $tones[$tone] ?? $tones['violet'] }}">
+      <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ $tones[$tone] ?? $tones['violet'] }}">
         <x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" />
       </span>
     @endif

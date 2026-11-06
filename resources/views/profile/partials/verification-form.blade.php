@@ -1,7 +1,7 @@
 {{-- Verification. Verified (basic) = M-Pesa number + ID photos + selfies, details read from the ID.
      Bank grade = the details below + signature. Stored encrypted. --}}
 @php
-    $select = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90';
+    $select = 'h-12 w-full px-4 ui-input rounded-2xl border-0 bg-gray-100 text-[15px] focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:bg-white/[0.06] dark:text-white/90';
 @endphp
 <x-ui.card title="Verified account" subtitle="Your M-Pesa number, your ID and three selfies. Then you can send and receive at basic limits." class="mb-6">
   <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Verified' : 'Not verified yet'"></span></x-slot:actions>

@@ -647,3 +647,8 @@ span.flatpickr-weekday,
 @media (min-width: 640px) { .sharet-app .sheet-panel { inset-block: 12px; right: 12px; border-radius: 28px; overflow: hidden; } }
 .sharet-app .sheet-head { border-color: transparent !important; padding-bottom: 8px; }
 .sharet-app .sheet-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+
+/* Shared x-ui components (cards, stats, fields) in the Revolut-style look, for every role */
+.sharet-app .ui-card { border-color: transparent !important; border-radius: 24px; box-shadow: 0 1px 2px rgb(10 10 12 / 0.04), 0 10px 30px -18px rgb(10 10 12 / 0.18); }
+.dark .sharet-app .ui-card { border-color: rgb(var(--app-ink) / 0.06) !important; box-shadow: none; }
+.sharet-app .ui-input { background-color: rgb(var(--app-tile)) !important; }
