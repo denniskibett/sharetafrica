@@ -32,6 +32,8 @@ class V2ServiceProvider extends ServiceProvider
             ->middleware('throttle:120,1')->name('rails.daraja.timeout');
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
+            // Proof the cron runs at all (sharet:golive reads it)
+            $schedule->call(fn () => @file_put_contents(\App\Console\Commands\SharetGoLive::heartbeatPath(), (string) time()))->everyMinute()->name('heartbeat');
             $schedule->command('ledger:check')->hourly()->withoutOverlapping();
             $schedule->command('ramp:resolve')->everyMinute()->withoutOverlapping();
             $schedule->command('recon:run')->dailyAt('00:30')->withoutOverlapping();
