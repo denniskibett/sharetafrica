@@ -16,7 +16,7 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 | ☐ | Headline: **"Every wallet. Every border. One app."** with wallet-to-wallet and cross-border as the two lead sections. |
 | ☐ | **Wallet to wallet:** M-PESA, Airtel Money, T-Kash and PesaLink logos with "Sharet ↔ Sharet free", "M-Pesa ↔ Airtel ↔ T-Kash" and "any wallet ↔ any bank". Uses those brands' logos: **check each brand's rules** before launch. |
 | ☐ | **Across borders:** Kenya pilot now → Tanzania next → Uganda after, sample KES 10,000 → TZS 202,909 (sample rate 1 KES = TZS 20.29), fee KES 50, "Join the cross-border waitlist". |
-| ☐ | **Brand presence:** dark closing band with a slowly drifting Sharet-mark pattern, and a giant cropped "sharet." wordmark in the footer. |
+| ☐ | **Brand presence:** a plain dark closing band (pattern removed at your request) and a giant cropped "sharet." wordmark in the footer. The Sharet-mark pattern stays only on the supplier card (wallet style 4). |
 | ☐ | **Motion:** incoming-payment alert slides in, balance card floats, dots travel between wallets, "Tanzania next" pulses. All off for reduced-motion users. |
 
 ## 1. Money rules
