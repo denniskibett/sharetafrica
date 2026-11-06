@@ -43,3 +43,12 @@ thing after switching back is `ledger:check` and reconciliation of anything the 
 - v1 fixes go on `main` and are merged into `v2`.
 - Re-park after each deploy of a version (`park`), so the parked copy is current.
 - A v2 migration that would change a v1 table needs a written decision first; it breaks the switch.
+
+## Spare copy of v1 (7 Nov 2026)
+
+A second, untouched copy of v1 sits at `/home/sharet.africa/releases/v1` (405 MB, same as `versions/v1`).
+`scripts/switch-version.sh v1` still uses `versions/v1`; nothing in the scripts moves or deletes
+`releases/v1`, so it stays as a fallback. To restore from it by hand if `versions/v1` is ever lost:
+
+    cp -a /home/sharet.africa/releases/v1 /home/sharet.africa/versions/v1
+    scripts/switch-version.sh v1
