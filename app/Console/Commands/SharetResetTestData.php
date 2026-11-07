@@ -42,7 +42,7 @@ class SharetResetTestData extends Command
         foreach ($orders as $o) {
             $rails = RailRequest::whereIn('id', array_filter([$o->collect_request_id, $o->payout_request_id]))->get();
             $real = $rails->contains(fn ($r) => $r->rail !== 'simulator' && $r->status === 'succeeded');
-            $journals = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->get()
+            $journals = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->orderByDesc('id')->get()   // newest first: a refund is undone before the payment it refunded
                 ->reject(fn ($j) => LedgerJournal::where('reverses_id', $j->id)->exists());
             $real || $simulated = array_merge($simulated, $journals->all());
             $posted = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->exists();

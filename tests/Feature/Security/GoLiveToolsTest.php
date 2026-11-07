@@ -115,4 +115,26 @@ class GoLiveToolsTest extends TestCase
         $this->assertSame(1, RampOrder::where('status', '!=', 'reversed')->count());
         $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
     }
+
+    public function test_clean_simulated_undoes_a_refunded_order_newest_journal_first(): void
+    {
+        $orders = app(RampOrders::class);
+        $settle = function ($o) use ($orders) {
+            while (! $o->final()) {
+                $o = $orders->refresh($o);
+            }
+
+            return $o;
+        };
+        $jane = User::factory()->create(['name' => 'Jane Doe', 'phone' => '0712345673']);
+        $jane->forceFill(['kyc_level' => 'basic'])->save();
+        $settle($orders->confirm($orders->topUp($jane, '500')));
+        $failed = $settle($orders->confirm($orders->quote($jane, 'phone', ['phone' => '0722110000'], '100', null, 'wallet')));   // simulator fails ...0000
+        $this->assertSame('refunded', $failed->status);
+
+        $this->artisan('sharet:clean-simulated', ['--apply' => true])->expectsOutputToContain('Reversed 2 order(s)')->assertSuccessful();
+        $this->assertSame(0, $orders->walletBalance($jane));
+        $this->assertSame(0, RampOrder::where('status', '!=', 'reversed')->count());
+        $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
+    }
 }

@@ -32,7 +32,7 @@ class SharetCleanSimulated extends Command
         $plan = [];
         foreach (RampOrder::with('user:id,email')->where('status', '!=', 'reversed')->orderByDesc('id')->get() as $o) {
             $rails = RailRequest::whereIn('id', array_filter([$o->collect_request_id, $o->payout_request_id]))->get();
-            $journals = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->get()
+            $journals = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->orderByDesc('id')->get()   // newest first: a refund is undone before the payment it refunded
                 ->reject(fn ($j) => LedgerJournal::where('reverses_id', $j->id)->exists());
             $posted = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->exists();
             $kind = match (true) {
