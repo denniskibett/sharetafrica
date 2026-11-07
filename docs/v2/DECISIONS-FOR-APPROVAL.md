@@ -131,7 +131,7 @@ Sharet's bank account for transfers shown as "Shown in your app" (no real I&M ac
 ## 7. Still blocking real money (not decisions, just to-dos)
 
 Run `php artisan sharet:golive` on the server for the live list. As of today:
-scheduler cron missing in CyberPanel · email (SMTP) not set (mail only logs) · SMS key not entered ·
+email (SMTP) not set (mail only logs) · SMS key not entered ·
 M-PESA B2C initiator + credential missing · payout float 0 · FX rate not recorded on live ·
 nightly backups not off the server · v2.sharet.africa DNS record · **written cover from a licensed partner
-(Cashia / Gladys) or CBK authorisation** · reset test data (`php artisan sharet:reset-test-data`, report first).
+(Cashia / Gladys) or CBK authorisation**. Simulator still on for everyone not in `RAIL_COLLECT_ONLY_FOR`. (Cron and test-money reset done 7 Nov.)
