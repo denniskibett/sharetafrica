@@ -22,6 +22,20 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 | ☐ | **"Your money, on your phone" section (customer-centric):** one phone that plays through home → Send to Tanzania (recipient, amount, delivered) → paying a till, with floating cards (money from Akinyi, Tanzania rate, Naivas payment). Placed above the safety section, which now sits above "Everything you pay for". Sample customer on the website is **Juma Jones**. |
 | ☐ | **App Store and Google Play badges** drawn with their marks. Before launch use Apple's and Google's official badge artwork, and only once the apps are live in the stores. |
 
+## 0b. API and settlements (you decided, 7 Nov)
+
+The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is the canvas board *Website · Integrate with Sharet*. Approved; not built yet.
+
+| ✓ | Decision |
+|---|---|
+| ✓ | **Settlements are tied to the Sharet ID** (`SH-` + 6 characters, fixed per person and per business). The API accepts an @name but always resolves and locks the Sharet ID. |
+| ✓ | **Customers see only their @name** in the app for now; the Sharet ID is shown to businesses (dashboard, API, statements). |
+| ✓ | **Connected accounts** (e.g. scharge landlords, Breve merchants) can **receive and send**: free between Sharet IDs, **charged outside Sharet** at normal rates. |
+| ✓ | **Group companies use the same public API** as outside businesses and get **discounted fees on larger settlements**. |
+| ☐ | Discount tiers on outside payout fees (samples): over KES 1M a month 25% off, over KES 10M 40% off; group companies get the next tier up. Confirm the figures. |
+| ☐ | Batches over KES 500,000 need a second approver; payout keys need an IP allow-list; live keys only after business verification (KYB). |
+| ☐ | Collection by M-PESA prompt: cost passed through. Confirm the rate with Cashia/Safaricom. |
+
 ## 1. Money rules
 
 | ✓ | Decision | Now | To change |
