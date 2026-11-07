@@ -256,6 +256,12 @@ Route::middleware(['auth', 'permission:waiting_list.invite'])
 |--------------------------------------------------------------------------
 */
 
+// Administration › Scheduled jobs: cron status and "Run now" for a fixed list of commands (fresh password, logged)
+Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/scheduler')->controller(\App\Http\Controllers\Admin\SchedulerController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.scheduler.index');
+    Route::post('/run', 'run')->middleware('password.confirm')->name('admin.scheduler.run');
+});
+
 // Staff › Pricing: business tariff tables (docs/v2/INTEGRATION.md §7); saving needs a recent password
 Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/pricing')->controller(\App\Http\Controllers\Admin\PricingController::class)->group(function () {
     Route::get('/', 'index')->name('admin.pricing.index');
