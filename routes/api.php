@@ -18,6 +18,13 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
             'company' => $key->company?->name,
         ]);
     });
+
+    // Accounts and quotes: nothing here moves money (docs/v2/INTEGRATION.md §1, §7, §9)
+    Route::middleware('api.scope:read')->controller(\App\Http\Controllers\Api\V1\AccountsController::class)->group(function () {
+        Route::get('/accounts/me', 'me')->name('api.v1.accounts.me');
+        Route::get('/accounts/resolve', 'resolve')->name('api.v1.accounts.resolve');
+        Route::post('/quotes', 'quote')->name('api.v1.quotes');
+    });
 });
 
 /*

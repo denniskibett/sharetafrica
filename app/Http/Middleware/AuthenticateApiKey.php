@@ -22,6 +22,8 @@ class AuthenticateApiKey
         }
 
         $request->attributes->set('api_key', $key);
+        // The key acts for the account that created it (until business wallets have their own ledger accounts)
+        $request->setUserResolver(fn () => $key->user);
 
         return $next($request);
     }

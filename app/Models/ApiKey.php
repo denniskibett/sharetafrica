@@ -12,9 +12,12 @@ use Illuminate\Support\Str;
  */
 class ApiKey extends Model
 {
-    protected $fillable = ['company_id', 'user_id', 'name', 'environment', 'prefix', 'last_four', 'hash', 'enabled', 'last_used_at'];
+    protected $fillable = ['company_id', 'user_id', 'name', 'environment', 'scopes', 'prefix', 'last_four', 'hash', 'enabled', 'last_used_at'];
 
-    protected $casts = ['enabled' => 'boolean', 'last_used_at' => 'datetime'];
+    /** What a key may do (docs/v2/INTEGRATION.md §2). New keys get read only unless the owner chooses more. */
+    public const SCOPES = ['read', 'collect', 'payout', 'connect'];
+
+    protected $casts = ['enabled' => 'boolean', 'last_used_at' => 'datetime', 'scopes' => 'array'];
 
     protected $hidden = ['hash'];
 
@@ -39,6 +42,16 @@ class ApiKey extends Model
         $this->hash = hash('sha256', $plain);
 
         return $plain;
+    }
+
+    public function allows(string $scope): bool
+    {
+        return in_array($scope, $this->scopes ?? ['read'], true);
+    }
+
+    public function isLive(): bool
+    {
+        return $this->environment === 'live';
     }
 
     public static function findByPlain(?string $plain): ?self

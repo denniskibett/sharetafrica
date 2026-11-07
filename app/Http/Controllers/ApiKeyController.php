@@ -26,7 +26,10 @@ class ApiKeyController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:80',
             'environment' => 'required|in:test,live',
+            'scopes' => 'nullable|array',
+            'scopes.*' => 'in:'.implode(',', ApiKey::SCOPES),
         ]);
+        $data['scopes'] = array_values(array_unique(array_merge(['read'], $data['scopes'] ?? [])));   // every key can read
 
         $key = new ApiKey($data + ['user_id' => $request->user()->id, 'company_id' => $request->user()->company_id, 'enabled' => true]);
         $plain = $key->issue();
@@ -81,6 +84,7 @@ class ApiKeyController extends Controller
             'name' => $k->name,
             'environment' => $k->environment,
             'masked' => $k->masked(),
+            'scopes' => $k->scopes ?? ['read'],
             'enabled' => $k->enabled,
             'owner' => $k->company?->name ?? $k->user?->name,
             'created_at' => $k->created_at?->timezone('Africa/Nairobi')->format('j M Y'),

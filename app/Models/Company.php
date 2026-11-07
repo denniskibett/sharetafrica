@@ -52,6 +52,7 @@ class Company extends Model implements Wallet
     protected static function booted(): void
     {
         static::creating(function (Company $company) {
+            $company->sharet_id ??= \App\Support\SharetId::generate();   // fixed business account number (docs/v2/INTEGRATION.md §1)
             if (empty($company->slug)) {
                 $company->slug = Str::slug($company->name) . '-' . Str::lower(Str::random(6));
             }

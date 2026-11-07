@@ -27,6 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             // Sharet API keys (Authorization: Bearer sk_…); alias() replaces, so keep all aliases in this one call
             'api.key' => \App\Http\Middleware\AuthenticateApiKey::class,
+            'api.scope' => \App\Http\Middleware\ApiScope::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

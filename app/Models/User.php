@@ -24,6 +24,8 @@ class User extends Authenticatable implements Wallet, Customer
     protected static function booted(): void
     {
         static::saving(fn (User $user) => \App\Support\Identity::assertValid($user));
+        // Every account gets its fixed Sharet ID when it's created (docs/v2/INTEGRATION.md §1)
+        static::creating(fn (User $user) => $user->sharet_id ??= \App\Support\SharetId::generate());
     }
 
     use HasFactory, Notifiable, SoftDeletes;
