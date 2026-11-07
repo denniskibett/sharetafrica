@@ -182,15 +182,25 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
 
 ## 12. What exists today, and the build order
 
-Today: API keys per company (create, rotate, toggle, delete) and `GET /api/v1/me`; users have unique `handle`s;
-Sharet ↔ Sharet transfers by @handle in the app; the mobile API (idempotent Sharet ↔ Sharet and M-PESA, see
-MOBILE-API.md); the double-entry ledger with orders and journals.
+**Built (7 Nov, branch v2, not yet deployed):**
+- Sharet IDs (`SH-XXXXXX`) for every user and company, issued on creation and backfilled; never change.
+- API keys with scopes (`read`, `collect`, `payout`, `connect`; every key can read). A key acts for the Sharet account
+  of the person who created it, until business wallets get their own ledger accounts.
+- `GET /api/v1/accounts/me`, `GET /api/v1/accounts/resolve` (masked name), `POST /api/v1/quotes`.
+- `POST /api/v1/payments` (`payout` scope, `Idempotency-Key`, stopped by the ledger freeze) and `GET /api/v1/payments/{id}`.
+  Sandbox keys simulate (test number 0700 000 002 always fails) and never touch the ledger. Live keys need a verified
+  business (company `verified_at`) and go through the app's order engine: Sharet ↔ Sharet free and instant; outside
+  payouts charged with the current personal tariff until the tariff tables exist.
+- Webhooks: `GET/POST/DELETE /api/v1/webhooks` (public HTTPS only), events `payment.paid`, `payment.failed`,
+  `payment.refunded`, signed `Sharet-Signature: t=…,v1=…`, sent after commit, retried for 24 hours by
+  `php artisan api:webhooks-retry` (scheduled every minute: **needs the server cron**).
+- Errors as `application/problem+json`.
 
-Build order when approved:
-1. Sharet IDs for users and companies (column, backfill, shown to businesses), and `accounts/resolve`.
-2. Key scopes, sandbox/live separation, idempotency on `/v1`.
-3. Quotes and payments (out), reusing the order engine; webhooks with signatures.
-4. Payment requests (in) with the hosted pay page and in-app approval.
-5. Split settlement in one journal; settlements (batch) with the second approver.
-6. Connected accounts and consent; tariff tables (transaction tiers × volume tiers) with Staff › Pricing.
-7. Docs site from this file; sandbox test numbers.
+**Still to build, in order:**
+1. Payment requests (collect) with the hosted pay page and in-app approval (§3).
+2. Split settlement in one journal; batch settlements with the second approver (§4, §5).
+3. Business wallets in the ledger (keys act for the company's Sharet ID, not the creator's).
+4. Connected accounts and consent (§6).
+5. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
+6. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
+7. Docs site from this file.

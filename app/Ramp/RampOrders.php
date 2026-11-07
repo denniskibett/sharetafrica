@@ -501,6 +501,7 @@ class RampOrders
         $o->failure = $failure ?? $o->failure;
         $o->timeline = array_merge($o->timeline ?? [], [$this->event($event)]);
         $o->save();
+        app(\App\Api\Webhooks::class)->orderMoved($o);   // API payments riding on this order follow it (and webhooks fire after commit)
     }
 
     private function event(string $text): array

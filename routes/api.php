@@ -25,6 +25,19 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
         Route::get('/accounts/resolve', 'resolve')->name('api.v1.accounts.resolve');
         Route::post('/quotes', 'quote')->name('api.v1.quotes');
     });
+
+    // Payments out: "payout" scope, Idempotency-Key, and api.money.* so the ledger freeze stops them (§4)
+    Route::controller(\App\Http\Controllers\Api\V1\PaymentsController::class)->group(function () {
+        Route::post('/payments', 'store')->middleware(['api.scope:payout', \App\Http\Middleware\Idempotent::class])->name('api.money.v1.payments.store');
+        Route::get('/payments/{id}', 'show')->middleware('api.scope:read')->name('api.v1.payments.show');
+    });
+
+    // Webhook endpoints (§8)
+    Route::middleware('api.scope:read')->controller(\App\Http\Controllers\Api\V1\WebhooksController::class)->group(function () {
+        Route::get('/webhooks', 'index')->name('api.v1.webhooks.index');
+        Route::post('/webhooks', 'store')->name('api.v1.webhooks.store');
+        Route::delete('/webhooks/{id}', 'destroy')->whereNumber('id')->name('api.v1.webhooks.destroy');
+    });
 });
 
 /*
