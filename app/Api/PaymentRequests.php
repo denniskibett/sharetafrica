@@ -1,0 +1,202 @@
+<?php
+
+namespace App\Api;
+
+use App\Models\ApiKey;
+use App\Models\ApiPaymentRequest;
+use App\Models\RampOrder;
+use App\Models\User;
+use App\Ramp\Destination;
+use App\Ramp\RampOrders;
+use App\Support\Handle;
+use App\Support\TransactionPin;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * Payment requests: money in (docs/v2/INTEGRATION.md §3).
+ *  - A business creates one with a "collect" key and gets a hosted pay page (/r/{token}).
+ *  - Sharet wallet: the payer signs in and approves with their PIN; a free wallet-to-wallet transfer pays it.
+ *    No API call can take money from a customer's wallet without that approval.
+ *  - M-PESA: the page sends a prompt to the payer's phone; the collection lands in the business's wallet.
+ *  - Sandbox requests (pr_test_) never touch the ledger: the page offers "pay" and "fail" buttons.
+ * Webhooks: payment_request.paid, payment_request.expired.
+ */
+final class PaymentRequests
+{
+    public const CHANNELS = ['sharet', 'mpesa'];
+
+    public function __construct(private RampOrders $orders, private Webhooks $webhooks) {}
+
+    public function create(ApiKey $key, User $payee, array $input): ApiPaymentRequest
+    {
+        if (! empty($input['splits'])) {
+            throw new ApiError(422, 'splits_not_available', 'Splits are coming next', 'Create the request without "splits" for now; split settlement is the next part of the API.');
+        }
+        if ($key->isLive() && ! $key->company?->verified_at) {
+            throw new ApiError(403, 'business_not_verified', 'Your business isn\'t verified yet', 'Live payment requests need a verified business. Use a sk_test_ key meanwhile.');
+        }
+        $cents = PaymentInput::read(['amount' => $input['amount'] ?? '', 'to' => ['sharet_id' => $payee->sharet_id]], new User)['cents'];
+
+        $payer = (array) ($input['payer'] ?? []);
+        $payerUser = isset($payer['sharet_id']) || isset($payer['handle']) ? PaymentInput::account($payer['sharet_id'] ?? null, $payer['handle'] ?? null) : null;
+        if ((isset($payer['sharet_id']) || isset($payer['handle'])) && ! $payerUser) {
+            throw new ApiError(404, 'account_not_found', 'No such Sharet account', 'Check the payer\'s @name or Sharet ID.');
+        }
+        if ($payerUser?->is($payee)) {
+            throw new ApiError(422, 'own_account', 'That\'s your own account', 'The payer must be someone else.');
+        }
+        try {
+            $payerPhone = isset($payer['phone']) ? Destination::phone((string) $payer['phone'], 'payer.phone') : null;
+        } catch (ValidationException $e) {
+            throw new ApiError(422, 'invalid_payer', 'Check the payer\'s phone', (string) collect($e->errors())->flatten()->first());
+        }
+
+        $channels = array_values(array_intersect(self::CHANNELS, (array) ($input['channels'] ?? self::CHANNELS)));
+        if (! $channels) {
+            throw new ApiError(422, 'invalid_channels', 'Choose how they can pay', 'channels: "sharet", "mpesa" or both.');
+        }
+        $minutes = max(5, min(60 * 24 * 30, (int) ($input['expires_in_minutes'] ?? 60 * 24 * 7)));
+        $live = $key->isLive();
+
+        return ApiPaymentRequest::create([
+            'public_id' => ($live ? 'pr_' : 'pr_test_').Str::lower(Str::random(20)),
+            'token' => Str::random(40),
+            'api_key_id' => $key->id, 'user_id' => $payee->id, 'environment' => $key->environment,
+            'amount' => $cents,
+            'reference' => filled($input['reference'] ?? null) ? Str::limit(strip_tags((string) $input['reference']), 140, '') : null,
+            'payer_user_id' => $payerUser?->id, 'payer_phone' => $payerPhone,
+            'channels' => $channels,
+            'metadata' => is_array($input['metadata'] ?? null) ? array_slice($input['metadata'], 0, 20, true) : null,
+            'status' => 'open',
+            'expires_at' => now()->addMinutes($minutes),
+        ]);
+    }
+
+    public static function present(ApiPaymentRequest $r): array
+    {
+        return [
+            'id' => $r->public_id,
+            'object' => 'payment_request',
+            'environment' => $r->environment,
+            'status' => $r->status,
+            'amount' => PaymentInput::amount($r->amount),
+            'currency' => config('ledger.currency'),
+            'reference' => $r->reference,
+            'payee' => ['sharet_id' => $r->payee->sharet_id, 'handle' => '@'.Handle::for($r->payee)],
+            'payer' => $r->payer ? ['sharet_id' => $r->payer->sharet_id, 'handle' => '@'.Handle::for($r->payer)] : ($r->payer_phone ? ['phone' => $r->payer_phone] : null),
+            'channels' => $r->channels,
+            'pay_url' => route('pay-request.show', $r->token),
+            'paid_via' => $r->paid_via,
+            'paid_at' => $r->paid_at?->toIso8601String(),
+            'expires_at' => $r->expires_at->toIso8601String(),
+            'metadata' => $r->metadata,
+            'created_at' => $r->created_at?->toIso8601String(),
+        ];
+    }
+
+    /** Sharet wallet: the signed-in payer approves with their PIN; a free wallet-to-wallet transfer pays the request. */
+    public function payWithSharet(ApiPaymentRequest $r, User $payer, ?string $pin): ApiPaymentRequest
+    {
+        $this->assertPayable($r, 'sharet');
+        if ($r->payer_user_id && $r->payer_user_id !== $payer->id) {
+            throw ValidationException::withMessages(['pay' => 'This request is for another Sharet account.']);
+        }
+        if ($payer->is($r->payee)) {
+            throw ValidationException::withMessages(['pay' => 'You can\'t pay your own request.']);
+        }
+        TransactionPin::check($payer, $pin);
+
+        if ($r->environment === 'test') {
+            return $this->markPaid($r, 'sandbox', null);
+        }
+
+        return DB::transaction(function () use ($r, $payer) {
+            $locked = ApiPaymentRequest::whereKey($r->id)->lockForUpdate()->first();
+            $this->assertPayable($locked, 'sharet');
+            $order = $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request');
+
+            return $this->markPaid($locked, 'sharet', $order);
+        });
+    }
+
+    /** M-PESA: prompt the payer's phone; the collection credits the business's wallet. Paid when the order is. */
+    public function payWithMpesa(ApiPaymentRequest $r, string $phone): ApiPaymentRequest
+    {
+        $this->assertPayable($r, 'mpesa');
+        $phone = Destination::phone($phone, 'phone');
+        if ($r->environment === 'test') {
+            return $this->markPaid($r, 'sandbox', null);
+        }
+        if ($r->order && ! $r->order->final()) {
+            return $r;   // a prompt is already on its way
+        }
+        $order = $this->orders->confirm($this->orders->topUp($r->payee, PaymentInput::amount($r->amount), $phone));
+        $r->update(['ramp_order_id' => $order->id, 'payer_phone' => $phone]);
+        $this->orderMoved($order->fresh());
+
+        return $r->fresh();
+    }
+
+    /** Sandbox only: the page's "Pay" / "Fail" buttons. */
+    public function sandbox(ApiPaymentRequest $r, bool $pay): ApiPaymentRequest
+    {
+        abort_unless($r->environment === 'test', 404);
+        $this->assertPayable($r, null);
+
+        return $pay ? $this->markPaid($r, 'sandbox', null) : tap($r)->update(['status' => 'cancelled']);
+    }
+
+    /** The M-PESA order behind a request moved: paid → the request is paid. */
+    public function orderMoved(RampOrder $order): void
+    {
+        $r = ApiPaymentRequest::where('ramp_order_id', $order->id)->first();
+        if ($r && $r->status === 'open' && $order->status === 'paid') {
+            $this->markPaid($r, 'mpesa', $order);
+        }
+    }
+
+    public function cancel(ApiPaymentRequest $r): ApiPaymentRequest
+    {
+        if ($r->status === 'open') {
+            $r->update(['status' => 'cancelled']);
+        }
+
+        return $r->fresh();
+    }
+
+    /** Close open requests past their time and tell the business. */
+    public function expireDue(): int
+    {
+        $n = 0;
+        ApiPaymentRequest::where('status', 'open')->where('expires_at', '<', now())->orderBy('id')->each(function (ApiPaymentRequest $r) use (&$n) {
+            if ($r->order && ! $r->order->final()) {
+                return;   // an M-PESA prompt is still being answered
+            }
+            $r->update(['status' => 'expired']);
+            $this->webhooks->fire($r->payee, $r->environment, 'payment_request.expired', self::present($r));
+            $n++;
+        });
+
+        return $n;
+    }
+
+    private function markPaid(ApiPaymentRequest $r, string $via, ?RampOrder $order): ApiPaymentRequest
+    {
+        $r->update(['status' => 'paid', 'paid_via' => $via, 'paid_at' => now(), 'ramp_order_id' => $order?->id ?? $r->ramp_order_id]);
+        $this->webhooks->fire($r->payee, $r->environment, 'payment_request.paid', self::present($r->fresh()));
+
+        return $r->fresh();
+    }
+
+    private function assertPayable(?ApiPaymentRequest $r, ?string $channel): void
+    {
+        if (! $r || ! $r->isOpen()) {
+            throw ValidationException::withMessages(['pay' => $r?->status === 'paid' ? 'This request is already paid.' : 'This request is no longer open.']);
+        }
+        if ($channel && ! in_array($channel, $r->channels, true)) {
+            throw ValidationException::withMessages(['pay' => 'This request can\'t be paid that way.']);
+        }
+    }
+}

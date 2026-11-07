@@ -36,6 +36,16 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/contact', 'contact')->name('contact');
 });
 
+// Hosted pay page for API payment requests (docs/v2/INTEGRATION.md §3). Paying moves money: names under "pay." so the
+// ledger freeze stops it. Sharet wallet needs sign-in and the PIN; M-PESA works for anyone with the link.
+Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\PayRequestController::class)->group(function () {
+    Route::get('/', 'show')->middleware('throttle:60,1')->name('pay-request.show');
+    Route::get('/status', 'status')->middleware('throttle:60,1')->name('pay-request.status');
+    Route::post('/sharet', 'sharet')->middleware(['auth', 'throttle:10,1'])->name('pay.request.sharet');
+    Route::post('/mpesa', 'mpesa')->middleware('throttle:5,1')->name('pay.request.mpesa');
+    Route::post('/sandbox', 'sandbox')->middleware('throttle:20,1')->name('pay-request.sandbox');
+});
+
 // The Android app (APK uploaded by the app's scripts/release-android.sh; offered on the Developers page for testing only)
 Route::get('/app/android/{abi?}', [\App\Http\Controllers\AppDownloadController::class, 'android'])->name('app.android');
 

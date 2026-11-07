@@ -76,9 +76,10 @@ class RampOrders
     }
 
     /** "Add money": collect from the payer's M-PESA into their wallet. No fee. Confirmed like any order. */
-    public function topUp(User $user, string $amount): RampOrder
+    public function topUp(User $user, string $amount, ?string $payerPhone = null): RampOrder
     {
-        $payer = $this->payer($user);
+        // $payerPhone: someone else pays into this wallet (API payment requests, docs/v2/INTEGRATION.md §3)
+        $payer = $payerPhone !== null ? Destination::phone($payerPhone, 'phone') : $this->payer($user);
         $cents = $this->cents($amount);
         $this->checkLimits($user, $cents);
 
@@ -93,7 +94,7 @@ class RampOrders
             'currency' => config('ledger.currency'),
             'status' => 'quoted',
             'quote_expires_at' => now()->addMinutes(config('pricing.quote_minutes')),
-            'timeline' => [$this->event('Adding '.Money::format($cents).' to your wallet')],
+            'timeline' => [$this->event($payerPhone !== null ? 'Collecting '.Money::format($cents).' from '.$payer : 'Adding '.Money::format($cents).' to your wallet')],
         ]);
     }
 

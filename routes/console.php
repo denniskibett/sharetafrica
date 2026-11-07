@@ -18,3 +18,9 @@ Artisan::command('inspire', function () {
     $this->info(app(\App\Api\Webhooks::class)->retryDue().' webhook deliveries tried.');
 })->purpose('Retry API webhook deliveries that are due');
 \Illuminate\Support\Facades\Schedule::command('api:webhooks-retry')->everyMinute()->withoutOverlapping();
+
+// API payment requests past their time are closed and the business is told (payment_request.expired)
+\Illuminate\Support\Facades\Artisan::command('api:requests-expire', function () {
+    $this->info(app(\App\Api\PaymentRequests::class)->expireDue().' payment requests expired.');
+})->purpose('Expire API payment requests that are past their time');
+\Illuminate\Support\Facades\Schedule::command('api:requests-expire')->everyMinute()->withoutOverlapping();

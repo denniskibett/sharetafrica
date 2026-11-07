@@ -32,6 +32,13 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
         Route::get('/payments/{id}', 'show')->middleware('api.scope:read')->name('api.v1.payments.show');
     });
 
+    // Payment requests: money in (§3). Creating one moves nothing; paying happens on the hosted page.
+    Route::controller(\App\Http\Controllers\Api\V1\PaymentRequestsController::class)->group(function () {
+        Route::post('/payment-requests', 'store')->middleware(['api.scope:collect', \App\Http\Middleware\Idempotent::class])->name('api.v1.payment_requests.store');
+        Route::get('/payment-requests/{id}', 'show')->middleware('api.scope:read')->name('api.v1.payment_requests.show');
+        Route::post('/payment-requests/{id}/cancel', 'cancel')->middleware('api.scope:collect')->name('api.v1.payment_requests.cancel');
+    });
+
     // Webhook endpoints (§8)
     Route::middleware('api.scope:read')->controller(\App\Http\Controllers\Api\V1\WebhooksController::class)->group(function () {
         Route::get('/webhooks', 'index')->name('api.v1.webhooks.index');

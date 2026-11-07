@@ -42,6 +42,7 @@ final class Webhooks
     /** A ramp order changed: if an API payment rides on it, update its status and tell the business. */
     public function orderMoved(RampOrder $order): void
     {
+        app(PaymentRequests::class)->orderMoved($order);   // an M-PESA collection paying a payment request
         $p = ApiPayment::where('ramp_order_id', $order->id)->first();
         if (! $p) {
             return;

@@ -195,12 +195,16 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   `payment.refunded`, signed `Sharet-Signature: t=…,v1=…`, sent after commit, retried for 24 hours by
   `php artisan api:webhooks-retry` (scheduled every minute: **needs the server cron**).
 - Errors as `application/problem+json`.
+- Payment requests (money in): `POST /api/v1/payment-requests` (`collect` scope, `Idempotency-Key`), `GET …/{id}`,
+  `POST …/{id}/cancel`. Hosted pay page `/r/{token}`: Sharet wallet (signed in + PIN, free, only the named payer if one
+  is set) or an M-PESA prompt to any phone (lands in the business's wallet). Sandbox requests show "Simulate paid /
+  cancel" and never touch the ledger. Webhooks `payment_request.paid`, `payment_request.expired`; expiry by
+  `php artisan api:requests-expire` (scheduled every minute). `splits` are refused until split settlement is built.
 
 **Still to build, in order:**
-1. Payment requests (collect) with the hosted pay page and in-app approval (§3).
-2. Split settlement in one journal; batch settlements with the second approver (§4, §5).
-3. Business wallets in the ledger (keys act for the company's Sharet ID, not the creator's).
-4. Connected accounts and consent (§6).
-5. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
-6. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
-7. Docs site from this file.
+1. Split settlement in one journal; batch settlements with the second approver (§4, §5).
+2. Business wallets in the ledger (keys act for the company's Sharet ID, not the creator's).
+3. Connected accounts and consent (§6).
+4. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
+5. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
+6. Docs site from this file.
