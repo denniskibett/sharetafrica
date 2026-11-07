@@ -43,5 +43,6 @@ and asked me to decide and note every decision here. Newest at the bottom.
     moves by exactly the totals. Typing through the simulator was unreliable, so the test types for us.
 13. **Live testing stays on public endpoints.** I did not sign in to sharet.africa with any account; after deploy I
     only check `/api/mobile/v1/config`. Your first sign-in on the live app is yours to do.
-14. **Deploy + push:** the mobile API is committed on `v2`, pushed, and deployed with `scripts/deploy.sh`
-    (tests, backup, migrate). The release APK points at https://sharet.africa.
+14. **Push done, deploy waiting for you:** the mobile API is committed on `v2` (7e578ed) and pushed. The deploy (`scripts/deploy.sh`)
+    was blocked by my permission rules, so run it yourself; until then the APK cannot sign in (the live site has no /api/mobile/v1 yet).
+15. **Fix found by the test:** "Done" after a payment now returns to Home (it used to land on the Send menu and Home showed the old balance).
