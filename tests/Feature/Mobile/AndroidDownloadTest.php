@@ -42,6 +42,7 @@ class AndroidDownloadTest extends TestCase
     {
         $this->get('/app/android')->assertNotFound();
         $this->get('/')->assertOk()->assertDontSee('/app/android');
+        $this->get('/developers')->assertOk()->assertDontSee('/app/android')->assertDontSee('Android test build');
         $this->getJson('/api/mobile/v1/config')->assertJsonPath('android', null);
     }
 
@@ -54,7 +55,9 @@ class AndroidDownloadTest extends TestCase
         $this->assertStringContainsString('Sharet-1.2.0.apk', $r->headers->get('Content-Disposition'));
         $this->assertStringContainsString('Sharet-1.2.0-32bit.apk', $this->get('/app/android/armv7')->assertOk()->headers->get('Content-Disposition'));
 
-        $this->get('/')->assertSee(route('app.android'));
+        // Testing only (owner, 7 Nov): offered on the Developers page, never on the home page
+        $this->get('/')->assertDontSee('/app/android');
+        $this->get('/developers')->assertOk()->assertSee('For testing only')->assertSee(route('app.android'))->assertSee(route('app.android', 'armv7'));
         $this->getJson('/api/mobile/v1/config')->assertJsonPath('android.version', '1.2.0')->assertJsonPath('android.build', 3);
     }
 

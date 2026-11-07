@@ -36,7 +36,7 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/contact', 'contact')->name('contact');
 });
 
-// The Android app (APK uploaded by the app's scripts/release-android.sh; shown on the home page once present)
+// The Android app (APK uploaded by the app's scripts/release-android.sh; offered on the Developers page for testing only)
 Route::get('/app/android/{abi?}', [\App\Http\Controllers\AppDownloadController::class, 'android'])->name('app.android');
 
 Route::controller(HomeController::class)->group(function () {
