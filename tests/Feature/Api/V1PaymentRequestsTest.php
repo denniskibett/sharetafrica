@@ -149,12 +149,12 @@ class V1PaymentRequestsTest extends TestCase
         Http::assertSent(fn (HttpRequest $q) => $q['type'] === 'payment_request.paid');
     }
 
-    public function test_requests_need_collect_scope_no_splits_yet_and_expire(): void
+    public function test_requests_need_collect_scope_split_only_to_sharet_and_expire(): void
     {
         $biz = $this->scharge();
         $this->postJson('/api/v1/payment-requests', ['amount' => '1000'], $this->key($biz, 'test', ['read']) + ['Idempotency-Key' => 'no-scope-1'])->assertForbidden();
-        $this->postJson('/api/v1/payment-requests', ['amount' => '1000', 'splits' => [['to' => 'self', 'percent' => 100]]], $this->key($biz) + ['Idempotency-Key' => 'splits-1'])
-            ->assertStatus(422)->assertJsonPath('type', 'https://sharet.africa/docs/errors#splits_not_available');
+        $this->postJson('/api/v1/payment-requests', ['amount' => '1000', 'splits' => [['to' => ['type' => 'bank', 'bank' => 'equity', 'account' => '0123456789'], 'percent' => 100]]], $this->key($biz) + ['Idempotency-Key' => 'splits-1'])
+            ->assertStatus(422)->assertJsonPath('type', 'https://sharet.africa/docs/errors#outside_split_not_available');
         $this->postJson('/api/v1/payment-requests', ['amount' => '1000'], $this->key($this->scharge(false, '0711000222'), 'live') + ['Idempotency-Key' => 'unverified-1'])->assertForbidden();
 
         $r = $this->postJson('/api/v1/payment-requests', ['amount' => '1000', 'expires_in_minutes' => 5], $this->key($biz) + ['Idempotency-Key' => 'expiring-1'])->json();

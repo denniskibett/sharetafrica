@@ -9,9 +9,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ApiPaymentRequest extends Model
 {
     protected $fillable = ['public_id', 'token', 'api_key_id', 'user_id', 'environment', 'amount', 'reference', 'payer_user_id', 'payer_phone',
-        'channels', 'metadata', 'status', 'paid_via', 'ramp_order_id', 'paid_at', 'expires_at'];
+        'channels', 'metadata', 'splits', 'split_status', 'split_failure', 'status', 'paid_via', 'ramp_order_id', 'paid_at', 'expires_at'];
 
-    protected $casts = ['channels' => 'array', 'metadata' => 'array', 'paid_at' => 'datetime', 'expires_at' => 'datetime'];
+    protected $casts = ['channels' => 'array', 'metadata' => 'array', 'splits' => 'array', 'paid_at' => 'datetime', 'expires_at' => 'datetime'];
 
     public function payee(): BelongsTo
     {

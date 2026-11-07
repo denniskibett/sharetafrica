@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /** A business's webhook endpoint (docs/v2/INTEGRATION.md §8). The secret is encrypted at rest and signs every delivery. */
 class ApiWebhook extends Model
 {
-    public const EVENTS = ['payment.paid', 'payment.failed', 'payment.refunded', 'payment_request.paid', 'payment_request.expired'];
+    public const EVENTS = ['payment.paid', 'payment.failed', 'payment.refunded', 'payment_request.paid', 'payment_request.expired',
+        'settlement.completed', 'settlement.failed', 'settlement.awaiting_approval'];
 
     protected $fillable = ['user_id', 'environment', 'url', 'events', 'secret', 'enabled'];
 

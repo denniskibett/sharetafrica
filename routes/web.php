@@ -36,6 +36,13 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/contact', 'contact')->name('contact');
 });
 
+// Dashboard › Settlements: second approval for large API batches. Names under "pay." so the ledger freeze stops approvals.
+Route::middleware(['auth', 'permission:developer.api_keys'])->prefix('settlements')->controller(\App\Http\Controllers\SettlementApprovalsController::class)->group(function () {
+    Route::get('/', 'index')->name('settlements.index');
+    Route::post('/{settlement}/approve', 'approve')->middleware('password.confirm')->name('pay.settlements.approve');
+    Route::post('/{settlement}/reject', 'reject')->middleware('password.confirm')->name('pay.settlements.reject');
+});
+
 // Hosted pay page for API payment requests (docs/v2/INTEGRATION.md §3). Paying moves money: names under "pay." so the
 // ledger freeze stops it. Sharet wallet needs sign-in and the PIN; M-PESA works for anyone with the link.
 Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\PayRequestController::class)->group(function () {

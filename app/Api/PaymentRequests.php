@@ -31,9 +31,6 @@ final class PaymentRequests
 
     public function create(ApiKey $key, User $payee, array $input): ApiPaymentRequest
     {
-        if (! empty($input['splits'])) {
-            throw new ApiError(422, 'splits_not_available', 'Splits are coming next', 'Create the request without "splits" for now; split settlement is the next part of the API.');
-        }
         if ($key->isLive() && ! $key->company?->verified_at) {
             throw new ApiError(403, 'business_not_verified', 'Your business isn\'t verified yet', 'Live payment requests need a verified business. Use a sk_test_ key meanwhile.');
         }
@@ -58,6 +55,7 @@ final class PaymentRequests
             throw new ApiError(422, 'invalid_channels', 'Choose how they can pay', 'channels: "sharet", "mpesa" or both.');
         }
         $minutes = max(5, min(60 * 24 * 30, (int) ($input['expires_in_minutes'] ?? 60 * 24 * 7)));
+        $splits = ! empty($input['splits']) ? Splits::resolve((array) $input['splits'], $cents, $payee) : null;
         $live = $key->isLive();
 
         return ApiPaymentRequest::create([
@@ -69,6 +67,7 @@ final class PaymentRequests
             'payer_user_id' => $payerUser?->id, 'payer_phone' => $payerPhone,
             'channels' => $channels,
             'metadata' => is_array($input['metadata'] ?? null) ? array_slice($input['metadata'], 0, 20, true) : null,
+            'splits' => $splits,
             'status' => 'open',
             'expires_at' => now()->addMinutes($minutes),
         ]);
@@ -92,6 +91,9 @@ final class PaymentRequests
             'paid_at' => $r->paid_at?->toIso8601String(),
             'expires_at' => $r->expires_at->toIso8601String(),
             'metadata' => $r->metadata,
+            'splits' => $r->splits ? array_map(fn ($l) => ['sharet_id' => $l['sharet_id'], 'amount' => PaymentInput::amount($l['amount'])], $r->splits) : null,
+            'split_status' => $r->split_status,
+            'split_failure' => $r->split_failure,
             'created_at' => $r->created_at?->toIso8601String(),
         ];
     }
@@ -186,8 +188,43 @@ final class PaymentRequests
     {
         $r->update(['status' => 'paid', 'paid_via' => $via, 'paid_at' => now(), 'ramp_order_id' => $order?->id ?? $r->ramp_order_id]);
         $this->webhooks->fire($r->payee, $r->environment, 'payment_request.paid', self::present($r->fresh()));
+        if ($r->splits) {
+            $this->settle($r->fresh());
+        }
 
         return $r->fresh();
+    }
+
+    /**
+     * Pay every split leg from the business's wallet to the recipients' Sharet IDs, all or nothing: the legs run in one
+     * database transaction, so if any leg is refused none of them happen and the money stays in the business's wallet
+     * (settlement.failed, retry with POST /payment-requests/{id}/settle). Free and instant (Sharet ↔ Sharet).
+     */
+    public function settle(ApiPaymentRequest $r): ApiPaymentRequest
+    {
+        if (! $r->splits || $r->status !== 'paid' || $r->split_status === 'settled') {
+            return $r;
+        }
+        if ($r->environment === 'test') {
+            $r->update(['split_status' => 'settled', 'split_failure' => null]);
+        } else {
+            try {
+                DB::transaction(function () use ($r) {
+                    foreach ($r->splits as $leg) {
+                        $to = \App\Models\User::findOrFail($leg['user_id']);
+                        $this->orders->transfer($r->payee, Handle::for($to), PaymentInput::amount($leg['amount']), Str::limit('Split · '.($r->reference ?: $r->public_id), 140, ''));
+                    }
+                });
+                $r->update(['split_status' => 'settled', 'split_failure' => null]);
+            } catch (ValidationException $e) {
+                $r->update(['split_status' => 'failed', 'split_failure' => (string) collect($e->errors())->flatten()->first()]);
+            }
+        }
+        $r = $r->fresh();
+        $this->webhooks->fire($r->payee, $r->environment, $r->split_status === 'settled' ? 'settlement.completed' : 'settlement.failed',
+            ['payment_request' => $r->public_id, 'legs' => self::present($r)['splits'], 'failure' => $r->split_failure]);
+
+        return $r;
     }
 
     private function assertPayable(?ApiPaymentRequest $r, ?string $channel): void

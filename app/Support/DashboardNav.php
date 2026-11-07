@@ -51,6 +51,7 @@ class DashboardNav
                     ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
                 ],
             ],
             [
@@ -64,6 +65,7 @@ class DashboardNav
                     ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
                 ],
             ],
             [
@@ -71,6 +73,7 @@ class DashboardNav
                 'roles' => ['techie'],
                 'items' => [
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'amber', 'can' => 'developer.api_keys'],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
                     ['label' => 'Webhooks', 'route' => 'developer.webhooks.index', 'icon' => 'bolt', 'tone' => 'violet'],
                     ['label' => 'Request logs', 'route' => 'developer.logs', 'icon' => 'command-line', 'tone' => 'slate'],
                     ['label' => 'Sandbox', 'route' => 'developer.sandbox', 'icon' => 'beaker', 'tone' => 'teal'],

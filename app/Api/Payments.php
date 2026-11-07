@@ -33,6 +33,25 @@ final class Payments
         return $key->isLive() ? $this->live($key, $user, $in, $input, $reference) : $this->sandbox($key, $user, $in, $reference);
     }
 
+    /** One item of a batch settlement: paid like any payment; a refusal is recorded as a failed item, never thrown. */
+    public function createInSettlement(ApiKey $key, User $user, array $input, int $settlementId): ApiPayment
+    {
+        try {
+            $p = $this->create($key, $user, $input);
+            $p->update(['api_settlement_id' => $settlementId]);
+
+            return $p->fresh();
+        } catch (ApiError $e) {
+            return ApiPayment::create([
+                'public_id' => ($key->isLive() ? 'pay_' : 'pay_test_').Str::lower(Str::random(18)),
+                'api_key_id' => $key->id, 'user_id' => $user->id, 'environment' => $key->environment, 'api_settlement_id' => $settlementId,
+                'status' => 'failed', 'amount' => 0, 'fee' => 0, 'total' => 0,
+                'to' => (array) ($input['to'] ?? []), 'reference' => isset($input['reference']) ? Str::limit((string) $input['reference'], 140, '') : null,
+                'failure' => $e->detail,
+            ]);
+        }
+    }
+
     /** Status of an API payment, refreshed from its order (live) so a GET is never stale. */
     public function current(ApiPayment $p): ApiPayment
     {

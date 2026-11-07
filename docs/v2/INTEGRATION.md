@@ -199,12 +199,21 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   `POST …/{id}/cancel`. Hosted pay page `/r/{token}`: Sharet wallet (signed in + PIN, free, only the named payer if one
   is set) or an M-PESA prompt to any phone (lands in the business's wallet). Sandbox requests show "Simulate paid /
   cancel" and never touch the ledger. Webhooks `payment_request.paid`, `payment_request.expired`; expiry by
-  `php artisan api:requests-expire` (scheduled every minute). `splits` are refused until split settlement is built.
+  `php artisan api:requests-expire` (scheduled every minute).
+- Split settlement on payment requests: legs to Sharet IDs or @names (resolved to Sharet IDs at creation), by percent or
+  amount, whole shillings, the rest stays with the business ("self"). Paid all-or-nothing in one database transaction
+  from the business's wallet once the request is paid; on failure the money stays with the business
+  (`settlement.failed`) and `POST /api/v1/payment-requests/{id}/settle` retries. Legs to M-PESA/banks are refused:
+  recipients send outside themselves (charged).
+- Batch settlements: `POST /api/v1/settlements` (`payout`, `Idempotency-Key`, up to 500 items, every item checked
+  before anything moves), `GET /api/v1/settlements/{id}`. Live batches over KES 500,000 (`API_SECOND_APPROVAL_CENTS`)
+  return 202 `awaiting_approval` and wait in Dashboard › **API approvals** for a different person from the same business
+  with API-key access, after re-entering their password; the key's owner can't approve. Webhooks
+  `settlement.awaiting_approval`, `settlement.completed`, `settlement.failed`.
 
 **Still to build, in order:**
-1. Split settlement in one journal; batch settlements with the second approver (§4, §5).
-2. Business wallets in the ledger (keys act for the company's Sharet ID, not the creator's).
-3. Connected accounts and consent (§6).
-4. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
-5. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
-6. Docs site from this file.
+1. Business wallets in the ledger (keys act for the company's Sharet ID, not the creator's).
+2. Connected accounts and consent (§6).
+3. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
+4. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
+5. Docs site from this file.

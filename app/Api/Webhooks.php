@@ -55,6 +55,9 @@ final class Webhooks
         if (in_array($status, ['paid', 'failed', 'refunded'], true)) {
             $this->fire($p->user, $p->environment, 'payment.'.$status, Payments::present($p->fresh()));
         }
+        if ($p->api_settlement_id && $p->settlement) {
+            app(Settlements::class)->refresh($p->settlement);   // the batch finishes when its last payment does
+        }
     }
 
     public function deliver(ApiWebhookDelivery $d): void

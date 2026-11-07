@@ -32,11 +32,18 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
         Route::get('/payments/{id}', 'show')->middleware('api.scope:read')->name('api.v1.payments.show');
     });
 
+    // Batch settlements: many payments in one call; live batches over the threshold wait for a second approver (§4)
+    Route::controller(\App\Http\Controllers\Api\V1\SettlementsController::class)->group(function () {
+        Route::post('/settlements', 'store')->middleware(['api.scope:payout', \App\Http\Middleware\Idempotent::class])->name('api.money.v1.settlements.store');
+        Route::get('/settlements/{id}', 'show')->middleware('api.scope:read')->name('api.v1.settlements.show');
+    });
+
     // Payment requests: money in (§3). Creating one moves nothing; paying happens on the hosted page.
     Route::controller(\App\Http\Controllers\Api\V1\PaymentRequestsController::class)->group(function () {
         Route::post('/payment-requests', 'store')->middleware(['api.scope:collect', \App\Http\Middleware\Idempotent::class])->name('api.v1.payment_requests.store');
         Route::get('/payment-requests/{id}', 'show')->middleware('api.scope:read')->name('api.v1.payment_requests.show');
         Route::post('/payment-requests/{id}/cancel', 'cancel')->middleware('api.scope:collect')->name('api.v1.payment_requests.cancel');
+        Route::post('/payment-requests/{id}/settle', 'settle')->middleware(['api.scope:payout'])->name('api.money.v1.payment_requests.settle');
     });
 
     // Webhook endpoints (§8)

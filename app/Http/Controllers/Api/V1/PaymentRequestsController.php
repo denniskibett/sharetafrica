@@ -36,6 +36,14 @@ class PaymentRequestsController extends Controller
         return $r ? response()->json(PaymentRequests::present($this->requests->cancel($r))) : $this->missing();
     }
 
+    /** Retry the split legs of a paid request whose split failed (e.g. after topping up the business wallet). */
+    public function settle(Request $request, string $id)
+    {
+        $r = $this->find($request, $id);
+
+        return $r ? response()->json(PaymentRequests::present($this->requests->settle($r))) : $this->missing();
+    }
+
     private function find(Request $request, string $id): ?ApiPaymentRequest
     {
         $r = ApiPaymentRequest::where('public_id', $id)->where('user_id', $request->user()->id)
