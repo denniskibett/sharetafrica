@@ -21,7 +21,7 @@ return new class extends Migration
             $t->char('token_hash', 64)->unique();
             $t->timestamp('last_used_at')->nullable();
             $t->string('last_ip', 45)->nullable();
-            $t->timestamp('expires_at');
+            $t->dateTime('expires_at'); // dateTime: MySQL strict mode refuses a NOT NULL timestamp without a default
             $t->timestamp('revoked_at')->nullable();
             $t->timestamps();
             $t->index(['user_id', 'revoked_at']);
