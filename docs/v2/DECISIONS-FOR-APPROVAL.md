@@ -67,7 +67,16 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 
 ## 4. Website (homepage coded 7 Nov from the approved board; not yet deployed)
 
-The homepage `/` is now the canvas design (generated: `resources/views/index.blade.php`, `public/css/site.css`, layout `resources/views/site/layout.blade.php`). The hero rate is **today's real rate**, or "Today's rate, before you pay" if treasury hasn't recorded one. Footer links with no page yet (Careers, Press, Terms) are left out. **Other public pages (Personal, Merchants, Developers, Company, Contact, Trade, Privacy, Blog) still use the old look**: they need designs first.
+The homepage `/` is now the canvas design (generated: `resources/views/index.blade.php`, `public/css/site.css`, layout `resources/views/site/layout.blade.php`). The hero rate is **today's real rate**, or "Today's rate, before you pay" if treasury hasn't recorded one. Footer links with no page yet (Careers, Press, Terms) are left out. **Other public pages (Personal, Merchants, Developers, Company, Contact, Trade, Privacy, Blog) still use the old look in code.** Their new designs are on the canvas (Phase 1 · Website, boards Web*V2, desktop + phone), awaiting your approval. Points to confirm in them:
+
+| ✓ | Decision |
+|---|---|
+| ☐ | Old claims dropped because they don't match the Kenya pilot: "~60% cheaper", Tanzania/Uganda sending live today, "CBK licence application submitted Q1 2026", "client funds at Equity Bank", "MTN Uganda live", "privately held, no outside investment". Tell me which of these are true and should come back. |
+| ☐ | **Business** and **Trade finance** pages say "coming soon" with a business waiting list; settlement "every evening at 17:00" and trade terms (3.5% / 60 days, 0.1% a day late, two approvers above KES 500,000) are samples. |
+| ☐ | **Developers:** "sandbox on request" and six v1 endpoints (payments, quotes, balance, ledger, webhooks) — this is the proposed public API; only the mobile API exists in code today. |
+| ☐ | **Contact:** support@sharet.africa for customers and fraud, hello@sharet.africa for business, partners and press; "reply within one working day". |
+| ☐ | **Privacy:** your current notice word for word, in a new layout with a contents list and a short "In short" summary at the top (new text: please check it). |
+| ☐ | **Blog:** the three posts shown are samples; the real page lists your published posts. |
 
 | ✓ | Decision |
 |---|---|

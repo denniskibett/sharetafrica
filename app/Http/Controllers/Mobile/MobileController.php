@@ -41,6 +41,7 @@ class MobileController extends Controller
             'api' => 'v1', 'min_app_version' => config('mobile.min_version', '1.0.0'), 'currency' => config('ledger.currency'),
             'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen(), 'support' => ['email' => 'support@sharet.africa'],
             'test_mode' => config('rails.default') === 'simulator',
+            'android' => ($a = \App\Support\AndroidRelease::latest()) ? ['version' => $a['version'], 'build' => $a['build'] ?? null, 'url' => route('app.android')] : null,
         ]);
     }
 

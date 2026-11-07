@@ -34,6 +34,12 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/developers', 'developers')->name('developers');
     Route::get('/company', 'company')->name('company');
     Route::get('/contact', 'contact')->name('contact');
+});
+
+// The Android app (APK uploaded by the app's scripts/release-android.sh; shown on the home page once present)
+Route::get('/app/android/{abi?}', [\App\Http\Controllers\AppDownloadController::class, 'android'])->name('app.android');
+
+Route::controller(HomeController::class)->group(function () {
 
     // Form submissions (public — do NOT require auth); thank-you emails are sent from HomeController
     Route::middleware('throttle:10,10')->group(function () {
