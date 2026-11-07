@@ -5,7 +5,7 @@
       <div class="flex items-center justify-between gap-3">
         <div>
           <p class="font-medium text-gray-900 dark:text-white">Verified</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">M-Pesa number, ID photos and three selfies. Send and receive at basic limits.</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">M-Pesa number, ID photos and a selfie. Send and receive at basic limits.</p>
         </div>
         <span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Done' : data.level.basic.done + ' of ' + data.level.basic.of"></span>
       </div>

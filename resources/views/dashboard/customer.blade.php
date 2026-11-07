@@ -29,7 +29,7 @@
       <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-lime text-[#050507]"><x-heroicon-o-identification class="h-6 w-6" /></span>
       <span class="min-w-0 flex-1">
         <span class="block font-semibold">Verify to start transacting</span>
-        <span class="block text-sm text-app-muted">Photograph your ID (front and back) and take three selfies. We read your details from the ID: nothing to type.</span>
+        <span class="block text-sm text-app-muted">Photograph your ID (front and back) and take a quick selfie. We read your details from the ID: nothing to type.</span>
       </span>
       <x-heroicon-o-chevron-right class="h-5 w-5 shrink-0 text-app-accent" />
     </a>

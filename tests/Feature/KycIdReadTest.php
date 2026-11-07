@@ -90,4 +90,11 @@ class KycIdReadTest extends TestCase
         @unlink($file);
         $this->assertSame(['12345678', '1990-03-05', 'Jane Wanjiru Doe', 'Kiambu'], [$read['id_number'] ?? null, $read['date_of_birth'] ?? null, $read['full_name'] ?? null, $read['district_of_birth'] ?? null]);
     }
+
+    public function test_verification_shows_one_guided_selfie(): void
+    {
+        $user = User::factory()->create(['onboarding_status' => 'active']);
+        $this->actingAs($user)->get('/profile/edit')->assertOk()
+            ->assertSee('kycSelfie((t, u) => uploadDoc(t, u))', false)->assertSee('We take three photos for you')->assertDontSee('kycCamera()', false);
+    }
 }

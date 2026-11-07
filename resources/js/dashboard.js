@@ -159,6 +159,12 @@ export function profile(url) {
             finally { this.busy = false; }
         },
         percent(part) { return part?.of ? Math.round((part.done / part.of) * 100) : 0; },
+        /** The three selfie photos shown as one card: done when all three are in. */
+        selfieCard(center) {
+            const poses = (this.data.documents || []).filter((x) => x.type.startsWith('selfie_'));
+            return { ...center, type: 'selfie', label: 'Selfie', hint: 'One quick selfie: look straight, then turn left and right. Taken for you.',
+                poses, uploaded: poses.length === 3 && poses.every((x) => x.uploaded), url: null, at: center.at };
+        },
         docError: {},
         /** Upload one verification photo: a File (checked for clarity first) or a data: URL. */
         async uploadDoc(type, source, check = { minWidth: 1000, minHeight: 600 }) {
@@ -229,6 +235,95 @@ export function kycCamera() {
             if (!check.ok) { this.error = check.reason; return; }
             this.shot = url; this.stop();
         },
+        destroy() { this.stop(); },
+    };
+}
+
+/**
+ * One guided selfie that yields the three photos staff need (straight, left, right). The camera watches the light
+ * (dark, washed out, or lit from behind) and holds still; each pose is taken by itself once it has been good for about a
+ * second, and the turns only count when the head has visibly moved from the straight shot. Each photo uploads in the
+ * background while the next pose is being taken. `upload(type, dataUrl)` is the page's uploadDoc.
+ */
+export const SELFIE_STEPS = [
+    { type: 'selfie_center', say: 'Look straight at the camera' },
+    { type: 'selfie_left', say: 'Slowly turn your head to the left' },
+    { type: 'selfie_right', say: 'Now slowly turn to the right' },
+];
+
+/** Light and a tiny greyscale thumbnail of the video frame: overall brightness, the face oval vs the edges, sharpness. */
+function frameStats(video) {
+    const w = 64, h = 48, c = frameStats.c || (frameStats.c = document.createElement('canvas'));
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d', { willReadFrequently: true }); ctx.drawImage(video, 0, 0, w, h);
+    const px = ctx.getImageData(0, 0, w, h).data, g = new Float32Array(w * h);
+    let all = 0, face = 0, nf = 0, edge = 0, ne = 0;
+    for (let i = 0; i < g.length; i++) {
+        g[i] = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]; all += g[i];
+        const x = (i % w) / w - 0.5, y = Math.floor(i / w) / h - 0.5;
+        if ((x * x) / 0.08 + (y * y) / 0.14 < 1) { face += g[i]; nf++; } else if (Math.abs(x) > 0.38) { edge += g[i]; ne++; }
+    }
+    let lap = 0;
+    for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; lap += Math.abs(4 * g[i] - g[i - 1] - g[i + 1] - g[i - w] - g[i + w]); }
+    return { mean: all / g.length, face: face / nf, edge: edge / ne, sharp: lap / ((w - 2) * (h - 2)), grey: g };
+}
+
+function frameDiff(a, b) {
+    let d = 0;
+    for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]);
+    return d / a.length;
+}
+
+export function kycSelfie(upload) {
+    return {
+        stream: null, error: '', step: 0, hint: '', good: 0, now: 0, shots: {}, sent: {}, timer: null, last: null, base: null, since: 0, done: false,
+        get current() { return SELFIE_STEPS[this.step]; },
+        async start() {
+            this.stop(); Object.assign(this, { error: '', step: 0, good: 0, shots: {}, sent: {}, base: null, done: false, since: Date.now() });
+            try {
+                this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false });
+                this.$refs.video.srcObject = this.stream; await this.$refs.video.play();
+                this.timer = setInterval(() => this.tick(), 200);
+            } catch (e) { this.error = 'We could not open your camera. Allow camera access in your browser, or upload photos instead.'; }
+        },
+        stop() { clearInterval(this.timer); this.timer = null; this.stream?.getTracks().forEach((t) => t.stop()); this.stream = null; },
+        /** Every 200 ms: is the light right and the picture steady? Five good frames in a row (about a second) takes the photo. */
+        tick() {
+            const v = this.$refs.video;
+            this.now = Date.now();
+            if (!v?.videoWidth || this.done) return;
+            const s = frameStats(v), moved = this.last ? frameDiff(s.grey, this.last) : 99;
+            this.last = s.grey;
+            let hint = '';
+            if (s.mean < 60 || s.face < 55) hint = 'Too dark. Face a window or a lamp.';
+            else if (s.mean > 215) hint = 'Too bright. Move out of direct light.';
+            else if (s.edge - s.face > 45) hint = 'The light is behind you. Turn to face the light.';
+            else if (s.sharp < 6) hint = 'Hold the phone steady.';
+            else if (moved > 14) hint = 'Hold still…';
+            else if (this.step > 0 && this.base && frameDiff(s.grey, this.base) < 9) hint = this.current.say.replace('Slowly ', '').replace('Now slowly', 'Turn') + ' a little more';
+            this.hint = hint;
+            this.good = hint ? 0 : this.good + 1;
+            if (this.good >= 5) this.take(s);
+        },
+        /** Takes this pose's photo (mirrored like the preview), uploads it in the background and moves on. */
+        take(stats = null) {
+            const v = this.$refs.video, c = document.createElement('canvas');
+            c.width = v.videoWidth; c.height = v.videoHeight;
+            const ctx = c.getContext('2d'); ctx.translate(c.width, 0); ctx.scale(-1, 1); ctx.drawImage(v, 0, 0);
+            const url = c.toDataURL('image/jpeg', 0.92), type = this.current.type;
+            this.shots = { ...this.shots, [type]: url };
+            if (this.step === 0) this.base = (stats || frameStats(v)).grey;
+            this.sent = { ...this.sent, [type]: 'sending' };
+            upload(type, url).then((ok) => { this.sent = { ...this.sent, [type]: ok ? 'done' : 'failed' }; });
+            this.good = 0; this.since = Date.now();
+            if (this.step < SELFIE_STEPS.length - 1) { this.step++; } else { this.done = true; this.stop(); }
+        },
+        /** After 12 seconds on one pose, let the person take it themselves. */
+        get slow() { return !this.done && this.stream && this.now - this.since > 12000; },
+        get failed() { return SELFIE_STEPS.filter((p) => this.sent[p.type] === 'failed').map((p) => p.type); },
+        get finished() { return this.done && SELFIE_STEPS.every((p) => this.sent[p.type] === 'done'); },
+        /** Re-sends any photo whose upload failed. */
+        retry() { this.failed.forEach((t) => { this.sent = { ...this.sent, [t]: 'sending' }; upload(t, this.shots[t]).then((ok) => { this.sent = { ...this.sent, [t]: ok ? 'done' : 'failed' }; }); }); },
         destroy() { this.stop(); },
     };
 }

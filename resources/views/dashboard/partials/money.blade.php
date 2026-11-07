@@ -45,7 +45,7 @@
     @unless ($verified)
       <div x-show="mode !== 'receive' || receiveFrom === 'mpesa'" class="rounded-2xl bg-app-wait/10 p-5 text-sm">
         <p class="font-semibold text-gray-900 dark:text-white">Verify your account to move money</p>
-        <p class="mt-1 text-gray-600 dark:text-gray-300">Photograph your ID (front and back) and take three selfies. It takes about two minutes, and we read your details from the ID.</p>
+        <p class="mt-1 text-gray-600 dark:text-gray-300">Photograph your ID (front and back) and take a quick selfie. It takes about two minutes, and we read your details from the ID.</p>
         <a href="{{ route('profile.edit') }}#verification" class="mt-4 inline-flex h-11 items-center rounded-full bg-app-lime px-5 font-semibold text-[#050507]">Verify now</a>
       </div>
     @endunless
