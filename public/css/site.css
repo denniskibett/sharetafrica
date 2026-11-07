@@ -391,6 +391,18 @@ body{margin:0;background:#fff}
 @media (max-width:900px){.pf.side{display:none}}
 @media (max-width:600px){.p3{margin-top:24px;padding-bottom:40px}.pf{width:250px;height:516px}.pf .phone{transform:scale(.665)}.fcard.l,.fcard.r{display:none}.lead.pl{display:none}}
 @media (prefers-reduced-motion:reduce){.f1,.f2,.f3,.bars i{animation:none!important}}
+/* Hero words: the noun after "Every" rolls through wallet, bank, till, phone; the intro rises in and the wallet names get a lime sweep */
+.rot{display:inline-grid;justify-items:start;vertical-align:bottom;overflow:hidden;height:1.02em;line-height:1;white-space:nowrap;width:2.65em;animation:rotwid 10s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes rotwid{0%{width:2.87em}4%,23%{width:2.65em}29%,48%{width:2.29em}54%,73%{width:1.07em}79%,100%{width:2.87em}}
+.rot > span{grid-area:1/1;opacity:0;transform:translateY(100%);animation:rotw 10s cubic-bezier(.65,0,.35,1) infinite}
+.rot > span:nth-child(2){animation-delay:2.5s}.rot > span:nth-child(3){animation-delay:5s}.rot > span:nth-child(4){animation-delay:7.5s}
+@keyframes rotw{0%{opacity:0;transform:translateY(100%)}4%,22%{opacity:1;transform:none}26%,100%{opacity:0;transform:translateY(-100%)}}
+.lead.rise{animation:rv .9s cubic-bezier(.2,.8,.2,1) .2s both}
+@keyframes rv{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.lead mark{background:linear-gradient(var(--lime),var(--lime)) no-repeat 0 88%/0% 38%;color:inherit;padding:0 1px;animation:mk 7.5s ease-in-out infinite}
+.lead mark:nth-of-type(2){animation-delay:2.5s}.lead mark:nth-of-type(3){animation-delay:5s}
+@keyframes mk{0%{background-size:0% 38%}10%,30%{background-size:100% 38%}42%,100%{background-size:0% 38%;background-position:100% 88%}}
+@media (prefers-reduced-motion:reduce){.rot{animation:none;width:auto}.rot > span{animation:none}.rot > span:first-child{opacity:1;transform:none}.lead.rise,.lead mark{animation:none}.lead mark{background-size:100% 38%}}
 .badge .bl{display:flex;flex-direction:column;line-height:1.05;font:600 16px var(--f-ui);letter-spacing:-.01em}.badge .bl small{font:500 10px var(--f-ui);letter-spacing:.02em;opacity:.85}
 .badge{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 16px;border-radius:12px;background:var(--ink);color:#fff;font-weight:600;font-size:14px}
 
