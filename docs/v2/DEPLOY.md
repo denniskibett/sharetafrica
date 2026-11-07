@@ -1,8 +1,9 @@
 # Deploying sharet.africa
 
 One server (CyberPanel, OpenLiteSpeed, PHP 8.3, MariaDB 10.3) at `185.113.249.146`. Deploys run from a developer's
-machine with `scripts/deploy.sh`; there is no CI yet and no git remote. Each deploy is a new release folder swapped in
-whole, so a bad release is one command away from the previous one.
+machine with `scripts/deploy.sh`; there is no CI yet and no git remote. Each deploy is prepared in a new release folder,
+then copied over `public_html` in place (a hard-linked snapshot of the old code is kept), so a bad release is one
+command away from the previous one and `public_html` is never renamed: a shell left open in it runs the new code.
 
 ## Sites on the server
 
@@ -24,8 +25,8 @@ Next to the live site: `releases/` (each deploy and the one it replaced), `backu
 | 2. Backup | On the server: database dump and an archive of the live folder into `backups/<timestamp>/` | Nothing live changed |
 | 3. Upload | The repo (minus `scripts/deploy-exclude.txt`) and the built assets into a **new** `releases/<timestamp>/` | Delete the half-uploaded folder |
 | 4. Prepare | Copies the live `.env`, `storage/` (uploads) and server-only public files into the release; `composer install --no-dev`; `APP_DEBUG=false`; **migrations**; caches | The live site still runs the old release. A migration that ran stays in the database: v2 migrations are additive, so the old code is unaffected |
-| 5. Swap | `public_html` becomes `releases/previous-<timestamp>`, the new release becomes `public_html`; storage link and caches rebuilt from the final path | — |
-| 6. Check | The main pages must answer 200 | The script swaps straight back to the previous release |
+| 5. Copy in | `public_html` is snapshotted to `releases/previous-<timestamp>` (hard links), then the release is rsynced over it in maintenance mode (`storage/` untouched); caches rebuilt; LiteSpeed restarted gracefully so OPcache reloads | The maintenance page lifts by itself; roll back with `--rollback` |
+| 6. Check | The main pages must answer 200 | The script copies the snapshot straight back |
 
 ```bash
 scripts/deploy.sh --dry-run     # see every step, change nothing
