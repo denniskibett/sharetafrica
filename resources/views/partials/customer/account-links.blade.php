@@ -17,6 +17,7 @@
   <a href="{{ route('profile.edit') }}" class="{{ $link }}"><x-heroicon-o-cog-6-tooth class="h-5 w-5" /> Account settings</a>
   <a href="{{ route('profile.edit') }}#verification" class="{{ $link }}"><x-heroicon-o-identification class="h-5 w-5" /> Verification
     @unless (in_array($user->kyc_level, ['basic', 'standard'], true))<span class="ml-auto h-2 w-2 rounded-full bg-amber-500" aria-label="To do"></span>@endunless</a>
+  <a href="{{ route('connections.index') }}" class="{{ $link }}"><x-heroicon-o-link class="h-5 w-5" /> Connected apps</a>
   <a href="{{ route('help') }}" class="{{ $link }}"><x-heroicon-o-lifebuoy class="h-5 w-5" /> Help</a>
   <form method="POST" action="{{ route('logout') }}" class="mt-1 border-t border-app-line pt-1">
     @csrf

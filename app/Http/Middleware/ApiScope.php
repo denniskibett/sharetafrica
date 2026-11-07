@@ -16,6 +16,11 @@ class ApiScope
             return ApiProblem::make(403, 'missing_scope', 'This key can\'t do that', "Give the key the \"$scope\" scope in Developers › API keys.");
         }
 
+        $connection = $request->attributes->get('api_connection');
+        if ($connection && ! $connection->allows($scope)) {
+            return ApiProblem::make(403, 'not_allowed_by_account', 'That person didn\'t allow this', "Their Sharet account approved only: ".implode(', ', $connection->scopes).'. Send a new connect link asking for "'.$scope.'".');
+        }
+
         return $next($request);
     }
 }

@@ -43,6 +43,17 @@ Route::middleware(['auth', 'permission:developer.api_keys'])->prefix('settlement
     Route::post('/{settlement}/reject', 'reject')->middleware('password.confirm')->name('pay.settlements.reject');
 });
 
+// Connected accounts, the person's side (docs/v2/INTEGRATION.md §6): consent with the PIN, and disconnect any time
+Route::prefix('connect/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\ConnectConsentController::class)->group(function () {
+    Route::get('/', 'show')->middleware('throttle:60,1')->name('connect.show');
+    Route::post('/approve', 'approve')->middleware(['auth', 'throttle:10,1'])->name('connect.approve');
+    Route::post('/decline', 'decline')->middleware(['auth', 'throttle:10,1'])->name('connect.decline');
+});
+Route::middleware('auth')->controller(\App\Http\Controllers\ConnectConsentController::class)->group(function () {
+    Route::get('/connected-apps', 'index')->name('connections.index');
+    Route::post('/connected-apps/{connection}/disconnect', 'revoke')->name('connections.revoke');
+});
+
 // Hosted pay page for API payment requests (docs/v2/INTEGRATION.md §3). Paying moves money: names under "pay." so the
 // ledger freeze stops it. Sharet wallet needs sign-in and the PIN; M-PESA works for anyone with the link.
 Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\PayRequestController::class)->group(function () {

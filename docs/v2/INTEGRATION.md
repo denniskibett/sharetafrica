@@ -216,8 +216,14 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   act for it; personal keys act for their owner. Verified companies get business limits (sample: KES 1,000,000 per
   payment, 10,000,000 a day; confirm), unverified ones can't move money. Dashboard › API approvals shows the wallet.
 
+- Connected accounts: `POST /api/v1/connect/links` (`connect` scope; scopes `collect`/`payout`, optional
+  `reference` and https `return_url`), `GET /api/v1/connect/accounts`, `POST /api/v1/connect/accounts/{id}/disconnect`.
+  The person opens `/connect/{token}` (7 days), signs in, reads what the platform may do, and approves with their PIN
+  or declines; they disconnect any time in Account › **Connected apps**. The platform acts for them with
+  `Sharet-Account: SH-…`, only within the approved scopes and their own limits (receive and send: free inside Sharet,
+  charged outside). Webhooks `account.connected`, `account.disconnected`.
+
 **Still to build, in order:**
-1. Connected accounts and consent (§6).
-2. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
-3. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
-4. Docs site from this file.
+1. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
+2. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
+3. Docs site from this file.

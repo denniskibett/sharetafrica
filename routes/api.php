@@ -46,6 +46,13 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
         Route::post('/payment-requests/{id}/settle', 'settle')->middleware(['api.scope:payout'])->name('api.money.v1.payment_requests.settle');
     });
 
+    // Connected accounts: the platform asks people to connect, lists and disconnects them (§6)
+    Route::middleware('api.scope:connect')->controller(\App\Http\Controllers\Api\V1\ConnectController::class)->group(function () {
+        Route::post('/connect/links', 'link')->name('api.v1.connect.link');
+        Route::get('/connect/accounts', 'index')->name('api.v1.connect.index');
+        Route::post('/connect/accounts/{id}/disconnect', 'disconnect')->name('api.v1.connect.disconnect');
+    });
+
     // Webhook endpoints (§8)
     Route::middleware('api.scope:read')->controller(\App\Http\Controllers\Api\V1\WebhooksController::class)->group(function () {
         Route::get('/webhooks', 'index')->name('api.v1.webhooks.index');

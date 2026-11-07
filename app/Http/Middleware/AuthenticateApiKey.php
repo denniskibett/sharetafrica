@@ -24,6 +24,13 @@ class AuthenticateApiKey
         $request->attributes->set('api_key', $key);
         // A company's key acts for the company's own Sharet wallet; a personal key for its owner (INTEGRATION.md §1)
         $account = $key->company ? $key->company->walletUser() : $key->user;
+
+        // Acting for a connected account (INTEGRATION.md §6): only one that approved this platform, within its scopes
+        if (filled($header = $request->header('Sharet-Account'))) {
+            $connection = app(\App\Api\Connections::class)->forRequest($key, $account, (string) $header);
+            $request->attributes->set('api_connection', $connection);
+            $account = $connection->account;
+        }
         $request->setUserResolver(fn () => $account);
 
         return $next($request);
