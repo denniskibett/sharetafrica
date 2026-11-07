@@ -36,6 +36,7 @@ return [
 
         '4100' => ['name' => 'Sharet fees', 'type' => 'income', 'book' => 'gl', 'allow_negative' => true],
         '4110' => ['name' => 'Merchant and API fees', 'type' => 'income', 'book' => 'gl', 'allow_negative' => true],
+        '4800' => ['name' => 'Test payments kept (real money paid in while testing)', 'type' => 'income', 'book' => 'gl', 'allow_negative' => true],
         '4900' => ['name' => 'Rounding differences', 'type' => 'income', 'book' => 'gl', 'allow_negative' => true],
 
         '5100' => ['name' => 'M-PESA charges', 'type' => 'expense', 'book' => 'gl', 'allow_negative' => true],

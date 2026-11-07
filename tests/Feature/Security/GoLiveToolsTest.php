@@ -137,4 +137,26 @@ class GoLiveToolsTest extends TestCase
         $this->assertSame(0, RampOrder::where('status', '!=', 'reversed')->count());
         $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
     }
+
+    public function test_a_real_test_top_up_can_be_booked_as_income(): void
+    {
+        $orders = app(RampOrders::class);
+        $tester = User::factory()->create(['name' => 'Test Er', 'phone' => '0712345674']);
+        $tester->forceFill(['kyc_level' => 'basic'])->save();
+        $o = $orders->confirm($orders->topUp($tester, '10'));
+        while (! $o->final()) {
+            $o = $orders->refresh($o);
+        }
+        \App\Models\RailRequest::whereKey($o->collect_request_id)->update(['rail' => 'daraja']);   // real M-PESA
+
+        $this->artisan('sharet:clean-simulated', ['--apply' => true])->assertSuccessful();
+        $this->assertSame(1000, $orders->walletBalance($tester), 'real money is never touched without being named');
+
+        $this->artisan('sharet:clean-simulated', ['--keep-as-income' => [(string) $o->id], '--apply' => true])
+            ->expectsOutputToContain('moved from the wallet to 4800')->assertSuccessful();
+        $this->assertSame(0, $orders->walletBalance($tester));
+        $this->assertSame('reversed', $o->fresh()->status);
+        $this->assertSame(1000, abs((int) app(\App\Ledger\Ledger::class)->account('4800')->fresh()->balance));   // Sharet's test income
+        $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
+    }
 }
