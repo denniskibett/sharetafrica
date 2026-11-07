@@ -32,7 +32,8 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ✓ | **Customers see only their @name** in the app for now; the Sharet ID is shown to businesses (dashboard, API, statements). |
 | ✓ | **Connected accounts** (e.g. scharge landlords, Breve merchants) can **receive and send**: free between Sharet IDs, **charged outside Sharet** at normal rates. |
 | ✓ | **Group companies use the same public API** as outside businesses and get **discounted fees on larger settlements**. |
-| ☐ | Discount tiers on outside payout fees (samples): over KES 1M a month 25% off, over KES 10M 40% off; group companies get the next tier up. Confirm the figures. |
+| ✓ | **Tariffs are tables:** Table 1 = fee by movement type and transaction amount band; Table 2 = discount by monthly volume tier. Kept by staff (Staff › Pricing), versioned by effective date. |
+| ☐ | Set the figures in both tables (samples in INTEGRATION.md §7: bank KES 50/100/0.01% cap 500; volume 0% / 25% over KES 1M / 40% over KES 10M; group companies one tier up). |
 | ☐ | Batches over KES 500,000 need a second approver; payout keys need an IP allow-list; live keys only after business verification (KYB). |
 | ☐ | Collection by M-PESA prompt: cost passed through. Confirm the rate with Cashia/Safaricom. |
 

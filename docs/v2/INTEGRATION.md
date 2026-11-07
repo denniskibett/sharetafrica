@@ -107,27 +107,42 @@ a Sharet ID and @name. The platform never holds their money.
 Decision (owner, 7 Nov): connected accounts can **receive and send**. **Sharet ↔ Sharet is free**; sending
 **outside Sharet** (M-PESA, Airtel, T-Kash, banks, SWIFT later) is charged at the normal rates.
 
-## 7. Pricing for businesses
+## 7. Pricing: tariff tables (owner, 7 Nov)
 
-| Movement | Fee |
+Fees come from **two tables**, kept by staff in the dashboard (Staff › Pricing), versioned with an effective date. A
+quote always uses the tariff in force when it's made, and records which version it used.
+
+**Table 1 · Transaction tiers.** The fee for one movement, by **movement type** and **amount band**. Each row is one
+band; each cell is a fixed fee, a percentage, or both (with an optional cap). Sample structure (figures to set):
+
+| Amount band (KES) | Sharet ↔ Sharet | Collect by Sharet wallet | Collect by M-PESA prompt | Pay out to M-PESA / Airtel / T-Kash | Pay out to bank (PesaLink) |
+|---|---|---|---|---|---|
+| 1 – 100 | Free | Free | pass-through | Free | n/a |
+| 101 – 1,000 | Free | Free | pass-through | band fee | KES 50 |
+| 1,001 – 10,000 | Free | Free | pass-through | band fee | KES 50 |
+| 10,001 – 100,000 | Free | Free | pass-through | band fee | KES 50 |
+| 100,001 – 1,000,000 | Free | Free | pass-through | band fee | KES 100 |
+| Over 1,000,000 | Free | Free | pass-through | band fee | 0.01%, cap KES 500 |
+
+"Band fee" today is the personal tariff in `config/pricing.php` (Safaricom's charge for the band + 20%, excise on our
+part); for businesses it becomes its own column in this table. Sharet ↔ Sharet stays free in every band.
+
+**Table 2 · Volume tiers.** A discount on Table 1 fees for **outside** movements, by the business's **total outside
+settlements in the calendar month so far**. Sample structure (figures to set):
+
+| Monthly outside settlements (KES) | Discount on Table 1 fees |
 |---|---|
-| Sharet ↔ Sharet (any two Sharet IDs, incl. splits and connected accounts) | **Free** |
-| Collect by Sharet wallet | Free |
-| Collect by M-PESA prompt | Collection cost passed through (to confirm with Cashia/Safaricom) |
-| Pay out to M-PESA / Airtel / T-Kash | Standard send fee (config/pricing.php: Safaricom band + 20%, excise on our part) |
-| Pay out to a bank (PesaLink) | KES 50 sample (to confirm) |
+| 0 – 1,000,000 | 0% |
+| 1,000,001 – 10,000,000 | 25% |
+| Over 10,000,000 | 40% |
 
-**Larger settlements are discounted** (owner, 7 Nov), for group companies and for any business with volume. Proposed
-tiers on outside payout fees, per calendar month, **sample figures to confirm**:
-
-| Monthly outside settlements | Discount on payout fees |
-|---|---|
-| Up to KES 1,000,000 | none |
-| KES 1M – 10M | 25% |
-| Over KES 10M | 40% |
-| Sharet group companies | the next tier up from their volume |
-
-The fee is always shown in the quote and the response before money moves.
+Rules:
+- The fee for a movement = Table 1 fee for its type and amount band, minus the Table 2 discount for the business's
+  tier at that moment. A movement that crosses a tier boundary is priced at the tier it starts in.
+- **Group companies** are priced one volume tier up from their actual volume (owner: discounted for larger
+  settlements).
+- Connected accounts are priced on their own volume, not the platform's.
+- The fee and the tier used are returned in every quote and response, and printed on statements.
 
 ## 8. Webhooks
 
@@ -177,5 +192,5 @@ Build order when approved:
 3. Quotes and payments (out), reusing the order engine; webhooks with signatures.
 4. Payment requests (in) with the hosted pay page and in-app approval.
 5. Split settlement in one journal; settlements (batch) with the second approver.
-6. Connected accounts and consent; volume discount tiers.
+6. Connected accounts and consent; tariff tables (transaction tiers × volume tiers) with Staff › Pricing.
 7. Docs site from this file; sandbox test numbers.
