@@ -57,7 +57,7 @@ class AndroidDownloadTest extends TestCase
 
         // Testing only (owner, 7 Nov): offered on the Developers page, never on the home page
         $this->get('/')->assertDontSee('/app/android');
-        $this->get('/developers')->assertOk()->assertSee('For testing only')->assertSee(route('app.android'))->assertSee(route('app.android', 'armv7'));
+        $this->get('/developers')->assertOk()->assertSee('FOR TESTING ONLY')->assertSee('Android test build')->assertSee(route('app.android'))->assertSee(route('app.android', 'armv7'));
         $this->getJson('/api/mobile/v1/config')->assertJsonPath('android.version', '1.2.0')->assertJsonPath('android.build', 3);
     }
 

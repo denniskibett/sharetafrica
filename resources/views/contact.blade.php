@@ -1,107 +1,11 @@
-{{-- resources/views/home/pages/contact.blade.php --}}
-@extends('home.layouts.app')
-
-@section('title', 'Contact Sharet — Merchants, wallets, trade, press')
-@section('description', 'Get in touch about merchant onboarding, personal wallets, trade accounts, developer access, press or careers. We reply within 48 working hours.')
-
+{{-- contact: generated from the approved canvas board WebContactV2 by scratchpad build_pages.py. Change the design first, then regenerate. --}}
+@extends('site.layout')
+@section('title', 'Contact Sharet · Talk to a real person')
+@section('description', 'Report fraud, get help with a payment, or talk to us about business, partnerships or press. Every message is read by someone in Nairobi.')
 @section('content')
-
-  {{-- Hero --}}
-  <section class="hero">
-    <div class="container container--wide">
-      <div class="hero-grid">
-        <div class="hero-text">
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Reply within 48 working hours</span>
-          <h1 class="hero-headline">
-            Send a real<br/>
-            <span class="lime">first note,</span> get<br/>
-            a real reply.
-          </h1>
-          <p class="hero-sub">
-            Every note to Sharet is read by a real person on the team — not an inbox bot. Tell us who you are, what you do, and which page brought you here. We will route it to the right person and reply within 48 working hours.
-          </p>
-          <div class="hero-cta-row">
-            <a class="btn btn--primary btn--lg" href="#intake">Start here</a>
-            <a class="btn btn--ghost btn--lg" href="#channels">Other channels</a>
-          </div>
-          <div class="hero-meta">
-            <span><strong>48hr</strong> · target reply</span>
-            <span aria-hidden="true">·</span>
-            <span><strong>3</strong> · offices in East Africa</span>
-            <span aria-hidden="true">·</span>
-            <span><strong>1</strong> · ledger</span>
-          </div>
-        </div>
-        <div class="hero-media">
-          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet operations desk with a laptop, a reconciliation sheet, and a Nairobi coffee cup." />
-          <div class="floating-tag ft-top">
-            <span class="pill">Inbox</span>
-            HELLO @ SHARET.AFRICA
-          </div>
-          <div class="floating-tag ft-bottom">
-            NAIROBI · KAMPALA · DAR ES SALAAM
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Channels --}}
-  <section id="channels">
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="label">Three channels</span>
-          <h2>Pick the right<br/>door to come<br/>through.</h2>
-        </div>
-        <p class="lede">
-          Onboarding enquiries land with the platform team. Press and media land with communications. Careers land with operations. Every channel is a real inbox watched by a real person at Sharet.
-        </p>
-      </div>
-
-      <div class="channel-grid">
-        <article class="channel-card">
-          <span class="label">01 / Onboarding</span>
-          <h3>For merchants, individuals &amp; traders.</h3>
-          <p>The right door for merchants, personal wallets, trade accounts, and platform integrations. Tell us which audience you are, and we will route it.</p>
-          <a class="channel-line" href="mailto:hello@sharet.africa">hello @ sharet.africa</a>
-          <span class="mono" style="color: var(--fg-mute);">Platform team · 48hr reply target</span>
-        </article>
-
-        <article class="channel-card" id="press">
-          <span class="label label--lime">02 / Press &amp; media</span>
-          <h3>For journalists.</h3>
-          <p>Interviews, image licensing, brand assets, commentary on African payments infrastructure, and quotes for stories on fintech and mobile money.</p>
-          <a class="channel-line" href="mailto:press@sharet.africa">press @ sharet.africa</a>
-          <span class="mono" style="color: var(--fg-mute);">Communications lead · 5-day reply target</span>
-        </article>
-
-        <article class="channel-card" id="careers">
-          <span class="label">03 / Careers</span>
-          <h3>For job-seekers.</h3>
-          <p>Hiring across engineering, treasury, compliance, and partnerships — with a preference for people who have shipped payments infrastructure in East Africa.</p>
-          <a class="channel-line" href="mailto:careers@sharet.africa">careers @ sharet.africa</a>
-          <span class="mono" style="color: var(--fg-mute);">Operations lead · 7–14 day reply window</span>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  {{-- Intake --}}
-  <section id="intake">
-      <div class="container container--narrow">
-          <div class="section-head">
-              <div>
-                  <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Intake</span>
-                  <h2>Tell us who<br/>you are first.</h2>
-              </div>
-              <p class="lede">
-                  Pick the audience that fits you best. The form will route your note to the right person. Every note goes to a real person on the team.
-              </p>
-          </div>
-
-          {{-- site.js sends this in the background (no reload) and shows the reply in .form-status; plain post still works --}}
-          <form class="form-card" method="POST" action="{{ route('contact.send') }}" data-async-form>
+<div class="ui web pg">
+<div class="wr"><div class="wn"><a class="lg" href="{{ route('home') }}" aria-label="Sharet home">sharet<i>.</i></a><nav><a href="{{ route('personal') }}">Personal</a><a href="{{ route('home') }}#abroad">Abroad</a><a href="{{ route('merchants') }}">Business</a><a href="{{ route('home') }}#pricing">Pricing</a><a class="on" href="{{ route('contact') }}">Help</a></nav><a class="wb o" href="{{ route('login') }}">Log in</a><a class="wb" href="{{ route('register') }}">Open an account</a></div></div>
+<div class="wr phero"><div><span class="lbl">CONTACT</span><h1 class="mega pg">Talk to a real person.</h1><p class="lead">Every message is read by someone on the Sharet team in Nairobi. Pick the right door and we'll get back to you fast.</p></div></div><div class="wr"><div class="doors"><div class="door red"><span class="tile t-bad"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span><b>Report fraud</b><span>Someone asked for your PIN, or a payment you didn't make? Tell us now and we can stop your account while we look.</span><a href="mailto:support@sharet.africa">support@sharet.africa</a></div><div class="door"><span class="tile t-send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 .5c0 1.5-2.5 2-2.5 3.5"/><path d="M12 17h.01"/></svg></span><b>Customers</b><span>Payments, your account, verification and limits. We reply within one working day.</span><a href="mailto:support@sharet.africa">support@sharet.africa</a></div><div class="door"><span class="tile t-pay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg></span><b>Businesses and partners</b><span>Business accounts, the API, and partnerships.</span><a href="mailto:hello@sharet.africa">hello@sharet.africa</a></div><div class="door"><span class="tile t-ink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/></svg></span><b>Press</b><span>Interviews, facts and figures, and brand assets.</span><a href="mailto:hello@sharet.africa">hello@sharet.africa</a></div></div></div><div class="wr sect " style=""><span class="lbl">WRITE TO US</span><h2 class="h2w" style="margin-top:12px">Tell us who you are first.</h2><p class="lead">We route your note to the right person. No newsletter, no sharing.</p><div style="margin-top:24px" id="write"><form class="form-card sform" method="POST" action="{{ route('contact.send') }}">
               @csrf
               <div class="form-status" role="status" aria-live="polite" hidden></div>
 
@@ -175,92 +79,10 @@
                       <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </button>
               </div>
-          </form>
-      </div>
-  </section>
+          </form></div></div><div class="wr sect " style="padding-top:0"><span class="lbl">VISIT</span><h2 class="h2w" style="margin-top:12px">Nairobi, Kenya.</h2><p class="lead">Sharet Africa Ltd. Meetings by appointment.</p></div>
+<div class="foot"><div class="wr"><div class="cols"><div><span style="font:400 20px var(--f-disp);color:#fff">sharet<span style="color:var(--lime)">.</span></span><p>Payments for Kenya and East Africa. Nairobi.</p></div>
+<div><b>Personal</b><a href="{{ route('home') }}#send">Send and receive</a><a href="{{ route('home') }}#everyday">Pay bills</a><a href="{{ route('home') }}#everyday">Withdraw</a><a href="{{ route('home') }}#card">Card</a><a href="{{ route('home') }}#abroad">Across borders</a></div><div><b>Business</b><a href="{{ route('merchants') }}">Merchants</a><a href="{{ route('trade') }}">Trade finance</a><a href="{{ route('developers') }}">Developers</a></div><div><b>Company</b><a href="{{ route('company') }}">About</a><a href="{{ route('blog.index') }}">Blog</a></div><div><b>Help</b><a href="{{ route('contact') }}">Help centre</a><a href="{{ route('contact') }}">Report fraud</a><a href="{{ route('privacy') }}">Privacy</a></div></div>
+<p class="legal">Sharet Africa Ltd is not a bank. Payment services are provided with Cashia (Kashia Services Limited), licensed by the Central Bank of Kenya as a payment service provider. <a href="https://www.centralbank.go.ke/national-payments-system/" style="color:#D4FF3D">Check on CBK's licensed directory</a><br> Customer money is held in a separate trust account. Fees, rates and limits are shown in the app before you confirm.</p><!-- Photos (Unsplash licence, credit not required; kept here and in public/images/site/credits.json): Michael Kyule (Kilifi), Dwayne joe (Nairobi), Jonathan Ward (Kampala), Imani Bahati (Kampala), Wietse Jongsma (Entebbe), Nicholas Gray (Nairobi). --></div></div>
 
-  {{-- Locations --}}
-  <section class="snug tile-section">
-    <div class="container container--wide">
-      <div class="split">
-        <div class="split-text">
-          <span class="eyebrow eyebrow--on-tile"><span class="dot" aria-hidden="true"></span>Three offices</span>
-          <h2>Nairobi.<br/>Kampala.<br/>Dar es Salaam.</h2>
-          <p>
-            Our offices in Nairobi, Kampala, and Dar es Salaam are working spaces — not showrooms. If you would like to visit, write to the platform team at <strong>hello@sharet.africa</strong> with a working window and a reason, and we will schedule time with the right people.
-          </p>
-          <ul class="split-fact-list">
-            <li><b>Nairobi</b><span>Headquarters · Westlands · engineering, treasury, compliance</span></li>
-            <li><b>Kampala</b><span>Regional operations · Uganda market</span></li>
-            <li><b>Dar es Salaam</b><span>Regional operations · Tanzania market</span></li>
-            <li><b>Hours</b><span>Mon–Fri 0900–1800 EAT · public holidays closed</span></li>
-          </ul>
-          <a class="btn btn--ghost-on-tile btn--lg" href="#intake">Send a first note
-            <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </div>
-        <div class="split-img">
-          <img src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1000&q=80" alt="A map of East Africa with Sharet's three offices marked." />
-          <span class="ft-corner">Nairobi · Kampala · Dar es Salaam</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Press kit --}}
-  <section>
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Press kit</span>
-          <h2>Everything a<br/>journalist needs<br/>in one folder.</h2>
-        </div>
-        <p class="lede">
-          Founder portraits, brand assets, a 600-word boilerplate, and a usage agreement. Drop a note to <strong>press@sharet.africa</strong> if you would like a passworded archive link to past releases, commentary, or data.
-        </p>
-      </div>
-
-      <div class="channel-grid">
-        <article class="channel-card">
-          <span class="label">Press pack</span>
-          <h3>Brand assets.</h3>
-          <p>Sharet logos (SVG, PNG), team photos, a one-liner and a short boilerplate. Sent by email on request.</p>
-          <a class="channel-line" href="mailto:press@sharet.africa?subject=Press%20pack%20request">Request the press pack →</a>
-          <span class="mono" style="color: var(--fg-mute);">press@sharet.africa</span>
-        </article>
-        <article class="channel-card">
-          <span class="label">Team</span>
-          <h3>Who builds Sharet.</h3>
-          <p>Names, roles and photos of the team. Longer bios and quotes for articles on request.</p>
-          <a class="channel-line" href="{{ route('company') }}#team">Meet the team →</a>
-          <span class="mono" style="color: var(--fg-mute);">sharet.africa/company</span>
-        </article>
-        <article class="channel-card">
-          <span class="label">Commentary</span>
-          <h3>Quotes &amp; data.</h3>
-          <p>Commentary on African payments infrastructure, mobile money, and cross-border settlement. On-record quotes available on request.</p>
-          <a class="channel-line" href="mailto:press@sharet.africa">press @ sharet.africa</a>
-          <span class="mono" style="color: var(--fg-mute);">Communications lead · always-on</span>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  {{-- Closing --}}
-  <section class="closing-cta">
-    <div class="container container--narrow">
-      <span class="label" style="color: rgba(10,10,12,0.6);">Final note</span>
-      <h2>Send a real note.<br/>We will send a<br/>real one back.</h2>
-      <p class="lede">
-        We do not use intake forms to filter people out. We use them to read the brief faster. If a form is the wrong shape for your project, write directly — every channel above is a real inbox watched by a real person at Sharet.
-      </p>
-      <div class="cta-row">
-        <a class="btn btn--dark btn--lg" href="#intake">Open the form
-          <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a class="btn btn--ghost btn--lg" href="mailto:hello@sharet.africa">Or write directly</a>
-      </div>
-    </div>
-  </section>
-
+</div>
 @endsection

@@ -60,6 +60,7 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <main id="main">
+    @include('site.partials.flash')
     @yield('content')
   </main>
   @stack('scripts')

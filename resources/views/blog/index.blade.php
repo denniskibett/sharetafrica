@@ -1,35 +1,20 @@
-{{-- Public blog list (posts from Website › Blog). --}}
-@extends('home.layouts.app')
-
-@section('title', 'Sharet · Blog — Payments across East Africa, explained')
-@section('description', 'Notes from the Sharet team on mobile money, cross-border payments and building one ledger across M-PESA, MTN, Airtel and banks in East Africa.')
-
+{{-- blog/index: generated from the approved canvas board WebBlogV2 by scratchpad build_pages.py. Change the design first, then regenerate. --}}
+@extends('site.layout')
+@section('title', 'Sharet Blog · Notes from the ledger')
+@section('description', 'How Sharet works, what we are building next, and what we learn along the way.')
 @section('content')
-  <section class="hero hero--compact">
-    <div class="container container--wide">
-      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Blog</span>
-      <h1 class="hero-headline">Notes from <span class="lime">the ledger.</span></h1>
-      <p class="hero-sub">How payments across East Africa actually work, and what we are building to make them cheaper.</p>
-    </div>
-  </section>
+<div class="ui web pg">
+<div class="wr"><div class="wn"><a class="lg" href="{{ route('home') }}" aria-label="Sharet home">sharet<i>.</i></a><nav><a href="{{ route('personal') }}">Personal</a><a href="{{ route('home') }}#abroad">Abroad</a><a href="{{ route('merchants') }}">Business</a><a href="{{ route('home') }}#pricing">Pricing</a><a href="{{ route('contact') }}">Help</a></nav><a class="wb o" href="{{ route('login') }}">Log in</a><a class="wb" href="{{ route('register') }}">Open an account</a></div></div>
+<div class="wr phero"><span class="lbl">BLOG</span><h1 class="mega pg">Notes from the ledger.</h1><p class="lead">How Sharet works, what we're building next, and what we learn along the way.</p></div><div class="wr">@if ($posts->isEmpty())<p class="lead" style="margin-top:24px">The first posts are on their way.</p>@else
+@php $first = $posts->first(); @endphp
+<a class="feat" href="{{ route('blog.show', $first->slug) }}"><div class="pi">@if ($first->cover_url)<div style="background:url('{{ $first->cover_url }}') center/cover"></div>@else<div style="background:url('/images/site/hero-phone-kilifi-1200.webp') center 30%/cover"></div>@endif</div>
+<div><small class="lbl">{{ strtoupper($first->published_at->format('j M Y')) }} · {{ $first->reading_minutes }} MIN READ</small><p style="margin:12px 0 0"><b>{{ $first->title }}</b></p><p class="lead" style="font-size:17px">{{ $first->excerpt }}</p><div style="margin-top:20px"><span class="wb o">Read the post</span></div></div></a>
+@if ($posts->count() > 1)<div class="posts">@foreach ($posts->skip(1) as $post)<a class="post" href="{{ route('blog.show', $post->slug) }}"><div class="pi"><div style="background:url('{{ $post->cover_url ?: '/images/site/send-matatu-nairobi-1200.webp' }}') center/cover"></div></div><small>{{ strtoupper($post->published_at->format('j M Y')) }} · {{ $post->reading_minutes }} MIN READ</small><b>{{ $post->title }}</b><span>{{ $post->excerpt }}</span></a>@endforeach</div>@endif
+<div class="pager">{{ $posts->links() }}</div>@endif</div>
+<div style="height:clamp(56px,6vw,84px)"></div>
+<div class="foot"><div class="wr"><div class="cols"><div><span style="font:400 20px var(--f-disp);color:#fff">sharet<span style="color:var(--lime)">.</span></span><p>Payments for Kenya and East Africa. Nairobi.</p></div>
+<div><b>Personal</b><a href="{{ route('home') }}#send">Send and receive</a><a href="{{ route('home') }}#everyday">Pay bills</a><a href="{{ route('home') }}#everyday">Withdraw</a><a href="{{ route('home') }}#card">Card</a><a href="{{ route('home') }}#abroad">Across borders</a></div><div><b>Business</b><a href="{{ route('merchants') }}">Merchants</a><a href="{{ route('trade') }}">Trade finance</a><a href="{{ route('developers') }}">Developers</a></div><div><b>Company</b><a href="{{ route('company') }}">About</a><a href="{{ route('blog.index') }}">Blog</a></div><div><b>Help</b><a href="{{ route('contact') }}">Help centre</a><a href="{{ route('contact') }}">Report fraud</a><a href="{{ route('privacy') }}">Privacy</a></div></div>
+<p class="legal">Sharet Africa Ltd is not a bank. Payment services are provided with Cashia (Kashia Services Limited), licensed by the Central Bank of Kenya as a payment service provider. <a href="https://www.centralbank.go.ke/national-payments-system/" style="color:#D4FF3D">Check on CBK's licensed directory</a><br> Customer money is held in a separate trust account. Fees, rates and limits are shown in the app before you confirm.</p><!-- Photos (Unsplash licence, credit not required; kept here and in public/images/site/credits.json): Michael Kyule (Kilifi), Dwayne joe (Nairobi), Jonathan Ward (Kampala), Imani Bahati (Kampala), Wietse Jongsma (Entebbe), Nicholas Gray (Nairobi). --></div></div>
 
-  <section class="snug">
-    <div class="container container--wide">
-      @if ($posts->isEmpty())
-        <p class="lede">The first posts are on their way.</p>
-      @else
-        <div class="blog-grid">
-          @foreach ($posts as $post)
-            <a class="blog-card" href="{{ route('blog.show', $post->slug) }}">
-              @if ($post->cover_url)<img loading="lazy" decoding="async" src="{{ $post->cover_url }}" alt="" />@endif
-              <span class="label">{{ $post->published_at->format('j M Y') }} · {{ $post->reading_minutes }} min read</span>
-              <h2>{{ $post->title }}</h2>
-              <p>{{ $post->excerpt }}</p>
-            </a>
-          @endforeach
-        </div>
-        <div class="blog-pages">{{ $posts->links() }}</div>
-      @endif
-    </div>
-  </section>
+</div>
 @endsection

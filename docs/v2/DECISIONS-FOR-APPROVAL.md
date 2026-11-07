@@ -67,7 +67,7 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 
 ## 4. Website (homepage coded 7 Nov from the approved board; not yet deployed)
 
-The homepage `/` is now the canvas design (generated: `resources/views/index.blade.php`, `public/css/site.css`, layout `resources/views/site/layout.blade.php`). The hero rate is **today's real rate**, or "Today's rate, before you pay" if treasury hasn't recorded one. Footer links with no page yet (Careers, Press, Terms) are left out. **Other public pages (Personal, Merchants, Developers, Company, Contact, Trade, Privacy, Blog) still use the old look in code.** Their new designs are on the canvas (Phase 1 · Website, boards Web*V2, desktop + phone), awaiting your approval. Points to confirm in them:
+The homepage `/` is now the canvas design (generated: `resources/views/index.blade.php`, `public/css/site.css`, layout `resources/views/site/layout.blade.php`). The hero rate is **today's real rate**, or "Today's rate, before you pay" if treasury hasn't recorded one. Footer links with no page yet (Careers, Press, Terms) are left out. **Personal, Business (/merchants), Developers, Company, Contact, Trade, Privacy and Blog are now built in code from the canvas boards Web*V2** (7 Nov, not yet deployed). Their real forms (business waiting list, sandbox request, trade application, contact), the team and group companies on Company, real blog posts and the Android test build on Developers are kept; same footer as the home page everywhere. Points to confirm in them:
 
 | ✓ | Decision |
 |---|---|
