@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('tariffs', function (Blueprint $t) {
             $t->id();
             $t->unsignedInteger('version')->unique();
-            $t->timestamp('effective_from');
+            $t->dateTime('effective_from');   // dateTime: MySQL strict mode refuses a NOT NULL timestamp without a default
             $t->json('bands');            // {movement: [{up_to: cents|null, fixed: cents, percent_bp: int, cap: cents|null}, …]}
             $t->json('volume_tiers');     // [{from: cents, discount_bp: int}, …] ascending
             $t->unsignedSmallInteger('excise_bp')->default(1500);

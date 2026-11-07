@@ -24,7 +24,7 @@ return new class extends Migration
             $t->string('status', 20)->default('pending');                            // pending, active, declined, revoked
             $t->string('reference', 140)->nullable();                                // the platform's own id for this person
             $t->string('return_url', 500)->nullable();
-            $t->timestamp('expires_at');                                             // for the link, while pending
+            $t->dateTime('expires_at');   // dateTime: MySQL strict mode refuses a NOT NULL timestamp without a default                                             // for the link, while pending
             $t->timestamp('approved_at')->nullable();
             $t->timestamp('revoked_at')->nullable();
             $t->timestamps();

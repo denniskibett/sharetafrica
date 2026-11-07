@@ -26,7 +26,7 @@ return new class extends Migration
             $t->string('paid_via', 20)->nullable();             // sharet, mpesa, sandbox
             $t->foreignId('ramp_order_id')->nullable()->constrained()->nullOnDelete();   // the order that paid it (or is collecting)
             $t->timestamp('paid_at')->nullable();
-            $t->timestamp('expires_at');
+            $t->dateTime('expires_at');   // dateTime: MySQL strict mode refuses a NOT NULL timestamp without a default
             $t->timestamps();
             $t->index(['status', 'expires_at']);
         });
