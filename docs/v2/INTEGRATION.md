@@ -236,5 +236,10 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   The API keys screen shows each key's scopes and addresses and the business's Sharet ID. **If Cloudflare or another
   proxy is ever put in front of sharet.africa, configure trusted proxies first**, or every caller will look like the proxy.
 
-**Still to build, in order:**
-1. Docs site from this file.
+- Public docs at **/docs** (and /docs/errors, where every error `type` links): quickstart, identifiers, keys and
+  scopes, every endpoint with examples, webhook signature checks (PHP and Node), the full error list, sandbox, pricing
+  and limits; same look as the website and linked from Developers and the footer. A test fails if the code returns
+  an error type the docs don't list.
+
+**Next, when needed:** collection fees once the Cashia/Safaricom rate is known; an `api.sharet.africa` host; queue
+workers for webhooks (needs the server cron); the docs as a separate site if they grow.

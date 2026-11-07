@@ -54,6 +54,10 @@ Route::middleware('auth')->controller(\App\Http\Controllers\ConnectConsentContro
     Route::post('/connected-apps/{connection}/disconnect', 'revoke')->name('connections.revoke');
 });
 
+// Public API docs (the contract: docs/v2/INTEGRATION.md). Error types link to /docs/errors#type.
+Route::view('/docs', 'docs.index')->name('docs');
+Route::get('/docs/errors', fn () => view('docs.index'))->name('docs.errors');
+
 // Hosted pay page for API payment requests (docs/v2/INTEGRATION.md §3). Paying moves money: names under "pay." so the
 // ledger freeze stops it. Sharet wallet needs sign-in and the PIN; M-PESA works for anyone with the link.
 Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\PayRequestController::class)->group(function () {

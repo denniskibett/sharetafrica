@@ -495,6 +495,20 @@ a.wb,a.badge{text-decoration:none}
 .wr.sect:has(.sform),.wr.sect:has(> .form){text-align:center}
 .wr.sect:has(.sform) .lead,.wr.sect:has(> .form) .lead{margin-inline:auto}
 .sform,.wr.sect > .form{margin-inline:auto;text-align:left;max-width:820px}
+.idc{font:600 15px var(--f-mono);background:var(--ink);color:var(--lime);border-radius:10px;padding:8px 12px;align-self:flex-start}
+.flowd{display:flex;align-items:center;gap:10px;margin-top:28px;flex-wrap:wrap}
+.flowd .nd{border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:150px;background:#fff}
+.flowd .nd b{font:700 15px var(--f-ui)}.flowd .nd span{font-size:13px;color:var(--sub)}
+.flowd .nd.app{background:var(--surf)}.flowd .nd.led{background:var(--ink);border-color:var(--ink)}.flowd .nd.led b{color:#fff}.flowd .nd.led span{color:#B5B5BC}
+.flowd .ar{flex:0 0 36px;height:2px;background:var(--line);position:relative;overflow:hidden}
+.flowd .ar:after{content:"";position:absolute;top:-3px;left:-8px;width:8px;height:8px;border-radius:50%;background:var(--lime);animation:arr 1.8s linear infinite}
+@keyframes arr{to{left:100%}}
+.flowd .legs{display:flex;flex-direction:column;gap:8px}
+@media (max-width:900px){.flowd{flex-direction:column;align-items:stretch}.flowd .ar{flex-basis:auto;width:2px;height:22px;margin-left:24px}.flowd .ar:after{top:-8px;left:-3px;animation:arrv 1.8s linear infinite}}
+@keyframes arrv{to{top:100%}}
+@media (prefers-reduced-motion:reduce){.flowd .ar:after{animation:none}}
+.tt{display:grid;grid-template-columns:1.6fr 1fr;gap:28px;margin-top:24px;align-items:start}.tt .price{margin-top:10px}.price.tt1 th{text-align:left;font:600 12px var(--f-ui);color:var(--mu);padding:10px 4px;border-bottom:1px solid var(--line)}.price.tt1 td:last-child{text-align:left}
+@media (max-width:900px){.tt{grid-template-columns:1fr}}
 /* Compact type for the inner pages (owner: "reduce a lot of font") */
 .web.pg .mega.pg{font-size:clamp(30px,3.4vw,48px);line-height:1.08;letter-spacing:-.035em;margin-top:10px}
 .web.pg .h2w{font-size:clamp(24px,2.3vw,34px);line-height:1.12;letter-spacing:-.025em}
