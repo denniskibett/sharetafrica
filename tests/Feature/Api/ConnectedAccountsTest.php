@@ -34,7 +34,7 @@ class ConnectedAccountsTest extends TestCase
     {
         $c = Company::create(['name' => $name, 'verified_at' => now()]);
         $owner = User::factory()->create(['name' => 'Peter Kamau', 'phone' => $phone, 'company_id' => $c->id]);
-        $k = new ApiKey(['user_id' => $owner->id, 'company_id' => $c->id, 'name' => $name, 'environment' => 'live', 'scopes' => ['read', 'collect', 'payout', 'connect'], 'enabled' => true]);
+        $k = new ApiKey(['user_id' => $owner->id, 'company_id' => $c->id, 'name' => $name, 'environment' => 'live', 'scopes' => ['read', 'collect', 'payout', 'connect'], 'allowed_ips' => ['127.0.0.1'], 'enabled' => true]);
         $plain = $k->issue();
         $k->save();
 

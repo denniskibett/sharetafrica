@@ -12,12 +12,12 @@ use Illuminate\Support\Str;
  */
 class ApiKey extends Model
 {
-    protected $fillable = ['company_id', 'user_id', 'name', 'environment', 'scopes', 'prefix', 'last_four', 'hash', 'enabled', 'last_used_at'];
+    protected $fillable = ['company_id', 'user_id', 'name', 'environment', 'scopes', 'allowed_ips', 'prefix', 'last_four', 'hash', 'enabled', 'last_used_at'];
 
     /** What a key may do (docs/v2/INTEGRATION.md §2). New keys get read only unless the owner chooses more. */
     public const SCOPES = ['read', 'collect', 'payout', 'connect'];
 
-    protected $casts = ['enabled' => 'boolean', 'last_used_at' => 'datetime', 'scopes' => 'array'];
+    protected $casts = ['enabled' => 'boolean', 'last_used_at' => 'datetime', 'scopes' => 'array', 'allowed_ips' => 'array'];
 
     protected $hidden = ['hash'];
 
@@ -47,6 +47,27 @@ class ApiKey extends Model
     public function allows(string $scope): bool
     {
         return in_array($scope, $this->scopes ?? ['read'], true);
+    }
+
+    /** Is this caller address on the key's allow-list (single IPs or CIDR ranges)? */
+    public function ipAllowed(?string $ip): bool
+    {
+        return $ip !== null && ! empty($this->allowed_ips) && \Symfony\Component\HttpFoundation\IpUtils::checkIp($ip, $this->allowed_ips);
+    }
+
+    /** "41.90.12.7, 196.201.0.0/16" or an array → a clean list, or null if any entry isn't an IP or range. */
+    public static function parseIps(string|array|null $raw): ?array
+    {
+        $items = collect(is_array($raw) ? $raw : preg_split('/[\s,]+/', (string) $raw))->map(fn ($i) => trim((string) $i))->filter()->unique()->values();
+        foreach ($items as $item) {
+            [$addr, $bits] = array_pad(explode('/', $item, 2), 2, null);
+            $v6 = filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
+            if (! filter_var($addr, FILTER_VALIDATE_IP) || ($bits !== null && (! ctype_digit($bits) || (int) $bits > ($v6 ? 128 : 32) || (int) $bits < ($v6 ? 32 : 8)))) {
+                return null;
+            }
+        }
+
+        return $items->take(20)->all();
     }
 
     public function isLive(): bool

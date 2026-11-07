@@ -67,7 +67,7 @@ class V1SettlementsTest extends TestCase
 
     private function key(User $u, string $env = 'live', array $scopes = ['read', 'collect', 'payout']): array
     {
-        $k = new ApiKey(['user_id' => $u->id, 'company_id' => $u->company_id, 'name' => 'scharge', 'environment' => $env, 'scopes' => $scopes, 'enabled' => true]);
+        $k = new ApiKey(['user_id' => $u->id, 'company_id' => $u->company_id, 'name' => 'scharge', 'environment' => $env, 'scopes' => $scopes, 'allowed_ips' => ['127.0.0.1'], 'enabled' => true]);
         $plain = $k->issue();
         $k->save();
 

@@ -230,6 +230,11 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   the version and discount. Sharet ↔ Sharet is always free. Version 1 holds the samples below. Collection fees
   (`collect_mpesa`) are in the table but not charged yet.
 
+- IP allow-list: live keys with the `payout` scope move money only from listed addresses (single IPs or ranges, /8 or
+  narrower, up to 20), set when the key is made or later under Access in Developers › API keys; without a list they get
+  `ip_allow_list_required`, from elsewhere `ip_not_allowed` (with the IP we saw). Sandbox keys and reading need no list.
+  The API keys screen shows each key's scopes and addresses and the business's Sharet ID. **If Cloudflare or another
+  proxy is ever put in front of sharet.africa, configure trusted proxies first**, or every caller will look like the proxy.
+
 **Still to build, in order:**
-1. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
-2. Docs site from this file.
+1. Docs site from this file.

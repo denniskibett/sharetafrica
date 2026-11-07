@@ -23,7 +23,7 @@ class V1AccountsTest extends TestCase
 
     private function key(User $user, array $scopes = ['read'], string $env = 'test'): string
     {
-        $k = new ApiKey(['user_id' => $user->id, 'company_id' => $user->company_id, 'name' => 'Test', 'environment' => $env, 'scopes' => $scopes, 'enabled' => true]);
+        $k = new ApiKey(['user_id' => $user->id, 'company_id' => $user->company_id, 'name' => 'Test', 'environment' => $env, 'scopes' => $scopes, 'allowed_ips' => ['127.0.0.1'], 'enabled' => true]);
         $plain = $k->issue();
         $k->save();
 

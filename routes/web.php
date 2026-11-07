@@ -197,6 +197,7 @@ Route::middleware(['auth', 'permission:developer.api_keys'])
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::patch('/{id}/toggle', 'toggle')->name('toggle')->whereNumber('id');
+        Route::patch('/{id}/settings', 'settings')->name('settings');
         Route::post('/{id}/rotate', 'rotate')->name('rotate')->whereNumber('id');
         Route::delete('/{id}', 'destroy')->name('destroy')->whereNumber('id');
     });
