@@ -14,6 +14,7 @@ use Illuminate\Console\Command;
  * Clears a test account before launch, the ledger's way: nothing is deleted.
  *   php artisan sharet:reset-test-data                 report only (default)
  *   php artisan sharet:reset-test-data --apply         reverse SIMULATED money, close cases, disable the account
+ *   … --email=you@x --keep-account --apply             only reverse the simulated money (a real person who was simulated by mistake)
  *
  * Money that really moved (a real M-PESA receipt) is never reversed automatically: reversing it would make the
  * books say the paybill holds less than it does. Those orders are listed with the decision to take
@@ -21,7 +22,7 @@ use Illuminate\Console\Command;
  */
 class SharetResetTestData extends Command
 {
-    protected $signature = 'sharet:reset-test-data {--email=v2-tester@sharet.test} {--apply : Make the changes (otherwise only report)}';
+    protected $signature = 'sharet:reset-test-data {--email=v2-tester@sharet.test} {--apply : Make the changes (otherwise only report)} {--keep-account : Only reverse simulated money: keep the account and its cases}';
 
     protected $description = 'Report, then reverse simulated test money, close test cases and disable the test account';
 
@@ -59,6 +60,11 @@ class SharetResetTestData extends Command
 
         foreach ($simulated as $j) {
             $ledger->reverse($j, 'Test data reset before launch', null);
+        }
+        if ($this->option('keep-account')) {
+            $this->info('Reversed '.count($simulated).' simulated journal(s). Account kept. Wallet now: '.\App\Ledger\Money::format($ledger->account('2100', $user)->available()).'. Run php artisan ledger:check next.');
+
+            return self::SUCCESS;
         }
         $cases->each(fn ($c) => $c->forceFill(['status' => 'closed'])->save());
         $user->forceFill(['status' => false])->saveQuietly();

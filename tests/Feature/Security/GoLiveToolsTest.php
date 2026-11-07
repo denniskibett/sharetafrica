@@ -53,4 +53,24 @@ class GoLiveToolsTest extends TestCase
         $this->artisan('sharet:reset-test-data', ['--apply' => true])->assertSuccessful();
         $this->assertSame(0, $orders->walletBalance($tester));
     }
+
+    public function test_keep_account_only_reverses_the_simulated_money(): void
+    {
+        $orders = app(RampOrders::class);
+        $person = User::factory()->create(['email' => 'dennis@example.test', 'phone' => '0712345679']);
+        $person->forceFill(['kyc_level' => 'basic'])->save();
+        foreach (['100', '250'] as $amount) {
+            $o = $orders->confirm($orders->topUp($person, $amount));
+            while (! $o->final()) {
+                $o = $orders->refresh($o);
+            }
+        }
+        $this->assertSame(35000, $orders->walletBalance($person));
+
+        $this->artisan('sharet:reset-test-data', ['--email' => 'dennis@example.test', '--keep-account' => true, '--apply' => true])
+            ->expectsOutputToContain('Account kept')->assertSuccessful();
+        $this->assertSame(0, $orders->walletBalance($person));
+        $this->assertFalse($person->fresh()->trashed());
+        $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
+    }
 }
