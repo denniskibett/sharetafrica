@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class RampOrder extends Model
 {
-    public const FINAL = ['paid', 'failed', 'refunded', 'expired', 'refund_failed'];
+    public const FINAL = ['paid', 'failed', 'refunded', 'expired', 'refund_failed', 'reversed'];   // reversed: test money undone in the ledger, hidden from the customer
 
     protected $guarded = ['id'];
 
@@ -94,6 +94,7 @@ class RampOrder extends Model
             'refunded' => ['Refunded', 'neutral'],
             'refund_failed' => ['Refund needs attention', 'error'],
             'expired' => ['Quote expired', 'neutral'],
+            'reversed' => ['Reversed', 'neutral'],
             default => [ucfirst($this->status), 'neutral'],
         };
     }
@@ -215,7 +216,7 @@ class RampOrder extends Model
             'signed' => ($in ? '+' : '−').Money::format($in ? $this->amount : $this->total),
             // colour of the amount: in (green), out (red), pending (amber, still moving), none (failed, refunded, expired)
             'flow' => match (true) {
-                in_array($this->status, ['failed', 'refunded', 'expired', 'quoted'], true) => 'none',
+                in_array($this->status, ['failed', 'refunded', 'expired', 'quoted', 'reversed'], true) => 'none',
                 ! $this->final() => 'pending',
                 default => $in ? 'in' : 'out',
             },

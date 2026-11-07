@@ -38,14 +38,19 @@ class SharetResetTestData extends Command
         $orders = RampOrder::where('user_id', $user->id)->orderBy('id')->get();
         $rows = [];
         $simulated = [];
+        $toMark = [];   // simulated orders whose money is (or will be) fully reversed: shown to nobody as a transaction
         foreach ($orders as $o) {
             $rails = RailRequest::whereIn('id', array_filter([$o->collect_request_id, $o->payout_request_id]))->get();
             $real = $rails->contains(fn ($r) => $r->rail !== 'simulator' && $r->status === 'succeeded');
             $journals = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->get()
                 ->reject(fn ($j) => LedgerJournal::where('reverses_id', $j->id)->exists());
             $real || $simulated = array_merge($simulated, $journals->all());
+            $posted = LedgerJournal::where('source_type', $o->getMorphClass())->where('source_id', $o->id)->whereNull('reverses_id')->exists();
+            if (! $real && $posted && $o->status !== 'reversed') {
+                $toMark[] = $o;
+            }
             $rows[] = [$o->id, $o->status, \App\Ledger\Money::format($o->total), $rails->pluck('rail')->unique()->implode('+') ?: '—',
-                $real ? '<comment>REAL: decide (refund or test-income journal)</comment>' : ($journals->count() ? 'reverse '.$journals->count().' journal(s)' : 'nothing posted')];
+                $real ? '<comment>REAL: decide (refund or test-income journal)</comment>' : ($journals->count() ? 'reverse '.$journals->count().' journal(s)' : ($posted && $o->status !== 'reversed' ? 'already reversed: mark as reversed' : 'nothing to do'))];
         }
         $cases = SupportCase::where('user_id', $user->id)->where('status', '!=', 'closed')->get();
 
@@ -61,8 +66,11 @@ class SharetResetTestData extends Command
         foreach ($simulated as $j) {
             $ledger->reverse($j, 'Test data reset before launch', null);
         }
+        foreach ($toMark as $o) {
+            $o->forceFill(['status' => 'reversed'])->saveQuietly();   // quietly: no SMS or receipt for undoing test money
+        }
         if ($this->option('keep-account')) {
-            $this->info('Reversed '.count($simulated).' simulated journal(s). Account kept. Wallet now: '.\App\Ledger\Money::format($ledger->account('2100', $user)->available()).'. Run php artisan ledger:check next.');
+            $this->info('Reversed '.count($simulated).' simulated journal(s), marked '.count($toMark).' order(s) reversed. Account kept. Wallet now: '.\App\Ledger\Money::format($ledger->account('2100', $user)->available()).'. Run php artisan ledger:check next.');
 
             return self::SUCCESS;
         }

@@ -26,7 +26,7 @@ class PayController extends Controller
 
         $me = $request->user();
         $query = RampOrder::with('sender')->where(fn ($q) => $q->where('user_id', $me->id)->orWhere('recipient_user_id', $me->id))
-            ->whereNotIn('status', ['quoted', 'expired']) // quotes nobody confirmed are not transactions
+            ->whereNotIn('status', ['quoted', 'expired', 'reversed']) // quotes nobody confirmed, and test money undone, are not transactions
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s));
         $mine = RampOrder::where('user_id', $me->id);
 

@@ -72,5 +72,13 @@ class GoLiveToolsTest extends TestCase
         $this->assertSame(0, $orders->walletBalance($person));
         $this->assertFalse($person->fresh()->trashed());
         $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
+        $this->assertSame(['reversed', 'reversed'], \App\Models\RampOrder::where('user_id', $person->id)->pluck('status')->all());
+        $this->actingAs($person)->getJson('/pay')->assertOk()->assertJsonCount(0, 'data');   // gone from their transactions
+
+        // Orders reversed before this marking existed are marked on a re-run
+        \App\Models\RampOrder::where('user_id', $person->id)->update(['status' => 'paid']);
+        $this->artisan('sharet:reset-test-data', ['--email' => 'dennis@example.test', '--keep-account' => true, '--apply' => true])
+            ->expectsOutputToContain('marked 2 order(s) reversed')->assertSuccessful();
+        $this->assertSame(0, $orders->walletBalance($person));
     }
 }

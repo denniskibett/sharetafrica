@@ -116,7 +116,7 @@ class MobileController extends Controller
     {
         $user = $request->user();
         $page = RampOrder::where(fn ($q) => $q->where('user_id', $user->id)->orWhere('recipient_user_id', $user->id))
-            ->whereNotIn('status', ['quoted', 'expired'])->latest('id')->paginate(20);
+            ->whereNotIn('status', ['quoted', 'expired', 'reversed'])->latest('id')->paginate(20);
 
         return response()->json(['data' => $page->getCollection()->map(fn ($o) => $o->present($user))->values(),
             'meta' => ['page' => $page->currentPage(), 'last_page' => $page->lastPage()]]);
