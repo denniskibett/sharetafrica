@@ -163,7 +163,8 @@ class ProfileController extends Controller
         $verified = Kyc::progress($user)['basic']['complete'];
 
         return response()->json([
-            'message' => $verified ? 'You are verified. You can start sending and receiving.' : Kyc::DOCUMENTS[$type][0].' saved.'.($read ? ' We read your details from it.' : ''),
+            'message' => $verified ? 'You are verified. You can start sending and receiving.'
+                : (Kyc::progress($user)['basic']['submitted'] && ! str_starts_with($type, 'selfie') ? 'Thanks. We are checking your ID; this usually takes less than a day.' : Kyc::DOCUMENTS[$type][0].' saved.'.($read ? ' We read your details from it.' : '')),
             'read' => $read, 'verified' => $verified,
         ]);
     }

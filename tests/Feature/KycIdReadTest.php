@@ -95,6 +95,75 @@ class KycIdReadTest extends TestCase
     {
         $user = User::factory()->create(['onboarding_status' => 'active']);
         $this->actingAs($user)->get('/profile/edit')->assertOk()
-            ->assertSee('kycSelfie((t, u) => uploadDoc(t, u))', false)->assertSee('We take three photos for you')->assertDontSee('kycCamera()', false);
+            ->assertSee('kycSelfie((t, u) => uploadDoc(t, u))', false)->assertSee('keep your face in the oval')->assertDontSee('kycCamera()', false);
+    }
+
+    private function sendAll(User $user): void
+    {
+        foreach (['id_front', 'id_back', 'selfie_center', 'selfie_left', 'selfie_right'] as $t) {
+            $this->actingAs($user)->postJson("/profile/documents/$t", ['file' => UploadedFile::fake()->image("$t.jpg", 1600, 1000)])->assertOk();
+        }
+    }
+
+    public function test_verified_only_when_the_checks_pass(): void
+    {
+        $this->reads = ['id_front' => ['id_number' => '12345678', 'full_name' => 'Dennis Kibet Koech', 'date_of_birth' => '1994-03-24']];
+        $ok = User::factory()->create(['name' => 'Dennis Kibett', 'phone' => '+254711000001', 'onboarding_status' => 'active']);
+        $this->sendAll($ok);
+        $this->assertSame(['basic', 'approved'], [$ok->fresh()->kyc_level, $ok->fresh()->kyc_review]);   // one letter of spelling allowed
+
+        // Same ID on a second account: waits for staff
+        $twin = User::factory()->create(['name' => 'Dennis Koech', 'phone' => '+254711000002', 'onboarding_status' => 'active']);
+        $this->sendAll($twin);
+        $this->assertSame(['none', 'pending'], [$twin->fresh()->kyc_level, $twin->fresh()->kyc_review]);
+        $checks = collect(Kyc::data($twin->fresh())['review']['checks'])->mapWithKeys(fn ($c) => [$c[0] => $c[2]]);
+        $this->assertFalse($checks['unique']);
+        $this->assertTrue($checks['name']);
+        $this->actingAs($twin)->getJson('/profile/data')->assertJsonPath('level.basic.review.key', 'pending');
+    }
+
+    public function test_name_mismatch_minor_and_unreadable_ids_wait_for_staff(): void
+    {
+        $this->assertFalse(Kyc::namesMatch('Juma Jones', 'Jane Wanjiru Doe'));
+        $this->assertTrue(Kyc::namesMatch('Jane Doe', 'JANE WANJIRU DOE'));
+
+        $this->reads = ['id_front' => ['id_number' => '22222222', 'full_name' => 'Jane Wanjiru Doe', 'date_of_birth' => now()->subYears(16)->toDateString()]];
+        $kid = User::factory()->create(['name' => 'Jane Doe', 'phone' => '+254711000003', 'onboarding_status' => 'active']);
+        $this->sendAll($kid);
+        $this->assertSame('pending', $kid->fresh()->kyc_review);
+
+        $this->reads = [];
+        $blank = User::factory()->create(['name' => 'Juma Jones', 'phone' => '+254711000004', 'onboarding_status' => 'active']);
+        $this->sendAll($blank);
+        $this->assertSame(['none', 'pending'], [$blank->fresh()->kyc_level, $blank->fresh()->kyc_review]);
+    }
+
+    public function test_staff_approve_or_reject_and_a_new_photo_starts_over(): void
+    {
+        $this->seed([\Database\Seeders\RolePermissionSeeder::class]);
+        $staff = User::factory()->create(['name' => 'Amina Otieno']);
+        $staff->assignRole('super_admin');
+        $person = User::factory()->create(['name' => 'Juma Jones', 'phone' => '+254711000005', 'onboarding_status' => 'active']);
+        $this->sendAll($person);   // nothing readable: waits
+
+        $this->actingAs($staff)->get('/admin/verifications')->assertOk()->assertSee('Juma Jones');
+        $this->actingAs(User::factory()->create())->get('/admin/verifications')->assertForbidden();
+
+        $this->actingAs($staff)->postJson("/users/{$person->id}/verification", ['decision' => 'reject'])->assertJsonValidationErrors('reason');
+        $this->postJson("/users/{$person->id}/verification", ['decision' => 'reject', 'reason' => 'The ID photo is blurred.'])->assertOk();
+        $this->assertSame(['none', 'rejected'], [$person->fresh()->kyc_level, $person->fresh()->kyc_review]);
+        $this->actingAs($person->fresh())->getJson('/profile/data')->assertJsonPath('level.basic.review.text', 'We could not verify you: The ID photo is blurred.');
+
+        $this->actingAs($staff)->postJson("/users/{$person->id}/verification", ['decision' => 'approve'])->assertOk();
+        $this->assertSame('basic', $person->fresh()->kyc_level);
+
+        // A new ID photo means a fresh check: approval no longer stands
+        $this->travel(2)->seconds();
+        $this->actingAs($person->fresh())->postJson('/profile/documents/id_front', ['file' => UploadedFile::fake()->image('new.jpg', 1600, 1000)])->assertOk();
+        $this->assertSame(['none', 'pending'], [$person->fresh()->kyc_level, $person->fresh()->kyc_review]);
+
+        // Staff cannot verify themselves
+        $this->sendAll($staff);
+        $this->actingAs($staff)->postJson("/users/{$staff->id}/verification", ['decision' => 'approve'])->assertForbidden();
     }
 }

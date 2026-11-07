@@ -157,6 +157,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
+        Route::post('/users/{user}/verification', [UserController::class, 'verify'])->name('users.verify');
+        Route::get('/admin/verifications', [\App\Http\Controllers\Admin\VerificationsController::class, 'index'])->name('admin.verifications.index');
         Route::view('/reports', 'reports.index')->name('reports.index');
     });
 

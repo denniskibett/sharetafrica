@@ -101,6 +101,7 @@ class DashboardNav
                         'active' => ['admin.analytics.*']],
                     ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'document-chart-bar', 'tone' => 'violet'],
                     ['label' => 'User management', 'route' => 'users.index', 'icon' => 'users', 'tone' => 'indigo', 'active' => ['users.*']],
+                    ['label' => 'Verifications', 'route' => 'admin.verifications.index', 'icon' => 'identification', 'tone' => 'lime', 'can' => 'admin.users'],
                     ['label' => 'Waiting list', 'route' => 'admin.waiting_list', 'icon' => 'queue-list', 'tone' => 'amber'],
                     ['label' => 'Enquiries', 'route' => 'admin.contact.index', 'icon' => 'inbox-arrow-down', 'tone' => 'sky', 'can' => 'waiting_list.invite'],
                     ['label' => 'Email designs', 'route' => 'admin.emails.index', 'icon' => 'envelope', 'tone' => 'rose', 'can' => 'admin.system',

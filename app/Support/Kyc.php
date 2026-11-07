@@ -48,8 +48,123 @@ class Kyc
 
     public static function save(User $user, array $data): void
     {
-        $user->forceFill(['kyc' => encrypt($data)])->save();
+        $data = self::review($user, $data);
+        $user->forceFill([
+            'kyc' => encrypt($data),
+            'kyc_id_hash' => self::idHash($data['id_number'] ?? null),
+            'kyc_review' => $data['review']['status'] ?? null,
+        ])->save();
         self::refreshLevel($user);
+    }
+
+    /** A keyed hash of the ID number, so a second account with the same ID can be found without decrypting anyone. */
+    public static function idHash(?string $idNumber): ?string
+    {
+        $n = preg_replace('/[^A-Z0-9]/', '', strtoupper((string) $idNumber));
+
+        return $n === '' ? null : hash_hmac('sha256', $n, (string) config('app.key'));
+    }
+
+    /**
+     * The automatic checks behind "Verified". Each: [key, label, ok, note]. All must pass for an automatic approval;
+     * otherwise a person goes to staff review (Administration › Verifications).
+     */
+    public static function checks(User $user, array $kyc): array
+    {
+        $read = ($kyc['id_read']['id_front'] ?? []) + ($kyc['id_read']['id_back'] ?? []);
+        $dob = $kyc['date_of_birth'] ?? null;
+        $age = $dob ? rescue(fn () => \Carbon\Carbon::parse($dob)->age, null, false) : null;
+        $hash = self::idHash($kyc['id_number'] ?? null);
+        $dupe = $hash ? User::where('kyc_id_hash', $hash)->where('id', '!=', $user->id)->exists() : false;
+        $match = self::namesMatch((string) $user->name, (string) ($kyc['full_name'] ?? ''));
+
+        return [
+            ['id_read', 'ID photo could be read', (bool) array_intersect_key($read, array_flip(['id_number', 'full_name', 'date_of_birth'])), $read ? null : 'Nothing readable on the ID photos'],
+            ['id_number', 'ID number found', filled($kyc['id_number'] ?? null), null],
+            ['name', 'Name on ID matches the account', $match, filled($kyc['full_name'] ?? null) ? ($match ? null : 'Account: '.$user->name.' · ID: '.$kyc['full_name']) : 'No name read from the ID'],
+            ['adult', '18 or older', $age !== null && $age >= 18, $age === null ? 'No date of birth' : ($age < 18 ? "Age $age" : null)],
+            ['unique', 'ID not used by another account', $hash !== null && ! $dupe, $dupe ? 'Another account has this ID number' : null],
+        ];
+    }
+
+    /**
+     * Two names on the account must each be found on the ID (one letter of spelling allowed, two for long names:
+     * "Kibett" matches "Kibet"). An account with one name needs that one.
+     */
+    public static function namesMatch(string $account, string $onId): bool
+    {
+        $words = fn ($v) => array_values(array_filter(explode(' ', preg_replace('/[^a-z ]/', ' ', strtolower($v))), fn ($w) => strlen($w) >= 2));
+        [$a, $b] = [$words($account), $words($onId)];
+        if (! $a || ! $b) {
+            return false;
+        }
+        $found = collect($a)->filter(fn ($w) => collect($b)->contains(fn ($x) => levenshtein($w, $x) <= (strlen($w) >= 6 ? 2 : 1)))->count();
+
+        return $found >= min(2, count($a));
+    }
+
+    /** What a review was decided on: the verification photos and the details read from the ID. A change means a fresh look. */
+    private static function reviewBasis(array $kyc): string
+    {
+        return sha1(json_encode([
+            collect(self::VERIFY)->map(fn ($t) => $kyc['documents'][$t]['path'] ?? null)->all(),
+            $kyc['id_number'] ?? null, $kyc['full_name'] ?? null, $kyc['date_of_birth'] ?? null,
+        ]));
+    }
+
+    /**
+     * Keeps $kyc['review'] current. Nothing to review until every verification photo is in. Then the checks run: all
+     * passing approves automatically; otherwise it waits for staff. A staff decision stands until the photos or the
+     * ID details change.
+     */
+    private static function review(User $user, array $kyc): array
+    {
+        $photos = collect(array_intersect(self::VERIFY, self::requiredDocuments($kyc)))->every(fn ($t) => filled($kyc['documents'][$t]['path'] ?? null));
+        if (! $photos) {
+            unset($kyc['review']);
+
+            return $kyc;
+        }
+        $basis = self::reviewBasis($kyc);
+        $current = $kyc['review'] ?? null;
+        if ($current && ($current['basis'] ?? null) === $basis && in_array($current['by'] ?? null, ['staff', 'before_checks'], true)) {
+            return $kyc;   // staff decided on exactly this
+        }
+        $checks = self::checks($user, $kyc);
+        $pass = collect($checks)->every(fn ($c) => $c[2]);
+        $kyc['review'] = [
+            'status' => $pass ? 'approved' : 'pending', 'by' => 'checks', 'basis' => $basis, 'at' => now()->toIso8601String(),
+            'checks' => $checks, 'reason' => null,
+        ];
+
+        return $kyc;
+    }
+
+    /** Staff decision. Rejecting asks the person to retake what the reason says; their next upload starts a fresh check. */
+    public static function decide(User $user, User $staff, string $decision, ?string $reason): void
+    {
+        $kyc = self::data($user);
+        $kyc['review'] = [
+            'status' => $decision === 'approve' ? 'approved' : 'rejected', 'by' => 'staff', 'staff_id' => $staff->id, 'staff_name' => $staff->name,
+            'basis' => self::reviewBasis($kyc), 'at' => now()->toIso8601String(), 'reason' => $reason,
+            'checks' => self::checks($user, $kyc),
+        ];
+        $kyc['review_history'][] = array_diff_key($kyc['review'], ['checks' => 1, 'basis' => 1]);
+        $user->forceFill(['kyc' => encrypt($kyc), 'kyc_review' => $kyc['review']['status']])->save();
+        self::refreshLevel($user);
+    }
+
+    /** For the person: where their verification stands, in words. */
+    public static function reviewState(array $kyc): array
+    {
+        $r = $kyc['review'] ?? null;
+
+        return match ($r['status'] ?? null) {
+            'approved' => ['key' => 'approved', 'text' => 'Verified'],
+            'pending' => ['key' => 'pending', 'text' => 'We are checking your ID. This usually takes less than a day.'],
+            'rejected' => ['key' => 'rejected', 'text' => 'We could not verify you: '.($r['reason'] ?: 'please retake your ID photos and selfie.')],
+            default => ['key' => 'none', 'text' => null],
+        };
     }
 
     /** Documents still needed (a passport has no back side). */
@@ -63,14 +178,15 @@ class Kyc
         $kyc = self::data($user);
         $verify = array_values(array_intersect(self::VERIFY, self::requiredDocuments($kyc)));
         $photos = collect($verify)->filter(fn ($t) => filled($kyc['documents'][$t]['path'] ?? null))->count();
-        $basic = filled($user->name) && filled($user->phone) && $photos === count($verify);
+        $submitted = filled($user->name) && filled($user->phone) && $photos === count($verify);
+        $basic = $submitted && ($kyc['review']['status'] ?? null) === 'approved';   // checks passed or staff approved
         $fields = collect(self::FIELDS)->filter(fn ($k) => filled($kyc[$k] ?? null))->count();
         $required = self::requiredDocuments($kyc);
         $docs = collect($required)->filter(fn ($t) => filled($kyc['documents'][$t]['path'] ?? null))->count();
 
         return [
             'basic' => ['done' => (int) filled($user->name) + (int) filled($user->phone) + $photos, 'of' => 2 + count($verify), 'complete' => $basic,
-                'photos' => [$photos, count($verify)], 'phone' => filled($user->phone)],
+                'photos' => [$photos, count($verify)], 'phone' => filled($user->phone), 'submitted' => $submitted, 'review' => self::reviewState($kyc)],
             'standard' => [
                 'done' => $fields + $docs, 'of' => count(self::FIELDS) + count($required),
                 'fields' => [$fields, count(self::FIELDS)], 'documents' => [$docs, count($required)],

@@ -162,8 +162,9 @@ export function profile(url) {
         /** The three selfie photos shown as one card: done when all three are in. */
         selfieCard(center) {
             const poses = (this.data.documents || []).filter((x) => x.type.startsWith('selfie_'));
-            return { ...center, type: 'selfie', label: 'Selfie', hint: 'One quick selfie: look straight, then turn left and right. Taken for you.',
-                poses, uploaded: poses.length === 3 && poses.every((x) => x.uploaded), url: null, at: center.at };
+            const all = poses.length === 3 && poses.every((x) => x.uploaded);
+            return { ...center, type: 'selfie', label: 'Selfie', hint: 'Look at the camera and follow the prompts. It takes a few seconds.',
+                uploaded: all, url: all ? center.url : null, at: all ? center.at : null };
         },
         docError: {},
         /** Upload one verification photo: a File (checked for clarity first) or a data: URL. */

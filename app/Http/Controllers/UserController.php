@@ -141,6 +141,19 @@ class UserController extends Controller
                 ['Politically exposed', array_key_exists('pep', $kyc) ? ($kyc['pep'] ? 'Yes' : 'No') : null],
             ])->values(),
             'documents' => Kyc::documents($user, 'profile.document'),
+            'review' => [
+                'status' => $kyc['review']['status'] ?? null,
+                'by' => ['checks' => 'Automatic checks', 'staff' => 'Staff: '.($kyc['review']['staff_name'] ?? ''), 'before_checks' => 'Verified before checks existed'][$kyc['review']['by'] ?? ''] ?? null,
+                'at' => isset($kyc['review']['at']) ? \Carbon\Carbon::parse($kyc['review']['at'])->timezone('Africa/Nairobi')->format('j M Y, H:i') : null,
+                'reason' => $kyc['review']['reason'] ?? null,
+                'submitted' => $progress['basic']['submitted'],
+                'account_name' => $user->name, 'id_name' => $kyc['full_name'] ?? null,
+                'checks' => collect(Kyc::checks($user, $kyc))->map(fn ($c) => ['key' => $c[0], 'label' => $c[1], 'ok' => $c[2], 'note' => $c[3]])->values(),
+                'history' => collect($kyc['review_history'] ?? [])->reverse()->take(5)->map(fn ($h) => [
+                    'status' => $h['status'], 'who' => $h['staff_name'] ?? '', 'reason' => $h['reason'] ?? null,
+                    'at' => \Carbon\Carbon::parse($h['at'])->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+                ])->values(),
+            ],
             'footprint' => \App\Support\Footprint::forStaff($user),
             'stats' => [
                 'balance' => $user->getWalletBalance(),
@@ -153,6 +166,21 @@ class UserController extends Controller
             ])->filter(fn ($t) => $t[1])->sortBy(fn ($t) => $t[1])->map(fn ($t) => [$t[0], $t[1]->timezone('Africa/Nairobi')->format('j M Y, H:i')])->values(),
             'all_roles' => \Spatie\Permission\Models\Role::orderBy('name')->get(['id', 'name'])->map(fn ($r) => ['id' => $r->id, 'name' => str_replace('_', ' ', $r->name)]),
         ]);
+    }
+
+    /** Staff approve or reject a person's verification. Rejecting needs a reason the person will see. Logged. */
+    public function verify(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'decision' => 'required|in:approve,reject',
+            'reason' => 'required_if:decision,reject|nullable|string|max:300',
+        ], ['reason.required_if' => 'Say what the person should fix: they will see this.']);
+        abort_if($user->is($request->user()), 403, 'You cannot verify your own account.');
+        abort_unless(Kyc::progress($user)['basic']['submitted'], 422, 'This person has not sent all their verification photos yet.');
+        Kyc::decide($user, $request->user(), $data['decision'], $data['reason'] ?? null);
+        \App\Security\Lockdown::log('staff '.$data['decision'].'d a verification', ['person' => $user->id, 'reason' => $data['reason'] ?? null]);
+
+        return response()->json(['message' => $data['decision'] === 'approve' ? "{$user->name} is verified." : "{$user->name} was asked to retake their photos."]);
     }
 
     /** Wallet transactions for one person (table JSON). */

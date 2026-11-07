@@ -64,7 +64,8 @@ class DashboardPagesTest extends TestCase
         $this->actingAs($user = User::factory()->create(['onboarding_status' => 'active', 'intent' => 'merchant', 'phone' => null]));
         $this->putJson('/settings/business', ['name' => 'Duka Ltd'])->assertStatus(422); // needs a personal account first
         $user->update(['phone' => '+254711000222']);
-        \App\Support\Kyc::save($user, ['documents' => array_fill_keys(\App\Support\Kyc::VERIFY, ['path' => 'kyc/x.jpg'])]); // verified
+        \App\Support\Kyc::save($user, ['documents' => array_fill_keys(\App\Support\Kyc::VERIFY, ['path' => 'kyc/x.jpg'])]);
+        \App\Support\Kyc::decide($user, User::factory()->create(), 'approve', null); // verified (staff approved)
 
         $this->putJson('/settings/business', ['name' => 'Duka Ltd', 'tax_id' => 'p051234567x', 'directors' => [['name' => 'Jane Wanjiku', 'id_number' => '22334455']], 'settlement' => ['method' => 'bank', 'account_number' => '0123456789']])->assertOk();
         $company = $user->fresh()->company;

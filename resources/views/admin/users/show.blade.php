@@ -26,6 +26,7 @@
       @include('admin.users.partials.footprint')
     </div>
     <div class="space-y-6">
+      @include('admin.users.partials.review')
       @include('admin.users.partials.documents')
       <div x-data="dataTable({ url: '{{ route('users.activity', $user) }}', perPage: 5 })">
         <x-ui.table title="Wallet activity" :searchable="false" :columns="[

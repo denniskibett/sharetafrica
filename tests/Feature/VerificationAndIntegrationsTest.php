@@ -35,7 +35,7 @@ class VerificationAndIntegrationsTest extends TestCase
                 return $side === 'id_front' ? ['full_name' => 'Jane Wanjiru Doe', 'id_number' => '12345678', 'date_of_birth' => '1990-01-01', 'sex' => 'female'] : [];
             }
         });
-        $user = User::factory()->create(['onboarding_status' => 'active', 'phone' => null]);
+        $user = User::factory()->create(['name' => 'Jane Doe', 'onboarding_status' => 'active', 'phone' => null]);
         $this->actingAs($user)->getJson('/profile/data')->assertJsonPath('level.key', 'none');
 
         $user->update(['phone' => '+254711222333']);

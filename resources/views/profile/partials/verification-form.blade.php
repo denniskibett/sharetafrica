@@ -4,7 +4,10 @@
     $select = 'h-12 w-full px-4 ui-input rounded-2xl border-0 bg-gray-100 text-[15px] focus:outline-none focus:ring-2 focus:ring-gray-900/70 dark:bg-white/[0.06] dark:text-white/90';
 @endphp
 <x-ui.card title="Verified account" subtitle="Your M-Pesa number, your ID and a quick selfie. Then you can send and receive at basic limits." class="mb-6">
-  <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : 'warning')" x-text="data.level.basic.complete ? 'Verified' : 'Not verified yet'"></span></x-slot:actions>
+  <x-slot:actions><span :class="sharet.pill(data.level.basic.complete ? 'success' : (data.level.basic.review?.key === 'rejected' ? 'error' : 'warning'))"
+        x-text="data.level.basic.complete ? 'Verified' : ({ pending: 'In review', rejected: 'Retake needed' }[data.level.basic.review?.key] || 'Not verified yet')"></span></x-slot:actions>
+  <p x-show="!data.level.basic.complete && ['pending', 'rejected'].includes(data.level.basic.review?.key)" x-text="data.level.basic.review?.text"
+     class="mb-4 rounded-xl px-4 py-3 text-sm" :class="data.level.basic.review?.key === 'rejected' ? 'bg-red-50 text-red-800 dark:bg-red-500/10 dark:text-red-200' : 'bg-amber-50 text-amber-900 dark:bg-amber-500/10 dark:text-amber-200'"></p>
   <dl class="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
     <div><dt class="text-gray-500">M-Pesa number</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.user.phone || 'Not added yet'"></dd></div>
     <div><dt class="text-gray-500">Name on ID</dt><dd class="font-medium text-gray-900 dark:text-white" x-text="data.kyc.full_name || 'Read from your ID'"></dd></div>
