@@ -37,3 +37,19 @@ Stored hashed (`device_tokens`), tied to the device id, 90 days sliding, revoked
 the same phone, or from the devices list. A blocked user's tokens stop working at once.
 
 Tests: `tests/Feature/Mobile/MobileApiTest.php`. App: `~/mobile/sharet`.
+
+## Android download (`/app/android`)
+
+The APK is served from `/home/sharet.africa/downloads/android/` (config `mobile.android_dir`), outside the release
+folders, so website deploys and rollbacks never touch it.
+
+- `GET /app/android` downloads the 64-bit APK (most phones); `/app/android/armv7` downloads the build for older 32-bit phones.
+- The homepage ("Get the Android app") and footer ("Android app") show the link only once an APK is uploaded.
+- `GET /api/mobile/v1/config` returns `android: {version, build, url}`, so the app can tell people about updates.
+
+**Every app update:** bump `version:` in `~/mobile/sharet/pubspec.yaml` (the `+N` build number must go up), then
+run `~/mobile/sharet/scripts/release-android.sh`. It builds signed APKs, uploads them with `android.json`, keeps
+the previous release and checks the live link. No website deploy is needed.
+
+The release key is in `~/mobile/sharet-keys/` (never in git). **Back it up**: without it, no update can ever be
+installed over the current app.

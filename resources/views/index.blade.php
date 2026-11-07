@@ -445,6 +445,11 @@
           <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <a class="btn btn--ghost btn--lg" href="{{ route('developers') }}">See the infrastructure</a>
+        @if (\App\Support\AndroidRelease::latest())
+        <a class="btn btn--ghost btn--lg" href="{{ route('app.android') }}" download title="Sharet for Android · version {{ \App\Support\AndroidRelease::latest()['version'] }} · {{ \App\Support\AndroidRelease::size() }}">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="margin-right:6px"><path fill="#3DDC84" d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85a.64.64 0 0 0-.83.22l-1.88 3.24a11.4 11.4 0 0 0-8.94 0L5.65 5.67a.64.64 0 0 0-.87-.2c-.28.18-.37.54-.22.83L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52M7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5m10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5"/></svg>Get the Android app
+        </a>
+        @endif
       </div>
     </div>
   </section>
