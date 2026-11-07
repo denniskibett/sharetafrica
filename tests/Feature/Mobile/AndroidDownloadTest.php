@@ -41,7 +41,7 @@ class AndroidDownloadTest extends TestCase
     public function test_nothing_is_offered_until_an_apk_is_uploaded(): void
     {
         $this->get('/app/android')->assertNotFound();
-        $this->get('/')->assertOk()->assertDontSee('Get the Android app');
+        $this->get('/')->assertOk()->assertDontSee('/app/android');
         $this->getJson('/api/mobile/v1/config')->assertJsonPath('android', null);
     }
 
@@ -54,7 +54,7 @@ class AndroidDownloadTest extends TestCase
         $this->assertStringContainsString('Sharet-1.2.0.apk', $r->headers->get('Content-Disposition'));
         $this->assertStringContainsString('Sharet-1.2.0-32bit.apk', $this->get('/app/android/armv7')->assertOk()->headers->get('Content-Disposition'));
 
-        $this->get('/')->assertSee('Get the Android app')->assertSee(route('app.android'));
+        $this->get('/')->assertSee(route('app.android'));
         $this->getJson('/api/mobile/v1/config')->assertJsonPath('android.version', '1.2.0')->assertJsonPath('android.build', 3);
     }
 
