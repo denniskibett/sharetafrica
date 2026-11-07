@@ -121,7 +121,39 @@ class Kyc
         return $path;
     }
 
-    /** What the ID photo says, kept under id_read; empty details are filled from it so nobody types them again. */
+    /** Kenya's 47 counties: an old ID's district only becomes the county when it is one of these. */
+    public const COUNTIES = ['Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo Marakwet', 'Embu', 'Garissa', 'Homa Bay', 'Isiolo',
+        'Kajiado', 'Kakamega', 'Kericho', 'Kiambu', 'Kilifi', 'Kirinyaga', 'Kisii', 'Kisumu', 'Kitui', 'Kwale', 'Laikipia', 'Lamu',
+        'Machakos', 'Makueni', 'Mandera', 'Marsabit', 'Meru', 'Migori', 'Mombasa', 'Muranga', 'Nairobi', 'Nakuru', 'Nandi', 'Narok',
+        'Nyamira', 'Nyandarua', 'Nyeri', 'Samburu', 'Siaya', 'Taita Taveta', 'Tana River', 'Tharaka Nithi', 'Trans Nzoia', 'Turkana',
+        'Uasin Gishu', 'Vihiga', 'Wajir', 'West Pokot'];
+
+    /** Details the ID decides: what the card says replaces what was typed (the old value is kept under 'replaced'). */
+    public const FROM_ID = ['id_number', 'date_of_birth', 'full_name', 'sex', 'nationality', 'county', 'town'];
+
+    /** Re-reads the ID photos already uploaded (backfill). Returns [field => [old, new]] for what changed. */
+    public static function reread(User $user, bool $save = true): array
+    {
+        $kyc = self::data($user);
+        $before = array_intersect_key($kyc, array_flip(self::FROM_ID));
+        foreach (['id_front', 'id_back'] as $side) {
+            $path = $kyc['documents'][$side]['path'] ?? null;
+            if ($path && Storage::disk('local')->exists($path)) {
+                $kyc = self::readId($kyc, $side, Storage::disk('local')->path($path));
+            }
+        }
+        $changes = [];
+        foreach (self::FROM_ID as $f) {
+            if (($kyc[$f] ?? null) !== ($before[$f] ?? null)) {
+                $changes[$f] = [$before[$f] ?? null, $kyc[$f] ?? null];
+            }
+        }
+        $save && $changes && self::save($user, $kyc);
+
+        return $changes;
+    }
+
+    /** What the ID photo says, kept under id_read; it fills the details regardless of what was typed, keeping the old value. */
     private static function readId(array $kyc, string $side, string $file): array
     {
         try {
@@ -131,14 +163,34 @@ class Kyc
             $read = [];
         }
         $kyc['id_read'][$side] = $read + ['at' => now()->toIso8601String()];
-        $kyc['id_type'] = ($kyc['id_type'] ?? null) ?: ($read ? 'national_id' : null);
-        foreach (['id_number', 'date_of_birth', 'full_name', 'sex'] as $field) {
-            if (filled($read[$field] ?? null) && blank($kyc[$field] ?? null)) {
-                $kyc[$field] = $read[$field];
+        if (! $read) {
+            return $kyc;
+        }
+        $kyc['id_type'] = ($kyc['id_type'] ?? null) === 'passport' && ! isset($read['id_number']) ? 'passport' : 'national_id';
+        $read += self::places($read);
+        foreach (self::FROM_ID as $field) {
+            $new = $read[$field] ?? null;
+            $old = $kyc[$field] ?? null;
+            if (blank($new) || $new === $old) {
+                continue;
             }
+            if (filled($old)) {
+                $kyc['replaced'][] = ['field' => $field, 'old' => $old, 'new' => $new, 'side' => $side, 'at' => now()->toIso8601String()];
+            }
+            $kyc[$field] = $new;
         }
 
         return $kyc;
+    }
+
+    /** County and town from the places printed on the card: the district (or district of birth) when it is a county; the location for the town. */
+    private static function places(array $read): array
+    {
+        $county = collect([$read['county'] ?? null, $read['district'] ?? null, $read['district_of_birth'] ?? null])
+            ->filter()->map(fn ($v) => collect(self::COUNTIES)->first(fn ($c) => strcasecmp(str_replace(["'", '-'], ['', ' '], $v), $c) === 0))->filter()->first();
+        $town = $read['sub_location'] ?? $read['location'] ?? $read['division'] ?? $read['place_of_issue'] ?? null;
+
+        return array_filter(['county' => $county, 'town' => $town]);
     }
 
     /** Document list for a page: label, hint, kind, uploaded?, when, and the private URL to view it. */

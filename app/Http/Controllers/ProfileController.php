@@ -159,7 +159,7 @@ class ProfileController extends Controller
         \App\Support\Footprint::record($request->user()->fresh(), $request, 'kyc_'.$type);
         $user = $request->user()->fresh();
         $kyc = Kyc::data($user);
-        $read = array_intersect_key($kyc['id_read'][$type] ?? [], array_flip(['full_name', 'id_number', 'date_of_birth']));
+        $read = array_intersect_key($kyc['id_read'][$type] ?? [], array_flip(['full_name', 'id_number', 'date_of_birth', 'district', 'location', 'sub_location', 'district_of_birth']));
         $verified = Kyc::progress($user)['basic']['complete'];
 
         return response()->json([

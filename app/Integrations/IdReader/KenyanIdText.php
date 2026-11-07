@@ -16,7 +16,55 @@ final class KenyanIdText
         $text = strtoupper(str_replace("\r", '', $text));
         $lines = array_values(array_filter(array_map('trim', explode("\n", $text)), 'strlen'));
 
-        return array_filter(self::mrz($lines) + self::front($text, $lines));
+        $mrz = self::mrz($lines);
+        $out = $mrz + self::front($text, $lines) + self::places($lines);   // the machine lines win where both have a value
+        if ($mrz || preg_match('/REPUBLIC OF KENYA|JAMHURI YA KENYA|\bKEN\b/', $text)) {
+            $out['nationality'] = 'Kenyan';
+        }
+
+        return array_filter($out);
+    }
+
+    /** Label => field for the places on the card: the back (district … sub-location) and the front (birth, issue). */
+    private const PLACES = [
+        'SUB-LOCATION' => 'sub_location', 'SUB LOCATION' => 'sub_location', 'SUBLOCATION' => 'sub_location',
+        'DISTRICT OF BIRTH' => 'district_of_birth', 'COUNTY OF BIRTH' => 'district_of_birth', 'PLACE OF BIRTH' => 'place_of_birth',
+        'PLACE OF ISSUE' => 'place_of_issue', 'DIVISION' => 'division', 'LOCATION' => 'location', 'DISTRICT' => 'district', 'COUNTY' => 'district',
+    ];
+
+    /** "DISTRICT: NAIROBI" or "DISTRICT" then "NAIROBI" on the next line. Longest labels first, so SUB-LOCATION isn't read as LOCATION. */
+    private static function places(array $lines): array
+    {
+        $out = [];
+        $labels = self::PLACES;
+        uksort($labels, fn ($a, $b) => strlen($b) <=> strlen($a));
+        $isLabel = fn (string $l) => (bool) collect(array_keys($labels))->first(fn ($k) => str_starts_with(preg_replace('/[^A-Z -]/', '', $l), $k))
+            || preg_match('/^(DATE|SEX|SERIAL|ID |FULL|SURNAME|GIVEN|HOLDER|SIGN|NATIONALITY)/', $l);
+        foreach ($lines as $i => $line) {
+            $clean = trim(preg_replace('/\s+/', ' ', preg_replace('/[^A-Z0-9: -]/', ' ', $line)));
+            foreach ($labels as $label => $field) {
+                if (! str_starts_with($clean, $label) || isset($out[$field])) {
+                    continue;
+                }
+                $rest = trim(ltrim(substr($clean, strlen($label)), ' :-'));
+                $value = $rest !== '' ? $rest : (isset($lines[$i + 1]) && ! $isLabel($lines[$i + 1]) ? $lines[$i + 1] : '');
+                if (($v = self::place($value)) !== null) {
+                    $out[$field] = $v;
+                }
+                break;
+            }
+        }
+
+        return $out;
+    }
+
+    private static function place(string $raw): ?string
+    {
+        $v = trim(preg_replace('/\s+/', ' ', preg_replace('/[^A-Z\' -]/', ' ', strtoupper($raw))), " -'");
+        // Stop before another label printed on the same line ("NAIROBI DIVISION KASARANI")
+        $v = trim(preg_split('/\b(DISTRICT|DIVISION|LOCATION|SUB-LOCATION|PLACE OF|DATE OF|SEX)\b/', $v)[0]);
+
+        return strlen($v) >= 3 && strlen($v) <= 40 ? Str::title(strtolower($v)) : null;
     }
 
     private static function front(string $text, array $lines): array
