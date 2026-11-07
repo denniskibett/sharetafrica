@@ -81,4 +81,38 @@ class GoLiveToolsTest extends TestCase
             ->expectsOutputToContain('marked 2 order(s) reversed')->assertSuccessful();
         $this->assertSame(0, $orders->walletBalance($person));
     }
+
+    public function test_clean_simulated_keeps_only_real_money_for_everyone(): void
+    {
+        $orders = app(RampOrders::class);
+        $settle = function ($o) use ($orders) {
+            while (! $o->final()) {
+                $o = $orders->refresh($o);
+            }
+
+            return $o;
+        };
+        $jane = User::factory()->create(['name' => 'Jane Doe', 'phone' => '0712345671']);
+        $juma = User::factory()->create(['name' => 'Juma Otieno', 'phone' => '0712345672']);
+        foreach ([$jane, $juma] as $u) {
+            $u->forceFill(['kyc_level' => 'basic'])->save();
+        }
+        $settle($orders->confirm($orders->topUp($jane, '500')));
+        $real = $settle($orders->confirm($orders->topUp($juma, '100')));
+        \App\Models\RailRequest::whereKey($real->collect_request_id)->update(['rail' => 'daraja']);   // as if M-PESA had collected it
+        $orders->transfer($jane, '@'.\App\Support\Handle::for($juma), '200');
+        $this->assertSame([30000, 30000], [$orders->walletBalance($jane), $orders->walletBalance($juma)]);
+
+        $this->artisan('sharet:clean-simulated')->expectsOutputToContain('Report only')->assertSuccessful();
+        $this->assertSame(30000, $orders->walletBalance($jane));
+
+        // Without --transfers Jane's top-up can't be undone (she passed 200 on): skipped, nothing half-done
+        $this->artisan('sharet:clean-simulated', ['--apply' => true])->expectsOutputToContain('Skipped')->assertFailed();
+        $this->assertSame([30000, 30000], [$orders->walletBalance($jane), $orders->walletBalance($juma)]);
+
+        $this->artisan('sharet:clean-simulated', ['--apply' => true, '--transfers' => true])->expectsOutputToContain('Reversed 2 order(s)')->assertSuccessful();
+        $this->assertSame([0, 10000], [$orders->walletBalance($jane), $orders->walletBalance($juma)]);   // only Juma's real 100 is left
+        $this->assertSame(1, RampOrder::where('status', '!=', 'reversed')->count());
+        $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
+    }
 }

@@ -95,7 +95,7 @@ class KycIdReadTest extends TestCase
     {
         $user = User::factory()->create(['onboarding_status' => 'active']);
         $this->actingAs($user)->get('/profile/edit')->assertOk()
-            ->assertSee('kycSelfie((t, u) => uploadDoc(t, u))', false)->assertSee('keep your face in the oval')->assertDontSee('kycCamera()', false);
+            ->assertSee('kycSelfie((t, u) => uploadDoc(t, u))', false)->assertSee('straight, then left, then right')->assertDontSee('kycCamera()', false);
     }
 
     private function sendAll(User $user): void

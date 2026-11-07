@@ -20,9 +20,17 @@
         </div>
 
         <div class="mt-3 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-gray-50 dark:bg-white/[0.03]">
-          <img x-show="d.url" :src="d.url" :alt="d.label" class="h-full w-full object-contain">
+          <img x-show="d.url && !d.poses" :src="d.url" :alt="d.label" class="h-full w-full object-contain">
+          <div x-show="d.poses && d.poses.some(p => p.url)" class="grid h-full w-full grid-cols-3 gap-1">
+            <template x-for="(p, i) in d.poses || []" :key="p.type">
+              <div class="relative h-full">
+                <img x-show="p.url" :src="p.url" :alt="['Straight', 'Left', 'Right'][i]" class="h-full w-full object-cover">
+                <span class="absolute inset-x-0 bottom-0 bg-black/50 py-0.5 text-center text-[10px] font-medium text-white" x-text="['Straight', 'Left', 'Right'][i]"></span>
+              </div>
+            </template>
+          </div>
           <x-heroicon-o-photo x-show="!d.url && d.kind === 'photo'" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
-          <x-heroicon-o-face-smile x-show="!d.uploaded && d.kind === 'selfie'" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
+          <x-heroicon-o-face-smile x-show="d.kind === 'selfie' && !(d.poses || []).some(p => p.url)" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
           <x-heroicon-o-pencil x-show="!d.url && d.kind === 'signature'" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
         </div>
 
@@ -52,7 +60,7 @@
      takes each pose by itself once it is steady, and uploads each photo in the background while the next is taken. --}}
 <x-ui.slide-over name="selfie" title="Selfie">
   <div x-data="kycSelfie((t, u) => uploadDoc(t, u))" x-effect="if (open) { $nextTick(() => start()) } else { stop() }" class="space-y-4">
-    <p class="text-sm text-gray-600 dark:text-gray-300">Face a window or a lamp, with a plain wall behind you. Hold the phone at eye level. We guide you through it: keep your face in the oval.</p>
+    <p class="text-sm text-gray-600 dark:text-gray-300">Face a window or a lamp, with a plain wall behind you. Hold the phone at eye level. We take three photos for you: straight, then left, then right.</p>
     <div class="relative mx-auto aspect-[3/4] max-w-sm overflow-hidden rounded-2xl bg-black">
       <video x-ref="video" x-show="!done" playsinline muted class="h-full w-full -scale-x-100 object-cover"></video>
       <img x-show="done" :src="shots.selfie_center" alt="Your selfie" class="h-full w-full object-cover">
@@ -64,14 +72,21 @@
       </div>
     </div>
 
-    {{-- One selfie to the person: a single progress bar while it takes the three poses and sends them --}}
-    <div class="mx-auto max-w-sm">
-      <div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
-        <div class="h-full rounded-full bg-gray-900 transition-all duration-500 dark:bg-[#D4FF3D]"
-             :style="'width:' + Math.round(100 * (Object.keys(shots).length + Object.values(sent).filter(v => v === 'done').length) / 6) + '%'"></div>
-      </div>
-      <p class="mt-2 text-center text-xs text-gray-500" x-text="finished ? 'Selfie sent' : (done ? 'Sending your selfie…' : 'Taking your selfie…')"></p>
-    </div>
+    {{-- The three poses from the one capture: taken, sending, sent --}}
+    <ol class="mx-auto grid max-w-sm grid-cols-3 gap-2">
+      <template x-for="(p, i) in $store.selfieSteps" :key="p.type">
+        <li class="flex flex-col items-center gap-1.5">
+          <div class="relative aspect-square w-full overflow-hidden rounded-xl border"
+               :class="sent[p.type] === 'done' ? 'border-emerald-300 dark:border-emerald-500/40' : (i === step && !done ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800')">
+            <img x-show="shots[p.type]" :src="shots[p.type]" alt="" class="h-full w-full object-cover">
+            <span x-show="sent[p.type] === 'done'" class="absolute right-1 top-1 rounded-full bg-emerald-500 p-0.5 text-white"><x-heroicon-s-check class="h-3 w-3" /></span>
+            <span x-show="sent[p.type] === 'sending'" class="absolute right-1 top-1 rounded-full bg-white/90 p-0.5 text-gray-700"><x-heroicon-o-arrow-path class="h-3 w-3 animate-spin" /></span>
+            <span x-show="sent[p.type] === 'failed'" class="absolute right-1 top-1 rounded-full bg-red-500 p-0.5 text-white"><x-heroicon-s-exclamation-triangle class="h-3 w-3" /></span>
+          </div>
+          <span class="text-xs text-gray-500" x-text="['Straight', 'Left', 'Right'][i]"></span>
+        </li>
+      </template>
+    </ol>
 
     <p x-show="error" x-text="error" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300"></p>
     <p x-show="failed.length" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300">A photo did not upload. Check your connection and send it again.</p>
