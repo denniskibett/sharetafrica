@@ -55,7 +55,19 @@ offered FX pairs; cross-border sending is not switched on anywhere, so nothing i
 | ☐ | Role homes reuse the other wallet styles: merchant = lime card, business = ink + metal card, importer = card stack, supplier = pattern card. | Designs only |
 | ☐ | The futuristic dark version is **not** used (kept on branch `backup/v2-futuristic-ui-2026-11-06`). | — |
 
-## 4. Website (design ready, not yet coded)
+## 3b. App screens built in code (7 Nov, not yet deployed)
+
+| ✓ | Decision |
+|---|---|
+| ☐ | **Sign in, sign up and the other auth pages** moved to the new look (A01/A02). Same fields, routes and checks. Sign in stays **email + password**: the designed phone-and-PIN sign in, SMS code and KYC camera steps are not built yet. |
+| ☐ | Sign up labels the phone field "M-PESA number" ("Your mobile number becomes your wallet number"); no fixed +254 because UG/TZ/RW numbers are also accepted. Desktop shows the A01 welcome card beside the form. |
+| ☐ | **Onboarding** restyled; lane colours: individual blue, merchant violet, business amber, developer ink. |
+| ☐ | **Help** page (/help): search, common questions, fraud steps. Answers use the live settings (fees, limits KES 70,000 verified; 250,000 per payment / 500,000 per day bank grade). **Check the wording**, especially "Until then you can receive, but not send". Report fraud opens an email to support@sharet.africa. Chat, "My cases" and one-tap freeze are not built (no backend). |
+| ☐ | **Coming-soon previews** for Requests, Card, Send abroad (Tanzania next, Uganda later) and SWIFT: design look with sample details (labelled as a preview), a disabled "Tell me when it's ready" button, nothing that moves money. Reached from the Account menu under "Soon". |
+
+## 4. Website (homepage coded 7 Nov from the approved board; not yet deployed)
+
+The homepage `/` is now the canvas design (generated: `resources/views/index.blade.php`, `public/css/site.css`, layout `resources/views/site/layout.blade.php`). The hero rate is **today's real rate**, or "Today's rate, before you pay" if treasury hasn't recorded one. Footer links with no page yet (Careers, Press, Terms) are left out. **Other public pages (Personal, Merchants, Developers, Company, Contact, Trade, Privacy, Blog) still use the old look**: they need designs first.
 
 | ✓ | Decision |
 |---|---|

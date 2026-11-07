@@ -1,452 +1,62 @@
-{{-- resources/views/home/pages/index.blade.php --}}
-@extends('home.layouts.app')
-
-@section('title', 'Sharet Africa — Cheaper payments across East Africa')
-@section('description', 'Send money to anyone in East Africa on M-PESA, MTN, Airtel or bank from one Sharet wallet. Free internal transfers; the person you pay never signs up.')
-
+{{-- Website home. Generated from the approved canvas board WebHomeV2 by scratchpad build_site.py; change the design first, then regenerate. --}}
+@extends('site.layout')
+@section('title', 'Sharet · Every wallet. Every border. One app.')
+@section('description', 'Send between M-Pesa, Airtel Money, T-Kash and any bank, free between Sharet wallets, and across East Africa. Kenya pilot now, Tanzania next. Every fee on screen before you pay.')
+@php $rate = \App\Support\HomeRates::line(); @endphp
 @section('content')
+<div class="ui web">
+<div class="wr"><div class="wn"><a class="lg" href="{{ route('home') }}" aria-label="Sharet home">sharet<i>.</i></a><nav><a href="{{ route('personal') }}">Personal</a><a href="#abroad">Abroad</a><a href="{{ route('merchants') }}">Business</a><a href="#pricing">Pricing</a><a href="{{ route('contact') }}">Help</a></nav><a class="wb o" href="{{ route('login') }}">Log in</a><a class="wb" href="{{ route('register') }}">Open an account</a></div>
 
-  {{-- Hero --}}
-  <section class="hero">
-    <div class="container container--wide">
-      <div class="hero-grid">
-        <div class="hero-text">
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>East Africa · Kenya · Tanzania · Uganda</span>
-          <h1 class="hero-headline">
-            Cheaper.<br/>
-            <span class="lime">Any rail.</span><br/>
-            No signup <span class="slash">/</span> on their side.
-          </h1>
-          <p class="hero-sub">
-            Send money to anyone in East Africa — M-PESA, MTN, Airtel, Vodacom, or bank — from one Sharet wallet. Internal transfers are free. External payments cost less. And the person you are paying never has to sign up for anything.
-          </p>
-          <div class="hero-cta-row">
-            <a class="btn btn--primary btn--lg" href="{{ route('personal') }}">Send money
-              <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-            <a class="btn btn--ghost btn--lg" href="{{ route('merchants') }}">Accept payments</a>
-          </div>
-          <div class="hero-meta">
-            <span><strong>0%</strong> · internal transfer fee</span>
-            <span aria-hidden="true">·</span>
-            <span><strong>6</strong> · rails at launch</span>
-            <span aria-hidden="true">·</span>
-            <span><strong>3</strong> · East African markets</span>
-          </div>
-        </div>
-        <div class="hero-media reveal">
-          <img fetchpriority="high" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80" alt="A Sharet user in Nairobi sending money from their phone — the recipient receives it directly on their M-PESA, no Sharet account needed." />
-          <div class="floating-tag ft-top">
-            <span class="pill">Send · 0%</span>
-            KES 10,000 → +255 Vodacom
-          </div>
-          <div class="floating-tag ft-bottom">
-            THEY DON'T NEED SHARET
-          </div>
-        </div>
-      </div>
+<h1 class="mega">Every wallet. Every border. One app.</h1>
+<p class="lead">Move money between M-Pesa, Airtel Money, T-Kash and any bank, free between Sharet wallets, and across East Africa: piloting in Kenya now, Tanzania next, then Uganda. Every fee on screen before you pay.</p>
+<div class="row2" style="margin-top:28px;flex-wrap:wrap;gap:12px"><a class="wb l" href="{{ route('register') }}">Open a free account</a><span class="badge"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span class="bl"><small>Download on the</small>App Store</span></span><span class="badge"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#34A853" d="M3.6 1.8 13.6 12l3.2-3.2L5.1 2.1c-.5-.3-1.1-.4-1.5-.3z"/><path fill="#4285F4" d="M3.6 1.8C3.2 2 3 2.4 3 2.9v18.2c0 .5.2.9.6 1.1L13.6 12z"/><path fill="#FBBC04" d="m16.8 8.8 3.7 2.1c.9.5.9 1.7 0 2.2l-3.7 2.1-3.2-3.2z"/><path fill="#EA4335" d="M3.6 22.2 13.6 12l3.2 3.2-11.7 6.7c-.5.3-1.1.4-1.5.3z"/></svg><span class="bl"><small>GET IT ON</small>Google Play</span></span></div>
 
-      <div class="stat-strip">
-        <div class="stat-cell">
-          <div class="stat-num"><span class="lime">0</span>%</div>
-          <div class="stat-label">Fee on Sharet-to-Sharet transfers</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-num">6<span class="lime">+</span></div>
-          <div class="stat-label">Rails integrated at launch</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-num">60<span class="lime">%</span></div>
-          <div class="stat-label">Cheaper than rail-to-rail hops</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-num">0</div>
-          <div class="stat-label">Signups required on the other side</div>
-        </div>
-      </div>
-    </div>
-  </section>
+<div class="stage hero" aria-label="Sharet in Kilifi, Nairobi and across the border">
+<div class="hs s1"><div class="bgk"></div><span class="tag">KILIFI · NOW<b>Paid by a friend, free.</b></span><div class="float"><div class="chipw"><span class="tile t-in"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7L7 17"/><path d="M16 17H7V8"/></svg></span><span class="grow"><b>KES 2,000 from Akinyi</b><br><span class="sm mu">Just now · Sharet to Sharet, free</span></span></div><div class="bal" style="width:100%;box-sizing:border-box;box-shadow:0 16px 40px rgba(10,10,12,.25)"><small>KES wallet</small><span class="amt">KES 48,250.00</span><small>&#64;juma</small></div><div class="chipw"><span class="tile t-abroad"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></span><span class="grow">@if ($rate)<b>{{ $rate }}</b><br><span class="sm mu">Today's rate, locked for 15 min</span>@else<b>Today's rate, before you pay</b><br><span class="sm mu">Locked for 15 minutes</span>@endif</span></div></div></div>
+<div class="hs s2"><div class="bgk"></div><span class="tag">NAIROBI · NOW<b>M-Pesa to Airtel, one button.</b></span><div class="float"><div class="chipw"><span class="tile t-send"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></span><span class="grow"><b>KES 1,500 to Otieno</b><br><span class="sm mu">Airtel Money · name confirmed</span></span></div><div class="bal" style="width:100%;box-sizing:border-box;box-shadow:0 16px 40px rgba(10,10,12,.25)"><small>KES wallet</small><span class="amt">KES 46,735.00</span><small>Fee KES 15 · shown first</small></div><div class="chipw"><span class="tile t-in"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 8"/></svg></span><span class="grow"><b>Delivered in 4 seconds</b><br><span class="sm mu">Ref TKB7Q2K81P</span></span></div></div></div>
+<div class="hs s3"><div class="bgk"></div><span class="tag">TANZANIA · NEXT<b>Across the border, same app.</b></span><div class="float"><div class="chipw"><span class="tile t-abroad"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></span><span class="grow"><b>KES 10,000 to Dar es Salaam</b><br><span class="sm mu">Vodacom M-Pesa · coming next</span></span></div><div class="bal" style="width:100%;box-sizing:border-box;box-shadow:0 16px 40px rgba(10,10,12,.25)"><small>They get</small><span class="amt">TZS 202,909</span><small>Rate locked 15 min · fee KES 50</small></div><div class="chipw"><span class="tile t-in"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7L7 17"/><path d="M16 17H7V8"/></svg></span><span class="grow"><b>They don't need the app</b><br><span class="sm mu">Straight to their own wallet</span></span></div></div></div>
+<div class="hs s4"><div class="bgk"></div><span class="tag">EVERYDAY<b>Any till, any bill.</b></span><div class="float"><div class="chipw"><span class="tile t-pay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg></span><span class="grow"><b>NAIVAS WESTLANDS</b><br><span class="sm mu">Till 512 334 · name checked first</span></span></div><div class="bal" style="width:100%;box-sizing:border-box;box-shadow:0 16px 40px rgba(10,10,12,.25)"><small>Paid</small><span class="amt">KES 3,480.00</span><small>Receipt in Activity</small></div><div class="chipw"><span class="tile t-out"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18"/><path d="M12 3l9 5H3z"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/></svg></span><span class="grow"><b>KES 25,000 to Equity ••• 4410</b><br><span class="sm mu">PesaLink · under a minute</span></span></div></div></div>
+</div>
+</div>
 
-  {{-- Section 01: THE KILLER FEATURE — They don't need Sharet --}}
-  <section class="tile-section">
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="label">The idea · 01</span>
-          <h2>Send to anyone.<br/>They don't need<br/>to be on Sharet.</h2>
-        </div>
-        <p class="lede">
-          You have a Sharet wallet. They have M-PESA, MTN, Airtel, Vodacom, or a bank account. You enter their number or PayBill. Sharet identifies the country, network, and rail — and routes the payment. They get paid. They never had to download anything.
-        </p>
-      </div>
+<div class="wr sect" style="padding-bottom:0"><span class="lbl" id="wallets">WALLET TO WALLET</span><h2 class="h2w" style="margin-top:12px">Every wallet talks to every wallet.</h2><p class="lead">Your Sharet number is your M-Pesa number. Send from it to Airtel Money, T-Kash or any bank, and receive from all of them, in one app. Between Sharet wallets it's free and instant.</p><div class="deck" aria-label="M-Pesa, Airtel Money, T-Kash, PesaLink and Sharet wallets linked in one app"><div class="belt"><div class="wc w-sh c1"><div class="top"><span style="font:400 24px var(--f-disp)">sharet<span style="color:var(--lime)">.</span></span><span class="lk">FREE</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">&#64;juma</span></div><div class="bt"><span>JUMA JONES</span><span>SHARET</span></div></div><div class="wc w-mp c2"><div class="top"><span class="lgc"><img src="/images/partners/mpesa.svg" alt="M-PESA" style="height:28px;width:auto"></span><span class="lk">LINKED</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">0722 ••• 904</span></div><div class="bt"><span>JUMA JONES</span><span>M-PESA</span></div></div><div class="wc w-at c3"><div class="top"><span class="lgc"><img src="/images/partners/airtel.svg" alt="Airtel Money" style="height:22px;width:auto"></span><span class="lk">LINKED</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">0733 ••• 218</span></div><div class="bt"><span>JUMA JONES</span><span>AIRTEL MONEY</span></div></div><div class="wc w-tk c4"><div class="top"><span class="lgc" style="background:#1EA7E1;padding:0"><img src="/images/partners/tkash.png" alt="T-Kash" style="height:24px;width:auto"></span><span class="lk">LINKED</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">0770 ••• 552</span></div><div class="bt"><span>JUMA JONES</span><span>T-KASH</span></div></div><div class="wc w-pl c5"><div class="top"><span class="lgc"><img src="/images/partners/pesalink.png" alt="PesaLink" style="height:20px;width:auto"></span><span class="lk">ANY BANK</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">Equity ••• 4410</span></div><div class="bt"><span>JUMA JONES</span><span>PESALINK</span></div></div><div aria-hidden="true" class="wc w-sh c1"><div class="top"><span style="font:400 24px var(--f-disp)">sharet<span style="color:var(--lime)">.</span></span><span class="lk">FREE</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">&#64;juma</span></div><div class="bt"><span>JUMA JONES</span><span>SHARET</span></div></div><div aria-hidden="true" class="wc w-mp c2"><div class="top"><span class="lgc"><img src="/images/partners/mpesa.svg" alt="M-PESA" style="height:28px;width:auto"></span><span class="lk">LINKED</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">0722 ••• 904</span></div><div class="bt"><span>JUMA JONES</span><span>M-PESA</span></div></div><div aria-hidden="true" class="wc w-at c3"><div class="top"><span class="lgc"><img src="/images/partners/airtel.svg" alt="Airtel Money" style="height:22px;width:auto"></span><span class="lk">LINKED</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">0733 ••• 218</span></div><div class="bt"><span>JUMA JONES</span><span>AIRTEL MONEY</span></div></div><div aria-hidden="true" class="wc w-tk c4"><div class="top"><span class="lgc" style="background:#1EA7E1;padding:0"><img src="/images/partners/tkash.png" alt="T-Kash" style="height:24px;width:auto"></span><span class="lk">LINKED</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">0770 ••• 552</span></div><div class="bt"><span>JUMA JONES</span><span>T-KASH</span></div></div><div aria-hidden="true" class="wc w-pl c5"><div class="top"><span class="lgc"><img src="/images/partners/pesalink.png" alt="PesaLink" style="height:20px;width:auto"></span><span class="lk">ANY BANK</span></div><div class="row2" style="align-items:center;gap:12px"><span class="chip"></span><span class="no">Equity ••• 4410</span></div><div class="bt"><span>JUMA JONES</span><span>PESALINK</span></div></div></div></div><div class="trio w2w" style="margin-top:20px"><div class="panelw" style="background:var(--surf);min-height:0"><h3>Sharet <span class="swi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></span> Sharet</h3><p>Free and instant, to an &#64;name or number.</p></div><div class="panelw" style="background:var(--surf);min-height:0"><h3>M-Pesa <span class="swi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></span> Airtel <span class="swi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></span> T-Kash</h3><p>One send button for every network. We confirm the name first.</p></div><div class="panelw" style="background:var(--surf);min-height:0"><h3>Any wallet <span class="swi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg></span> any bank</h3><p>PesaLink, 24/7, into any Kenyan bank account in your name.</p></div></div></div>
 
-      <div class="split">
-        <div class="split-text">
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Worked example</span>
-          <h2>Nairobi →<br/>Dar es Salaam.</h2>
-          <p>
-            You are in Nairobi. Your supplier is in Dar es Salaam. You have their +255 number. You enter it in Sharet, choose the amount, confirm. Sharet does the rest — country detection, network identification, treasury check, rail selection, payout execution. Your supplier receives TZS in their Vodacom wallet in minutes.
-          </p>
-          <ul class="split-fact-list">
-            <li><b>You enter</b><span>+255 754 XXX XXX · KES 10,000</span></li>
-            <li><b>Sharet detects</b><span>Tanzania · Vodacom M-Pesa</span></li>
-            <li><b>Sharet checks</b><span>TZS liquidity · limits · rail availability</span></li>
-            <li><b>Sharet routes</b><span>Through the Vodacom payout rail</span></li>
-            <li><b>They receive</b><span>TZS in their Vodacom wallet — no signup, no app</span></li>
-          </ul>
-          <a class="btn btn--ghost-on-tile" href="{{ route('personal') }}">See how sending works
-            <svg class="arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </div>
-        <div class="split-img">
-          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=1000&q=80" alt="A Vodacom M-PESA agent in Dar es Salaam — the recipient receives the payout in their existing wallet without needing a Sharet account." />
-          <span class="ft-corner">Recipient side · Vodacom M-Pesa</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<div class="wr sect"><div class="split"><div><span class="lbl" id="send">SEND</span><h2 class="h2w" style="margin-top:12px">Send in seconds.<br>Free between friends.</h2><p class="lead">M-Pesa, Airtel or any bank by PesaLink. Other Sharet members get it free and instantly. We confirm the name before your money moves.</p><div style="margin-top:24px"><a class="wb" href="{{ route('register') }}">Start sending</a></div></div>
+<div class="panelw ph-send"><div></div><div style="max-width:320px;align-self:center;width:100%;position:relative"><div class="mini"><div class="row2" style="align-items:center"><span class="av">WM</span><span class="grow"><b>Wanjiku Mwangi</b><br><span class="sm mu">M-Pesa · 0722 ••• 904</span></span></div><div class="amt s">KES 1,500</div><div class="kv" style="border:0;padding:0"><span>Fee</span><span>KES 15.00</span></div><span class="btn lime">Send</span></div></div></div></div></div>
 
-  {{-- Section 02: Three audiences --}}
-  <section>
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="label">Built for · 02</span>
-          <h2>Three ways<br/>to use Sharet.</h2>
-        </div>
-        <p class="lede">
-          Whether you accept payments, send money, or build on our infrastructure — Sharet is one wallet and one ledger behind the scenes. Pick the door that matches what you do.
-        </p>
-      </div>
+<div class="wr sect"><div class="split"><div class="panelw ph-abroad" style="color:#fff;min-height:520px"><div></div><div class="mini" style="max-width:340px;align-self:center;width:100%;position:relative"><div class="row2" style="align-items:center"><span class="flag" style="background:linear-gradient(135deg,#1EB53A 0 40%,#FCD116 40% 44%,#0A0A0C 44% 56%,#FCD116 56% 60%,#00A3DD 60%)"></span><b class="grow">Send to Tanzania</b><span class="pill p-warn">NEXT</span></div><div class="kv" style="border:0;padding:0"><span>You send</span><span>KES 10,000</span></div><div class="kv" style="border:0;padding:0"><span>They get</span><span>TZS 202,909</span></div><span class="sm mu">Rate locked 15 min · fee KES 50 · they don't need the app</span></div></div><div><span class="lbl" id="abroad">ACROSS BORDERS</span><h2 class="h2w" style="margin-top:12px">East Africa,<br>one wallet.</h2><p class="lead">Send home, pay suppliers and get paid across borders at today's rate, shown before you pay. Recipients get it on their own mobile money or bank.</p><div class="steps" style="margin-top:22px"><div class="st d"><b><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 8"/></svg></b><span><strong class="stt">Kenya · pilot now</strong><small>M-Pesa, Airtel Money, T-Kash, every bank</small></span></div><div class="st n"><b>2</b><span><strong class="stt">Tanzania · next</strong><small>Vodacom M-Pesa, Airtel Money, Mixx by Yas, banks</small></span></div><div class="st"><b>3</b><span><strong class="stt">Uganda · after</strong><small>MTN MoMo, Airtel Money, banks</small></span></div></div><div style="margin-top:22px"><a class="wb" href="{{ route('personal') }}">Join the cross-border waitlist</a></div></div></div></div>
 
-      <div class="cap-bento">
-        <article class="cap-card cap-card--tall">
-          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1000&q=80" alt="A merchant in Nairobi accepting a mobile money payment." />
-          <div class="cap-tall-meta">
-            <span class="cap-num lime-text">01 / Merchants</span>
-            <h3>Accept from any rail.<br/>Settle anywhere.</h3>
-            <p>Receive payments from M-PESA, MTN, Airtel, cards, and banks — into one wallet. Settle externally on demand. One dashboard for all rails.</p>
-            <a class="btn btn--ghost-on-tile btn--sm" href="{{ route('merchants') }}" style="margin-top: 12px;">Merchants →</a>
-          </div>
-        </article>
+<div class="wr sect" style="padding-top:0"><div style="text-align:center"><span class="lbl">IN THE APP</span><h2 class="h2w" style="margin-top:12px">Your money, on your phone.</h2><p class="lead pl" style="margin-inline:auto">Your balance and M-Pesa number at a glance. Send to family in Tanzania in three steps. Pay any till, with the name checked before you pay.</p></div><div class="p3" aria-hidden="true"><div class="pf"><div class="phone"><div class="scrn k0 sp"><div class="sbar" style="color:#fff"><span>9:41</span><span class="sic"><svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.4A10.6 10.6 0 0 0 8 .3 10.6 10.6 0 0 0 .5 3.3l1.3 1.4A8.7 8.7 0 0 1 8 2.2zm0 3.7c1.4 0 2.7.5 3.6 1.4l1.4-1.4A7 7 0 0 0 8 4 7 7 0 0 0 3 5.9l1.4 1.4c.9-.9 2.2-1.4 3.6-1.4zM8 9.4l2.2-2.2a3.2 3.2 0 0 0-4.4 0z"/></svg><svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div><div class="spl"><span class="spl-mark">sharet<i>.</i></span><span class="spl-tag">Every wallet. Every border.</span><span class="spl-dots"><i></i><i></i><i></i></span></div></div><div class="scrn k1"><div class="sbar" style="color:#fff"><span>9:41</span><span class="sic"><svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.4A10.6 10.6 0 0 0 8 .3 10.6 10.6 0 0 0 .5 3.3l1.3 1.4A8.7 8.7 0 0 1 8 2.2zm0 3.7c1.4 0 2.7.5 3.6 1.4l1.4-1.4A7 7 0 0 0 8 4 7 7 0 0 0 3 5.9l1.4 1.4c.9-.9 2.2-1.4 3.6-1.4zM8 9.4l2.2-2.2a3.2 3.2 0 0 0-4.4 0z"/></svg><svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div><div class="inkhero" style="gap:18px;padding-bottom:24px"><div class="top2"><span class="logo">sharet<i>.</i></span><span class="av" style="background:var(--lime);color:var(--onlime)">JO</span><span class="icb bellb" aria-label="Notifications"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></span></div><div class="greet"><b>Habari, Juma</b><span><span class="flag" style="background:linear-gradient(#0A0A0C 0 30%,#fff 30% 35%,#B00 35% 65%,#fff 65% 70%,#076B32 70%)"></span> 1 KES = USD 0.0076</span></div><div><span style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,.6)">Available balance<span aria-label="Hide balance" style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);align-items:center;justify-content:center;color:#fff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span></span><div style="font:700 38px/1.1 var(--f-ui);letter-spacing:-.04em;color:#fff;margin-top:2px">KES 48,250.00</div></div><div class="row2" style="flex-wrap:wrap;gap:8px;margin-top:6px"><span aria-label="Copy your M-PESA number" style="display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12.5px;color:rgba(255,255,255,.8)"><img src="/images/partners/mpesa.svg" alt="M-PESA" style="height:11px;width:auto;filter:brightness(0) invert(1);opacity:.8"><span class="num">0712 345 678</span><span style="opacity:.6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></span></span><span aria-label="Copy your &#64;name" style="display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);font-size:12.5px;color:rgba(255,255,255,.8)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg>juma<span style="opacity:.6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></span></span></div></div><div class="row2" style="justify-content:space-around;"><span style="display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px"><span class="ring-act" style="width:52px;height:52px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Add</span><span style="display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px"><span class="ring-act" style="width:52px;height:52px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg></span>Send</span><span style="display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px"><span class="ring-act" style="width:52px;height:52px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7L7 17"/><path d="M16 17H7V8"/></svg></span>Request</span><span style="display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12.5px"><span class="ring-act" style="width:52px;height:52px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></span>Withdraw</span></div><div class="row2" style="align-items:center"><b class="grow">Recent</b><span class="sm mu">See all</span></div><div class="list"><div class="li"><span class="tile t-in"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7L7 17"/><path d="M16 17H7V8"/></svg></span><span class="t"><b>Akinyi Wekesa</b><small>Received · 09:12</small></span><span class="num" style="color:var(--in-tx)">+2,000.00</span></div><div class="li"><span class="tile t-pay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16l-1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span class="t"><b>Naivas Westlands</b><small>Till · yesterday</small></span><span class="num">−3,480.00</span></div></div><div class="grow"></div><div class="tabs"><a tabindex="-1" class="on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</a><a tabindex="-1" class=""><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>Pay</a><a tabindex="-1" class=""><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>Cards</a><a tabindex="-1" class=""><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>Activity</a><a tabindex="-1" class=""><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Me</a></div></div><div class="scrn k2"><div class="sbar" style="color:var(--tx)"><span>9:41</span><span class="sic"><svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.4A10.6 10.6 0 0 0 8 .3 10.6 10.6 0 0 0 .5 3.3l1.3 1.4A8.7 8.7 0 0 1 8 2.2zm0 3.7c1.4 0 2.7.5 3.6 1.4l1.4-1.4A7 7 0 0 0 8 4 7 7 0 0 0 3 5.9l1.4 1.4c.9-.9 2.2-1.4 3.6-1.4zM8 9.4l2.2-2.2a3.2 3.2 0 0 0-4.4 0z"/></svg><svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div><div class="bar"><a tabindex="-1" class="icb" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></a><span class="t">Wallets</span></div><div class="bal"><small>Kenyan shilling · M-PESA 0712 345 678</small><span class="amt s">KES 48,250.00</span></div><div class="bal abroad"><small>Tanzanian shilling · next</small><span class="amt s">TZS 202,909</span></div><div class="bal lime"><small>Virtual card · USD</small><span class="amt s">USD 64.20</span></div><a tabindex="-1" class="btn sec"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4L3 8l4 4"/><path d="M3 8h14"/><path d="M17 20l4-4-4-4"/><path d="M21 16H7"/></svg>Convert between wallets</a><div class="grow"></div></div><div class="scrn k3"><div class="sbar" style="color:var(--tx)"><span>9:41</span><span class="sic"><svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.4A10.6 10.6 0 0 0 8 .3 10.6 10.6 0 0 0 .5 3.3l1.3 1.4A8.7 8.7 0 0 1 8 2.2zm0 3.7c1.4 0 2.7.5 3.6 1.4l1.4-1.4A7 7 0 0 0 8 4 7 7 0 0 0 3 5.9l1.4 1.4c.9-.9 2.2-1.4 3.6-1.4zM8 9.4l2.2-2.2a3.2 3.2 0 0 0-4.4 0z"/></svg><svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div><div class="bar"><a tabindex="-1" class="icb" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></a><span class="t">How much</span></div><div class="fld"><label>You send</label><div class="inp  big"><span class="num">KES 10,000</span></div></div><div class="fld"><label>Neema gets</label><div class="inp  big"><span class="num">TZS 202,909</span></div></div><div class="list"><div class="kv"><span>Rate · locked 15 min</span><span>TZS 20.29</span></div><div class="kv"><span>Fee</span><span>KES 50.00</span></div><div class="kv tot"><span>Total</span><span>KES 10,050.00</span></div></div><div class="grow"></div><a tabindex="-1" class="btn ">Review</a></div><div class="scrn k4"><div class="sbar" style="color:var(--tx)"><span>9:41</span><span class="sic"><svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.4A10.6 10.6 0 0 0 8 .3 10.6 10.6 0 0 0 .5 3.3l1.3 1.4A8.7 8.7 0 0 1 8 2.2zm0 3.7c1.4 0 2.7.5 3.6 1.4l1.4-1.4A7 7 0 0 0 8 4 7 7 0 0 0 3 5.9l1.4 1.4c.9-.9 2.2-1.4 3.6-1.4zM8 9.4l2.2-2.2a3.2 3.2 0 0 0-4.4 0z"/></svg><svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div><div class="big"><div class="ring" style="background:var(--lime);color:var(--onlime)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 8"/></svg></div><h2 class="h1">Delivered</h2><div class="amt">TZS 202,909</div><p class="mu" style="margin:0;max-width:280px">Neema got it on Vodacom M-Pesa.</p></div><div class="list"><div class="kv"><span>Partner ref</span><span>VTZ-55120874</span></div></div><div class="grow"></div><a tabindex="-1" class="btn ">Send again</a></div><div class="scrn k5"><div class="sbar" style="color:var(--tx)"><span>9:41</span><span class="sic"><svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg><svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path fill="currentColor" d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.4A10.6 10.6 0 0 0 8 .3 10.6 10.6 0 0 0 .5 3.3l1.3 1.4A8.7 8.7 0 0 1 8 2.2zm0 3.7c1.4 0 2.7.5 3.6 1.4l1.4-1.4A7 7 0 0 0 8 4 7 7 0 0 0 3 5.9l1.4 1.4c.9-.9 2.2-1.4 3.6-1.4zM8 9.4l2.2-2.2a3.2 3.2 0 0 0-4.4 0z"/></svg><svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="currentColor" opacity=".45"/></svg></span></div><div class="bar"><a tabindex="-1" class="icb" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></a><span class="t">Pay</span></div><div class="big"><div class="ring" style="background:var(--lime);color:var(--onlime)"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 8"/></svg></div><h2 class="h1">Paid</h2><div class="amt">KES 3,480.00</div><p class="mu" style="margin:0;max-width:280px">NAIVAS WESTLANDS · Till 512 334</p></div><div class="list"><div class="kv"><span>Name checked</span><span>NAIVAS WESTLANDS</span></div><div class="kv"><span>Fee</span><span>Free</span></div><div class="kv"><span>M-PESA ref</span><span>TKB7Q2K81P</span></div></div><div class="grow"></div><a tabindex="-1" class="btn sec">Share receipt</a></div></div><div class="fcard l f1"><span class="tile t-in"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7L7 17"/><path d="M16 17H7V8"/></svg></span><span><b>KES 2,000 from Akinyi</b><br><span class="sm mu">Sharet to Sharet · free</span></span></div><div class="fcard r f3"><span class="tile t-pay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg></span><span><b>Paid NAIVAS WESTLANDS</b><br><span class="sm mu">KES 3,480 · name checked first</span></span></div><div class="fcard c f2"><span class="flag" style="background:linear-gradient(135deg,#1EB53A 0 40%,#FCD116 40% 44%,#0A0A0C 44% 56%,#FCD116 56% 60%,#00A3DD 60%)"></span><span><b>1 KES = TZS 20.29</b><br><span class="sm mu">Tanzania next · locked 15 min</span></span></div></div></div></div>
 
-        <article class="cap-card cap-card--std">
-          <span class="cap-num">02 / Personal</span>
-          <h3>Send across<br/>East Africa.</h3>
-          <p>Send to family, pay for goods, receive from abroad — from one wallet. Recipients don't need Sharet.</p>
-          <a class="btn btn--ghost btn--sm" href="{{ route('personal') }}" style="margin-top: auto;">Personal →</a>
-        </article>
+<div class="wr sect" style="padding-top:0"><div class="panelw" style="background:var(--lime);min-height:auto"><div class="split" style="align-items:start"><div><span class="lbl" id="safety" style="color:#3B4A00">SAFETY</span><h2 class="h2w" style="margin-top:12px">Your money's safe place.</h2><p class="lead" style="color:#2B3600">Every shilling is recorded twice and checked against M-Pesa and the bank every day. Nothing leaves without your PIN.</p></div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))">
+<div class="mini"><span class="tile t-ink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><b>Real names only</b><span class="sm mu">Every account is checked against its ID, and every recipient by name.</span></div>
+<div class="mini"><span class="tile t-ink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><b>Your PIN, every time</b><span class="sm mu">Five wrong tries locks payments for 30 minutes.</span></div>
+<div class="mini"><span class="tile t-ink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span><b>An emergency stop</b><span class="sm mu">If anything looks wrong we can pause payments in one step. Balances stay visible.</span></div>
+<div class="mini"><span class="tile t-ink"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span><b>Held separately</b><span class="sm mu">Customer money is held with Cashia, a payment service provider licensed by the Central Bank of Kenya, apart from ours.</span></div>
+</div></div></div></div>
 
-        <article class="cap-card cap-card--std">
-          <span class="cap-num">03 / Trade</span>
-          <h3>Goods in and<br/>out of Africa.</h3>
-          <p>Pay suppliers abroad. Get paid from abroad. Settle locally in KES, TZS, or UGX.</p>
-          <a class="btn btn--ghost btn--sm" href="{{ route('trade') }}" style="margin-top: auto;">Trade →</a>
-        </article>
+<div class="wr"><span class="lbl" id="everyday">EVERYDAY</span><h2 class="h2w" style="margin-top:12px">Everything you pay for.</h2>
+<div class="goals"><span class="goal on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Rent</span><span class="goal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg>School fees</span><span class="goal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 6 5"/></svg>Chama</span><span class="goal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg>KPLC</span><span class="goal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg>Tills</span><span class="goal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="1"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2-4-6-3-5 0M12 8c2-4 6-3 5 0"/></svg>Family upcountry</span></div>
+<div class="trio">
+<div class="panelw ph-pay" style="color:#fff"><div><h3>Pay any till or bill</h3><p>We look up the name first, so you never pay the wrong shop.</p></div><div class="mini"><div class="row2" style="align-items:center"><span class="tile t-pay"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg></span><b class="grow">NAIVAS WESTLANDS</b></div><span class="sm mu">Till 512 334</span><div class="amt s">KES 3,480</div></div></div>
+<div class="panelw ph-out" style="color:#fff"><div><h3>Withdraw to any bank</h3><p>PesaLink, any time of day. If the bank returns it, every shilling comes back.</p></div><div class="mini"><div class="row2" style="align-items:center"><span class="tile t-out"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18"/><path d="M12 3l9 5H3z"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/></svg></span><b class="grow">Equity ••• 4410</b><span class="pill p-ok">SENT</span></div><div class="amt s">KES 25,000</div></div></div>
+<div class="panelw ph-free" style="color:var(--onlime)"><div><h3>Free between Sharet wallets</h3><p>Send to an &#64;name or a Sharet number: instant, free, any time.</p></div><div class="mini"><div class="row2" style="align-items:center"><span class="av">AW</span><b class="grow">&#64;akinyi</b><span class="pill p-lime">FREE</span></div><div class="amt s">KES 2,000</div></div></div>
+</div></div>
 
-        <article class="cap-card cap-card--wide">
-          <span class="cap-num">04 / Developers &amp; platforms</span>
-          <h3>Build on the Sharet ledger —<br/>or license the whole stack.</h3>
-          <p>Full API, SDKs, sandbox, webhooks, and a white-label option for banks, fintechs, and platforms that want to launch their own branded wallet on top of Sharet. The ledger, treasury, and adapter layer are all licensable as IP.</p>
-          <a class="btn btn--ghost btn--sm" href="{{ route('developers') }}" style="margin-top: 12px;">Developers &amp; licensing →</a>
-        </article>
-      </div>
-    </div>
-  </section>
+<div class="wr sect"><div class="panelw" style="background:var(--ink);color:#fff;min-height:520px"><div class="split"><div><span class="lbl" id="card" style="color:#B5B5BC">CARD</span><h2 class="h2w" style="margin-top:12px">A dollar card for the internet.</h2><p class="lead" style="color:#C9C9C2">Pay online in USD from your shilling balance. The rate is locked before you top up. Freeze it with one tap.</p><div style="margin-top:24px"><a class="wb l" href="{{ route('register') }}">Get your card</a></div></div>
+<div style="max-width:380px;width:100%;justify-self:center"><div class="vcard" style="height:220px;background:linear-gradient(135deg,#1C1C20,#2E2E36);box-shadow:0 30px 60px rgba(0,0,0,.4)"><span class="row2" style="justify-content:space-between"><b>sharet<span style="color:var(--lime)">.</span></b><span class="num">USD</span></span><span class="n">5321 •••• •••• 0471</span><span class="row2 sm" style="justify-content:space-between;color:#B5B5BC"><span>JUMA JONES</span><span>09/29</span></span></div></div></div></div></div>
 
-  {{-- Section 03: Why cheaper --}}
-  <section class="chapter">
-    <div class="container container--narrow">
-      <div class="chapter-grid">
-        <div>
-          <span class="label">Why cheaper · 03</span>
-          <h2>The old path<br/>took three hops.<br/>Sharet takes one.</h2>
-        </div>
-        <div class="chapter-body">
-          <p>
-            Moving money from one rail to another in East Africa traditionally takes multiple hops — withdraw, convert, send, deposit — with a fee at each hop. Sharet collapses that into one payment routed through one ledger. Because the ledger carries the internal movement for free, the only fee is the external rail at the destination.
-          </p>
-          <blockquote class="pull-quote">
-            The ledger is the cheapest place for money to move. Everything else is a rail.
-            <cite>— Sharet engineering principle</cite>
-          </blockquote>
-          <p>
-            In practice, this makes cross-rail payments in East Africa cheaper by a wide margin — often 40 to 60 percent less than routing through traditional intermediary paths. The savings come from removing hops, not from squeezing margins.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+<div class="wr sect"><div class="split"><div class="panelw ph-trade"><div></div><div class="mini" style="max-width:320px;align-self:center;width:100%;position:relative"><b>LPO-77412 · Naivas</b><div class="kv" style="border:0;padding:0"><span>Advance</span><span>KES 960,000</span></div><span class="pill p-ok">SUPPLIER PAID</span></div></div>
+<div><span class="lbl">BUSINESS · COMING SOON</span><h2 class="h2w" style="margin-top:12px">Finance the order. Pay the supplier.</h2><p class="lead">Trade finance with our funding partner Aimzone Ventures: suppliers paid on delivery, you repay from sales.</p><div style="margin-top:24px"><a class="wb o" href="{{ route('merchants') }}">Join the business waiting list</a></div></div></div></div>
 
-  {{-- Section 04: Trade corridor — goods in and out of Africa --}}
-  <section class="snug">
-    <div class="container container--wide">
-      <div class="split split--reverse">
-        <div class="split-text">
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Trade · 04</span>
-          <h2>Pay suppliers<br/>abroad. Get paid<br/>from abroad.</h2>
-          <p>
-            Sharet sits on both sides of the African trade corridor. Importers can pay suppliers in China, the UAE, Europe, or India — settling in USD, EUR, or GBP — while the recipient receives funds in whatever rail or currency they use locally. Exporters can receive payment from international buyers and settle directly into M-PESA, MTN, Airtel, or a local bank account.
-          </p>
-          <ul class="split-fact-list">
-            <li><b>Imports</b><span>Pay suppliers abroad · settle in USD/EUR/GBP</span></li>
-            <li><b>Exports</b><span>Receive from buyers abroad · settle in KES/TZS/UGX</span></li>
-            <li><b>Intra-Africa</b><span>Kenya ↔ Tanzania ↔ Uganda · without multiple hops</span></li>
-            <li><b>Diaspora</b><span>Send home · recipients get paid on their existing rail</span></li>
-            <li><b>Compliance</b><span>Documentation, customs, and regulatory support built-in</span></li>
-          </ul>
-          <a class="btn btn--ghost" href="{{ route('trade') }}">See the trade corridor
-            <svg class="arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </div>
-        <div class="split-img">
-          <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=1000&q=80" alt="A container port in Mombasa — the trade corridor between Africa and the world." />
-          <span class="ft-corner">Trade corridor · in and out of Africa</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<div class="wr"><span class="lbl" id="pricing">PRICING</span><h2 class="h2w" style="margin-top:12px">The fee is on the screen first.</h2>
+<div class="scr"><table class="price"><tr><td>Send to a Sharet member</td><td>Instant</td><td>Free</td></tr><tr><td>Add money by M-Pesa</td><td>Instant</td><td>Free</td></tr><tr><td>Send to M-Pesa or Airtel</td><td>Seconds</td><td>From KES 9 · free up to 100</td></tr><tr><td>Withdraw to a bank</td><td>Under a minute</td><td>KES 50</td></tr><tr><td>Send to Tanzania · coming next</td><td>Minutes</td><td>KES 50 + rate shown</td></tr><tr><td>SWIFT transfer</td><td>1–3 working days</td><td>KES 2,500</td></tr></table></div></div>
 
-  {{-- Section 05: Payment rails grid --}}
-  <section>
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="label">Rails · 05</span>
-          <h2>Six rails.<br/>One wallet.<br/>Zero friction.</h2>
-        </div>
-        <p class="lede">
-          We did not try to integrate every network on day one. We picked the rails that matter most in each market, built deep integrations, and will add more as transaction volumes justify them.
-        </p>
-      </div>
+<div class="wr sect tail"><div class="panelw brandband" style="min-height:auto;align-items:center;text-align:center;padding-block:72px"><h2 class="h2w">Join Sharet Kenya. Tanzania next.</h2><div class="row2" style="justify-content:center;flex-wrap:wrap;gap:12px"><a class="wb l" href="{{ route('register') }}">Open a free account</a><span class="badge" style="background:#fff;color:var(--ink)"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg><span class="bl"><small>Download on the</small>App Store</span></span><span class="badge" style="background:#fff;color:var(--ink)"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="#34A853" d="M3.6 1.8 13.6 12l3.2-3.2L5.1 2.1c-.5-.3-1.1-.4-1.5-.3z"/><path fill="#4285F4" d="M3.6 1.8C3.2 2 3 2.4 3 2.9v18.2c0 .5.2.9.6 1.1L13.6 12z"/><path fill="#FBBC04" d="m16.8 8.8 3.7 2.1c.9.5.9 1.7 0 2.2l-3.7 2.1-3.2-3.2z"/><path fill="#EA4335" d="M3.6 22.2 13.6 12l3.2 3.2-11.7 6.7c-.5.3-1.1.4-1.5.3z"/></svg><span class="bl"><small>GET IT ON</small>Google Play</span></span></div></div></div>
 
-      <div class="work-grid">
-        <a class="work-item work-item--xl reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=1400&q=80" alt="A Safaricom M-PESA agent kiosk in Nairobi with a customer completing a deposit." />
-            <span class="wm-pill">Kenya</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">M-PESA Kenya</div>
-              <div class="wm-cap">Safaricom · Daraja API · KES</div>
-            </div>
-            <div class="wm-cap">Rail 01</div>
-          </div>
-        </a>
-
-        <a class="work-item work-item--sm reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742111-a301076d9d18?auto=format&fit=crop&w=900&q=80" alt="A Vodacom M-Pesa agent point in Dar es Salaam, Tanzania." />
-            <span class="wm-pill">Tanzania</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">Vodacom M-Pesa</div>
-              <div class="wm-cap">Tanzania · TZS</div>
-            </div>
-            <div class="wm-cap">Rail 02</div>
-          </div>
-        </a>
-
-        <a class="work-item work-item--md reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=1100&q=80" alt="An MTN Mobile Money kiosk in Kampala, Uganda." />
-            <span class="wm-pill">Uganda</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">MTN MoMo</div>
-              <div class="wm-cap">Uganda · UGX</div>
-            </div>
-            <div class="wm-cap">Rail 03</div>
-          </div>
-        </a>
-
-        <a class="work-item work-item--md reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=1100&q=80" alt="An Airtel Money agent in East Africa." />
-            <span class="wm-pill">Tanzania · Uganda</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">Airtel Money</div>
-              <div class="wm-cap">Secondary rail · TZ &amp; UG</div>
-            </div>
-            <div class="wm-cap">Rail 04</div>
-          </div>
-        </a>
-
-        <a class="work-item work-item--sm reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?auto=format&fit=crop&w=900&q=80" alt="A bank branch in Nairobi — Sharet connects to KES, TZS, and UGX bank accounts." />
-            <span class="wm-pill">Banking</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">Bank Accounts</div>
-              <div class="wm-cap">KES · TZS · UGX · settlement</div>
-            </div>
-            <div class="wm-cap">Rail 05</div>
-          </div>
-        </a>
-
-        <a class="work-item work-item--lg reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1556742393-d75f468bfcb0?auto=format&fit=crop&w=1200&q=80" alt="A point-of-sale card terminal at a Nairobi merchant." />
-            <span class="wm-pill">Cards</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">Card Processing</div>
-              <div class="wm-cap">Visa · Mastercard · merchant rails</div>
-            </div>
-            <div class="wm-cap">Rail 06</div>
-          </div>
-        </a>
-
-        <a class="work-item work-item--sm reveal" href="{{ route('developers') }}">
-          <div class="wm">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=900&q=80" alt="A stylised map of Africa showing future Sharet rail integrations." />
-            <span class="wm-pill">Phase 2+</span>
-            <span class="wm-arrow" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 11L11 3M11 3H5M11 3V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-            </span>
-          </div>
-          <div class="work-meta">
-            <div>
-              <div class="wm-title">More African rails</div>
-              <div class="wm-cap">Nigeria · Ghana · Rwanda · expansion</div>
-            </div>
-            <div class="wm-cap">Rail 07+</div>
-          </div>
-        </a>
-      </div>
-
-      <div class="center-row" style="margin-top: var(--space-7); justify-content: center;">
-        <a class="btn btn--ghost btn--lg" href="{{ route('developers') }}">See the full infrastructure
-          <svg class="arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  {{-- Section 06: Trust / compliance --}}
-  <section class="compact">
-    <div class="container container--wide">
-      <div class="press-strip">
-        <div>
-          <span class="label">Compliance</span>
-          <p class="mono" style="margin-top: 6px; color: var(--fg-soft);">Built for East African markets</p>
-        </div>
-        <div class="press-row" aria-label="Compliance standards">
-          <span>KYC · AML</span>
-          <span>CBK-aligned</span>
-          <span>BOT-aligned</span>
-          <span>BOU-aligned</span>
-          <span>Safeguarded funds</span>
-          <span>Data localisation</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  {{-- Section 07: Journal --}}
-  <section>
-    <div class="container container--wide">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Notes from the ledger</span>
-          <h2>The journal.</h2>
-        </div>
-        <p class="lede">
-          Short notes from the Sharet team — working notes on rail routing, liquidity, ledger design, trade corridors, and the markets we are watching closely.
-        </p>
-      </div>
-
-      {{-- Latest blog posts (Website › Blog); the three standing notes show until the first post is published --}}
-      @php $latestPosts = \App\Models\Post::published()->latest('published_at')->take(3)->get(); @endphp
-      @if ($latestPosts->isNotEmpty())
-      <div class="journal-grid">
-        @foreach ($latestPosts as $post)
-          <article class="journal-card">
-            @if ($post->cover_url)<div class="j-img"><img loading="lazy" decoding="async" src="{{ $post->cover_url }}" alt="" /></div>@endif
-            <div class="j-meta"><span>Blog</span><span aria-hidden="true">·</span><span>{{ $post->published_at->format('d M Y') }}</span></div>
-            <h3>{{ $post->title }}</h3>
-            <p>{{ $post->excerpt }}</p>
-            <a class="btn btn--ghost btn--sm" href="{{ route('blog.show', $post->slug) }}">Read note</a>
-          </article>
-        @endforeach
-      </div>
-      @else
-      <div class="journal-grid">
-        <article class="journal-card">
-          <div class="j-img">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=900&q=80" alt="A stylised diagram of a Sharet internal transaction — two ledger entries, zero external rails." />
-          </div>
-          <div class="j-meta"><span>Ledger</span><span aria-hidden="true">·</span><span>04 Oct 2026</span></div>
-          <h3>Why the recipient never needs an account.</h3>
-          <p>How Sharet routes a payment to a phone number that isn't on our system — and why that is the whole point of the design.</p>
-          <a class="btn btn--ghost btn--sm" href="{{ route('blog.index') }}">Read the blog</a>
-        </article>
-
-        <article class="journal-card">
-          <div class="j-img">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80" alt="A stylised view of country-level liquidity pools connected by one Sharet ledger." />
-          </div>
-          <div class="j-meta"><span>Treasury</span><span aria-hidden="true">·</span><span>22 Sep 2026</span></div>
-          <h3>Liquidity pools, not cross-border hops.</h3>
-          <p>Why Sharet maintains local settlement positions in each market instead of moving every customer's funds across borders per transaction.</p>
-          <a class="btn btn--ghost btn--sm" href="{{ route('blog.index') }}">Read the blog</a>
-        </article>
-
-        <article class="journal-card">
-          <div class="j-img">
-            <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=900&q=80" alt="A container port at dawn — the trade corridor between Africa and the world." />
-          </div>
-          <div class="j-meta"><span>Trade</span><span aria-hidden="true">·</span><span>09 Aug 2026</span></div>
-          <h3>The Mombasa–Dubai corridor in numbers.</h3>
-          <p>What we learned building settlement rails for importers paying suppliers abroad — and why the fee structure matters more than the FX rate.</p>
-          <a class="btn btn--ghost btn--sm" href="{{ route('blog.index') }}">Read the blog</a>
-        </article>
-      </div>
-      @endif
-    </div>
-  </section>
-
-  {{-- Closing CTA --}}
-  <section class="closing-cta">
-    <div class="container container--narrow">
-      <span class="label" style="color: rgba(10,10,12,0.6);">Get started · 2026</span>
-      <h2>Payments across<br/>East Africa.<br/>Cheaper, on any rail.</h2>
-      <p class="lede">
-        Whether you accept payments, send money, or build on our infrastructure — we onboard merchants in a day, individuals in minutes, and platforms in a week. Send us a note and we will get you set up.
-      </p>
-      <div class="cta-row">
-        <a class="btn btn--dark btn--lg" href="{{ route('contact') }}">Get started
-          <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <a class="btn btn--ghost btn--lg" href="{{ route('developers') }}">See the infrastructure</a>
-      </div>
-    </div>
-  </section>
-
+<div class="foot"><div class="wr"><div class="cols"><div><span style="font:400 20px var(--f-disp);color:#fff">sharet<span style="color:var(--lime)">.</span></span><p>Payments for Kenya and East Africa. Nairobi.</p></div>
+<div><b>Personal</b><a href="#send">Send and receive</a><a href="#everyday">Pay bills</a><a href="#everyday">Withdraw</a><a href="#card">Card</a><a href="#abroad">Across borders</a></div><div><b>Business</b><a href="{{ route('merchants') }}">Merchants</a><a href="{{ route('trade') }}">Trade finance</a><a href="{{ route('developers') }}">Developers</a></div><div><b>Company</b><a href="{{ route('company') }}">About</a><a href="{{ route('blog.index') }}">Blog</a></div><div><b>Help</b><a href="{{ route('contact') }}">Help centre</a><a href="{{ route('contact') }}">Report fraud</a><a href="{{ route('privacy') }}">Privacy</a></div></div>
+<p class="legal">Sharet Africa Ltd is not a bank. Payment services are provided with Cashia (Kashia Services Limited), licensed by the Central Bank of Kenya as a payment service provider. <a href="https://www.centralbank.go.ke/national-payments-system/" style="color:#D4FF3D">Check on CBK's licensed directory</a><br> Customer money is held in a separate trust account. Fees, rates and limits are shown in the app before you confirm.</p><!-- Photos (Unsplash licence, credit not required; kept here and in public/images/site/credits.json): Michael Kyule (Kilifi), Dwayne joe (Nairobi), Jonathan Ward (Kampala), Imani Bahati (Kampala), Wietse Jongsma (Entebbe), Nicholas Gray (Nairobi). --></div></div>
+</div>
 @endsection

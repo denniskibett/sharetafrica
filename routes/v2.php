@@ -53,3 +53,13 @@ Route::middleware(['auth', 'throttle:60,1'])
         Route::get('{order}/receipt', 'receipt')->name('receipt');
         Route::get('{order}', 'show')->name('show');
     });
+
+// Customer app: Help (canvas A17), and read-only previews of designed features that have no backend yet
+// (Requests A08, Card A11, Send abroad A13, SWIFT A12). The previews never move money and post nothing.
+Route::middleware('auth')->group(function () {
+    Route::view('help', 'help.index')->name('help');
+    Route::view('requests', 'soon.requests')->name('requests');
+    Route::view('card', 'soon.card')->name('card');
+    Route::view('abroad', 'soon.abroad')->name('abroad');
+    Route::view('abroad/swift', 'soon.swift')->name('abroad.swift');
+});
