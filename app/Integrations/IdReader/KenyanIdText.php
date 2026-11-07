@@ -64,7 +64,11 @@ final class KenyanIdText
         // Stop before another label printed on the same line ("NAIROBI DIVISION KASARANI")
         $v = trim(preg_split('/\b(DISTRICT|DIVISION|LOCATION|SUB-LOCATION|PLACE OF|DATE OF|SEX)\b/', $v)[0]);
 
-        return strlen($v) >= 3 && strlen($v) <= 40 ? Str::title(strtolower($v)) : null;
+        // OCR noise ("RO BA") is short fragments: a real place has a word of 4+ letters with a vowel, and no more than 4 words
+        $words = explode(' ', $v);
+        $real = collect($words)->contains(fn ($w) => strlen($w) >= 4 && preg_match('/[AEIOU]/', $w)) && count($words) <= 4;
+
+        return $real && strlen($v) <= 40 ? Str::title(strtolower($v)) : null;
     }
 
     private static function front(string $text, array $lines): array

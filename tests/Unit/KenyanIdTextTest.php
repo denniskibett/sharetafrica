@@ -19,6 +19,12 @@ class KenyanIdTextTest extends TestCase
         $this->assertSame(['district' => 'Kiambu', 'division' => 'Kikuyu', 'location' => 'Karai', 'sub_location' => 'Gikambura', 'place_of_issue' => 'Kikuyu'], KenyanIdText::parse($text));
     }
 
+    public function test_ocr_noise_is_not_taken_as_a_place(): void
+    {
+        $this->assertSame([], KenyanIdText::parse("LOCATION RO BA\nDIVISION\nX Q7 ZZ"));
+        $this->assertSame(['sub_location' => 'Ol Kalou'], KenyanIdText::parse("SUB-LOCATION: OL KALOU"));
+    }
+
     public function test_reads_the_machine_lines_on_the_back(): void
     {
         $text = "some noise\nIDKYA2345678901<<1234<<<<<<<<<\n9003052F3101015KEN<<<<<<<<<<<6\nDOE<<JANE<WANJIRU<<<<<<<<<<<<<";
