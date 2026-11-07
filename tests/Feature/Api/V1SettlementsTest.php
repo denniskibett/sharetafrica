@@ -50,11 +50,17 @@ class V1SettlementsTest extends TestCase
         return $u;
     }
 
-    private function staff(string $name, string $handle, string $phone, string $balance = '0', string $kyc = 'standard'): User
+    private function staff(string $name, string $handle, string $phone, string $balance = '0'): User
     {
-        $u = $this->person($name, $handle, $phone, $balance, $kyc);
+        $u = $this->person($name, $handle, $phone);
         $u->forceFill(['company_id' => $this->company->id])->save();
         $u->assignRole('techie');
+        if ($balance !== '0') {   // the company's own wallet holds the money
+            $o = app(RampOrders::class)->confirm(app(RampOrders::class)->topUp($this->company->walletUser(), $balance, $phone));
+            while (! $o->final()) {
+                $o = app(RampOrders::class)->refresh($o);
+            }
+        }
 
         return $u;
     }
@@ -70,6 +76,8 @@ class V1SettlementsTest extends TestCase
 
     private function balance(User $u): int
     {
+        $u = $u->company_id && ! $u->is_business_wallet ? Company::find($u->company_id)->walletUser() : $u;   // a business's money is in its wallet
+
         return app(Ledger::class)->account('2100', $u)->available();
     }
 
@@ -114,7 +122,8 @@ class V1SettlementsTest extends TestCase
 
     public function test_a_failed_split_keeps_the_money_with_the_business_until_it_is_retried(): void
     {
-        $biz = $this->staff('Peter Kamau', 'scharge', '0711000111', '0', 'none');   // can't send yet, so the split fails
+        $biz = $this->staff('Peter Kamau', 'scharge', '0711000111');
+        $this->company->walletUser()->forceFill(['kyc_level' => 'none'])->save();   // the wallet can't send yet, so the split fails
         $tenant = $this->person('Akinyi Wekesa', 'akinyi', '0712345678', '5000', 'basic');
         $landlord = $this->person('Amina Otieno', 'amina', '0713000222');
         $r = $this->postJson('/api/v1/payment-requests', ['amount' => '2000', 'channels' => ['sharet'], 'splits' => [['to' => ['handle' => '@amina'], 'percent' => 100]]],
@@ -127,7 +136,7 @@ class V1SettlementsTest extends TestCase
         $this->assertSame(200_000, $this->balance($biz), 'all or nothing: the money stays with the business');
         $this->assertSame(0, $this->balance($landlord));
 
-        $biz->forceFill(['kyc_level' => 'standard'])->save();
+        $this->company->walletUser()->forceFill(['kyc_level' => 'business'])->save();
         $this->postJson('/api/v1/payment-requests/'.$r['id'].'/settle', [], $this->key($biz))->assertOk()->assertJsonPath('split_status', 'settled');
         $this->assertSame(200_000, $this->balance($landlord));
         $this->assertSame(0, $this->balance($biz));

@@ -51,11 +51,51 @@ class Company extends Model implements Wallet
      */
     protected static function booted(): void
     {
+        // A company's wallet follows its verification: business limits once verified, none before
+        static::updated(function (Company $company) {
+            if ($company->wasChanged('verified_at') && $company->wallet_user_id) {
+                User::whereKey($company->wallet_user_id)->first()?->forceFill(['kyc_level' => $company->verified_at ? 'business' : 'none'])->save();
+            }
+        });
         static::creating(function (Company $company) {
             $company->sharet_id ??= \App\Support\SharetId::generate();   // fixed business account number (docs/v2/INTEGRATION.md §1)
             if (empty($company->slug)) {
                 $company->slug = Str::slug($company->name) . '-' . Str::lower(Str::random(6));
             }
+        });
+    }
+
+    /**
+     * The company's own Sharet account (docs/v2/INTEGRATION.md §1): the company's Sharet ID, an @name from its name, and
+     * business limits once the company is verified. It can never sign in; API keys of the company act for it.
+     */
+    public function walletUser(): User
+    {
+        if ($this->wallet_user_id && ($u = User::find($this->wallet_user_id))) {
+            return $u;
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () {
+            $base = trim(preg_replace('/[^a-z0-9]+/', '.', \Illuminate\Support\Str::ascii(strtolower($this->name ?: 'business'))), '.') ?: 'business';
+            $base = \Illuminate\Support\Str::limit($base, 24, '');
+            $handle = $base;
+            for ($n = 2; User::where('handle', $handle)->exists(); $n++) {
+                $handle = $base.$n;
+            }
+            $u = new User;
+            $u->forceFill([
+                'name' => $this->name,
+                'email' => 'wallet+'.strtolower($this->sharet_id).'@business.sharet.africa',
+                'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(64)),   // never used: wallets can't sign in
+                'is_business_wallet' => true,
+                'company_id' => $this->id,
+                'sharet_id' => $this->sharet_id,
+                'handle' => $handle,
+                'kyc_level' => $this->verified_at ? 'business' : 'none',
+            ])->save();
+            $this->forceFill(['wallet_user_id' => $u->id])->saveQuietly();
+
+            return $u;
         });
     }
 

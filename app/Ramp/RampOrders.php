@@ -40,7 +40,8 @@ class RampOrders
 
     public function quote(User $user, string $type, array $destination, string $amount, ?string $note = null, string $funding = 'mpesa'): RampOrder
     {
-        $payer = $this->payer($user);
+        // A business wallet pays from its balance and has no M-PESA number of its own
+        $payer = $user->is_business_wallet && $funding === 'wallet' ? '' : $this->payer($user);
         [$dest, $party] = Destination::normalise($type, $destination);
         $cents = $this->cents($amount);
         if ($type === 'phone' && $party === $payer && $funding !== 'wallet') {

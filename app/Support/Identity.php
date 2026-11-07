@@ -115,6 +115,14 @@ class Identity
     /** Called by the User model before every save: refuses invalid people, wherever they come from. */
     public static function assertValid(User $user): void
     {
+        // A business wallet is an account, not a person: it carries the company's name and can never sign in
+        if ($user->is_business_wallet) {
+            if (trim((string) $user->name) === '') {
+                throw ValidationException::withMessages(['name' => 'A business wallet needs the business name.']);
+            }
+
+            return;
+        }
         if ($user->isDirty('name')) {
             $user->name = self::normaliseName($user->name);
         }

@@ -67,6 +67,8 @@ class V1PaymentRequestsTest extends TestCase
 
     private function balance(User $u): int
     {
+        $u = $u->company_id && ! $u->is_business_wallet ? Company::find($u->company_id)->walletUser() : $u;   // a business's money is in its wallet
+
         return app(Ledger::class)->account('2100', $u)->available();
     }
 
@@ -81,7 +83,7 @@ class V1PaymentRequestsTest extends TestCase
         $this->postJson('/api/v1/webhooks', ['url' => 'https://hooks.example.com/in', 'events' => ['payment_request.paid']], $this->key($biz))->assertCreated();
 
         $r = $this->postJson('/api/v1/payment-requests', ['amount' => '35000', 'reference' => 'Rent Nov · 4B', 'payer' => ['phone' => '0712 345 678']],
-            $this->key($biz) + ['Idempotency-Key' => 'rent-4b-nov'])->assertCreated()->assertJsonPath('status', 'open')->assertJsonPath('payee.sharet_id', $biz->sharet_id)->json();
+            $this->key($biz) + ['Idempotency-Key' => 'rent-4b-nov'])->assertCreated()->assertJsonPath('status', 'open')->assertJsonPath('payee.sharet_id', Company::find($biz->company_id)->sharet_id)->json();
         $this->assertStringStartsWith('pr_test_', $r['id']);
 
         $token = $this->token($r['pay_url']);

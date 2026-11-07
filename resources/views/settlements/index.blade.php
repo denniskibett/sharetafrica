@@ -13,6 +13,17 @@
     </p>
   </div>
 
+  @if ($wallet)
+    <div class="mb-6 flex flex-col gap-4 rounded-2xl bg-gray-900 p-5 text-white sm:flex-row sm:items-center">
+      <div class="min-w-0 flex-1">
+        <p class="text-xs uppercase tracking-wider text-white/60">{{ $company->name }} · business wallet</p>
+        <p class="mt-1 text-2xl font-semibold">KES {{ number_format($balance / 100, 2) }}</p>
+        <p class="mt-1 text-sm text-white/70">{{ $wallet->sharet_id }} · {{ '@'.$wallet->handle }} · {{ $wallet->kyc_level === 'business' ? 'verified' : 'not verified yet' }}</p>
+      </div>
+      <p class="max-w-xs text-sm text-white/70">Your API keys collect into and pay out from this wallet. Settlements are tied to its Sharet ID.</p>
+    </div>
+  @endif
+
   @if (session('status'))<div class="mb-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-200" role="status">{{ session('status') }}</div>@endif
   @if ($errors->any())<div class="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-800 dark:bg-red-500/10 dark:text-red-200" role="alert">{{ $errors->first() }}</div>@endif
 

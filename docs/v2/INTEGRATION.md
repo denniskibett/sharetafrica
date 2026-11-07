@@ -211,9 +211,13 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   with API-key access, after re-entering their password; the key's owner can't approve. Webhooks
   `settlement.awaiting_approval`, `settlement.completed`, `settlement.failed`.
 
+- Business wallets: every company has its own Sharet account (its Sharet ID, an @name from its name, e.g. `@scharge`),
+  created on first use and held as an account that can never sign in (web or app). API keys that belong to a company
+  act for it; personal keys act for their owner. Verified companies get business limits (sample: KES 1,000,000 per
+  payment, 10,000,000 a day; confirm), unverified ones can't move money. Dashboard › API approvals shows the wallet.
+
 **Still to build, in order:**
-1. Business wallets in the ledger (keys act for the company's Sharet ID, not the creator's).
-2. Connected accounts and consent (§6).
-3. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
-4. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
-5. Docs site from this file.
+1. Connected accounts and consent (§6).
+2. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
+3. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
+4. Docs site from this file.

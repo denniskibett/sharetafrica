@@ -22,8 +22,9 @@ class AuthenticateApiKey
         }
 
         $request->attributes->set('api_key', $key);
-        // The key acts for the account that created it (until business wallets have their own ledger accounts)
-        $request->setUserResolver(fn () => $key->user);
+        // A company's key acts for the company's own Sharet wallet; a personal key for its owner (INTEGRATION.md §1)
+        $account = $key->company ? $key->company->walletUser() : $key->user;
+        $request->setUserResolver(fn () => $account);
 
         return $next($request);
     }

@@ -36,6 +36,8 @@ return [
         'none' => ['per_order' => 0, 'per_day' => 0],
         'basic' => ['per_order' => 7_000_000, 'per_day' => 7_000_000],        // 70,000.00
         'standard' => ['per_order' => 25_000_000, 'per_day' => 50_000_000],   // 250,000.00 / 500,000.00
+        // verified businesses' wallets (API): sample figures, confirm before live (DECISIONS-FOR-APPROVAL.md)
+        'business' => ['per_order' => 100_000_000, 'per_day' => 1_000_000_000],   // 1,000,000.00 / 10,000,000.00
     ],
 
     // Each bank's M-PESA paybill, for paying a bank account (account number = the bank account). CHECK before going live.

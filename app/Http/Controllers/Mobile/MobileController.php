@@ -60,7 +60,7 @@ class MobileController extends Controller
             ? User::where('email', Str::lower($id))->first()
             : User::where('phone', Identity::normalisePhone($id))->first();
 
-        if (! $user || ! Hash::check($data['password'], (string) $user->password)) {
+        if (! $user || $user->is_business_wallet || ! Hash::check($data['password'], (string) $user->password)) {
             RateLimiter::hit($limiter, 300);
             throw ValidationException::withMessages(['identifier' => 'That phone or email and password don\'t match.']);
         }

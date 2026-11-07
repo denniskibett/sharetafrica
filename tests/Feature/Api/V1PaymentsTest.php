@@ -37,8 +37,8 @@ class V1PaymentsTest extends TestCase
         $c = Company::create(['name' => 'scharge', 'verified_at' => $verified ? now() : null]);
         $u = User::factory()->create(['name' => 'Juma Jones', 'phone' => '0712345678', 'company_id' => $c->id]);
         $u->forceFill(['kyc_level' => 'standard'])->save();
-        if ($balance !== '0') {
-            $o = app(RampOrders::class)->confirm(app(RampOrders::class)->topUp($u, $balance));
+        if ($balance !== '0') {   // the company's own wallet holds the money; the owner pays it in by M-PESA
+            $o = app(RampOrders::class)->confirm(app(RampOrders::class)->topUp($c->walletUser(), $balance, '0712345678'));
             while (! $o->final()) {
                 $o = app(RampOrders::class)->refresh($o);
             }
@@ -58,6 +58,8 @@ class V1PaymentsTest extends TestCase
 
     private function balance(User $u): int
     {
+        $u = $u->company_id && ! $u->is_business_wallet ? Company::find($u->company_id)->walletUser() : $u;   // a business's money is in its wallet
+
         return app(Ledger::class)->account('2100', $u)->available();
     }
 
@@ -83,7 +85,7 @@ class V1PaymentsTest extends TestCase
 
     public function test_payments_need_the_payout_scope_an_idempotency_key_and_a_verified_business_for_live(): void
     {
-        $u = $this->business('5000', verified: false);
+        $u = $this->business('0', verified: false);
         $body = ['amount' => '100', 'to' => ['type' => 'mpesa', 'phone' => '0722000904']];
 
         $this->postJson('/api/v1/payments', $body, $this->key($u, 'test', ['read']) + ['Idempotency-Key' => 'scope-check-1'])->assertForbidden()->assertJsonPath('type', 'https://sharet.africa/docs/errors#missing_scope');

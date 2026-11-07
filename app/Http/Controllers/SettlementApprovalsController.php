@@ -22,7 +22,11 @@ class SettlementApprovalsController extends Controller
             ? ApiSettlement::whereHas('key', fn ($q) => $q->where('company_id', $user->company_id))->with(['user:id,name', 'approver:id,name', 'key'])->latest()->limit(50)->get()
             : collect();
 
-        return view('settlements.index', ['rows' => $rows, 'me' => $user]);
+        $company = $user->company_id ? \App\Models\Company::find($user->company_id) : null;
+        $wallet = $company?->walletUser();
+        $balance = $wallet ? app(\App\Ledger\Ledger::class)->account('2100', $wallet)->available() : null;
+
+        return view('settlements.index', ['rows' => $rows, 'me' => $user, 'company' => $company, 'wallet' => $wallet, 'balance' => $balance]);
     }
 
     public function approve(Request $request, ApiSettlement $settlement)
