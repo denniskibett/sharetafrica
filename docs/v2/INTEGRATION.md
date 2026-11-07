@@ -223,7 +223,13 @@ the merchant's own Sharet ID → Breve marks the invoice paid on `payment_reques
   `Sharet-Account: SH-…`, only within the approved scopes and their own limits (receive and send: free inside Sharet,
   charged outside). Webhooks `account.connected`, `account.disconnected`.
 
+- Tariff tables (§7): `tariffs` versions (Table 1 bands per movement: fixed + percent, capped; Table 2 volume tiers;
+  excise on the fee), edited in Staff › **Pricing** (admin.system + fresh password; saving adds a version with an
+  effective date). API quotes, payouts and batch items are priced from the version in force, on the paying account's
+  own outside volume this month (Sharet companies one tier up, marked on the same screen); every API payment records
+  the version and discount. Sharet ↔ Sharet is always free. Version 1 holds the samples below. Collection fees
+  (`collect_mpesa`) are in the table but not charged yet.
+
 **Still to build, in order:**
-1. Tariff tables (transaction tiers × volume tiers) with Staff › Pricing (§7).
-2. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
-3. Docs site from this file.
+1. IP allow-list for live payout keys; API key screen shows scopes and the Sharet ID.
+2. Docs site from this file.

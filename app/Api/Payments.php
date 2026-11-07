@@ -6,7 +6,6 @@ use App\Models\ApiKey;
 use App\Models\ApiPayment;
 use App\Models\RampOrder;
 use App\Models\User;
-use App\Ramp\Pricing;
 use App\Ramp\RampOrders;
 use App\Support\Handle;
 use Illuminate\Support\Str;
@@ -23,7 +22,7 @@ final class Payments
 {
     public const SANDBOX_FAIL_PHONE = '254700000002';
 
-    public function __construct(private RampOrders $orders, private Webhooks $webhooks) {}
+    public function __construct(private RampOrders $orders, private Webhooks $webhooks, private Tariffs $tariffs) {}
 
     public function create(ApiKey $key, User $user, array $input): ApiPayment
     {
@@ -75,6 +74,7 @@ final class Payments
             'currency' => config('ledger.currency'),
             'to' => $p->to,
             'reference' => $p->reference,
+            'tariff' => $p->tariff_id ? ['version' => \App\Models\Tariff::whereKey($p->tariff_id)->value('version'), 'volume_discount_percent' => ($p->discount_bp ?? 0) / 100] : null,
             'failure' => $p->failure,
             'created_at' => $p->created_at?->toIso8601String(),
         ];
@@ -93,7 +93,7 @@ final class Payments
 
     private function sandbox(ApiKey $key, User $user, array $in, ?string $reference): ApiPayment
     {
-        $fee = $in['type'] === 'sharet' ? ['fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $in['cents']] : Pricing::quote($in['cents']);
+        $fee = $this->tariffs->quote($user, $in['type'], $in['cents']);
         $fails = ($in['destination']['phone'] ?? null) === self::SANDBOX_FAIL_PHONE;
 
         $p = ApiPayment::create([
@@ -101,6 +101,7 @@ final class Payments
             'api_key_id' => $key->id, 'user_id' => $user->id, 'environment' => 'test',
             'status' => $fails ? 'failed' : 'paid',
             'amount' => $in['cents'], 'fee' => $fee['fee'] + $fee['excise'] + $fee['rounding'], 'total' => $fee['total'],
+            'tariff_id' => $fee['tariff_id'], 'discount_bp' => $fee['discount_bp'],
             'to' => ['type' => $in['type']] + $in['destination'], 'reference' => $reference,
             'failure' => $fails ? 'The test number 0700 000 002 always fails.' : null,
         ]);
@@ -119,7 +120,8 @@ final class Payments
             if ($in['type'] === 'sharet') {
                 $order = $this->orders->transfer($user, Handle::for($in['recipient']), PaymentInput::amount($in['cents']), $reference);
             } else {
-                $quote = $this->orders->quote($user, PaymentInput::rampType($in['type']), (array) $input['to'], PaymentInput::amount($in['cents']), $reference, 'wallet');
+                $price = $this->tariffs->quote($user, $in['type'], $in['cents']);
+                $quote = $this->orders->quote($user, PaymentInput::rampType($in['type']), (array) $input['to'], PaymentInput::amount($in['cents']), $reference, 'wallet', $price);
                 $order = $this->orders->confirm($quote);
             }
         } catch (ValidationException $e) {
@@ -131,6 +133,7 @@ final class Payments
             'api_key_id' => $key->id, 'user_id' => $user->id, 'environment' => 'live', 'ramp_order_id' => $order->id,
             'status' => 'paying',
             'amount' => $order->amount, 'fee' => $order->fee + $order->excise + $order->rounding, 'total' => $order->total,
+            'tariff_id' => $price['tariff_id'] ?? \App\Models\Tariff::current()?->id, 'discount_bp' => $price['discount_bp'] ?? 0,
             'to' => ['type' => $in['type']] + $in['destination'], 'reference' => $reference,
         ]);
         $this->webhooks->orderMoved($order->fresh());

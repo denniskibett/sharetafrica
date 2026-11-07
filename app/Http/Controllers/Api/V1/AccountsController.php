@@ -6,7 +6,6 @@ use App\Api\PaymentInput;
 use App\Http\Controllers\Controller;
 use App\Ledger\Ledger;
 use App\Models\User;
-use App\Ramp\Pricing;
 use App\Support\ApiProblem;
 use App\Support\Handle;
 use Illuminate\Http\Request;
@@ -55,7 +54,10 @@ class AccountsController extends Controller
             return response()->json($this->priced($in['cents'], ['fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $in['cents']], ['type' => 'sharet'] + $this->present($in['recipient'])));
         }
 
-        return response()->json($this->priced($in['cents'], Pricing::quote($in['cents']), ['type' => $in['type']] + $in['destination']));
+        $price = app(\App\Api\Tariffs::class)->quote($request->user(), $in['type'], $in['cents']);
+
+        return response()->json($this->priced($in['cents'], $price, ['type' => $in['type']] + $in['destination'])
+            + ['tariff' => ['version' => $price['tariff_version'], 'volume_discount_percent' => $price['discount_bp'] / 100, 'month_to_date' => PaymentInput::amount($price['volume'])]]);
     }
 
     private function find(?string $sharetId, ?string $handle): ?User
@@ -83,7 +85,6 @@ class AccountsController extends Controller
         return [
             'amount' => PaymentInput::amount($amount), 'currency' => config('ledger.currency'),
             'fee' => PaymentInput::amount($p['fee']), 'excise' => PaymentInput::amount($p['excise']), 'rounding' => PaymentInput::amount($p['rounding']), 'total' => PaymentInput::amount($p['total']),
-            'tariff' => $to['type'] === 'sharet' ? 'sharet_free' : 'standard',
             'to' => $to,
             'expires_in_minutes' => (int) config('pricing.quote_minutes'),
         ];

@@ -251,6 +251,13 @@ Route::middleware(['auth', 'permission:waiting_list.invite'])
 |--------------------------------------------------------------------------
 */
 
+// Staff › Pricing: business tariff tables (docs/v2/INTEGRATION.md §7); saving needs a recent password
+Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/pricing')->controller(\App\Http\Controllers\Admin\PricingController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.pricing.index');
+    Route::post('/', 'store')->middleware('password.confirm')->name('admin.pricing.store');
+    Route::post('/companies/{company}/group', 'group')->middleware('password.confirm')->name('admin.pricing.group');
+});
+
 Route::middleware(['auth', 'permission:admin.system'])->group(function () {
     Route::get('/admin/system', [SystemController::class, 'index'])->name('admin.system.index');
     Route::put('/admin/system', [SystemController::class, 'update'])->name('system.update');

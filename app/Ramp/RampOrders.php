@@ -38,7 +38,7 @@ class RampOrders
 
     // ---------------------------------------------------------------- customer steps
 
-    public function quote(User $user, string $type, array $destination, string $amount, ?string $note = null, string $funding = 'mpesa'): RampOrder
+    public function quote(User $user, string $type, array $destination, string $amount, ?string $note = null, string $funding = 'mpesa', ?array $price = null): RampOrder
     {
         // A business wallet pays from its balance and has no M-PESA number of its own
         $payer = $user->is_business_wallet && $funding === 'wallet' ? '' : $this->payer($user);
@@ -53,7 +53,8 @@ class RampOrders
             throw ValidationException::withMessages(['amount' => 'Sending to M-PESA and banks is not live yet: your money stays safe in your wallet. Sharet @name transfers work.']);
         }
 
-        $price = Pricing::quote($cents);
+        // API payments bring their own price from the business tariff (App\Api\Tariffs); the app uses the personal one
+        $price = $price !== null ? array_intersect_key($price, array_flip(['fee', 'excise', 'rounding', 'total'])) : Pricing::quote($cents);
         $this->checkLimits($user, $price['total']);
         if ($funding === 'wallet' && $this->walletBalance($user) < $price['total']) {
             throw ValidationException::withMessages(['amount' => 'Your wallet has KES '.Money::format($this->walletBalance($user)).'. Add money or pay from M-PESA.']);

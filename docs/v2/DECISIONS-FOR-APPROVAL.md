@@ -33,7 +33,7 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ✓ | **Connected accounts** (e.g. scharge landlords, Breve merchants) can **receive and send**: free between Sharet IDs, **charged outside Sharet** at normal rates. |
 | ✓ | **Group companies use the same public API** as outside businesses and get **discounted fees on larger settlements**. |
 | ✓ | **Tariffs are tables:** Table 1 = fee by movement type and transaction amount band; Table 2 = discount by monthly volume tier. Kept by staff (Staff › Pricing), versioned by effective date. |
-| ☐ | Set the figures in both tables (samples in INTEGRATION.md §7: bank KES 50/100/0.01% cap 500; volume 0% / 25% over KES 1M / 40% over KES 10M; group companies one tier up). |
+| ☐ | Set the figures in **Staff › Pricing** (version 1 = samples: mobile payouts = Safaricom band + 20%; bank KES 50 / 100 / 0.01% max 500; volume 25% over KES 1M, 40% over 10M; excise 15% on the whole fee: **check excise with a tax adviser**). Samples were in INTEGRATION.md §7: bank KES 50/100/0.01% cap 500; volume 0% / 25% over KES 1M / 40% over KES 10M; group companies one tier up). |
 | ☐ | Batches over KES 500,000 need a second approver; payout keys need an IP allow-list; live keys only after business verification (KYB). |
 | ☐ | **Business wallet limits** (sample): KES 1,000,000 per payment and 10,000,000 a day for verified businesses (`config/pricing.php` → `limits.business`). Confirm. |
 | ☐ | Collection by M-PESA prompt: cost passed through. Confirm the rate with Cashia/Safaricom. |
