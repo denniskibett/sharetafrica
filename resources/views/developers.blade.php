@@ -126,6 +126,28 @@ $ <span class="k">curl</span> https://api.sharet.africa/v1/health
     </div>
   </section>
 
+  {{-- Android test build: for testers and developers only (owner, 7 Nov). Shown once an APK is uploaded by the app's release script. --}}
+  @if ($android = \App\Support\AndroidRelease::latest())
+  <section class="compact" id="android">
+    <div class="container container--wide">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow"><span class="dot" aria-hidden="true"></span>For testing only</span>
+          <h2>Android<br/>test build.</h2>
+        </div>
+        <div>
+          <p>A test build of the Sharet app for Android, for testers and developers. It talks to sharet.africa in test mode, so money is simulated. It isn't the store version: your phone may ask you to allow installs from your browser.</p>
+          <p style="margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-3);">
+            <a class="btn btn--primary btn--lg" href="{{ route('app.android') }}" download>Download APK · {{ \App\Support\AndroidRelease::size() }}</a>
+            @if (\App\Support\AndroidRelease::path('armv7'))<a class="btn btn--ghost btn--lg" href="{{ route('app.android', 'armv7') }}" download>Older phones (32-bit) · {{ \App\Support\AndroidRelease::size('armv7') }}</a>@endif
+          </p>
+          <p style="margin-top: var(--space-3); font-family: var(--font-mono); font-size: var(--text-sm);">Version {{ $android['version'] }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  @endif
+
   {{-- Essentials --}}
   <section class="compact">
     <div class="container container--wide">

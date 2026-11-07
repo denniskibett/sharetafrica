@@ -14,7 +14,6 @@
           <li><a href="{{ route('personal') }}">Personal</a></li>
           <li><a href="{{ route('trade') }}">Trade</a></li>
           <li><a href="{{ route('contact') }}">Get started</a></li>
-          @if (\App\Support\AndroidRelease::latest())<li><a href="{{ route('app.android') }}" download>Android app</a></li>@endif
         </ul>
       </div>
       <div>
@@ -24,6 +23,7 @@
           <li><a href="{{ route('developers') }}#endpoints">API reference</a></li>
           <li><a href="{{ route('developers') }}#licensing">Licensing</a></li>
           <li><a href="{{ route('developers') }}#sandbox">Sandbox</a></li>
+          @if (\App\Support\AndroidRelease::latest())<li><a href="{{ route('developers') }}#android">Android test build</a></li>@endif
         </ul>
       </div>
       <div>
