@@ -146,6 +146,28 @@ class V1PaymentRequestsTest extends TestCase
         Http::assertSent(fn (HttpRequest $q) => $q['type'] === 'payment_request.paid' && $q['data']['id'] === $r['id'] && $q['data']['paid_via'] === 'sharet');
     }
 
+    public function test_on_production_a_live_request_is_never_paid_by_the_simulator_and_a_named_owner_gets_the_real_rail(): void
+    {
+        $biz = $this->scharge();
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10', 'channels' => ['mpesa']],
+            $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-1577'])->assertCreated()->json();
+        $token = $this->token($r['pay_url']);
+        $wallet = Company::find($biz->company_id)->walletUser();
+
+        // the live server: real collections only for named people, simulator allowed for demos
+        config(['rails.default' => 'simulator', 'rails.collect' => 'daraja', 'rails.collect_only_for' => ['someone@else.test'], 'rails.simulator.allow_in_production' => true]);
+        $this->app['env'] = 'production';
+        $this->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class, \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class, \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])->from("/r/$token")->post("/r/$token/mpesa", ['phone' => '0717 492 048'])->assertSessionHasErrors('phone');
+        $this->assertSame('open', ApiPaymentRequest::first()->status);
+        $this->assertDatabaseCount('ramp_orders', 0);
+        $this->assertSame('simulator', app(\App\Integrations\Rails::class)->collecting($wallet));
+
+        // the business's owner is named: its wallet collects on the real rail
+        config(['rails.collect_only_for' => [strtolower($biz->email)]]);
+        $this->assertSame('daraja', app(\App\Integrations\Rails::class)->collecting($wallet->fresh()));
+        $this->app['env'] = 'testing';
+    }
+
     public function test_only_the_named_payer_can_pay_from_their_wallet(): void
     {
         $biz = $this->scharge();

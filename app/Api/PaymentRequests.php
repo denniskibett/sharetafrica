@@ -134,6 +134,11 @@ final class PaymentRequests
         if ($r->order && ! $r->order->final()) {
             return $r;   // a prompt is already on its way
         }
+        // A live request is paid with real money only: never let the simulator stand in for M-PESA (it "succeeds"
+        // without a Safaricom prompt, and the business would mark an unpaid invoice paid).
+        if (app()->isProduction() && app(\App\Integrations\Rails::class)->collecting($r->payee) === 'simulator') {
+            throw ValidationException::withMessages(['phone' => 'M-PESA payments aren\'t switched on for this business yet. Pay from a Sharet wallet, or ask the business for another way to pay.']);
+        }
         $order = $this->orders->confirm($this->orders->topUp($r->payee, PaymentInput::amount($r->amount), $phone));
         $r->update(['ramp_order_id' => $order->id, 'payer_phone' => $phone]);
         $this->orderMoved($order->fresh());

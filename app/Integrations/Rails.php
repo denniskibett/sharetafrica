@@ -16,10 +16,7 @@ class Rails
     /** The rail for this person's wallet top-ups (config rails.collect, limited by rails.collect_only_for), else the default. */
     public function collecting(?\App\Models\User $user = null): string
     {
-        $only = config('rails.collect_only_for');
-        $allowed = empty($only) || ($user && in_array(strtolower($user->email), array_map('strtolower', $only), true));
-
-        return config('rails.collect') && $allowed ? config('rails.collect') : $this->default();
+        return config('rails.collect') && $this->isNamed($user) ? config('rails.collect') : $this->default();
     }
 
     /** The rail that pays out for this person (config rails.payout, limited by rails.collect_only_for), else the default. */
@@ -30,9 +27,18 @@ class Rails
 
     private function isNamed(?\App\Models\User $user): bool
     {
-        $only = config('rails.collect_only_for');
+        $only = array_map('strtolower', config('rails.collect_only_for'));
+        if (empty($only) || ! $user) {
+            return empty($only);
+        }
+        if (in_array(strtolower($user->email), $only, true)) {
+            return true;
+        }
 
-        return empty($only) || ($user && in_array(strtolower($user->email), array_map('strtolower', $only), true));
+        // A business wallet can't sign in and has a made-up email: it is named when one of its people is.
+        return $user->is_business_wallet && $user->company_id
+            && \App\Models\User::where('company_id', $user->company_id)->where('is_business_wallet', false)->get(['email'])
+                ->contains(fn ($u) => in_array(strtolower($u->email), $only, true));
     }
 
     public function for(?string $name = null): PaymentRail
