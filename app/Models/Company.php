@@ -180,10 +180,42 @@ class Company extends Model implements Wallet
      */
     public function verify(?User $by = null): void
     {
+        $settings = $this->settings ?? [];
+        $settings['kyb_review'] = ['status' => 'approved', 'reason' => null, 'by' => $by?->id, 'at' => now()->toIso8601String()];
         $this->update([
             'verified_at' => now(),
             'verified_by' => $by?->id,
+            'settings' => $settings,
         ]);
+    }
+
+    /** Staff reject a business (or revoke a verification): live keys stop working; the owner sees the reason in Business settings. */
+    public function reject(User $by, string $reason): void
+    {
+        $this->update([
+            'verified_at' => null,
+            'verified_by' => null,
+            'settings' => array_merge($this->settings ?? [], ['kyb_review' => ['status' => 'rejected', 'reason' => $reason, 'by' => $by->id, 'at' => now()->toIso8601String()]]),
+        ]);
+    }
+
+    public const COUNTRIES = ['KE' => 'Kenya', 'UG' => 'Uganda', 'TZ' => 'Tanzania', 'RW' => 'Rwanda', 'BI' => 'Burundi', 'SS' => 'South Sudan', 'ET' => 'Ethiopia', 'SO' => 'Somalia', 'NG' => 'Nigeria', 'GH' => 'Ghana', 'ZA' => 'South Africa'];
+
+    /** "Kenya", "kenya" or "KE" → "KE" (companies.country is two letters). Unknown names default to Kenya. */
+    public static function countryCode(?string $country): string
+    {
+        $c = trim((string) $country);
+        if (strlen($c) === 2 && ctype_alpha($c)) {
+            return strtoupper($c);
+        }
+        $code = array_search(strtolower($c), array_map('strtolower', self::COUNTRIES), true);
+
+        return $code ?: 'KE';
+    }
+
+    public static function countryName(?string $code): string
+    {
+        return self::COUNTRIES[strtoupper((string) $code)] ?? ($code ?: 'Kenya');
     }
 
     /**

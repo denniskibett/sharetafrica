@@ -159,6 +159,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
         Route::post('/users/{user}/verification', [UserController::class, 'verify'])->name('users.verify');
         Route::get('/admin/verifications', [\App\Http\Controllers\Admin\VerificationsController::class, 'index'])->name('admin.verifications.index');
+        Route::get('/admin/businesses', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('admin.businesses.index');
+        Route::post('/admin/businesses/{company}/decision', [\App\Http\Controllers\Admin\BusinessesController::class, 'decide'])->name('admin.businesses.decide');
         Route::view('/reports', 'reports.index')->name('reports.index');
     });
 

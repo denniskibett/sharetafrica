@@ -36,6 +36,9 @@ typos in later versions. One per user and one per business (company); a business
   second approver in the dashboard before money leaves.
 - Every write takes an **`Idempotency-Key`** header: retries return the first result, never a second payment.
 - Live keys only after the business passes **KYB** (registration, KRA PIN, directors, settlement account).
+  Any account holder registers a business in **Settings › Business**; staff approve or reject it in
+  **Administration › Businesses** (a rejection's reason shows on the owner's Business settings). A key belongs to
+  the business of the person who created it.
 - No API call can take money **from a customer's wallet** without that customer approving it in the Sharet app
   (PIN) or paying by their own M-PESA prompt.
 - Payment services are provided with Cashia (CBK-licensed PSP); customer money stays in the trust account.

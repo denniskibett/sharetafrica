@@ -29,8 +29,9 @@ class CompanySettingsController extends Controller
         $company = $user->company;
         $kyb = $this->kyb($company);
         $kyb['directors'] = $this->withOwner($user, $kyb['directors'] ?? []);
-        $values = ($company?->only(['name', 'legal_name', 'type', 'registration_number', 'tax_id', 'email', 'phone', 'website', 'country', 'city', 'address']) ?? ['country' => 'Kenya']) + $kyb;
-        $done = collect(self::REQUIRED)->filter(fn ($k) => filled($values[$k] ?? null) && (! is_array($values[$k]) || array_filter($values[$k], fn ($r) => filled(is_array($r) ? array_filter($r) : $r))))->count();
+        $values = ($company?->only(['name', 'legal_name', 'type', 'registration_number', 'tax_id', 'email', 'phone', 'website', 'country', 'city', 'address']) ?? ['country' => 'KE']) + $kyb;
+        $values['country'] = Company::countryName($values['country'] ?? null);
+        $done = self::countDone($values);
 
         return response()->json([
             'company' => $values + [
@@ -40,6 +41,7 @@ class CompanySettingsController extends Controller
             'logo' => $company?->logo ? asset('storage/'.$company->logo) : null,
             'progress' => ['done' => $done, 'of' => count(self::REQUIRED)],
             'verified' => (bool) $company?->verified_at,
+            'review' => $company?->settings['kyb_review'] ?? null,   // staff decision (Administration › Businesses); a rejection carries a reason
             'exists' => (bool) $company,
             'owner' => [
                 'name' => $user->name,
@@ -89,10 +91,14 @@ class CompanySettingsController extends Controller
         $company = $user->company ?? new Company(['status' => true]);
         $company->fill(collect($data)->only(['name', 'legal_name', 'type', 'registration_number', 'email', 'phone', 'website', 'country', 'city', 'address'])->all());
         $company->tax_id = isset($data['tax_id']) ? strtoupper($data['tax_id']) : null;
+        $company->country = Company::countryCode($data['country'] ?? null);   // companies.country is ISO 3166 alpha-2
 
         $kyb = collect($data)->only(['registered_on', 'vat_number', 'nature_of_business', 'annual_turnover', 'settlement'])->all();
         $kyb['directors'] = $this->withOwner($user, array_values(array_filter($data['directors'] ?? [], fn ($d) => filled($d['name'] ?? null))));
         $company->settings = array_merge($company->settings ?? [], ['kyb' => encrypt($kyb), 'kyb_updated_at' => now()->toIso8601String()]);
+        if (($company->settings['kyb_review']['status'] ?? null) === 'rejected') {   // fixed after a rejection: back in the staff queue
+            $company->settings = array_merge($company->settings, ['kyb_review' => ['status' => 'pending'] + $company->settings['kyb_review']]);
+        }
         $company->save();
 
         if (! $user->company_id) {
@@ -123,6 +129,20 @@ class CompanySettingsController extends Controller
             'user_id' => $user->id, 'name' => $user->name, 'id_number' => Kyc::data($user)['id_number'] ?? '',
             'role' => $mine['role'] ?? 'Director', 'shareholding' => $mine['shareholding'] ?? '', 'self' => true,
         ]], $others);
+    }
+
+    /** How many REQUIRED KYB items are filled in, from the merged public + encrypted values. */
+    public static function countDone(array $values): int
+    {
+        return collect(self::REQUIRED)->filter(fn ($k) => filled($values[$k] ?? null) && (! is_array($values[$k]) || array_filter($values[$k], fn ($r) => filled(is_array($r) ? array_filter($r) : $r))))->count();
+    }
+
+    /** A saved business's KYB progress for staff review: ['done' => n, 'of' => m]. */
+    public static function progressOf(Company $company): array
+    {
+        $values = $company->only(['legal_name', 'type', 'registration_number', 'tax_id', 'email', 'phone', 'address']) + (new self)->kyb($company);
+
+        return ['done' => self::countDone($values), 'of' => count(self::REQUIRED)];
     }
 
     protected function kyb(?Company $company): array

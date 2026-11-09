@@ -19,7 +19,7 @@
 
   <x-ui.stats :cols="3" class="mb-6">
     <x-ui.stat label="Business profile" value="d.progress.of ? Math.round(d.progress.done / d.progress.of * 100) + '% complete' : '—'" format="raw" icon="building-storefront" tone="lime" />
-    <x-ui.stat label="Verification" value="d.verified ? 'Verified' : (d.exists ? 'In review' : 'Not started')" format="raw" icon="shield-check" tone="emerald" />
+    <x-ui.stat label="Verification" value="d.verified ? 'Verified' : (d.review?.status === 'rejected' ? 'Needs changes' : (d.exists ? 'In review' : 'Not started'))" format="raw" icon="shield-check" tone="emerald" />
     <x-ui.stat label="Your verification" value="d.owner?.bank_grade ? 'Bank grade' : (d.owner?.personal ? 'Basic' : 'No account')" format="raw" icon="identification" tone="sky" />
   </x-ui.stats>
 
@@ -30,6 +30,10 @@
   <div x-show="!loading && d.owner?.personal && !d.owner?.bank_grade" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100 sm:flex-row sm:items-center sm:justify-between">
     <p>Your business can't be fully verified until <strong>your own bank-grade verification</strong> is done (ID photos, selfies and signature).</p>
     <x-ui.button variant="secondary" href="{{ route('profile.edit') }}#verification">Finish my verification</x-ui.button>
+  </div>
+
+  <div x-show="!loading && !d.verified && d.review?.status === 'rejected'" x-cloak class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100">
+    <p><strong>Our team sent your business back.</strong> <span x-text="d.review?.reason"></span> Fix it below and save: we review it again.</p>
   </div>
 
   <form x-show="!loading" x-cloak @submit.prevent="save()" class="space-y-6">
