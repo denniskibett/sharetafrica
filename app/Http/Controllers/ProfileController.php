@@ -29,9 +29,15 @@ class ProfileController extends Controller
         return view('profile.index');
     }
 
-    public function edit()
+    public function edit(Request $request)
     {
-        return view('profile.edit');
+        // Sent here from a pay page (/r/{token}) to verify first: remember it so the page offers the way back.
+        $back = (string) $request->query('return', '');
+        if (preg_match('#^/r/[A-Za-z0-9]{40}$#', $back)) {
+            session(['kyc_return' => $back]);
+        }
+
+        return view('profile.edit', ['kycReturn' => session('kyc_return')]);
     }
 
     public function getUserData(Request $request): JsonResponse

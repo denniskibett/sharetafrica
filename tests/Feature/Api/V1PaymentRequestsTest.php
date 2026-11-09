@@ -168,6 +168,22 @@ class V1PaymentRequestsTest extends TestCase
         $this->app['env'] = 'testing';
     }
 
+    public function test_an_unverified_payer_gets_a_verify_now_link_that_comes_back_to_the_pay_page(): void
+    {
+        $biz = $this->scharge();
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10'], $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-1578b'])->assertCreated()->json();
+        $token = $this->token($r['pay_url']);
+        $admin = User::factory()->create(['onboarding_status' => 'active']);
+        $admin->forceFill(['kyc_level' => 'none'])->save();
+
+        $this->actingAs($admin)->get("/r/$token")->assertOk()->assertSee('Verify now')
+            ->assertSee(e(route('profile.edit', ['return' => "/r/$token"])), false)->assertDontSee('Create PIN');
+        $this->actingAs($admin)->get('/profile/edit?return='.urlencode("/r/$token"))->assertOk()->assertSee('Back to my payment')->assertSee(url("/r/$token"));
+        $this->actingAs($admin)->get('/profile/edit?return='.urlencode('https://evil.example/r/x'))->assertOk();
+        $this->flushSession();
+        $this->actingAs($admin)->get('/profile/edit?return='.urlencode('https://evil.example'))->assertOk()->assertDontSee('Back to my payment');
+    }
+
     public function test_only_the_named_payer_can_pay_from_their_wallet(): void
     {
         $biz = $this->scharge();

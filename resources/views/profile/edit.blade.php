@@ -13,6 +13,12 @@
   <div x-data="{ tab: ['personal', 'verification', 'security', 'close'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'personal' }"
        x-effect="history.replaceState(null, '', '#' + tab)">
     <x-ui.page-header title="Account settings" subtitle="Keep your details current. Verified details unlock higher limits and more services." />
+    @if ($kycReturn ?? null)
+      <div class="mb-6 flex flex-col gap-3 rounded-2xl border border-lime-200 bg-lime-50 p-4 text-sm text-lime-900 sm:flex-row sm:items-center sm:justify-between dark:border-lime-500/30 dark:bg-lime-500/10 dark:text-lime-100">
+        <p>Verify your name, M-PESA number and ID here, then go back to finish your payment.</p>
+        <a href="{{ url($kycReturn) }}" class="inline-flex h-10 shrink-0 items-center justify-center rounded-full bg-gray-900 px-4 font-semibold text-white hover:bg-gray-800">Back to my payment</a>
+      </div>
+    @endif
 
     <div class="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
       <nav class="ui-card flex gap-1 overflow-x-auto rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800 dark:bg-white/[0.03] lg:h-fit lg:flex-col" aria-label="Settings">
