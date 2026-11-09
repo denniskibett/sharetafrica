@@ -199,6 +199,7 @@ final class PaymentRequests
         $n = 0;
         RampOrder::whereIn('id', ApiPaymentRequest::whereNotNull('ramp_order_id')->select('ramp_order_id'))
             ->where('payer_phone', $phone)->where('destination_type', 'wallet')->where('user_id', '!=', $user->id)
+            ->where('status', 'paid')->where('rail', '!=', 'simulator')   // only money that really moved
             ->whereNull('destination->paid_by')->get()
             ->each(function (RampOrder $o) use ($user, &$n) {
                 $o->update(['destination' => $o->destination + ['paid_by' => $user->id]]);

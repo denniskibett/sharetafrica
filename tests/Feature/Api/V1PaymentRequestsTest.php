@@ -342,10 +342,12 @@ class V1PaymentRequestsTest extends TestCase
             $order = app(RampOrders::class)->refresh($order);
         }
         $req = \App\Models\RailRequest::find($order->collect_request_id);
-        $req->forceFill(['rail' => 'daraja', 'provider_reference' => 'ws_CO_TEST', 'receipt' => 'UK96O15681', 'meta' => ($req->meta ?? []) + ['callbacks' => [['at' => now()->toIso8601String(), 'body' => [
+        $req->forceFill(['rail' => 'daraja', 'provider_reference' => 'ws_CO_TEST_'.$order->id, 'receipt' => 'UK96O15681', 'meta' => ($req->meta ?? []) + ['callbacks' => [['at' => now()->toIso8601String(), 'body' => [
             'MerchantRequestID' => '1234-5678', 'CheckoutRequestID' => 'ws_CO_TEST', 'ResultCode' => 0, 'ResultDesc' => 'The service request is processed successfully.',
             'CallbackMetadata' => ['Item' => [['Name' => 'Amount', 'Value' => 10], ['Name' => 'MpesaReceiptNumber', 'Value' => 'UK96O15681'],
                 ['Name' => 'TransactionDate', 'Value' => 20261109145126], ['Name' => 'PhoneNumber', 'Value' => 254717492048]]]]]]]])->save();
+
+        $order->forceFill(['rail' => 'daraja'])->save();   // as on live: a real M-PESA collection
 
         return $order->fresh();
     }
@@ -421,6 +423,13 @@ class V1PaymentRequestsTest extends TestCase
         $this->assertArrayNotHasKey('paid_by', $order->fresh()->destination);
         $this->artisan('sharet:claim-payments --apply')->expectsOutputToContain('Linked 1 payment')->assertSuccessful();
         $this->assertSame($dennis->id, $order->fresh()->destination['paid_by']);
+
+        // a simulated (or reversed) payment from the same number is never claimed
+        $fake = $this->guestPays($biz);
+        \App\Models\RailRequest::whereKey($fake->collect_request_id)->update(['rail' => 'simulator']);
+        $fake->forceFill(['rail' => 'simulator'])->save();
+        $this->artisan('sharet:claim-payments --apply')->expectsOutputToContain('Linked 0 payment')->assertSuccessful();
+        $this->assertArrayNotHasKey('paid_by', $fake->fresh()->destination);
     }
 
     public function test_requests_need_collect_scope_split_only_to_sharet_and_expire(): void
