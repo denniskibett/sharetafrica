@@ -111,6 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/chart/{name}', [DashboardController::class, 'chart'])->name('dashboard.chart')->where('name', '[a-z]+');
     Route::get('/dashboard/activity', [DashboardController::class, 'activity'])->name('dashboard.activity');
     Route::get('/dashboard/menu', [DashboardController::class, 'menu'])->name('dashboard.menu');
+    Route::get('/search', \App\Http\Controllers\SearchController::class)->middleware('throttle:120,1')->name('search');   // header search
 
     // Waiting list status page (user side)
     Route::get('/waiting-list', [WaitingListController::class, 'show'])->name('waiting_list.show');
