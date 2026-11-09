@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
  *  - Sharet wallet: the payer signs in and approves with their PIN; a free wallet-to-wallet transfer pays it.
  *    No API call can take money from a customer's wallet without that approval.
  *  - M-PESA: the page sends a prompt to the payer's phone; the collection lands in the business's wallet.
- *  - Sandbox requests (pr_test_) never touch the ledger: the page offers "pay" and "fail" buttons.
+ *  - Sandbox requests (SHTEST…, earlier pr_test_) never touch the ledger: the page offers "pay" and "fail" buttons.
  * Webhooks: payment_request.paid, payment_request.expired.
  */
 final class PaymentRequests
@@ -59,7 +59,7 @@ final class PaymentRequests
         $live = $key->isLive();
 
         return ApiPaymentRequest::create([
-            'public_id' => ($live ? 'pr_' : 'pr_test_').Str::lower(Str::random(20)),
+            'public_id' => self::newReference($live),
             'token' => Str::random(40),
             'api_key_id' => $key->id, 'user_id' => $payee->id, 'environment' => $key->environment,
             'amount' => $cents,
@@ -71,6 +71,26 @@ final class PaymentRequests
             'status' => 'open',
             'expires_at' => now()->addMinutes($minutes),
         ]);
+    }
+
+    /**
+     * The one reference for a payment, whatever it is paid with (Sharet wallet, M-PESA, later Airtel), in the M-PESA-like
+     * Sharet format (SHUK7Q2M4D; SHTEST… in the sandbox, see SharetReference). It is the request's API id, and every order that pays it carries the same reference
+     * (receipts, SMS, history, transaction_id). Requests made before this keep their old pr_ id.
+     */
+    public static function newReference(bool $live): string
+    {
+        return \App\Support\SharetReference::next($live);
+    }
+
+    /** Tag an order that pays $r with the request's reference (only for SH references; old pr_ requests keep the order's own). */
+    public static function tag(RampOrder $order, ApiPaymentRequest $r): RampOrder
+    {
+        if (str_starts_with($r->public_id, 'SH')) {
+            $order->update(['destination' => array_merge($order->destination ?? [], ['ref' => $r->public_id])]);
+        }
+
+        return $order;
     }
 
     public static function present(ApiPaymentRequest $r): array
@@ -119,7 +139,7 @@ final class PaymentRequests
         return DB::transaction(function () use ($r, $payer) {
             $locked = ApiPaymentRequest::whereKey($r->id)->lockForUpdate()->first();
             $this->assertPayable($locked, 'sharet');
-            $order = $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request');
+            $order = self::tag($this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request'), $r);
 
             return $this->markPaid($locked, 'sharet', $order);
         });
@@ -141,7 +161,7 @@ final class PaymentRequests
         if (app()->isProduction() && app(\App\Integrations\Rails::class)->collecting($r->payee) === 'simulator') {
             throw ValidationException::withMessages(['phone' => 'M-PESA payments aren\'t switched on for this business yet. Pay from a Sharet wallet, or ask the business for another way to pay.']);
         }
-        $order = $this->orders->topUp($r->payee, PaymentInput::amount($r->amount), $phone);
+        $order = self::tag($this->orders->topUp($r->payee, PaymentInput::amount($r->amount), $phone), $r);   // before confirm: the prompt SMS quotes it
         if ($signedIn && ! $signedIn->is($r->payee)) {
             $order->update(['destination' => ($order->destination ?? []) + ['paid_by' => $signedIn->id]]);   // shows in their history too
         }
@@ -174,7 +194,7 @@ final class PaymentRequests
         if (app()->isProduction() && app(\App\Integrations\Rails::class)->collecting($payer) === 'simulator') {
             throw ValidationException::withMessages(['phone' => 'M-PESA top-ups aren\'t switched on for your account yet. Pay from your wallet, or with M-PESA without signing in.']);
         }
-        $order = $this->orders->topUp($payer, PaymentInput::amount($r->amount), $phone);
+        $order = self::tag($this->orders->topUp($payer, PaymentInput::amount($r->amount), $phone), $r);
         $order->update(['destination' => ($order->destination ?? []) + ['pay_request' => $r->id], 'note' => 'Top-up to pay '.($r->reference ?: 'a payment request')]);
         $order = $this->orders->confirm($order->fresh());
         $this->orderMoved($order->fresh());
@@ -253,7 +273,7 @@ final class PaymentRequests
                 $this->assertPayable($r, null);
                 $payer = $o->user;
                 $this->assertPayer($r, $payer);
-                $transfer = DB::transaction(fn () => $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request'));
+                $transfer = self::tag(DB::transaction(fn () => $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request')), $r);
                 $this->markPaid($r, 'mpesa_via_wallet', $transfer);
                 $o->update(['destination' => $o->destination + ['onward' => $transfer->id]]);
             } catch (\Throwable $e) {

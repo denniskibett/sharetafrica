@@ -58,10 +58,16 @@ says which route it took:
 | `mpesa` | No account: an M-PESA prompt straight to the business's wallet. |
 | `sharet` | Signed in: from the payer's wallet, approved with their Sharet PIN (created on the page if they have none). |
 | `mpesa_via_wallet` | Signed in: an M-PESA prompt tops up the payer's wallet, then the amount moves on to the business. The payer sees both in their history. If the onward step fails, the money stays in their wallet and the request stays open. |
-| `sandbox` | `pr_test_` requests only. |
+| `sandbox` | Sandbox (`SHTEST…`) requests only. |
 
-A paid request also carries **`transaction_id`**: Sharet's transaction ID for the payment (`SH` + 8 characters), the
-reference to store against the invoice. The payer's M-PESA receipt and number stay with Sharet (the payer sees them in
+**One reference per payment.** A request's `id` is its Sharet reference, read like an M-PESA receipt: `SH` + year
+letter + month letter + 6 characters (`SHUK7Q2M4D` = November 2026; `SHTEST…` in the sandbox). It stays the same
+whatever the payer uses (Sharet wallet, M-PESA, later Airtel): the payer's receipt, SMS and history show it too. Store it
+against the invoice. Lookups ignore case. Requests made before November 2026 keep their `pr_…` id and can also be
+fetched by their `transaction_id`.
+
+A paid request also carries **`transaction_id`**: Sharet's transaction ID for the payment (the request's `id` for new
+requests). The payer's M-PESA receipt and number stay with Sharet (the payer sees them in
 their own history; staff can see the full Safaricom callback). M-PESA payments made without an account join the
 payer's Sharet history once they verify that M-PESA number.
 

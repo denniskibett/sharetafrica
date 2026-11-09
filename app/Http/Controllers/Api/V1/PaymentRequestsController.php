@@ -46,8 +46,15 @@ class PaymentRequestsController extends Controller
 
     private function find(Request $request, string $id): ?ApiPaymentRequest
     {
-        $r = ApiPaymentRequest::where('public_id', $id)->where('user_id', $request->user()->id)
-            ->where('environment', $request->attributes->get('api_key')->environment)->first();
+        $mine = fn () => ApiPaymentRequest::where('user_id', $request->user()->id)
+            ->where('environment', $request->attributes->get('api_key')->environment);
+        $id = str_starts_with(strtoupper($id), 'SH') ? strtoupper($id) : $id;
+        $r = $mine()->where('public_id', $id)->first();
+        if (! $r && str_starts_with($id, 'SH')) {
+            // an older pr_ request, looked up by the Sharet reference it was paid under (its transaction_id)
+            $r = $mine()->where('public_id', 'not like', 'SH%')->whereNotNull('ramp_order_id')->with('order')->latest('id')->limit(500)->get()
+                ->first(fn (ApiPaymentRequest $x) => $x->order?->sharetReference() === $id);
+        }
         if ($r?->order) {
             $this->requests->orderMoved($r->order);
             $r = $r->fresh();

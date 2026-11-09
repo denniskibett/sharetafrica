@@ -36,8 +36,16 @@ class RampOrder extends Model
      * When a payment changes state, tell the customer after the transaction commits: an SMS for the prompt and the
      * result (CustomerMessages), and the emailed receipt when it finishes big enough (Receipt).
      */
+    /** Bookkeeping keys kept on destination that are not part of where the money goes. */
+    public const META_KEYS = ['ref', 'paid_by', 'pay_request', 'onward', 'onward_failure'];
+
     protected static function booted(): void
     {
+        static::creating(function (RampOrder $o) {
+            if (! isset(($o->destination ?? [])['ref'])) {
+                $o->destination = ($o->destination ?? []) + ['ref' => \App\Support\SharetReference::next()];   // its Sharet reference (SHUK…)
+            }
+        });
         static::saved(function (RampOrder $o) {
             if (! $o->wasRecentlyCreated && ! $o->wasChanged('status')) {
                 return;
@@ -149,6 +157,10 @@ class RampOrder extends Model
 
     public function sharetReference(): string
     {
+        if (is_string($ref = $this->destination['ref'] ?? null) && str_starts_with($ref, 'SH')) {
+            return $ref;   // SHUK… (orders since Nov 2026; one paying a payment request carries the request's)
+        }
+
         return 'SH'.strtoupper(substr(str_replace('-', '', $this->uuid), 0, 8));
     }
 

@@ -78,6 +78,7 @@ class PayController extends Controller
         $today = (int) RampOrder::where('user_id', $me->id)->where('destination_type', '!=', 'wallet')->where('created_at', '>=', now('Africa/Nairobi')->startOfDay()->utc())
             ->whereIn('status', ['collecting', 'paying', 'paid', 'refunding'])->sum('total');
         $recent = RampOrder::where('user_id', $me->id)->where('status', 'paid')->where('destination_type', '!=', 'wallet')->latest('id')->limit(20)->get()
+            ->each(fn ($o) => $o->destination = \Illuminate\Support\Arr::except($o->destination ?? [], RampOrder::META_KEYS))
             ->unique(fn ($o) => json_encode($o->destination))->take(4)
             ->map(fn ($o) => ['label' => $o->destination_type === 'sharet' ? '@'.$o->destination['handle'] : $o->recipient(), 'icon' => $o->present()['icon'],
                 'payload' => ['mode' => 'send'] + ($o->destination_type === 'sharet' ? ['to' => '@'.$o->destination['handle']] : ['type' => $o->destination_type, 'dest' => $o->destination])])->values();

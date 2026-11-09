@@ -85,7 +85,7 @@ class V1PaymentRequestsTest extends TestCase
 
         $r = $this->postJson('/api/v1/payment-requests', ['amount' => '35000', 'reference' => 'Rent Nov · 4B', 'payer' => ['phone' => '0712 345 678']],
             $this->key($biz) + ['Idempotency-Key' => 'rent-4b-nov'])->assertCreated()->assertJsonPath('status', 'open')->assertJsonPath('payee.sharet_id', Company::find($biz->company_id)->sharet_id)->json();
-        $this->assertStringStartsWith('pr_test_', $r['id']);
+        $this->assertMatchesRegularExpression('/^SHTEST[A-Z][A-L][0-9A-Z]{6}$/', $r['id']);
 
         $token = $this->token($r['pay_url']);
         $this->get("/r/$token")->assertOk()->assertSee('Pay scharge')->assertSee('KES 35,000.00')->assertSee('Sandbox: no real money moves');
@@ -364,8 +364,55 @@ class V1PaymentRequestsTest extends TestCase
         $this->assertSame('1234-5678', $p['merchant_request_id']);
         $this->assertSame(20261109145126, $p['transaction_date']);
         $this->assertSame('ws_CO_TEST', $p['raw']['CheckoutRequestID']);
-        $this->assertMatchesRegularExpression('/^SH[0-9A-F]{8}$/', $order->sharetReference());
+        $this->assertTrue(\App\Support\SharetReference::valid($order->sharetReference()));
         $this->assertArrayNotHasKey('paid_by', $order->destination, 'a guest is linked to nobody yet');
+    }
+
+    public function test_one_sharet_reference_is_the_api_id_the_transaction_id_and_the_order_reference_on_every_rail(): void
+    {
+        $biz = $this->scharge();
+        $order = $this->guestPays($biz);   // M-PESA
+        $req = ApiPaymentRequest::first();
+        $this->assertMatchesRegularExpression('/^SH[A-Z][A-L][0-9A-Z]{6}$/', $req->public_id);
+        $this->assertSame($req->public_id, $order->sharetReference(), 'the order paying it carries the same reference');
+        $this->getJson('/api/v1/payment-requests/'.strtolower($req->public_id), $this->key($biz, 'live'))->assertOk()
+            ->assertJsonPath('id', $req->public_id)->assertJsonPath('transaction_id', $req->public_id);
+
+        $akinyi = $this->tenant('akinyi', '500');   // Sharet wallet: the transfer carries it too
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '100', 'channels' => ['sharet']], $this->key($biz, 'live') + ['Idempotency-Key' => 'wallet-ref-one'])->json();
+        $this->actingAs($akinyi)->post('/r/'.$this->token($r['pay_url']).'/sharet', ['pin' => '4826'])->assertRedirect();
+        $this->getJson('/api/v1/payment-requests/'.$r['id'], $this->key($biz, 'live'))->assertJsonPath('status', 'paid')->assertJsonPath('transaction_id', $r['id']);
+        $this->assertSame($r['id'], ApiPaymentRequest::where('public_id', $r['id'])->first()->order->sharetReference());
+    }
+
+    public function test_references_read_like_mpesa_and_the_month_letter_moves_on_each_month(): void
+    {
+        $this->travelTo(\Carbon\Carbon::parse('2026-11-09 12:00', 'Africa/Nairobi'));
+        $this->assertMatchesRegularExpression('/^SHUK[0-9A-Z]{6}$/', \App\Support\SharetReference::next());
+        $this->assertMatchesRegularExpression('/^SHTESTUK[0-9A-Z]{6}$/', \App\Support\SharetReference::next(false));
+        $this->travelTo(\Carbon\Carbon::parse('2026-12-01 00:30', 'Africa/Nairobi'));
+        $this->assertMatchesRegularExpression('/^SHUL/', \App\Support\SharetReference::next());
+        $this->travelTo(\Carbon\Carbon::parse('2027-01-15', 'Africa/Nairobi'));
+        $this->assertMatchesRegularExpression('/^SHVA/', \App\Support\SharetReference::next());
+
+        $user = $this->tenant('wanjiru', '100');
+        $o = app(RampOrders::class)->topUp($user, '50', '0712345678');
+        $this->assertMatchesRegularExpression('/^SHVA[0-9A-Z]{6}$/', $o->sharetReference(), 'every order gets one too');
+        $this->assertSame($o->sharetReference(), $o->fresh()->sharetReference(), 'and keeps it');
+    }
+
+    public function test_an_older_pr_request_keeps_its_id_and_is_also_found_by_the_reference_it_was_paid_under(): void
+    {
+        $biz = $this->scharge();
+        $order = $this->guestPays($biz);
+        $req = ApiPaymentRequest::first();
+        $req->update(['public_id' => 'pr_edlkqqbxdbdmo1vj8jch']);
+        $order->update(['destination' => collect($order->destination)->except('ref')->all()]);   // an order from before: SH + 8 hex
+        $ref = $order->fresh()->sharetReference();
+        $this->assertNotSame($req->public_id, $ref);
+        $this->getJson('/api/v1/payment-requests/pr_edlkqqbxdbdmo1vj8jch', $this->key($biz, 'live'))->assertOk()->assertJsonPath('transaction_id', $ref);
+        $this->getJson('/api/v1/payment-requests/'.$ref, $this->key($biz, 'live'))->assertOk()->assertJsonPath('id', 'pr_edlkqqbxdbdmo1vj8jch');
+        $this->getJson('/api/v1/payment-requests/SH00000000', $this->key($biz, 'live'))->assertNotFound();
     }
 
     public function test_the_payee_gets_the_sharet_transaction_id_but_never_the_mpesa_receipt_or_number(): void
