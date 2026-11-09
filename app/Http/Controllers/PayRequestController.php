@@ -30,7 +30,9 @@ class PayRequestController extends Controller
     {
         $r = $this->find($token);
 
-        return response()->json(['status' => $r->status, 'collecting' => (bool) ($r->order && ! $r->order->final()), 'failure' => $r->order?->status === 'failed' ? $r->order->failure : null]);
+        $topUp = auth()->user() ? PaymentRequests::topUpFor($r, auth()->user(), true) : null;
+
+        return response()->json(['status' => $r->status, 'collecting' => (bool) (($r->order && ! $r->order->final()) || $topUp), 'failure' => $r->order?->status === 'failed' ? $r->order->failure : null]);
     }
 
     public function sharet(Request $request, string $token)
@@ -56,6 +58,14 @@ class PayRequestController extends Controller
         return redirect()->route('pay-request.show', $token)->with('pin_created', true);
     }
 
+    public function topUp(Request $request, string $token)
+    {
+        $data = $request->validate(['phone' => ['required', 'string', 'max:20']]);
+        $this->requests->topUpAndPay($this->find($token), $request->user(), $data['phone']);
+
+        return redirect()->route('pay-request.show', $token);
+    }
+
     public function mpesa(Request $request, string $token)
     {
         $data = $request->validate(['phone' => ['required', 'string', 'max:20']]);
@@ -79,6 +89,9 @@ class PayRequestController extends Controller
         }
         if ($r->order) {
             $this->requests->orderMoved($r->order->fresh());
+        }
+        if (auth()->user() && ($t = PaymentRequests::topUpFor($r, auth()->user(), true))) {
+            app(RampOrders::class)->refresh($t);   // the payer's top-up prompt may have been answered: ask the rail (pays on)
         }
         if ($r->status === 'open' && $r->expires_at->isPast() && ! ($r->order && ! $r->order->fresh()->final())) {
             $this->requests->expireDue();

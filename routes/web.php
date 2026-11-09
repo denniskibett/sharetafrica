@@ -64,6 +64,7 @@ Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\A
     Route::get('/', 'show')->middleware('throttle:60,1')->name('pay-request.show');
     Route::get('/status', 'status')->middleware('throttle:60,1')->name('pay-request.status');
     Route::post('/sharet', 'sharet')->middleware(['auth', 'throttle:10,1'])->name('pay.request.sharet');
+    Route::post('/top-up', 'topUp')->middleware(['auth', 'throttle:5,1'])->name('pay.request.top-up');   // signed in: M-PESA into my wallet, then on to the payee
     Route::post('/pin', 'pin')->middleware(['auth', 'throttle:10,1'])->name('pay-request.pin');   // first-time Sharet PIN, then approve
     Route::post('/mpesa', 'mpesa')->middleware('throttle:5,1')->name('pay.request.mpesa');
     Route::post('/sandbox', 'sandbox')->middleware('throttle:20,1')->name('pay-request.sandbox');

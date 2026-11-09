@@ -6,6 +6,7 @@ use App\Api\PaymentRequests;
 use App\Ledger\Ledger;
 use App\Models\ApiKey;
 use App\Models\ApiPaymentRequest;
+use App\Models\RampOrder;
 use App\Models\Company;
 use App\Models\User;
 use App\Ramp\RampOrders;
@@ -182,6 +183,70 @@ class V1PaymentRequestsTest extends TestCase
         $this->actingAs($admin)->get('/profile/edit?return='.urlencode('https://evil.example/r/x'))->assertOk();
         $this->flushSession();
         $this->actingAs($admin)->get('/profile/edit?return='.urlencode('https://evil.example'))->assertOk()->assertDontSee('Back to my payment');
+    }
+
+    public function test_guests_choose_between_their_sharet_account_and_mpesa_without_one(): void
+    {
+        $biz = $this->scharge();
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10'], $this->key($biz, 'live') + ['Idempotency-Key' => 'choice-guest-page'])->assertCreated()->json();
+        $this->get('/r/'.$this->token($r['pay_url']))->assertOk()->assertSee('How would you like to pay?')->assertSee('I have a Sharet account')
+            ->assertSee('no account needed')->assertDontSee('Top up by M-PESA');
+    }
+
+    public function test_signed_in_top_up_by_mpesa_lands_in_my_wallet_then_moves_on_to_the_payee(): void
+    {
+        $biz = $this->scharge();
+        $this->postJson('/api/v1/webhooks', ['url' => 'https://hooks.example.com/in', 'events' => ['payment_request.paid']], $this->key($biz, 'live'))->assertCreated();
+        $akinyi = $this->tenant('akinyi');   // empty wallet
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10', 'reference' => 'Invoice #1577'], $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-1577-topup'])->assertCreated()->json();
+        $token = $this->token($r['pay_url']);
+
+        $this->actingAs($akinyi)->get("/r/$token")->assertOk()->assertSee('Or top up by M-PESA and pay')->assertSee('From my wallet');
+        $this->actingAs($akinyi)->post("/r/$token/top-up", ['phone' => '0712 345 678'])->assertRedirect("/r/$token");
+
+        $this->actingAs($akinyi)->getJson("/r/$token/status")->assertOk();   // the page polls; the prompt is answered
+        $req = ApiPaymentRequest::first();
+        $this->assertSame("paid", $req->status);
+        $this->assertSame('mpesa_via_wallet', $req->paid_via);
+        $this->assertSame(0, $this->balance($akinyi), 'in and straight out');
+        $this->assertSame(1_000, $this->balance($biz));
+        $mine = RampOrder::where('user_id', $akinyi->id)->orderBy('id')->get();
+        $this->assertSame(['wallet', 'paid'], [$mine[0]->destination_type, $mine[0]->status], 'the top-up is in my history');
+        $this->assertSame($req->ramp_order_id, $mine[1]->id, 'and so is the payment');
+        Http::assertSent(fn (HttpRequest $q) => $q['type'] === 'payment_request.paid' && $q['data']['paid_via'] === 'mpesa_via_wallet');
+
+        $this->actingAs($akinyi)->from("/r/$token")->post("/r/$token/top-up", ['phone' => '0712 345 678'])->assertSessionHasErrors('pay');
+        $this->assertSame(0, $this->balance($akinyi), 'never collected twice');
+    }
+
+    public function test_if_paying_on_fails_after_the_top_up_the_money_stays_in_my_wallet_and_the_request_stays_open(): void
+    {
+        $biz = $this->scharge();
+        $akinyi = $this->tenant('akinyi');
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10'], $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-onward-fail'])->assertCreated()->json();
+        $token = $this->token($r['pay_url']);
+
+        // the prompt is slow to answer (simulator: numbers ending 9999); meanwhile the onward payment becomes impossible
+        $this->actingAs($akinyi)->post("/r/$token/top-up", ['phone' => '0712 349 999'])->assertRedirect("/r/$token");
+        $this->assertSame('open', ApiPaymentRequest::first()->status);
+        $this->actingAs($akinyi)->get("/r/$token")->assertSee('Check your phone');
+        $akinyi->forceFill(['kyc_level' => 'none'])->save();   // e.g. limits changed: the wallet-to-wallet leg is refused
+
+        $o = RampOrder::where('user_id', $akinyi->id)->first();
+        for ($i = 0; $i < 5 && ! $o->final(); $i++) {
+            $o = app(RampOrders::class)->refresh($o);
+        }
+        $this->assertSame('paid', $o->status);
+        $this->assertSame('failed', $o->fresh()->destination['onward']);
+        $this->assertSame('open', ApiPaymentRequest::first()->status);
+        $this->assertSame(1_000, $this->balance($akinyi), 'the top-up stays in my wallet');
+        $this->assertSame(0, $this->balance($biz));
+
+        $akinyi->forceFill(['kyc_level' => 'basic'])->save();
+        $this->actingAs($akinyi->fresh())->get("/r/$token")->assertSee('is in your Sharet wallet, but paying')->assertSee('Pay from your wallet below');
+        $this->actingAs($akinyi->fresh())->post("/r/$token/sharet", ['pin' => '4826'])->assertRedirect("/r/$token");
+        $this->assertSame('paid', ApiPaymentRequest::first()->status);
+        $this->assertSame(0, $this->balance($akinyi));
     }
 
     public function test_only_the_named_payer_can_pay_from_their_wallet(): void

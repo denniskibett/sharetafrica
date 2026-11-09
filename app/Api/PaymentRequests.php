@@ -146,6 +146,44 @@ final class PaymentRequests
         return $r->fresh();
     }
 
+    /**
+     * Signed in, top up by M-PESA, then pay (paid_via "mpesa_via_wallet"): the prompt credits the PAYER's own wallet,
+     * and once that top-up is paid the same amount moves on to the payee as a wallet transfer (see orderMoved). The
+     * payer sees both in their history. If the onward transfer fails, the money stays in their wallet, the request
+     * stays open, and the page says so. The M-PESA PIN on their phone is the approval (as for any M-PESA payment).
+     */
+    public function topUpAndPay(ApiPaymentRequest $r, User $payer, string $phone): RampOrder
+    {
+        $this->assertPayable($r, 'mpesa');
+        $this->assertPayer($r, $payer);
+        $phone = Destination::phone($phone, 'phone');
+        if ($pending = self::topUpFor($r, $payer, true)) {
+            return $pending;   // a prompt is already on its way
+        }
+        if ($r->environment === 'test') {
+            $this->markPaid($r, 'sandbox', null);
+
+            return new RampOrder;
+        }
+        if (app()->isProduction() && app(\App\Integrations\Rails::class)->collecting($payer) === 'simulator') {
+            throw ValidationException::withMessages(['phone' => 'M-PESA top-ups aren\'t switched on for your account yet. Pay from your wallet, or with M-PESA without signing in.']);
+        }
+        $order = $this->orders->topUp($payer, PaymentInput::amount($r->amount), $phone);
+        $order->update(['destination' => ($order->destination ?? []) + ['pay_request' => $r->id], 'note' => 'Top-up to pay '.($r->reference ?: 'a payment request')]);
+        $order = $this->orders->confirm($order->fresh());
+        $this->orderMoved($order->fresh());
+
+        return $order->fresh();
+    }
+
+    /** The payer's latest top-up for this request ($pending: only one still waiting for M-PESA). */
+    public static function topUpFor(ApiPaymentRequest $r, User $payer, bool $pending = false): ?RampOrder
+    {
+        $o = RampOrder::where('user_id', $payer->id)->where('destination->pay_request', $r->id)->latest('id')->first();
+
+        return $o && (! $pending || ! $o->final()) ? $o : null;
+    }
+
     /** Sandbox only: the page's "Pay" / "Fail" buttons. */
     public function sandbox(ApiPaymentRequest $r, bool $pay): ApiPaymentRequest
     {
@@ -158,9 +196,48 @@ final class PaymentRequests
     /** The M-PESA order behind a request moved: paid → the request is paid. */
     public function orderMoved(RampOrder $order): void
     {
+        if ($order->status === 'paid' && ($rid = $order->destination['pay_request'] ?? null) && ! isset($order->destination['onward'])) {
+            $this->payOnward($order, (int) $rid);
+
+            return;
+        }
         $r = ApiPaymentRequest::where('ramp_order_id', $order->id)->first();
         if ($r && $r->status === 'open' && $order->status === 'paid') {
             $this->markPaid($r, 'mpesa', $order);
+        }
+    }
+
+    /** A top-up for a request was paid: move the amount on to the payee, once. Failure leaves the money in the wallet. */
+    private function payOnward(RampOrder $topUp, int $requestId): void
+    {
+        DB::transaction(function () use ($topUp, $requestId) {
+            $o = RampOrder::whereKey($topUp->id)->lockForUpdate()->first();
+            if (isset($o->destination['onward'])) {
+                return;   // already handled by another call
+            }
+            $r = ApiPaymentRequest::whereKey($requestId)->lockForUpdate()->first();
+            try {
+                $this->assertPayable($r, null);
+                $payer = $o->user;
+                $this->assertPayer($r, $payer);
+                $transfer = DB::transaction(fn () => $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request'));
+                $this->markPaid($r, 'mpesa_via_wallet', $transfer);
+                $o->update(['destination' => $o->destination + ['onward' => $transfer->id]]);
+            } catch (\Throwable $e) {
+                $why = $e instanceof ValidationException ? collect($e->errors())->flatten()->first() : 'Something went wrong on our side.';
+                $o->update(['destination' => $o->destination + ['onward' => 'failed', 'onward_failure' => $why]]);
+                $e instanceof ValidationException || report($e);
+            }
+        });
+    }
+
+    private function assertPayer(ApiPaymentRequest $r, User $payer): void
+    {
+        if ($r->payer_user_id && $r->payer_user_id !== $payer->id) {
+            throw ValidationException::withMessages(['pay' => 'This request is for another Sharet account.']);
+        }
+        if ($payer->is($r->payee)) {
+            throw ValidationException::withMessages(['pay' => 'You can\'t pay your own request.']);
         }
     }
 

@@ -49,6 +49,17 @@ typos in later versions. One per user and one per business (company); a business
 `POST /v1/payment-requests`. A business asks a customer to pay. The customer pays from their Sharet wallet (by @name or
 phone, approved with their PIN in the app) or by an M-PESA prompt. Money lands in the business's Sharet wallet.
 
+The hosted pay page (`pay_url`, /r/{token}) asks first: **I have a Sharet account** (sign in) or **Pay with M-PESA**
+(no account). Every route ends with the request `paid` and the same signed `payment_request.paid` webhook; `paid_via`
+says which route it took:
+
+| `paid_via` | Route |
+|---|---|
+| `mpesa` | No account: an M-PESA prompt straight to the business's wallet. |
+| `sharet` | Signed in: from the payer's wallet, approved with their Sharet PIN (created on the page if they have none). |
+| `mpesa_via_wallet` | Signed in: an M-PESA prompt tops up the payer's wallet, then the amount moves on to the business. The payer sees both in their history. If the onward step fails, the money stays in their wallet and the request stays open. |
+| `sandbox` | `pr_test_` requests only. |
+
 ```http
 POST /v1/payment-requests
 Authorization: Bearer sk_test_…
