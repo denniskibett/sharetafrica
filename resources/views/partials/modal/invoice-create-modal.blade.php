@@ -479,7 +479,7 @@
   <!-- Missing Invoices Modal -->
   <div x-show="showMissingInvoicesModal" x-cloak class="fixed inset-0 z-99999 overflow-y-auto" style="display: none;">
     <div class="flex items-center justify-center min-h-screen px-4">
-      <div class="fixed inset-0 bg-black/50" @click="showMissingInvoicesModal = false"></div>
+      <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="showMissingInvoicesModal = false"></div>
       
       <div class="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto z-99999">
         <div class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
@@ -568,7 +568,7 @@
   <!-- Duplicate Invoice Resolution Modal -->
   <div x-show="showDuplicateResolution" x-cloak class="fixed inset-0 z-99999 overflow-y-auto" style="display: none;">
     <div class="flex items-center justify-center min-h-screen px-4">
-      <div class="fixed inset-0 bg-black/50" @click="showDuplicateResolution = false"></div>
+      <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="showDuplicateResolution = false"></div>
       
       <div class="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full z-99999">
         <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">

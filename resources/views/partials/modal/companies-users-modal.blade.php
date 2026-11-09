@@ -1,7 +1,7 @@
 {{-- resources/views/partials/modal/companies-users-modal.blade.php --}}
 <div x-data="companiesUsersModal()" x-init="init()" x-cloak>
     <div x-show="showModal" class="fixed inset-0 z-99999 overflow-hidden" style="display: none;">
-        <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity dark:bg-gray-900 dark:bg-opacity-90" @click="closeModal"></div>
+        <div class="absolute inset-0 bg-gray-400/50 backdrop-blur-[32px] transition-opacity" @click="closeModal"></div>
         <div class="fixed inset-y-0 right-0 max-w-full flex">
             <div class="relative w-screen max-w-2xl">
                 <div class="h-full flex flex-col bg-white shadow-xl overflow-y-auto dark:bg-gray-800">

@@ -3,7 +3,7 @@
 <div x-data="subscriptionsShowModal()" x-init="init()" x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 transition-opacity" @click="closeModal()">
-            <div class="absolute inset-0 bg-gray-500 opacity-75 dark:bg-gray-900 dark:opacity-90"></div>
+            <div class="absolute inset-0 bg-gray-400/50 backdrop-blur-[32px]"></div>
         </div>
 
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>

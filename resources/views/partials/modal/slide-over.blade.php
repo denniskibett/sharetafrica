@@ -11,7 +11,7 @@
      @popstate.window="if (open) { pushed = false; open = false }"
      @keydown.escape.window="close()"
      x-show="open" x-cloak class="fixed inset-0 z-[100001]" role="dialog" aria-modal="true" aria-label="{{ $title }}">
-  <div x-show="open" x-transition.opacity class="absolute inset-0 bg-black/50" @click="close()"></div>
+  <div x-show="open" x-transition.opacity class="absolute inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="close()"></div>
   <div x-show="open" x-trap.noscroll="open"
        x-transition:enter="transform transition ease-out duration-300" x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
        x-transition:leave="transform transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"

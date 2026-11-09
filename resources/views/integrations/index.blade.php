@@ -101,7 +101,7 @@
 
   {{-- Settings modal --}}
   <div x-show="editing" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto p-4" @keydown.escape.window="editing = null">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="editing = null"></div>
+    <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="editing = null"></div>
     <form x-show="editing" x-transition @submit.prevent="save()" class="relative w-full max-w-[560px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
       <button type="button" @click="editing = null" class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400" aria-label="Close">
         <x-heroicon-o-x-mark class="h-5 w-5" />
@@ -160,7 +160,7 @@
 
   {{-- Details modal --}}
   <div x-show="details" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="details = null">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="details = null"></div>
+    <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="details = null"></div>
     <div x-show="details" x-transition class="relative w-full max-w-[560px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
       <button type="button" @click="details = null" class="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400" aria-label="Close">
         <x-heroicon-o-x-mark class="h-5 w-5" />
@@ -189,7 +189,7 @@
 
   {{-- Remove confirm --}}
   <div x-show="removing" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="removing = null">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="removing = null"></div>
+    <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="removing = null"></div>
     <div x-show="removing" x-transition class="relative w-full max-w-[460px] rounded-3xl bg-white p-6 text-center dark:bg-gray-900 lg:p-8">
       <span class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400">
         <x-heroicon-o-trash class="h-7 w-7" />

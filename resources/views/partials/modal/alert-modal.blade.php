@@ -3,7 +3,7 @@
      (success | warning | error | info), details ([[label, value], ...] shown as a list), confirmText, cancelText. --}}
 <div x-data="alertModal()" @alert-modal.window="show($event.detail)" @keydown.escape.window="open && close(false)"
      x-show="open" x-cloak class="fixed inset-0 z-[100002] flex items-center justify-center p-4" role="alertdialog" aria-modal="true" :aria-label="title">
-  <div x-show="open" x-transition.opacity class="absolute inset-0 bg-black/50" @click="close(false)"></div>
+  <div x-show="open" x-transition.opacity class="absolute inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="close(false)"></div>
   <div x-show="open" x-transition x-trap.noscroll="open" class="relative w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-xl dark:bg-gray-900">
     <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
           :class="{ 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400': tone === 'success', 'bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400': tone === 'warning', 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400': tone === 'error', 'bg-sky-100 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400': tone === 'info' }">

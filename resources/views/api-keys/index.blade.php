@@ -117,7 +117,7 @@
 
   {{-- Create --}}
   <div x-show="creating" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="creating = false">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="creating = false"></div>
+    <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="creating = false"></div>
     <form x-show="creating" x-transition @submit.prevent="create()" class="relative w-full max-w-[560px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
       <h4 class="mb-1 text-xl font-semibold text-gray-800 dark:text-white/90">Generate API key</h4>
       <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Name it after the system that will use it, so you can tell keys apart later.</p>
@@ -164,7 +164,7 @@
 
   {{-- Access: scopes and allowed IPs --}}
   <div x-show="editing" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="editing = null">
-    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" @click="editing = null"></div>
+    <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="editing = null"></div>
     <form x-show="editing" x-transition @submit.prevent="saveAccess()" class="relative w-full max-w-[560px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
       <h4 class="mb-1 text-xl font-semibold text-gray-800 dark:text-white/90">Access for <span x-text="editing?.name"></span></h4>
       <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">Changes apply to the next request.</p>

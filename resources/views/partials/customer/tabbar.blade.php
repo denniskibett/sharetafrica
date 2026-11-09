@@ -34,7 +34,7 @@
   </nav>
 
   <div x-show="sheet" x-cloak class="fixed inset-0 z-[1001]" @keydown.escape.window="sheet && history.back()">
-    <div x-show="sheet" x-transition.opacity class="absolute inset-0 bg-black/60" @click="history.back()"></div>
+    <div x-show="sheet" x-transition.opacity class="absolute inset-0 bg-gray-400/50 backdrop-blur-[32px]" @click="history.back()"></div>
     <div x-show="sheet" x-transition:enter="transition duration-200 ease-out" x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
          x-transition:leave="transition duration-150 ease-in" x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
          class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-app-panel px-4 pb-[max(env(safe-area-inset-bottom),20px)] pt-3">

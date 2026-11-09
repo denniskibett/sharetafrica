@@ -3,7 +3,7 @@
 <!-- MAIN SECURITY VISITOR LOG MODAL (Full Modal with Estate→Unit→Tenant Selection) -->
 <div id="securityVisitorModal" class="fixed inset-0 z-999999 hidden" style="isolation: isolate;" aria-labelledby="slideover-title" role="dialog" aria-modal="true">
     <!-- Backdrop with fade -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px] transition-opacity"></div>
     
     <!-- Slideover Panel - slides in from right -->
     <div class="fixed inset-y-0 right-0 max-w-full flex">

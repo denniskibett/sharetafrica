@@ -2,7 +2,7 @@
 <!-- User Assign Company Slide-over Modal -->
 <div x-data="userAssignModal()" x-init="init()" x-show="showModal" x-cloak class="fixed inset-0 z-99999 overflow-hidden" style="display: none;">
     <!-- Frosty Background Overlay -->
-    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
+    <div class="absolute inset-0 bg-gray-400/50 backdrop-blur-[32px] transition-opacity" @click="closeModal()"></div>
 
     <!-- Slide-over Panel -->
     <div class="absolute inset-y-0 right-0 max-w-full flex">
