@@ -15,7 +15,7 @@ class ApiKeyController extends Controller
     public function index(Request $request)
     {
         if ($request->wantsJson()) {
-            return response()->json(['keys' => $this->visible($request)->with('user:id,name', 'company:id,name')->latest()->get()->map(fn ($k) => $this->present($k))->values()]);
+            return response()->json(['keys' => $this->visible($request)->with('user:id,name,sharet_id', 'company:id,name,sharet_id')->latest()->get()->map(fn ($k) => $this->present($k))->values()]);
         }
 
         $company = $request->user()->company;
@@ -43,7 +43,7 @@ class ApiKeyController extends Controller
         $plain = $key->issue();
         $key->save();
 
-        return response()->json(['message' => 'Key created. Copy it now: it will not be shown again.', 'plain' => $plain, 'key' => $this->present($key->load('user:id,name', 'company:id,name'))], 201);
+        return response()->json(['message' => 'Key created. Copy it now: it will not be shown again.', 'plain' => $plain, 'key' => $this->present($key->load('user:id,name,sharet_id', 'company:id,name,sharet_id'))], 201);
     }
 
     /** Change what a key may do and where live payouts may come from. */
@@ -57,7 +57,7 @@ class ApiKeyController extends Controller
         }
         $key->update(['scopes' => array_values(array_unique(array_merge(['read'], $data['scopes'] ?? []))), 'allowed_ips' => $ips]);
 
-        return response()->json(['message' => 'Saved.', 'key' => $this->present($key->fresh(['user:id,name', 'company:id,name']))]);
+        return response()->json(['message' => 'Saved.', 'key' => $this->present($key->fresh(['user:id,name,sharet_id', 'company:id,name,sharet_id']))]);
     }
 
     public function toggle(Request $request, int $id)
@@ -106,6 +106,8 @@ class ApiKeyController extends Controller
             'name' => $k->name,
             'environment' => $k->environment,
             'masked' => $k->masked(),
+            'hint' => $k->prefix.'…'.$k->last_four,   // copyable key ID (the secret itself is never stored)
+            'account' => $k->company?->sharet_id ?? $k->user?->sharet_id,   // the Sharet ID the key acts for
             'scopes' => $k->scopes ?? ['read'],
             'allowed_ips' => $k->allowed_ips ?? [],
             'payout_blocked' => $k->environment === 'live' && in_array('payout', $k->scopes ?? [], true) && empty($k->allowed_ips),

@@ -98,6 +98,10 @@
               </td>
               <td class="whitespace-nowrap px-5 py-3">
                 <x-ui.row-menu>
+                  <x-ui.row-menu-item icon="clipboard-document" @click="copySecret(k)">Copy full key</x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="finger-print" @click="sharet.copy(k.hint)">Copy key ID</x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="identification" x-show="k.account" @click="sharet.copy(k.account)">Copy Sharet ID</x-ui.row-menu-item>
+                  <x-ui.row-menu-item icon="globe-alt" x-show="k.allowed_ips.length" @click="sharet.copy(k.allowed_ips.join(', '))">Copy allowed IPs</x-ui.row-menu-item>
                   <x-ui.row-menu-item icon="adjustments-horizontal" @click="editing = k; access = { scopes: k.scopes.filter(x => x !== 'read'), allowed_ips: k.allowed_ips.join(', ') }; errors = {}">Access</x-ui.row-menu-item>
                   <x-ui.row-menu-item icon="arrow-path" @click="rotate(k)">Regenerate</x-ui.row-menu-item>
                   <x-ui.row-menu-item icon="power" @click="toggle(k)" x-text="k.enabled ? 'Disable' : 'Enable'"></x-ui.row-menu-item>
@@ -209,6 +213,11 @@
         this.busy = false;
       },
       async toggle(k) { try { const r = await sharet.send('PATCH', `${base}/${k.id}/toggle`); this.put(r.key); } catch (e) {} },
+      async copySecret(k) {
+        if (!await sharet.confirm({ title: 'The full key was shown only once', message: 'We keep only a fingerprint, so nobody (not even Sharet) can copy it again. If you have lost it, regenerate: you get a new key to copy, and the current one stops working.',
+          confirmText: 'Regenerate…', details: [['Name', k.name], ['Key ID', k.hint]] })) return;
+        this.rotate(k);
+      },
       async rotate(k) {
         if (!await sharet.confirm({ title: 'Regenerate this key?', message: 'The current key stops working immediately. Update your systems with the new one.', confirmText: 'Regenerate',
           details: [['Name', k.name], ['Environment', k.environment], ['Key', k.masked], ['Last used', k.last_used_at]] })) return;
