@@ -101,7 +101,7 @@ class RampOrders
     }
 
     /** Wallet to wallet, to another Sharet user's @handle. Immediate, no fee, no rail: Dr 2100 sender / Cr 2100 recipient. */
-    public function transfer(User $from, string $handle, string $amount, ?string $note = null): RampOrder
+    public function transfer(User $from, string $handle, string $amount, ?string $note = null, ?string $ref = null): RampOrder
     {
         $to = Handle::find($handle) ?? throw ValidationException::withMessages(['handle' => 'No Sharet wallet has that @name.']);
         if ($to->is($from)) {
@@ -111,10 +111,10 @@ class RampOrders
         $this->checkLimits($from, $cents);
 
         try {
-            return DB::transaction(function () use ($from, $to, $cents, $note) {
+            return DB::transaction(function () use ($from, $to, $cents, $note, $ref) {
                 $o = RampOrder::create([
                     'uuid' => (string) Str::uuid(), 'user_id' => $from->id, 'recipient_user_id' => $to->id, 'rail' => 'internal',
-                    'destination_type' => 'sharet', 'destination' => ['handle' => Handle::for($to), 'name' => $to->name],
+                    'destination_type' => 'sharet', 'destination' => ['handle' => Handle::for($to), 'name' => $to->name] + ($ref ? ['ref' => $ref] : []),   // $ref: the payment request it pays
                     'payer_phone' => filled($from->phone) ? Destination::phone((string) $from->phone, 'payer') : '', 'funding' => 'wallet',
                     'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents, 'currency' => config('ledger.currency'),
                     'note' => $note ? Str::limit(strip_tags($note), 140, '') : null, 'status' => 'paid', 'quote_expires_at' => now(),
@@ -335,7 +335,8 @@ class RampOrders
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
                 Ledger::debit($this->ledger->account($this->rails->account($req->rail, 'collect')), $o->total),
                 Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $o->total),
-            ], ['source' => $o, 'memo' => ($topUp ? 'Wallet top-up from ' : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
+            ], ['source' => $o, 'memo' => ($topUp ? (\App\Models\ApiPaymentRequest::where('public_id', $o->sharetReference())->where('user_id', $o->user_id)->exists()
+                ? 'Payment request paid by M-PESA from ' : 'Wallet top-up from ') : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
             if ($topUp) {
                 $this->move($o, 'paid', "Added to your wallet · M-PESA {$req->receipt}");
 

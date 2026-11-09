@@ -84,9 +84,14 @@ final class PaymentRequests
     }
 
     /** Tag an order that pays $r with the request's reference (only for SH references; old pr_ requests keep the order's own). */
+    public static function refFor(ApiPaymentRequest $r): ?string
+    {
+        return str_starts_with($r->public_id, 'SH') ? $r->public_id : null;
+    }
+
     public static function tag(RampOrder $order, ApiPaymentRequest $r): RampOrder
     {
-        if (str_starts_with($r->public_id, 'SH')) {
+        if (self::refFor($r)) {
             $order->update(['destination' => array_merge($order->destination ?? [], ['ref' => $r->public_id])]);
         }
 
@@ -139,7 +144,7 @@ final class PaymentRequests
         return DB::transaction(function () use ($r, $payer) {
             $locked = ApiPaymentRequest::whereKey($r->id)->lockForUpdate()->first();
             $this->assertPayable($locked, 'sharet');
-            $order = self::tag($this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request'), $r);
+            $order = $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request', self::refFor($r));
 
             return $this->markPaid($locked, 'sharet', $order);
         });
@@ -273,7 +278,7 @@ final class PaymentRequests
                 $this->assertPayable($r, null);
                 $payer = $o->user;
                 $this->assertPayer($r, $payer);
-                $transfer = self::tag(DB::transaction(fn () => $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request')), $r);
+                $transfer = DB::transaction(fn () => $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request', self::refFor($r)));
                 $this->markPaid($r, 'mpesa_via_wallet', $transfer);
                 $o->update(['destination' => $o->destination + ['onward' => $transfer->id]]);
             } catch (\Throwable $e) {

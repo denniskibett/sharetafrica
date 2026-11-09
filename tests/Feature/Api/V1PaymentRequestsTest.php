@@ -382,7 +382,16 @@ class V1PaymentRequestsTest extends TestCase
         $r = $this->postJson('/api/v1/payment-requests', ['amount' => '100', 'channels' => ['sharet']], $this->key($biz, 'live') + ['Idempotency-Key' => 'wallet-ref-one'])->json();
         $this->actingAs($akinyi)->post('/r/'.$this->token($r['pay_url']).'/sharet', ['pin' => '4826'])->assertRedirect();
         $this->getJson('/api/v1/payment-requests/'.$r['id'], $this->key($biz, 'live'))->assertJsonPath('status', 'paid')->assertJsonPath('transaction_id', $r['id']);
-        $this->assertSame($r['id'], ApiPaymentRequest::where('public_id', $r['id'])->first()->order->sharetReference());
+        $paid = ApiPaymentRequest::where('public_id', $r['id'])->first()->order;
+        $this->assertSame($r['id'], $paid->sharetReference());
+
+        // the ledger names the same reference on both payments
+        $j = \App\Models\LedgerJournal::where('source_type', $paid->getMorphClass())->where('source_id', $paid->id)->first();
+        $this->assertSame($r['id'], $j->meta['ref']);
+        $this->assertStringEndsWith($r['id'], $j->memo);
+        $j = \App\Models\LedgerJournal::where('source_type', $order->getMorphClass())->where('source_id', $order->id)->where('type', 'ramp_collect')->first();
+        $this->assertSame($req->public_id, $j->meta['ref']);
+        $this->assertStringStartsWith('Payment request paid by M-PESA from 254717492048', $j->memo);
     }
 
     public function test_references_read_like_mpesa_and_the_month_letter_moves_on_each_month(): void

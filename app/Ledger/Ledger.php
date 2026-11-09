@@ -114,6 +114,11 @@ class Ledger
                 $uuid = Uuid::uuid5(self::UUID_NAMESPACE, $key)->toString();
                 $hash = self::hash($chain->last_hash, $uuid, $key, $type, $currency, $postedAt, $lines);
                 $source = $options['source'] ?? null;
+                if ($source instanceof \App\Models\RampOrder) {   // every journal names its payment's Sharet reference (SHUK…)
+                    $ref = $source->sharetReference();
+                    $options['meta'] = ($options['meta'] ?? []) + ['ref' => $ref];
+                    $options['memo'] = filled($options['memo'] ?? null) ? $options['memo'].' · '.$ref : $ref;
+                }
 
                 $journal = LedgerJournal::create([
                     'uuid' => $uuid,
