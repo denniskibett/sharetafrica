@@ -69,7 +69,7 @@ class PayRequestController extends Controller
     public function mpesa(Request $request, string $token)
     {
         $data = $request->validate(['phone' => ['required', 'string', 'max:20']]);
-        $this->requests->payWithMpesa($this->find($token), $data['phone']);
+        $this->requests->payWithMpesa($this->find($token), $data['phone'], $request->user());
 
         return redirect()->route('pay-request.show', $token);
     }

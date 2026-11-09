@@ -282,6 +282,55 @@ class V1PaymentRequestsTest extends TestCase
         Http::assertSent(fn (HttpRequest $q) => $q['type'] === 'payment_request.paid');
     }
 
+    public function test_a_signed_in_payers_direct_mpesa_payment_shows_in_their_history_without_touching_their_wallet(): void
+    {
+        $biz = $this->scharge();
+        $akinyi = $this->tenant('akinyi', '500');
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10', 'reference' => 'Invoice #1577'], $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-1577-direct'])->assertCreated()->json();
+        $token = $this->token($r['pay_url']);
+        $wallet = app(Ledger::class)->account('2100', $akinyi);
+        $postings = \Illuminate\Support\Facades\DB::table('ledger_postings')->where('account_id', $wallet->id)->count();
+
+        $this->actingAs($akinyi)->get("/r/$token")->assertOk()->assertSee('straight to scharge');
+        $this->actingAs($akinyi)->post("/r/$token/mpesa", ['phone' => '0717 492 048'])->assertRedirect("/r/$token");
+        $order = ApiPaymentRequest::first()->order;
+        for ($i = 0; $i < 5 && ! $order->final(); $i++) {
+            $order = app(RampOrders::class)->refresh($order);
+        }
+        $this->assertSame('paid', ApiPaymentRequest::first()->status);
+        $this->assertSame('mpesa', ApiPaymentRequest::first()->paid_via);
+        $this->assertSame(1_000, $this->balance($biz), 'the money went straight to the business');
+
+        // the payer's wallet and ledger are exactly as before
+        $this->assertSame(50_000, $this->balance($akinyi));
+        $this->assertSame($postings, \Illuminate\Support\Facades\DB::table('ledger_postings')->where('account_id', $wallet->id)->count());
+
+        // ...but it is in their history, as their payment, with the M-PESA receipt
+        $row = collect($this->actingAs($akinyi)->getJson('/pay')->assertOk()->json('data'))->firstWhere('uuid', $order->uuid);
+        $this->assertNotNull($row);
+        $this->assertSame('Paid scharge', $row['title']);
+        $this->assertSame('M-PESA 254717492048', $row['from']);
+        $this->assertFalse($row['in']);
+        $this->assertTrue($row['paid_direct']);
+        $receipt = $this->actingAs($akinyi)->getJson("/pay/{$order->uuid}")->assertOk()->json('order.receipt');
+        $this->assertSame($order->reference(), $receipt['Transaction ID']);
+        $this->assertSame('scharge', $receipt['Recipient']);
+        $this->actingAs($akinyi)->get("/pay/{$order->uuid}/receipt")->assertOk();
+
+        // nobody else sees it, and a guest's payment is linked to nobody
+        $other = User::factory()->create();
+        $this->actingAs($other)->getJson("/pay/{$order->uuid}")->assertNotFound();
+        $this->assertNull(collect($this->actingAs($other)->getJson('/pay')->json('data'))->firstWhere('uuid', $order->uuid));
+    }
+
+    public function test_a_guests_direct_mpesa_payment_is_linked_to_nobody(): void
+    {
+        $biz = $this->scharge();
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10'], $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-guest-direct'])->assertCreated()->json();
+        $this->post('/r/'.$this->token($r['pay_url']).'/mpesa', ['phone' => '0717 492 048'])->assertRedirect();
+        $this->assertArrayNotHasKey('paid_by', ApiPaymentRequest::first()->order->destination);
+    }
+
     public function test_requests_need_collect_scope_split_only_to_sharet_and_expire(): void
     {
         $biz = $this->scharge();

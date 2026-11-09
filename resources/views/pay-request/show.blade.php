@@ -131,6 +131,20 @@
           @endif
         @endif
       </section>
+      @if ($mpesa)
+        <section class="rounded-3xl border border-app-ink/10 p-5">
+          <h2 class="flex items-center gap-2 text-base font-semibold">
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-green-100 text-green-800"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+            Pay with M-PESA <span class="text-sm font-normal text-app-muted">· straight to {{ $who }}</span>
+          </h2>
+          <p class="mt-1 text-sm text-app-muted">Your wallet isn't used. The payment still shows in your Sharet history.</p>
+          <form method="POST" action="{{ route('pay.request.mpesa', $r->token) }}" class="mt-4 space-y-3">
+            @csrf
+            <x-ui.form-input label="M-PESA number" name="phone" type="tel" inputmode="tel" :value="old('phone', $r->payer_phone ? '0'.substr($r->payer_phone, 3) : ($me->phone ? '0'.substr(preg_replace('/\\D/', '', $me->phone), -9) : ''))" placeholder="0712 345 678" required />
+            <button type="submit" class="{{ $btn }}">Send M-PESA prompt</button>
+          </form>
+        </section>
+      @endif
     @endguest
 
     <p class="flex items-center gap-2 text-xs text-app-muted">

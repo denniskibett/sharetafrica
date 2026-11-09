@@ -25,7 +25,8 @@ class PayController extends Controller
         }
 
         $me = $request->user();
-        $query = RampOrder::with('sender')->where(fn ($q) => $q->where('user_id', $me->id)->orWhere('recipient_user_id', $me->id))
+        $query = RampOrder::with('sender', 'user')->where(fn ($q) => $q->where('user_id', $me->id)->orWhere('recipient_user_id', $me->id)
+            ->orWhere('destination->paid_by', $me->id))   // M-PESA payments I made to a business on its pay page (display only)
             ->whereNotIn('status', ['quoted', 'expired', 'reversed']) // quotes nobody confirmed, and test money undone, are not transactions
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s));
         $mine = RampOrder::where('user_id', $me->id);
@@ -179,6 +180,6 @@ class PayController extends Controller
     private function own(Request $request, RampOrder $order): void
     {
         abort_unless($order->user_id === $request->user()->id
-            || ($request->isMethod('GET') && $order->recipient_user_id === $request->user()->id), 404);
+            || ($request->isMethod('GET') && ($order->recipient_user_id === $request->user()->id || $order->paidBy($request->user()))), 404);
     }
 }

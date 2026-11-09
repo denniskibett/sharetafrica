@@ -134,6 +134,24 @@ class RampOrder extends Model
      */
     public function receipt(?User $viewer = null): array
     {
+        if ($this->paidBy($viewer)) {
+            $p = $this->present($viewer);
+
+            return array_filter([
+                'Recipient' => $this->user?->name,
+                'Account ID' => $this->user?->sharet_id,
+                'Bank' => 'Sharet wallet',
+                'From' => $p['from'],
+                'Transaction ID' => $this->reference(),   // the M-PESA receipt
+                'Sharet reference' => $this->sharetReference(),
+                'Date' => $this->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+                'Amount' => 'KES '.Money::format($this->amount),
+                'Total' => 'KES '.Money::format($this->total),
+                'Status' => $p['state']['label'],
+                'Note' => $this->note,
+            ], fn ($v) => filled($v));
+        }
+
         $d = $this->destination;
         $p = $this->present($viewer);
         $bank = config('pricing.banks.'.($d['bank'] ?? ''));
@@ -179,9 +197,23 @@ class RampOrder extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * $viewer paid this order by M-PESA straight to the business, signed in on its pay page (destination.paid_by): the
+     * order is the business's collection, but it belongs in the payer's history too. Display only: the money never
+     * touched the payer's wallet, so no ledger entry is theirs.
+     */
+    public function paidBy(?User $viewer): bool
+    {
+        return $viewer && (int) ($this->destination['paid_by'] ?? 0) === $viewer->id && $this->user_id !== $viewer->id;
+    }
+
     /** As $viewer sees it: the recipient of a transfer sees where it came from, not the sender's number. */
     public function present(?User $viewer = null): array
     {
+        if ($this->paidBy($viewer)) {
+            return $this->presentForPayer($viewer);
+        }
+
         [$label, $tone] = $this->statusLabel();
         $incoming = $viewer && $this->recipient_user_id === $viewer->id;
 
@@ -237,5 +269,23 @@ class RampOrder extends Model
             'url' => route('pay.show', $this->uuid),
             'sandbox' => $this->rail === 'simulator',
         ];
+    }
+
+    /** The payer's view of a business's M-PESA collection they paid (see paidBy): out of their M-PESA, not their wallet. */
+    private function presentForPayer(User $viewer): array
+    {
+        $base = $this->present();   // the business's view, then overridden
+        $to = $this->user?->name ?? 'a business';
+
+        return array_merge($base, [
+            'recipient' => $to, 'from' => 'M-PESA '.$this->payer_phone, 'to' => $to, 'incoming' => false,
+            'top_up' => false, 'transfer' => false, 'withdrawal' => false, 'in' => false,
+            'signed' => '−'.Money::format($this->amount),
+            'flow' => $base['flow'] === 'in' ? 'out' : $base['flow'],
+            'title' => 'Paid '.$to,
+            'icon' => 'device-phone-mobile',
+            'paid_direct' => true,
+            'timeline' => array_values(array_map(fn ($e) => str_starts_with($e['text'], 'Added to your wallet') ? ['text' => 'Paid to '.$to.' · M-PESA'.(str_contains($e['text'], 'M-PESA') ? substr($e['text'], strrpos($e['text'], 'M-PESA') + 6) : '')] + $e : $e, $base['timeline'])),
+        ]);
     }
 }

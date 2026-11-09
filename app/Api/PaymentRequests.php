@@ -124,7 +124,7 @@ final class PaymentRequests
     }
 
     /** M-PESA: prompt the payer's phone; the collection credits the business's wallet. Paid when the order is. */
-    public function payWithMpesa(ApiPaymentRequest $r, string $phone): ApiPaymentRequest
+    public function payWithMpesa(ApiPaymentRequest $r, string $phone, ?User $signedIn = null): ApiPaymentRequest
     {
         $this->assertPayable($r, 'mpesa');
         $phone = Destination::phone($phone, 'phone');
@@ -139,7 +139,11 @@ final class PaymentRequests
         if (app()->isProduction() && app(\App\Integrations\Rails::class)->collecting($r->payee) === 'simulator') {
             throw ValidationException::withMessages(['phone' => 'M-PESA payments aren\'t switched on for this business yet. Pay from a Sharet wallet, or ask the business for another way to pay.']);
         }
-        $order = $this->orders->confirm($this->orders->topUp($r->payee, PaymentInput::amount($r->amount), $phone));
+        $order = $this->orders->topUp($r->payee, PaymentInput::amount($r->amount), $phone);
+        if ($signedIn && ! $signedIn->is($r->payee)) {
+            $order->update(['destination' => ($order->destination ?? []) + ['paid_by' => $signedIn->id]]);   // shows in their history too
+        }
+        $order = $this->orders->confirm($order->fresh());
         $r->update(['ramp_order_id' => $order->id, 'payer_phone' => $phone]);
         $this->orderMoved($order->fresh());
 
