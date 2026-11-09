@@ -256,6 +256,15 @@ Route::middleware(['auth', 'permission:waiting_list.invite'])
 
 /*
 |--------------------------------------------------------------------------
+| Security: every domain and site on the VPS (defense agent report, ops in the scharge repo)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:admin.system'])
+    ->get('/admin/security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('admin.security.index');
+
+/*
+|--------------------------------------------------------------------------
 | System (platform admins) and the public website's team and blog
 |--------------------------------------------------------------------------
 */
