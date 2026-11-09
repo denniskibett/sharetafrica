@@ -45,6 +45,7 @@ class ProfileController extends Controller
         return response()->json([
             'user' => $user->only(['name', 'first_name', 'last_name', 'email', 'phone', 'bio', 'country', 'city']) + [
                 'avatar' => $user->avatar ? asset('storage/'.$user->avatar) : null,
+                'pin_set' => \App\Support\TransactionPin::isSet($user),
                 'initials' => \App\Support\Table::person($user)['initials'],
                 'lane' => People::lane($user->intent),
                 'roles' => $user->getRoleNames()->map(fn ($r) => str_replace('_', ' ', $r)),

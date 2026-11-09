@@ -52,12 +52,25 @@
           Pay from your Sharet wallet <span class="text-sm font-normal text-app-muted">· free</span>
         </h2>
         @auth
+          @if (! \App\Support\TransactionPin::isSet(auth()->user()))
+          <form method="POST" action="{{ route('pay-request.pin', $r->token) }}" class="mt-4 space-y-3">
+            @csrf
+            <p class="text-sm text-app-muted">Create your Sharet PIN first. You use it to approve every payment from your wallet. Nothing is paid yet.</p>
+            <x-ui.form-input label="New Sharet PIN (4 digits)" name="pin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" pattern="[0-9]{4}" required />
+            <x-ui.form-input label="Type it again" name="pin_confirmation" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" pattern="[0-9]{4}" required />
+            <button type="submit" class="h-12 w-full rounded-full bg-gray-900 text-[15px] font-semibold text-white hover:bg-gray-800">Create PIN</button>
+          </form>
+          @else
+          @if (session('pin_created'))
+            <p class="mt-4 rounded-2xl bg-lime-50 p-3 text-sm text-lime-900" role="status">Your Sharet PIN is set. Enter it below to approve this payment.</p>
+          @endif
           <form method="POST" action="{{ route('pay.request.sharet', $r->token) }}" class="mt-4 space-y-3">
             @csrf
             <x-ui.form-input label="Your Sharet PIN" name="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" required />
             <button type="submit" class="h-12 w-full rounded-full bg-gray-900 text-[15px] font-semibold text-white hover:bg-gray-800">Pay KES {{ number_format($r->amount / 100, 2) }}</button>
             <p class="text-xs text-app-muted">Paying as {{ '@'.\App\Support\Handle::for(auth()->user()) }}.</p>
           </form>
+          @endif
         @else
           <a href="{{ route('login') }}" class="mt-4 flex h-12 w-full items-center justify-center rounded-full bg-gray-900 text-[15px] font-semibold text-white hover:bg-gray-800">Sign in to pay with Sharet</a>
         @endauth

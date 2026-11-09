@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Api\PaymentRequests;
 use App\Models\ApiPaymentRequest;
 use App\Ramp\RampOrders;
+use App\Support\TransactionPin;
 use Illuminate\Http\Request;
 
 /**
@@ -38,6 +39,21 @@ class PayRequestController extends Controller
         $this->requests->payWithSharet($this->find($token), $request->user(), $data['pin']);
 
         return redirect()->route('pay-request.show', $token)->with('paid', true);
+    }
+
+    /**
+     * A signed-in payer without a Sharet PIN creates one here (same rules as POST pay.pin). Nothing is paid: the page
+     * comes back asking for the new PIN to approve the payment.
+     */
+    public function pin(Request $request, string $token)
+    {
+        $this->find($token);
+        abort_if(TransactionPin::isSet($request->user()), 422, 'You already have a Sharet PIN. Change it in Profile › Security.');
+        $data = $request->validate(['pin' => ['required', 'string'], 'pin_confirmation' => ['required', 'same:pin']],
+            ['pin_confirmation.same' => 'The two PINs do not match.']);
+        TransactionPin::set($request->user(), $data['pin']);
+
+        return redirect()->route('pay-request.show', $token)->with('pin_created', true);
     }
 
     public function mpesa(Request $request, string $token)

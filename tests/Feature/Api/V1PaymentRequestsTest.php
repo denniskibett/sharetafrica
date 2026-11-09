@@ -118,6 +118,34 @@ class V1PaymentRequestsTest extends TestCase
         $this->assertSame(1_500_000, $this->balance($akinyi), 'never paid twice');
     }
 
+    public function test_a_payer_without_a_pin_creates_one_on_the_pay_page_then_approves_with_it(): void
+    {
+        $biz = $this->scharge();
+        $this->postJson('/api/v1/webhooks', ['url' => 'https://hooks.example.com/in', 'events' => ['payment_request.paid']], $this->key($biz, 'live'))->assertCreated();
+        $akinyi = $this->tenant('akinyi', '50000');
+        $akinyi->forceFill(['transaction_pin' => null])->save();   // has money, never set a PIN
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10', 'channels' => ['sharet', 'mpesa']],
+            $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-1578'])->assertCreated()->json();
+        $token = $this->token($r['pay_url']);
+
+        $this->actingAs($akinyi)->get("/r/$token")->assertOk()->assertSee('Create your Sharet PIN first')->assertDontSee('Your Sharet PIN<');
+        $this->post("/r/$token/pin", ['pin' => '5937', 'pin_confirmation' => '5938'])->assertSessionHasErrors('pin_confirmation');
+        $this->post("/r/$token/pin", ['pin' => '1234', 'pin_confirmation' => '1234'])->assertSessionHasErrors('pin');
+        $this->assertFalse(TransactionPin::isSet($akinyi->fresh()));
+
+        $this->post("/r/$token/pin", ['pin' => '5937', 'pin_confirmation' => '5937'])->assertRedirect("/r/$token");
+        $this->assertTrue(TransactionPin::isSet($akinyi->fresh()));
+        $this->assertSame('open', ApiPaymentRequest::first()->status, 'creating the PIN pays nothing');
+        $this->assertSame(5_000_000, $this->balance($akinyi));
+        $this->actingAs($akinyi->fresh())->withSession(['pin_created' => true])->get("/r/$token")->assertSee('Your Sharet PIN is set')->assertSee('Pay KES 10.00');
+        $this->actingAs($akinyi->fresh())->post("/r/$token/pin", ['pin' => '8642', 'pin_confirmation' => '8642'])->assertStatus(422);
+
+        $this->actingAs($akinyi->fresh())->post("/r/$token/sharet", ['pin' => '5937'])->assertRedirect("/r/$token");
+        $this->assertSame('paid', ApiPaymentRequest::first()->status);
+        $this->assertSame(4_999_000, $this->balance($akinyi), 'no fee on a wallet payment');
+        Http::assertSent(fn (HttpRequest $q) => $q['type'] === 'payment_request.paid' && $q['data']['id'] === $r['id'] && $q['data']['paid_via'] === 'sharet');
+    }
+
     public function test_only_the_named_payer_can_pay_from_their_wallet(): void
     {
         $biz = $this->scharge();
