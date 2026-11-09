@@ -52,7 +52,12 @@
           Pay from your Sharet wallet <span class="text-sm font-normal text-app-muted">· free</span>
         </h2>
         @auth
-          @if (! \App\Support\TransactionPin::isSet(auth()->user()))
+          @if (in_array(auth()->user()->kyc_level ?: 'none', ['none'], true))
+          <div class="mt-4 space-y-3">
+            <p class="text-sm text-app-muted">Verify your account before paying from your wallet: your name, M-PESA number, ID photos and a selfie. It takes a few minutes, and this page waits for you.</p>
+            <a href="{{ route('profile.edit', ['return' => '/r/'.$r->token]) }}#verification" class="flex h-12 w-full items-center justify-center rounded-full bg-gray-900 text-[15px] font-semibold text-white hover:bg-gray-800">Verify now</a>
+          </div>
+          @elseif (! \App\Support\TransactionPin::isSet(auth()->user()))
           <form method="POST" action="{{ route('pay-request.pin', $r->token) }}" class="mt-4 space-y-3">
             @csrf
             <p class="text-sm text-app-muted">Create your Sharet PIN first. You use it to approve every payment from your wallet. Nothing is paid yet.</p>
