@@ -26,6 +26,12 @@ class User extends Authenticatable implements Wallet, Customer
         static::saving(fn (User $user) => \App\Support\Identity::assertValid($user));
         // Every account gets its fixed Sharet ID when it's created (docs/v2/INTEGRATION.md §1)
         static::creating(fn (User $user) => $user->sharet_id ??= \App\Support\SharetId::generate());
+        // Claim on join: their M-PESA number is now verified, so earlier pay-page payments from it join their history
+        static::saved(function (User $user) {
+            if ($user->wasChanged('kyc_level') || ($user->wasRecentlyCreated && $user->kyc_level && $user->kyc_level !== 'none')) {
+                \App\Api\PaymentRequests::claimFor($user);
+            }
+        });
     }
 
     use HasFactory, Notifiable, SoftDeletes;

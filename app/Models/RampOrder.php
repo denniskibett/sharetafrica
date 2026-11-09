@@ -121,6 +121,32 @@ class RampOrder extends Model
         return ($id ? RailRequest::find($id)?->receipt : null) ?: $this->sharetReference();
     }
 
+    /**
+     * What M-PESA told us about this order's collection, from the Safaricom callback kept on the rail request
+     * (DarajaCallbackController stores every body). Sharet-internal: shown to the payer and staff, never to the payee.
+     */
+    public function mpesaPayload(): ?array
+    {
+        $req = $this->collect_request_id ? RailRequest::find($this->collect_request_id) : null;
+        if (! $req || $req->rail === 'simulator') {
+            return null;
+        }
+        $cb = collect($req->meta['callbacks'] ?? [])->last()['body'] ?? null;
+        $items = collect($cb['CallbackMetadata']['Item'] ?? [])->pluck('Value', 'Name');
+
+        return [
+            'receipt' => $items->get('MpesaReceiptNumber') ?? $req->receipt,
+            'amount' => $items->get('Amount'),
+            'phone' => (string) ($items->get('PhoneNumber') ?? $this->payer_phone),
+            'transaction_date' => $items->get('TransactionDate'),
+            'result_code' => $cb['ResultCode'] ?? null,
+            'result_desc' => $cb['ResultDesc'] ?? null,
+            'checkout_request_id' => $cb['CheckoutRequestID'] ?? $req->provider_reference,
+            'merchant_request_id' => $cb['MerchantRequestID'] ?? null,
+            'raw' => $cb,
+        ];
+    }
+
     public function sharetReference(): string
     {
         return 'SH'.strtoupper(substr(str_replace('-', '', $this->uuid), 0, 8));
@@ -142,7 +168,8 @@ class RampOrder extends Model
                 'Account ID' => $this->user?->sharet_id,
                 'Bank' => 'Sharet wallet',
                 'From' => $p['from'],
-                'Transaction ID' => $this->reference(),   // the M-PESA receipt
+                'Transaction ID' => $this->sharetReference(),
+                'M-PESA receipt' => $this->reference(),
                 'Sharet reference' => $this->sharetReference(),
                 'Date' => $this->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
                 'Amount' => 'KES '.Money::format($this->amount),
@@ -285,6 +312,8 @@ class RampOrder extends Model
             'title' => 'Paid '.$to,
             'icon' => 'device-phone-mobile',
             'paid_direct' => true,
+            'transaction_id' => $this->sharetReference(),
+            'mpesa' => ($m = $this->mpesaPayload()) ? collect($m)->only(['receipt', 'phone', 'transaction_date'])->all() : null,
             'timeline' => array_values(array_map(fn ($e) => str_starts_with($e['text'], 'Added to your wallet') ? ['text' => 'Paid to '.$to.' · M-PESA'.(str_contains($e['text'], 'M-PESA') ? substr($e['text'], strrpos($e['text'], 'M-PESA') + 6) : '')] + $e : $e, $base['timeline'])),
         ]);
     }

@@ -313,7 +313,8 @@ class V1PaymentRequestsTest extends TestCase
         $this->assertFalse($row['in']);
         $this->assertTrue($row['paid_direct']);
         $receipt = $this->actingAs($akinyi)->getJson("/pay/{$order->uuid}")->assertOk()->json('order.receipt');
-        $this->assertSame($order->reference(), $receipt['Transaction ID']);
+        $this->assertSame($order->sharetReference(), $receipt['Transaction ID']);
+        $this->assertSame($order->reference(), $receipt['M-PESA receipt']);
         $this->assertSame('scharge', $receipt['Recipient']);
         $this->actingAs($akinyi)->get("/pay/{$order->uuid}/receipt")->assertOk();
 
@@ -329,6 +330,97 @@ class V1PaymentRequestsTest extends TestCase
         $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10'], $this->key($biz, 'live') + ['Idempotency-Key' => 'inv-guest-direct'])->assertCreated()->json();
         $this->post('/r/'.$this->token($r['pay_url']).'/mpesa', ['phone' => '0717 492 048'])->assertRedirect();
         $this->assertArrayNotHasKey('paid_by', ApiPaymentRequest::first()->order->destination);
+    }
+
+    /** A guest pays by M-PESA (simulator in tests); the order's collection then carries a Safaricom callback like live. */
+    private function guestPays(User $biz, string $phone = '0717 492 048'): RampOrder
+    {
+        $r = $this->postJson('/api/v1/payment-requests', ['amount' => '10', 'reference' => 'Invoice #1577'], $this->key($biz, 'live') + ['Idempotency-Key' => 'guest-'.uniqid()])->assertCreated()->json();
+        $this->post('/r/'.$this->token($r['pay_url']).'/mpesa', ['phone' => $phone])->assertRedirect();
+        $order = ApiPaymentRequest::where('public_id', $r['id'])->first()->order;
+        for ($i = 0; $i < 5 && ! $order->final(); $i++) {
+            $order = app(RampOrders::class)->refresh($order);
+        }
+        $req = \App\Models\RailRequest::find($order->collect_request_id);
+        $req->forceFill(['rail' => 'daraja', 'provider_reference' => 'ws_CO_TEST', 'receipt' => 'UK96O15681', 'meta' => ($req->meta ?? []) + ['callbacks' => [['at' => now()->toIso8601String(), 'body' => [
+            'MerchantRequestID' => '1234-5678', 'CheckoutRequestID' => 'ws_CO_TEST', 'ResultCode' => 0, 'ResultDesc' => 'The service request is processed successfully.',
+            'CallbackMetadata' => ['Item' => [['Name' => 'Amount', 'Value' => 10], ['Name' => 'MpesaReceiptNumber', 'Value' => 'UK96O15681'],
+                ['Name' => 'TransactionDate', 'Value' => 20261109145126], ['Name' => 'PhoneNumber', 'Value' => 254717492048]]]]]]]])->save();
+
+        return $order->fresh();
+    }
+
+    public function test_a_guest_mpesa_payment_is_recorded_with_its_mpesa_payload_and_a_sharet_transaction_id(): void
+    {
+        $biz = $this->scharge();
+        $order = $this->guestPays($biz);
+        $p = $order->mpesaPayload();
+        $this->assertSame('UK96O15681', $p['receipt']);
+        $this->assertSame('254717492048', $p['phone']);
+        $this->assertSame(0, $p['result_code']);
+        $this->assertSame('ws_CO_TEST', $p['checkout_request_id']);
+        $this->assertSame('1234-5678', $p['merchant_request_id']);
+        $this->assertSame(20261109145126, $p['transaction_date']);
+        $this->assertSame('ws_CO_TEST', $p['raw']['CheckoutRequestID']);
+        $this->assertMatchesRegularExpression('/^SH[0-9A-F]{8}$/', $order->sharetReference());
+        $this->assertArrayNotHasKey('paid_by', $order->destination, 'a guest is linked to nobody yet');
+    }
+
+    public function test_the_payee_gets_the_sharet_transaction_id_but_never_the_mpesa_receipt_or_number(): void
+    {
+        $biz = $this->scharge();
+        $this->postJson('/api/v1/webhooks', ['url' => 'https://hooks.example.com/in', 'events' => ['payment_request.paid']], $this->key($biz, 'live'))->assertCreated();
+        $order = $this->guestPays($biz);
+        $req = ApiPaymentRequest::first();
+        $api = $this->getJson('/api/v1/payment-requests/'.$req->public_id, $this->key($biz, 'live'))->assertOk()
+            ->assertJsonPath('status', 'paid')->assertJsonPath('transaction_id', $order->sharetReference());
+        $this->assertStringNotContainsString('717492048', $api->getContent());
+        $this->assertStringNotContainsString('UK96O15681', $api->getContent());
+        Http::assertSent(fn (HttpRequest $q) => $q['type'] === 'payment_request.paid' && $q['data']['transaction_id'] === $order->sharetReference()
+            && ! str_contains($q->body(), '717492048'));
+    }
+
+    public function test_a_later_verified_account_with_that_mpesa_number_claims_the_payment_without_touching_its_wallet(): void
+    {
+        $biz = $this->scharge();
+        $order = $this->guestPays($biz);
+
+        // joins later, number typed but not verified: nothing is claimed
+        $dennis = User::factory()->create(['name' => 'Dennis Kibet', 'phone' => '0717492048', 'onboarding_status' => 'active']);
+        $this->assertNull(collect($this->actingAs($dennis)->getJson('/pay')->json('data'))->firstWhere('uuid', $order->uuid));
+        $this->actingAs($dennis)->getJson("/pay/{$order->uuid}")->assertNotFound();
+
+        // verified (basic KYC): the payment joins their history, as theirs, with the receipt
+        $dennis->forceFill(['kyc_level' => 'basic'])->save();
+        $row = collect($this->actingAs($dennis)->getJson('/pay')->json('data'))->firstWhere('uuid', $order->uuid);
+        $this->assertSame('Paid scharge', $row['title']);
+        $this->assertSame($order->sharetReference(), $row['transaction_id']);
+        $this->assertSame('UK96O15681', $row['mpesa']['receipt']);
+        $receipt = $this->actingAs($dennis)->getJson("/pay/{$order->uuid}")->assertOk()->json('order.receipt');
+        $this->assertSame($order->sharetReference(), $receipt['Transaction ID']);
+        $this->assertSame('UK96O15681', $receipt['M-PESA receipt']);
+
+        // display only: no wallet money and no ledger postings for them
+        $this->assertSame(0, app(Ledger::class)->account('2100', $dennis)->available());
+        $this->assertSame(0, \Illuminate\Support\Facades\DB::table('ledger_postings')->where('account_id', app(Ledger::class)->account('2100', $dennis)->id)->count());
+
+        // someone verified with a different number claims nothing
+        $other = User::factory()->create(['phone' => '0722000111', 'onboarding_status' => 'active']);
+        $other->forceFill(['kyc_level' => 'basic'])->save();
+        $this->assertNull(collect($this->actingAs($other)->getJson('/pay')->json('data'))->firstWhere('uuid', $order->uuid));
+    }
+
+    public function test_the_backfill_command_reports_then_links_past_payments_to_verified_accounts(): void
+    {
+        $biz = $this->scharge();
+        $order = $this->guestPays($biz);
+        $dennis = User::factory()->create(['phone' => '0717492048', 'onboarding_status' => 'active']);
+        \Illuminate\Support\Facades\DB::table('users')->where('id', $dennis->id)->update(['kyc_level' => 'standard']);   // verified before claims existed
+
+        $this->artisan('sharet:claim-payments')->expectsOutputToContain('UK96O15681')->assertSuccessful();
+        $this->assertArrayNotHasKey('paid_by', $order->fresh()->destination);
+        $this->artisan('sharet:claim-payments --apply')->expectsOutputToContain('Linked 1 payment')->assertSuccessful();
+        $this->assertSame($dennis->id, $order->fresh()->destination['paid_by']);
     }
 
     public function test_requests_need_collect_scope_split_only_to_sharet_and_expire(): void

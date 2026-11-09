@@ -60,6 +60,11 @@ says which route it took:
 | `mpesa_via_wallet` | Signed in: an M-PESA prompt tops up the payer's wallet, then the amount moves on to the business. The payer sees both in their history. If the onward step fails, the money stays in their wallet and the request stays open. |
 | `sandbox` | `pr_test_` requests only. |
 
+A paid request also carries **`transaction_id`**: Sharet's transaction ID for the payment (`SH` + 8 characters), the
+reference to store against the invoice. The payer's M-PESA receipt and number stay with Sharet (the payer sees them in
+their own history; staff can see the full Safaricom callback). M-PESA payments made without an account join the
+payer's Sharet history once they verify that M-PESA number.
+
 ```http
 POST /v1/payment-requests
 Authorization: Bearer sk_test_…

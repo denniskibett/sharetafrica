@@ -88,6 +88,8 @@ final class PaymentRequests
             'channels' => $r->channels,
             'pay_url' => route('pay-request.show', $r->token),
             'paid_via' => $r->paid_via,
+            // Sharet's transaction ID for the payment (the business's reference); the M-PESA receipt and number stay with Sharet
+            'transaction_id' => $r->status === 'paid' ? ($r->order?->sharetReference() ?? null) : null,
             'paid_at' => $r->paid_at?->toIso8601String(),
             'expires_at' => $r->expires_at->toIso8601String(),
             'metadata' => $r->metadata,
@@ -144,7 +146,7 @@ final class PaymentRequests
             $order->update(['destination' => ($order->destination ?? []) + ['paid_by' => $signedIn->id]]);   // shows in their history too
         }
         $order = $this->orders->confirm($order->fresh());
-        $r->update(['ramp_order_id' => $order->id, 'payer_phone' => $phone]);
+        $r->update(['ramp_order_id' => $order->id]);   // the paying number stays on the order (Sharet-internal), not on the request
         $this->orderMoved($order->fresh());
 
         return $r->fresh();
@@ -178,6 +180,32 @@ final class PaymentRequests
         $this->orderMoved($order->fresh());
 
         return $order->fresh();
+    }
+
+    /**
+     * Claim on join: once a person's M-PESA number is verified (basic KYC or above), earlier M-PESA payments they made
+     * from it on pay pages show in their history (destination.paid_by). Display only; never the ledger. Returns how many.
+     */
+    public static function claimFor(User $user): int
+    {
+        if ($user->is_business_wallet || in_array($user->kyc_level ?: 'none', ['none'], true) || blank($user->phone)) {
+            return 0;
+        }
+        try {
+            $phone = Destination::phone((string) $user->phone);
+        } catch (ValidationException) {
+            return 0;
+        }
+        $n = 0;
+        RampOrder::whereIn('id', ApiPaymentRequest::whereNotNull('ramp_order_id')->select('ramp_order_id'))
+            ->where('payer_phone', $phone)->where('destination_type', 'wallet')->where('user_id', '!=', $user->id)
+            ->whereNull('destination->paid_by')->get()
+            ->each(function (RampOrder $o) use ($user, &$n) {
+                $o->update(['destination' => $o->destination + ['paid_by' => $user->id]]);
+                $n++;
+            });
+
+        return $n;
     }
 
     /** The payer's latest top-up for this request ($pending: only one still waiting for M-PESA). */
