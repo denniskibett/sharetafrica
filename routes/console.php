@@ -13,6 +13,16 @@ Artisan::command('inspire', function () {
     \Illuminate\Support\Facades\DB::table('page_clicks')->where('created_at', '<', now()->subMonths(6))->delete();
 })->daily()->name('analytics:prune')->withoutOverlapping();
 
+// Growth hub: SEO audit of the seven Sharet-family sites every morning (Administration › Growth › SEO);
+// cross-site analytics kept ~13 months like page_views.
+\Illuminate\Support\Facades\Schedule::command('growth:seo-audit')->dailyAt('05:30')->withoutOverlapping();
+\Illuminate\Support\Facades\Schedule::call(function () {
+    if (\App\Support\Growth\Analytics::ready()) {
+        \Illuminate\Support\Facades\DB::table('growth_page_views')->where('created_at', '<', now()->subMonths(13))->delete();
+        \Illuminate\Support\Facades\DB::table('growth_events')->where('created_at', '<', now()->subMonths(13))->delete();
+    }
+})->daily()->name('growth:prune')->withoutOverlapping();
+
 // API webhooks: send deliveries that are due (first tries happen at once; this retries failures for 24 hours)
 \Illuminate\Support\Facades\Artisan::command('api:webhooks-retry', function () {
     $this->info(app(\App\Api\Webhooks::class)->retryDue().' webhook deliveries tried.');

@@ -19,6 +19,10 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
         ]);
     });
 
+    // Growth numbers for the key's own business site(s) only: the localized Growth tab in each app (config/growth.php)
+    Route::get('/growth/summary', [\App\Http\Controllers\Api\V1\GrowthController::class, 'summary'])
+        ->middleware('api.scope:read')->name('api.v1.growth.summary');
+
     // Accounts and quotes: nothing here moves money (docs/v2/INTEGRATION.md §1, §7, §9)
     Route::middleware('api.scope:read')->controller(\App\Http\Controllers\Api\V1\AccountsController::class)->group(function () {
         Route::get('/accounts/me', 'me')->name('api.v1.accounts.me');

@@ -109,6 +109,8 @@ class DashboardNav
                         'active' => ['admin.emails.*']],
                     ['label' => 'Security', 'route' => 'admin.security.index', 'icon' => 'shield-check', 'tone' => 'rose', 'can' => 'admin.system',
                         'active' => ['admin.security.*', 'securitykit.*']],
+                    ['label' => 'Growth', 'route' => 'admin.growth.index', 'icon' => 'arrow-trending-up', 'tone' => 'emerald', 'can' => 'analytics.view',
+                        'active' => ['admin.growth.*']],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
                     ['label' => 'Roles & permissions', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'tone' => 'emerald', 'can' => 'admin.roles'],

@@ -26,6 +26,7 @@ class SchedulerController extends Controller
         'recon:run' => ['Reconcile now', 'Matches the ledger against M-PESA and bank statements.'],
         'db:backup' => ['Back up the database', 'Writes a compressed backup to the server (copy it off the server too).'],
         'kyc:reread' => ['Re-read uploaded IDs', 'Reads every uploaded ID photo again and fills name, ID number, birth date, county and town from it.'],
+        'growth:seo-audit' => ['SEO audit of all sites', 'Checks the seven Sharet-family sites (home page, robots.txt, sitemap, sample pages) for Growth › SEO.'],
         'sharet:golive' => ['Go-live check', 'Lists what still blocks real money.'],
     ];
 

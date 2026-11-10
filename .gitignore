@@ -24,6 +24,7 @@ yarn-error.log
 
 # Local dumps and archives: never commit
 *.sql
+!database/schema/*.sql
 *.zip
 .DS_Store
 /.claude/

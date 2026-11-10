@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [\App\Http\Middleware\SystemGuard::class]);
         $middleware->prepend(\App\Http\Middleware\SecurityHeaders::class); // every response, API and errors included
         // Analytics beacons are anonymous and carry no state change worth forging
-        $middleware->validateCsrfTokens(except: ['t']);
+        $middleware->validateCsrfTokens(except: ['t', 't/x']);
 
         // Spatie Permission middleware aliases
         $middleware->alias([

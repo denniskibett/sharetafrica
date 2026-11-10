@@ -39,6 +39,10 @@
         'invalid_scopes' => [422, 'Connect links ask for "collect", "payout" or both.'],
         'invalid_return_url' => [422, 'return_url must be a public https:// address.'],
         'invalid_webhook_url' => [422, 'Webhook URLs must be public https:// addresses.'],
+        'growth_no_site' => [403, 'Growth summary: this key\'s business has no website linked in the Sharet Growth hub.'],
+        'growth_other_site' => [403, 'Growth summary: the site asked for belongs to another business.'],
+        'invalid_date_range' => [422, 'Growth summary: from / to must be YYYY-MM-DD, from on or before to, at most 366 days apart.'],
+        'growth_unavailable' => [503, 'Growth summary: website numbers are not available right now. Try again later.'],
     ];
     $c = fn ($s) => '<div class="code">'.$s.'</div>';
 @endphp

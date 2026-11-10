@@ -93,6 +93,20 @@ Route::controller(HomeController::class)->group(function () {
 
 Route::post('/t', TrackController::class)->middleware('throttle:240,1')
     ->withoutMiddleware([\App\Http\Middleware\ApplyIntegrations::class])->name('track');
+
+// Growth hub collector for the seven Sharet-family sites (public/js/sharet-analytics.js): no session, no cookies,
+// no CSRF. Origin allow-list (config/growth.php) and its own rate limit inside the controller; always 204.
+Route::withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+    \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    \Illuminate\Cookie\Middleware\EncryptCookies::class,
+    \App\Http\Middleware\ApplyIntegrations::class,
+])->controller(\App\Http\Controllers\GrowthCollectController::class)->group(function () {
+    Route::post('/t/x', '__invoke')->name('growth.collect');
+    Route::options('/t/x', 'preflight')->name('growth.collect.preflight');
+});
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::view('/privacy', 'privacy')->name('privacy');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
@@ -265,6 +279,21 @@ Route::middleware(['auth', 'permission:waiting_list.invite'])
 
 Route::middleware(['auth', 'permission:admin.system'])
     ->get('/admin/security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('admin.security.index');
+
+/*
+|--------------------------------------------------------------------------
+| Growth: all seven Sharet-family sites (traffic, conversions, SEO audit, Ad center). Collector: POST /t/x above.
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:analytics.view'])->prefix('admin/growth')->name('admin.growth.')
+    ->controller(\App\Http\Controllers\Admin\GrowthController::class)->group(function () {
+        Route::get('/', 'overview')->name('index');
+        Route::get('/conversions', 'conversions')->name('conversions');
+        Route::get('/seo', 'seo')->name('seo');
+        Route::get('/ads', 'ads')->name('ads');
+        Route::post('/todos', 'todo')->name('todo');
+    });
 
 /*
 |--------------------------------------------------------------------------
