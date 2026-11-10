@@ -1,7 +1,8 @@
 {{-- developers: generated from the approved canvas board WebDevelopersV2 by scratchpad build_pages.py. Change the design first, then regenerate. --}}
 @extends('site.layout')
-@section('title', 'Sharet Developers · Build on Sharet')
-@section('description', 'One API for every wallet in Kenya: JSON, idempotent writes, signed webhooks and plain errors. Sandbox access on request.')
+@section('title', 'Payment API for Kenya · M-PESA collections and payouts · Sharet')
+@section('description', 'One REST API to collect by M-PESA prompt (STK push) and pay out to M-PESA, Airtel Money, T-Kash and Kenyan banks. Idempotent writes, signed webhooks, sandbox on request.')
+@php $seoNodes = [\App\Support\Seo::webApi(), \App\Support\Seo::breadcrumbs(['Developers' => route('developers')])]; @endphp
 @section('content')
 <div class="ui web pg">
 <div class="wr"><div class="wn"><a class="lg" href="{{ route('home') }}" aria-label="Sharet home">sharet<i>.</i></a><nav><a href="{{ route('personal') }}">Personal</a><a href="{{ route('home') }}#abroad">Abroad</a><a href="{{ route('merchants') }}">Business</a><a href="{{ route('home') }}#pricing">Pricing</a><a href="{{ route('contact') }}">Help</a></nav><a class="wb o" href="{{ route('login') }}">Log in</a><a class="wb" href="{{ route('register') }}">Open an account</a></div></div>
@@ -75,9 +76,7 @@ Idempotency-Key: 9f1c2a7e-4b2d
                   </button>
               </div>
           </form></div></div>
-<div class="foot"><div class="wr"><div class="cols"><div><span style="font:400 20px var(--f-disp);color:#fff">sharet<span style="color:var(--lime)">.</span></span><p>Payments for Kenya and East Africa. Nairobi.</p></div>
-<div><b>Personal</b><a href="{{ route('home') }}#send">Send and receive</a><a href="{{ route('home') }}#everyday">Pay bills</a><a href="{{ route('home') }}#everyday">Withdraw</a><a href="{{ route('home') }}#card">Card</a><a href="{{ route('home') }}#abroad">Across borders</a></div><div><b>Business</b><a href="{{ route('merchants') }}">Merchants</a><a href="{{ route('trade') }}">Trade finance</a><a href="{{ route('developers') }}">Developers</a><a href="{{ route('docs') }}">API docs</a></div><div><b>Company</b><a href="{{ route('company') }}">About</a><a href="{{ route('blog.index') }}">Blog</a></div><div><b>Help</b><a href="{{ route('contact') }}">Help centre</a><a href="{{ route('contact') }}">Report fraud</a><a href="{{ route('privacy') }}">Privacy</a></div></div>
-<p class="legal">Sharet Africa Ltd is not a bank. Payment services are provided with Cashia (Kashia Services Limited), licensed by the Central Bank of Kenya as a payment service provider. <a href="https://www.centralbank.go.ke/national-payments-system/" style="color:#D4FF3D">Check on CBK's licensed directory</a><br> Customer money is held in a separate trust account. Fees, rates and limits are shown in the app before you confirm.</p><!-- Photos (Unsplash licence, credit not required; kept here and in public/images/site/credits.json): Michael Kyule (Kilifi), Dwayne joe (Nairobi), Jonathan Ward (Kampala), Imani Bahati (Kampala), Wietse Jongsma (Entebbe), Nicholas Gray (Nairobi). --></div></div>
+@include('site.partials.footer')
 
 </div>
 @endsection

@@ -1,17 +1,41 @@
 # Sharet Africa — search engines and AI assistants are welcome on the public site.
+# Rules match by prefix: end a rule with $ when only that exact path is private (e.g. /t is the
+# analytics beacon, /trade is a public page).
 User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /admin
-Disallow: /integrations
+Disallow: /api/
 Disallow: /api-keys
+Disallow: /integrations
 Disallow: /profile
-Disallow: /wallet$
+Disallow: /settings
+Disallow: /settlements
+Disallow: /onboarding
+Disallow: /ops
+Disallow: /ledger
+Disallow: /reports
+Disallow: /requests
+Disallow: /users
+Disallow: /search
+Disallow: /help$
+Disallow: /help/
+Disallow: /kyc-documents
+Disallow: /waiting-list
+Disallow: /connected-apps
+Disallow: /connect/
+Disallow: /r/
+Disallow: /pay$
+Disallow: /pay/
+Disallow: /app/android
+Disallow: /wallet
+Disallow: /card$
+Disallow: /card/
+Disallow: /abroad
 Disallow: /merchant$
 Disallow: /business$
 Disallow: /developer$
-Disallow: /ops
-Disallow: /t
+Disallow: /t$
 
 # AI assistants (ChatGPT, Claude, Perplexity, Gemini) may read and cite the public pages
 User-agent: GPTBot
@@ -25,5 +49,8 @@ User-agent: Google-Extended
 Allow: /
 Disallow: /dashboard
 Disallow: /admin
+Disallow: /api/
+Disallow: /r/
+Disallow: /connect/
 
 Sitemap: https://sharet.africa/sitemap.xml

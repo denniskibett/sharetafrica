@@ -56,6 +56,9 @@
     <a href="mailto:support@sharet.africa" class="hover:text-app-ink">support@sharet.africa</a>
   </footer>
 </div>
+@if (session()->has('sa_conversion'))
+@include('partials.sharet-analytics')
+@endif
 @stack('scripts')
 </body>
 </html>

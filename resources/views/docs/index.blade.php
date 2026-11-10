@@ -1,7 +1,8 @@
 {{-- Public API docs (/docs, /docs/errors). The contract behind it: docs/v2/INTEGRATION.md. Same look as the website
      (site.css): contents on the left, one long page. Icons only. Keep in step with the API when it changes. --}}
 @extends('site.layout')
-@section('title', 'Sharet API docs · Collect, pay out and settle in Kenya')
+@section('title', 'Sharet API docs · M-PESA collections, payouts and webhooks in Kenya')
+@section('canonical', route('docs'))
 @section('description', 'Sharet API v1: Sharet IDs, scoped keys, payments, payment requests, split settlement, batch settlements, connected accounts, signed webhooks, errors and the sandbox.')
 
 @php
@@ -44,6 +45,7 @@
         'invalid_date_range' => [422, 'Growth summary: from / to must be YYYY-MM-DD, from on or before to, at most 366 days apart.'],
         'growth_unavailable' => [503, 'Growth summary: website numbers are not available right now. Try again later.'],
     ];
+    $seoNodes = [\App\Support\Seo::webApi(), \App\Support\Seo::breadcrumbs(['Developers' => route('developers'), 'API docs' => route('docs')])];
     $c = fn ($s) => '<div class="code">'.$s.'</div>';
 @endphp
 

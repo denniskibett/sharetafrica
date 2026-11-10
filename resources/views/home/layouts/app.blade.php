@@ -8,13 +8,14 @@
       $seoTitle = trim($__env->yieldContent('title', 'Sharet Africa'));
       $seoDescription = trim($__env->yieldContent('description', "Cheaper payments across East Africa. Any rail. The other person doesn't need Sharet."));
       $seoImage = asset('images/og/sharet-og.png');
+      $seoCanonical = trim($__env->yieldContent('canonical', url()->current()));
   @endphp
   <title>{{ $seoTitle }}</title>
   <meta name="description" content="{{ $seoDescription }}" />
   <meta name="robots" content="@yield('robots', 'index,follow,max-image-preview:large,max-snippet:-1')" />
-  <link rel="canonical" href="{{ url()->current() }}" />
-  <link rel="alternate" hreflang="en-KE" href="{{ url()->current() }}" />
-  <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}" />
+  <link rel="canonical" href="{{ $seoCanonical }}" />
+  <link rel="alternate" hreflang="en-KE" href="{{ $seoCanonical }}" />
+  <link rel="alternate" hreflang="x-default" href="{{ $seoCanonical }}" />
   <link rel="alternate" type="text/plain" title="Sharet summary for AI assistants" href="{{ route('llms') }}" />
   <link rel="sitemap" type="application/xml" href="{{ route('sitemap') }}" />
 
@@ -22,7 +23,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Sharet Africa" />
   <meta property="og:locale" content="en_KE" />
-  <meta property="og:url" content="{{ url()->current() }}" />
+  <meta property="og:url" content="{{ $seoCanonical }}" />
   <meta property="og:title" content="{{ $seoTitle }}" />
   <meta property="og:description" content="{{ $seoDescription }}" />
   <meta property="og:image" content="{{ $seoImage }}" />
@@ -46,7 +47,7 @@
   <link rel="manifest" href="{{ asset('site.webmanifest') }}" />
   <meta name="theme-color" content="#0A0A0C" />
 
-  <script type="application/ld+json">@json(\App\Support\Seo::graph($seoTitle, $seoDescription), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)</script>
+  <script type="application/ld+json">@json(\App\Support\Seo::graph($seoTitle, $seoDescription, $seoNodes ?? []), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)</script>
 
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -56,6 +57,7 @@
   {{-- Instant page changes: the browser fetches a link's page when you hover it (Chrome/Edge; others ignore) --}}
   <script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/logout","/t","/*\\?*","/admin/emails/*"]}},{"not":{"selector_matches":"[data-no-prefetch], [target=_blank]"}}]},"eagerness":"moderate"}]}</script>
 
+  @include('partials.sharet-analytics')
   @stack('head')
 </head>
 <body>

@@ -552,3 +552,23 @@ a.wb,a.badge{text-decoration:none}
 .pager{margin-top:28px}.pager nav{font-size:14px}
 a.feat,a.post{color:inherit;text-decoration:none}
 @media (max-width:600px){.sform .form-row{grid-template-columns:1fr}}
+/* Search landing pages (resources/views/landing): steps, feature cards, FAQ, related links */
+.lp-steps{counter-reset:s;list-style:none;padding:0;margin:24px 0 0;display:grid;gap:14px;max-width:780px}
+.lp-steps li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:start;font-size:16px;line-height:1.6;color:var(--sub)}
+.lp-steps li::before{content:counter(s);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--lime);color:var(--onlime);font:600 14px var(--f-mono)}
+.lp-steps b{color:var(--tx)}
+.lp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:14px;margin-top:24px}
+.lp-card{border:1px solid var(--line);border-radius:20px;padding:20px 22px}
+.lp-card h3{font:700 18px/1.25 var(--f-ui);letter-spacing:-.01em;margin:0 0 8px}
+.lp-card p{margin:0;color:var(--sub);font-size:15px;line-height:1.55}
+.lp code{font:500 .92em var(--f-mono)}
+.faq{margin-top:20px;max-width:820px;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line);padding:16px 4px}
+.faq summary{cursor:pointer;font:600 17px/1.35 var(--f-ui);list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:500 20px/1 var(--f-mono);color:var(--sub)}
+.faq details[open] summary::after{content:"–"}
+.faq p{margin:10px 0 0;color:var(--sub);line-height:1.6;font-size:15.5px}
+.lp-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.lp-links a{border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-size:14px;color:inherit;text-decoration:none}
+.lp-links a:hover{border-color:var(--tx)}

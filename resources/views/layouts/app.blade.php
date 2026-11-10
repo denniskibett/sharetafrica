@@ -390,6 +390,9 @@
         </div>
     </template>
 </div>
+@if (session()->has('sa_conversion'))
+@include('partials.sharet-analytics')
+@endif
 @stack('scripts')
 
 </body>
