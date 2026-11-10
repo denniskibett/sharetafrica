@@ -39,7 +39,7 @@ class Seo
     public const SISTERS = [
         ['Breve', 'https://breve.sharet.africa', 'Invoicing and M-Pesa payments for small businesses.'],
         ['Aiyotickets', 'https://aiyotickets.com', 'Events and tickets in Nairobi, paid with M-Pesa.'],
-        ['eServiz', 'https://eserviz.aiyotickets.com', 'Home services in Nairobi.'],
+        ['eServiz', 'https://eserviz.aiyotickets.com', 'Government errands done for you (NTSA, Lands, KRA).'],
         ['Scharge', 'https://scharge.sharet.africa', 'Property and rent management.'],
         ['Sharet Loans', 'https://loans.sharet.africa', 'Boda boda and e-bike loans.'],
         ['Shoope', 'https://shoope.africa', 'Safe payments for online shops: escrow for Instagram, TikTok and Marketplace sellers.'],
