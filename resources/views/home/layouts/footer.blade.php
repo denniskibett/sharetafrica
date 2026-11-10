@@ -20,9 +20,10 @@
         <h4>Build on Sharet</h4>
         <ul>
           <li><a href="{{ route('developers') }}">Developers</a></li>
-          <li><a href="{{ route('developers') }}#endpoints">API reference</a></li>
-          <li><a href="{{ route('developers') }}#licensing">Licensing</a></li>
-          <li><a href="{{ route('developers') }}#sandbox">Sandbox</a></li>
+          <li><a href="{{ route('docs') }}">API docs</a></li>
+          <li><a href="{{ route('landing.mpesa-api') }}">M-PESA API (STK push)</a></li>
+          <li><a href="{{ route('landing.gateway') }}">Payment gateway Kenya</a></li>
+          <li><a href="{{ route('landing.bulk') }}">Bulk payouts (B2C)</a></li>
           @if (\App\Support\AndroidRelease::latest())<li><a href="{{ route('developers') }}#android">Android test build</a></li>@endif
         </ul>
       </div>
@@ -34,6 +35,12 @@
           <li><a href="{{ route('company') }}#companies">Our companies</a></li>
           <li><a href="{{ route('contact') }}#careers">Careers</a></li>
           <li><a href="{{ route('contact') }}#press">Press</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>More from Sharet</h4>
+        <ul>
+          @foreach (\App\Support\Seo::SISTERS as [$sisterName, $sisterUrl, $sisterAbout])<li><a href="{{ $sisterUrl }}" title="{{ $sisterAbout }}">{{ $sisterName }}</a></li>@endforeach
         </ul>
       </div>
     </div>

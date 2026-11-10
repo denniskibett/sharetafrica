@@ -58,6 +58,11 @@ Route::middleware('auth')->controller(\App\Http\Controllers\ConnectConsentContro
 Route::view('/docs', 'docs.index')->name('docs');
 Route::get('/docs/errors', fn () => view('docs.index'))->name('docs.errors');
 
+// Search landing pages for Kenyan developers and businesses (App\Support\Seo::PAGES lists them for the sitemap)
+Route::view('/mpesa-api', 'landing.mpesa-api')->name('landing.mpesa-api');
+Route::view('/payment-gateway-kenya', 'landing.payment-gateway-kenya')->name('landing.gateway');
+Route::view('/bulk-payments-kenya', 'landing.bulk-payments-kenya')->name('landing.bulk');
+
 // Hosted pay page for API payment requests (docs/v2/INTEGRATION.md §3). Paying moves money: names under "pay." so the
 // ledger freeze stops it. Sharet wallet needs sign-in and the PIN; M-PESA works for anyone with the link.
 Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\PayRequestController::class)->group(function () {

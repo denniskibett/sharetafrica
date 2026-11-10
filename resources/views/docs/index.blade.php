@@ -1,7 +1,8 @@
 {{-- Public API docs (/docs, /docs/errors). The contract behind it: docs/v2/INTEGRATION.md. Same look as the website
      (site.css): contents on the left, one long page. Icons only. Keep in step with the API when it changes. --}}
 @extends('site.layout')
-@section('title', 'Sharet API docs · Collect, pay out and settle in Kenya')
+@section('title', 'Sharet API docs · M-PESA collections, payouts and webhooks in Kenya')
+@section('canonical', route('docs'))
 @section('description', 'Sharet API v1: Sharet IDs, scoped keys, payments, payment requests, split settlement, batch settlements, connected accounts, signed webhooks, errors and the sandbox.')
 
 @php
@@ -40,6 +41,7 @@
         'invalid_return_url' => [422, 'return_url must be a public https:// address.'],
         'invalid_webhook_url' => [422, 'Webhook URLs must be public https:// addresses.'],
     ];
+    $seoNodes = [\App\Support\Seo::webApi(), \App\Support\Seo::breadcrumbs(['Developers' => route('developers'), 'API docs' => route('docs')])];
     $c = fn ($s) => '<div class="code">'.$s.'</div>';
 @endphp
 

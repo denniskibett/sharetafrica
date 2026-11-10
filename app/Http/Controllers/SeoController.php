@@ -48,17 +48,17 @@ class SeoController extends Controller
             '## Products',
             '',
         ];
-        foreach (Seo::PAGES as $route => [, $summary]) {
+        foreach (Seo::PAGES as $route => $page) {
             if (! in_array($route, ['company', 'contact'])) {
-                $lines[] = '- ['.ucfirst($route === 'home' ? 'Overview' : $route).']('.route($route).'): '.$summary;
+                $lines[] = '- ['.($page[3] ?? ucfirst($route === 'home' ? 'Overview' : $route)).']('.route($route).'): '.$page[1];
             }
         }
         array_push($lines, '', '## Company', '',
             '- [About Sharet]('.route('company').'): '.Seo::PAGES['company'][1],
             '- [Contact]('.route('contact').'): '.Seo::PAGES['contact'][1].' General: hello@sharet.africa. Support: support@sharet.africa. Press: press@sharet.africa.',
             '', '## Companies run by Sharet', '');
-        foreach (Seo::companies() as [$name, $url, $about]) {
-            $lines[] = "- [$name]($url): $about";
+        foreach (Seo::subOrganizations() as $o) {
+            $lines[] = "- [{$o['name']}]({$o['url']}): {$o['description']}";
         }
         array_push($lines, '', '## Optional', '', '- [Sitemap]('.route('sitemap').')', '');
 

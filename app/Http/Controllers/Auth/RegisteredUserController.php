@@ -61,6 +61,7 @@ class RegisteredUserController extends Controller
         Outbox::later($user->email, SharetMail::waitingList($user));
     
         Auth::login($user);
+        session()->put('sa_conversion', 'signup');   // counted once on the next page (partials.sharet-analytics)
     
         return redirect($codeFirst ? route('verification.code') : route('dashboard', absolute: false));
     }

@@ -193,6 +193,13 @@
 </div>
 @endsection
 
+{{-- The tracker, so the api_keys conversion pushed when a key is created is counted --}}
+@push('scripts')
+@unless (session()->has('sa_conversion'))
+@include('partials.sharet-analytics')
+@endunless
+@endpush
+
 @push('scripts')
 <script>
   function apiKeysPage(base) {
@@ -202,7 +209,7 @@
       put(k) { this.keys = this.keys.some(x => x.id === k.id) ? this.keys.map(x => x.id === k.id ? k : x) : [k, ...this.keys]; },
       async create() {
         this.busy = true; this.errors = {};
-        try { const r = await sharet.send('POST', base, this.form); this.put(r.key); this.plain = r.plain; this.creating = false; }
+        try { const r = await sharet.send('POST', base, this.form); this.put(r.key); this.plain = r.plain; this.creating = false; (window.sa = window.sa || []).push(['conversion', 'api_keys']); }
         catch (e) { this.errors = Object.fromEntries(Object.entries(e.errors || {}).map(([k, v]) => [k, v[0]])); }
         this.busy = false;
       },

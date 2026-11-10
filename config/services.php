@@ -53,4 +53,10 @@ return [
         'path' => env('TESSERACT_PATH', 'tesseract'),
     ],
 
+    // First-party cross-site analytics (page views + conversions). Loaded on public pages in production only.
+    'sharet_analytics' => [
+        'url' => env('SHARET_ANALYTICS_URL', 'https://sharet.africa'),
+        'site' => 'sharet',
+    ],
+
 ];

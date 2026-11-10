@@ -5,6 +5,7 @@
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L19 8"/></svg>
     <span>{{ session($flash.'_message') }}</span>
   </div></div>
+  <script>(window.sa=window.sa||[]).push(['conversion','lead'])</script>
 @endif
 @if ($errors->any())
   <div class="flashbar" role="alert"><div class="bad">
