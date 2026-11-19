@@ -40,16 +40,16 @@ Route::middleware(['auth', 'role:support|operations|admin|super_admin'])
     });
 
 // Personal transactions: history page + the dashboard money panel's JSON (personal accounts first; business on hold)
-Route::middleware(['auth', 'throttle:60,1'])
+Route::middleware(['auth', 'throttle:60,1,pay-pages'])
     ->prefix('pay')->name('pay.')->controller(PayController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('chart', 'chart')->name('chart');
-        Route::post('quote', 'quote')->name('quote')->middleware('throttle:20,1');
-        Route::post('top-up', 'topUp')->name('top-up')->middleware('throttle:20,1');
-        Route::post('transfer', 'transfer')->name('transfer')->middleware('throttle:20,1');
-        Route::post('pin', 'pin')->name('pin')->middleware('throttle:10,1');
-        Route::post('{order}/confirm', 'confirm')->name('confirm')->middleware('throttle:10,1');
+        Route::post('quote', 'quote')->name('quote')->middleware('throttle:20,1,pay-quote');
+        Route::post('top-up', 'topUp')->name('top-up')->middleware('throttle:20,1,pay-top-up');
+        Route::post('transfer', 'transfer')->name('transfer')->middleware('throttle:20,1,pay-transfer');
+        Route::post('pin', 'pin')->name('pin')->middleware('throttle:10,1,pay-pin');
+        Route::post('{order}/confirm', 'confirm')->name('confirm')->middleware('throttle:10,1,pay-confirm');
         Route::get('{order}/receipt', 'receipt')->name('receipt');
         Route::get('{order}', 'show')->name('show');
     });

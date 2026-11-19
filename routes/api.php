@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 | Sharet API (prefix /api). Authenticate with "Authorization: Bearer sk_test_…" from Dashboard › API keys.
 */
 
-Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function () {
+Route::prefix('v1')->middleware(['api.key', 'throttle:60,1,api-v1'])->group(function () {
     // Check a key works: returns which key and environment it is
     Route::get('/me', function (Request $request) {
         $key = $request->attributes->get('api_key');
@@ -66,10 +66,10 @@ Route::prefix('v1')->middleware(['api.key', 'throttle:60,1'])->group(function ()
 | ledger freeze in SystemGuard covers them, and they need an Idempotency-Key. Docs: docs/v2/MOBILE-API.md
 */
 Route::prefix('mobile/v1')->name('api.mobile.')->controller(\App\Http\Controllers\Mobile\MobileController::class)->group(function () {
-    Route::get('config', 'config')->middleware('throttle:60,1')->name('config');
-    Route::post('auth/login', 'login')->middleware('throttle:10,1')->name('login');
+    Route::get('config', 'config')->middleware('throttle:60,1,mobile-config')->name('config');
+    Route::post('auth/login', 'login')->middleware('throttle:10,1,mobile-login')->name('login');
 
-    Route::middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:120,1'])->group(function () {
+    Route::middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:120,1,mobile-device'])->group(function () {
         Route::post('auth/logout', 'logout')->name('logout');
         Route::get('devices', 'devices')->name('devices');
         Route::delete('devices/{id}', 'revokeDevice')->whereNumber('id')->name('devices.revoke');
@@ -82,7 +82,7 @@ Route::prefix('mobile/v1')->name('api.mobile.')->controller(\App\Http\Controller
 });
 
 Route::prefix('mobile/v1')->name('api.money.mobile.')->controller(\App\Http\Controllers\Mobile\MobileController::class)
-    ->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:30,1', \App\Http\Middleware\Idempotent::class])->group(function () {
+    ->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:30,1,mobile-money', \App\Http\Middleware\Idempotent::class])->group(function () {
         Route::post('send/sharet', 'sendSharet')->name('send-sharet');
         Route::post('quote', 'quote')->name('quote');
         Route::post('orders/{uuid}/confirm', 'confirm')->name('confirm');

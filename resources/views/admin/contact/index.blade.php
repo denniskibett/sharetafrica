@@ -4,7 +4,7 @@
 
 @section('content')
 <div x-data="dataTable({ url: '{{ route('admin.contact.index') }}', filters: { audience: '' } })">
-  <x-ui.page-header title="Enquiries" subtitle="Messages from the contact form on sharet.africa. Each one is also emailed to the team inbox." />
+  <x-ui.page-header title="Enquiries" subtitle="Everything sent through the forms on sharet.africa: contact, waiting lists, trade and developer requests. Each one is emailed to the team inbox with its PDF." />
 
   <x-ui.stats :cols="4" class="mb-6">
     <x-ui.stat label="Enquiries" value="stats.total" hint="stats.total_hint" icon="inbox-arrow-down" tone="sky" />
@@ -16,6 +16,7 @@
   <x-ui.table title="Inbox" placeholder="Search people, business or message…" :columns="[
       ['key' => 'person', 'label' => 'From', 'type' => 'person'],
       ['key' => 'topic', 'label' => 'About'],
+      ['key' => 'ref', 'label' => 'Ref', 'type' => 'muted'],
       ['key' => 'business', 'label' => 'Business', 'type' => 'muted'],
       ['key' => 'status', 'label' => 'Status', 'type' => 'pill'],
       ['key' => 'date', 'label' => 'Received', 'type' => 'muted', 'sort' => 'date'],
@@ -47,7 +48,13 @@
         <dt class="text-gray-500">Phone</dt><dd class="text-gray-800 dark:text-gray-200" x-text="payload.phone || '—'"></dd>
         <dt class="text-gray-500">Country</dt><dd class="text-gray-800 dark:text-gray-200" x-text="payload.country || '—'"></dd>
         <dt class="text-gray-500">Received</dt><dd class="text-gray-800 dark:text-gray-200" x-text="payload.date"></dd>
+        <template x-if="payload.ref"><dt class="text-gray-500">Reference</dt></template>
+        <template x-if="payload.ref"><dd class="text-gray-800 dark:text-gray-200" x-text="payload.ref + (payload.form ? ' · ' + payload.form : '')"></dd></template>
+        <template x-for="(value, label) in (payload.rows || {})" :key="label">
+          <div class="contents"><dt class="text-gray-500" x-text="label"></dt><dd class="text-gray-800 dark:text-gray-200" x-text="Array.isArray(value) ? value.join(', ') : value"></dd></div>
+        </template>
       </dl>
+      <template x-if="payload.pdf_url"><a :href="payload.pdf_url" class="inline-flex items-center gap-1 text-sm font-medium text-brand-500 hover:underline">Download the submission PDF</a></template>
       <p class="whitespace-pre-line rounded-xl bg-gray-50 p-4 text-gray-800 dark:bg-white/5 dark:text-gray-200" x-text="payload.brief"></p>
     </div>
     <x-slot:footer>

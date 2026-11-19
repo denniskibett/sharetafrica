@@ -101,6 +101,36 @@ class SharetMail extends Mailable
         ], $note['email']);
     }
 
+    /**
+     * To the team inbox for any website form (App\Support\FormIntake): the reference, what was sent, a button to
+     * Administration › Enquiries; the PDF is attached by FormIntake. Reply-to is the sender.
+     */
+    public static function formReceived(\App\Models\Enquiry $enquiry): self
+    {
+        $m = $enquiry->meta ?? [];
+        $person = $enquiry->user;
+
+        return new self(($m['form_name'] ?? 'Website form').' '.($m['ref'] ?? '').' — '.($person?->name ?: $person?->email ?: 'website visitor'), [
+            'preheader' => str($enquiry->brief)->limit(90),
+            'eyebrow' => ($m['form_name'] ?? 'Website form').' · '.($m['ref'] ?? ''),
+            'heading' => ($person?->name ?: 'Someone').' sent the '.strtolower($m['form_name'] ?? 'website').' form',
+            'lines' => ['Reply to this email to answer them directly. The full submission is attached as a PDF and is in Administration › Enquiries.'],
+            'details' => array_filter([
+                'Reference' => $m['ref'] ?? null,
+                'Name' => $person?->name,
+                'Email' => $person?->email,
+                'Phone' => $person?->phone,
+                'Business' => $enquiry->business,
+            ]) + array_map(fn ($v) => is_array($v) ? implode(', ', $v) : (string) $v, $m['rows'] ?? []) + array_filter([
+                'Message' => $enquiry->brief,
+                'Received' => $enquiry->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i').' EAT',
+            ]),
+            'detailsTitle' => 'What they sent',
+            'button' => ['label' => 'Open Enquiries', 'url' => route('admin.contact.index')],
+            'signoff' => 'Sharet website',
+        ], $person?->email);
+    }
+
     /** Trade or developer application received (HomeController). */
     public static function applicationReceived(User $user, string $kind): self
     {
@@ -180,6 +210,10 @@ class SharetMail extends Mailable
         return [
             'contact-thanks' => ['Contact form: thank you (to the sender)', self::contactThanks($message)],
             'contact-received' => ['Contact form: new message (to the team)', self::contactReceived($message)],
+            'form-received' => ['Any website form: new submission with PDF (to the team)', self::formReceived(tap(new \App\Models\Enquiry([
+                'audience' => 'merchant', 'business' => 'Nairobi Events Co.', 'brief' => $message['brief'],
+                'meta' => ['ref' => 'SC-7KQ2XD', 'form' => 'contact', 'form_name' => 'Contact form', 'rows' => ['You are' => 'Merchant', 'Country' => 'Kenya']],
+            ]), fn ($e) => $e->setRelation('user', $user)->created_at = now()))],
             'waiting-list' => ['Sign-up: welcome and waiting list', self::waitingList($user)],
             'trade-received' => ['Trade application received', self::applicationReceived($user, 'trade')],
             'developer-received' => ['Developer request received', self::applicationReceived($user, 'developer')],

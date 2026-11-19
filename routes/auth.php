@@ -38,18 +38,18 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     // Sign-up email code (only when EMAIL_CODE_ON_SIGNUP is on)
     Route::get('verify-email/code', [\App\Http\Controllers\Auth\EmailCodeController::class, 'show'])->name('verification.code');
-    Route::post('verify-email/code', [\App\Http\Controllers\Auth\EmailCodeController::class, 'verify'])->middleware('throttle:10,1')->name('verification.code.verify');
-    Route::post('verify-email/code/resend', [\App\Http\Controllers\Auth\EmailCodeController::class, 'resend'])->middleware('throttle:3,1')->name('verification.code.resend');
+    Route::post('verify-email/code', [\App\Http\Controllers\Auth\EmailCodeController::class, 'verify'])->middleware('throttle:10,1,verification-code-verify')->name('verification.code.verify');
+    Route::post('verify-email/code/resend', [\App\Http\Controllers\Auth\EmailCodeController::class, 'resend'])->middleware('throttle:3,1,verification-code-resend')->name('verification.code.resend');
 
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
     Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
+        ->middleware(['signed', 'throttle:6,1,verification-verify'])
         ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
+        ->middleware('throttle:6,1,verification-send')
         ->name('verification.send');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])

@@ -51,11 +51,24 @@ class EmailDesignController extends Controller
             'country' => $m->user?->country,
             'status' => Table::pill(ucfirst((string) ($m->status ?: 'new')), $m->responded_at ? 'success' : 'info'),
             'date' => $m->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+            'ref' => $m->meta['ref'] ?? null,
+            'form' => $m->meta['form_name'] ?? null,
+            'rows' => $m->meta['rows'] ?? [],
+            'pdf_url' => ! empty($m->meta['pdf']) ? route('admin.contact.pdf', $m->id) : null,
         ], [], ['date' => 'created_at'], [
             'total' => Enquiry::count(), 'total_hint' => 'All time',
             'week' => Enquiry::where('created_at', '>=', now()->subDays(7))->count(), 'week_hint' => 'Last 7 days',
             'open' => Enquiry::whereNull('responded_at')->count(), 'open_hint' => 'Not answered yet',
             'answered' => Enquiry::whereNotNull('responded_at')->count(), 'answered_hint' => 'Replied to',
         ], extra: ['audiences' => SharetMail::AUDIENCES, 'inbox' => config('mail.contact_to')]);
+    }
+
+    /** The PDF of a website-form submission (App\Support\FormIntake). */
+    public function pdf(Enquiry $enquiry)
+    {
+        $path = $enquiry->meta['pdf'] ?? null;
+        abort_unless($path && \Illuminate\Support\Facades\Storage::disk('local')->exists($path), 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($path, basename($path), ['Content-Type' => 'application/pdf']);
     }
 }

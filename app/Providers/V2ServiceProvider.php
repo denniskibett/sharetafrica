@@ -25,11 +25,11 @@ class V2ServiceProvider extends ServiceProvider
         Route::middleware('web')->group(base_path('routes/v2.php'));
         // Safaricom posts STK results here: no session or CSRF; the secret path segment is the guard
         Route::post('rails/daraja/callback/{token}', \App\Integrations\Daraja\DarajaCallbackController::class)
-            ->middleware('throttle:120,1')->name('rails.daraja.callback');
+            ->middleware('throttle:120,1,rails-daraja-callback')->name('rails.daraja.callback');
         Route::post('rails/daraja/result/{token}', [\App\Integrations\Daraja\DarajaResultController::class, 'result'])
-            ->middleware('throttle:120,1')->name('rails.daraja.result');
+            ->middleware('throttle:120,1,rails-daraja-result')->name('rails.daraja.result');
         Route::post('rails/daraja/timeout/{token}', [\App\Integrations\Daraja\DarajaResultController::class, 'timeout'])
-            ->middleware('throttle:120,1')->name('rails.daraja.timeout');
+            ->middleware('throttle:120,1,rails-daraja-timeout')->name('rails.daraja.timeout');
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule) {
             // Proof the cron runs at all (sharet:golive reads it)
