@@ -72,7 +72,8 @@ class CustomerAppPagesTest extends TestCase
         $this->get('/help')->assertOk()->assertSee('class="sharet-app', false)->assertSee('Common questions')
             ->assertSee('Report fraud')->assertSee('mailto:support@sharet.africa', false)->assertSee('KES 70,000');
 
-        foreach (['/requests', '/card', '/abroad', '/abroad/swift'] as $url) {
+        $this->get('/requests')->assertOk()->assertSee('class="sharet-app', false)->assertSee('Split a bill')->assertDontSee("Tell me when it's ready", false);   // built (P05)
+        foreach (['/card', '/abroad', '/abroad/swift'] as $url) {
             $this->get($url)->assertOk()->assertSee('class="sharet-app', false)
                 ->assertSee("Tell me when it's ready", false)->assertSee('disabled', false)
                 ->assertDontSee(route('pay.transfer'));

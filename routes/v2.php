@@ -61,7 +61,16 @@ Route::middleware(['auth', 'throttle:60,1,pay-pages'])
 // (Requests A08, Card A11, Send abroad A13, SWIFT A12). The previews never move money and post nothing.
 Route::middleware('auth')->group(function () {
     Route::view('help', 'help.index')->name('help');
-    Route::view('requests', 'soon.requests')->name('requests');
+    // Requests and splits (canvas P05): ask an @name or any phone; they pay on /r/{token} by M-PESA or their Sharet wallet
+    Route::get('requests', [\App\Http\Controllers\RequestsController::class, 'index'])->name('requests');
+    Route::middleware('throttle:30,1,requests')->controller(\App\Http\Controllers\RequestsController::class)->prefix('requests')->name('requests.')->group(function () {
+        Route::get('data', 'data')->name('data');
+        Route::post('/', 'store')->name('store');
+        Route::post('split', 'split')->name('split');
+        Route::post('{id}/remind', 'remind')->name('remind');
+        Route::post('{id}/cancel', 'cancel')->name('cancel');
+        Route::post('{id}/decline', 'decline')->name('decline');
+    });
     Route::view('card', 'soon.card')->name('card');
     Route::view('abroad', 'soon.abroad')->name('abroad');
     Route::view('abroad/swift', 'soon.swift')->name('abroad.swift');

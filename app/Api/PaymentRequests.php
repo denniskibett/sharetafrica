@@ -317,7 +317,7 @@ final class PaymentRequests
                 return;   // an M-PESA prompt is still being answered
             }
             $r->update(['status' => 'expired']);
-            $this->webhooks->fire($r->payee, $r->environment, 'payment_request.expired', self::present($r));
+            $r->kind === 'personal' || $this->webhooks->fire($r->payee, $r->environment, 'payment_request.expired', self::present($r));   // personal requests never reach API webhooks
             $n++;
         });
 
@@ -327,7 +327,7 @@ final class PaymentRequests
     private function markPaid(ApiPaymentRequest $r, string $via, ?RampOrder $order): ApiPaymentRequest
     {
         $r->update(['status' => 'paid', 'paid_via' => $via, 'paid_at' => now(), 'ramp_order_id' => $order?->id ?? $r->ramp_order_id]);
-        $this->webhooks->fire($r->payee, $r->environment, 'payment_request.paid', self::present($r->fresh()));
+        $r->kind === 'personal' || $this->webhooks->fire($r->payee, $r->environment, 'payment_request.paid', self::present($r->fresh()));
         if ($r->splits) {
             $this->settle($r->fresh());
         }
