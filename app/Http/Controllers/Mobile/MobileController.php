@@ -109,7 +109,64 @@ class MobileController extends Controller
         $user = $request->user();
 
         return response()->json(['user' => $this->person($user), 'wallet' => ['balance' => Money::format($this->orders->walletBalance($user)), 'currency' => config('ledger.currency')],
-            'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen()]);
+            'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen(),
+            // your own account number on Sharet's paybill (once made), and which ways to add money are open
+            'account_number' => ($a = \App\Support\AccountNumber::for($user, create: false)) ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : null,
+            'add_ways' => array_values(array_filter(['mpesa', filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'account' : null,
+                filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'card' : null]))]);
+    }
+
+    /** Your own account number on Sharet's paybill (made the first time). */
+    public function accountNumber(Request $request): JsonResponse
+    {
+        $a = \App\Support\AccountNumber::for($request->user());
+
+        return response()->json(['account_number' => $a ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : null]);
+    }
+
+    /** Add money by card: the app opens the returned page in the browser; the customer pays the card charge on top. */
+    public function addByCard(Request $request): JsonResponse
+    {
+        $data = $request->validate(['amount' => 'required|string|max:20']);
+        [$order, $url] = $this->orders->topUpByCard($request->user(), $data['amount']);
+
+        return response()->json(['order' => $order->present($request->user()), 'url' => $url], 201);
+    }
+
+    /** Requests (P05): To pay and Sent, the same lists as the web page. */
+    public function requests(Request $request): JsonResponse
+    {
+        return response()->json(\App\Support\PersonalRequests::lists($request->user()));
+    }
+
+    public function askMoney(Request $request): JsonResponse
+    {
+        $data = $request->validate(['to' => 'required|string|max:40', 'amount' => 'required|string|max:20', 'note' => 'nullable|string|max:140', 'expires' => 'nullable|in:48h,7d']);
+        $r = \App\Support\PersonalRequests::ask($request->user(), $data['to'], $data['amount'], $data['note'] ?? null, $data['expires'] ?? '48h');
+
+        return response()->json(['message' => 'Request sent to '.($r->payer?->name ?? $r->payer_phone).'.', 'pay_url' => route('pay-request.show', $r->token)], 201);
+    }
+
+    public function splitBill(Request $request): JsonResponse
+    {
+        $data = $request->validate(['total' => 'required|string|max:20', 'people' => 'required|array|min:1|max:20', 'people.*' => 'string|max:40', 'note' => 'nullable|string|max:140', 'include_me' => 'boolean']);
+        $rs = \App\Support\PersonalRequests::split($request->user(), $data['total'], $data['people'], $data['note'] ?? null, $data['include_me'] ?? true);
+
+        return response()->json(['message' => 'Split sent: '.count($rs).' requests.'], 201);
+    }
+
+    /** decline (asked of me) · remind / cancel (I asked). */
+    public function requestAction(Request $request, string $id, string $action): JsonResponse
+    {
+        $q = \App\Models\ApiPaymentRequest::where('kind', 'personal')->where('public_id', $id);
+        $user = $request->user();
+        match ($action) {
+            'decline' => \App\Support\PersonalRequests::decline($q->firstOrFail(), $user),
+            'remind' => \App\Support\PersonalRequests::remind($q->where('user_id', $user->id)->firstOrFail()),
+            'cancel' => $q->where('user_id', $user->id)->where('status', 'open')->firstOrFail()->update(['status' => 'cancelled']),
+        };
+
+        return response()->json(['message' => ['decline' => 'Declined. Nothing was paid.', 'remind' => 'Reminder sent.', 'cancel' => 'Request cancelled.'][$action]]);
     }
 
     public function activity(Request $request): JsonResponse

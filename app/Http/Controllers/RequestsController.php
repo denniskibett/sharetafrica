@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Ledger\Money;
 use App\Models\ApiPaymentRequest;
-use App\Support\Handle;
 use App\Support\PersonalRequests;
 use Illuminate\Http\Request;
 
@@ -19,23 +18,7 @@ class RequestsController extends Controller
     /** To pay (asked of me) and Sent (I asked), newest first; splits grouped. */
     public function data(Request $request)
     {
-        $me = $request->user();
-        $row = fn (ApiPaymentRequest $r, bool $mine) => [
-            'id' => $r->public_id,
-            'who' => $mine ? ($r->payer ? $r->payer->name.' · @'.Handle::for($r->payer) : $r->payer_phone) : $r->payee->name.' · @'.Handle::for($r->payee),
-            'amount' => Money::format($r->amount),
-            'note' => $r->reference,
-            'status' => $r->status === 'open' && $r->expires_at->isPast() ? 'expired' : $r->status,
-            'left' => $r->status === 'open' ? $r->expires_at->diffForHumans(['parts' => 1, 'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE]).' left' : null,
-            'group' => $r->group,
-            'pay_url' => route('pay-request.show', $r->token),
-            'when' => $r->created_at->timezone('Africa/Nairobi')->format('j M, H:i'),
-        ];
-
-        return response()->json([
-            'to_pay' => ApiPaymentRequest::with('payee')->where('kind', 'personal')->where('payer_user_id', $me->id)->latest('id')->limit(50)->get()->map(fn ($r) => $row($r, false)),
-            'sent' => ApiPaymentRequest::with('payer')->where('kind', 'personal')->where('user_id', $me->id)->latest('id')->limit(100)->get()->map(fn ($r) => $row($r, true)),
-        ]);
+        return response()->json(PersonalRequests::lists($request->user()));
     }
 
     public function store(Request $request)

@@ -129,4 +129,36 @@ class MobileApiTest extends TestCase
         Lockdown::set('ledger', false, null, 'tests');
         $this->postJson('/api/mobile/v1/send/sharet', $body, $this->h($token, 'pay-0004-abcd'))->assertCreated();
     }
+
+    public function test_the_app_gets_requests_account_number_and_card_top_ups(): void
+    {
+        $juma = $this->person('0712345678', 'Juma Otieno');
+        $akinyi = $this->person('0722410556', 'Akinyi Wanjiru');
+        $token = $this->signIn('0712345678');
+
+        // Without Cloud9 connected: only the M-PESA prompt, no account number
+        $this->getJson('/api/mobile/v1/me', $this->h($token))->assertJsonPath('add_ways', ['mpesa'])->assertJsonPath('account_number', null);
+
+        $this->postJson('/api/mobile/v1/requests', ['to' => '@'.\App\Support\Handle::for($akinyi), 'amount' => '600', 'note' => 'Lunch'], $this->h($token))->assertCreated();
+        $this->postJson('/api/mobile/v1/requests/split', ['total' => '900', 'people' => ['0733112908', '@'.\App\Support\Handle::for($akinyi)]], $this->h($token))->assertCreated();
+        $sent = $this->getJson('/api/mobile/v1/requests', $this->h($token))->assertOk()->json('sent');
+        $this->assertCount(3, $sent);
+        $this->postJson('/api/mobile/v1/requests/'.$sent[0]['id'].'/cancel', [], $this->h($token))->assertOk();
+
+        $theirs = $this->signIn('0722410556');
+        $toPay = $this->getJson('/api/mobile/v1/requests', $this->h($theirs))->json('to_pay');
+        $this->assertCount(2, $toPay);
+        $open = collect($toPay)->firstWhere('status', 'open');
+        $this->postJson('/api/mobile/v1/requests/'.$open['id'].'/decline', [], $this->h($theirs))->assertOk();
+
+        // With Cloud9 connected: account number and card
+        \App\Models\Integration::create(['company_id' => null, 'provider' => 'cloud9', 'enabled' => true, 'credentials' => ['environment' => 'sandbox', 'api_key' => 'tokenTestabc', 'wallet_id' => '7VXW9MJD']]);
+        \Illuminate\Support\Facades\Http::fake([
+            '*/paybill_accounts/' => \Illuminate\Support\Facades\Http::response(['account_id' => 'A1', 'paybill_number' => '123456', 'account' => 482915]),
+            '*/checkout/sessions/' => \Illuminate\Support\Facades\Http::response(['checkout_id' => 'K7', 'checkout_url' => 'https://pay.example/k7', 'charge' => '35.00']),
+        ]);
+        $this->getJson('/api/mobile/v1/me', $this->h($token))->assertJsonPath('add_ways', ['mpesa', 'account', 'card']);
+        $this->getJson('/api/mobile/v1/account-number', $this->h($token))->assertJsonPath('account_number.formatted', '48 2915');
+        $this->postJson('/api/mobile/v1/add-money/card', ['amount' => '1000'], $this->h($token, 'card-top-up-1'))->assertCreated()->assertJsonPath('url', 'https://pay.example/k7');
+    }
 }
