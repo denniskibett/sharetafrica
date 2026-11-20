@@ -57,6 +57,11 @@ return [
     // Money in that Cloud9 refuses before accepting goes to Sharet's own M-PESA paybill instead (you decided, 21 Nov),
     // when the M-Pesa integration is connected. A route's own fallback on Payment rails wins. Empty = no default.
     'collect_fallback' => env('RAIL_COLLECT_FALLBACK', 'daraja'),
+    // …and money out Cloud9 refuses goes out from the paybill (B2C/B2B), when it has the initiator and float
+    'payout_fallback' => env('RAIL_PAYOUT_FALLBACK', 'daraja'),
+
+    // Cloud9 carries every payment once its key is in Integrations › Cloud9 (routes on Payment rails still win)
+    'prefer_cloud9' => (bool) env('RAIL_PREFER_CLOUD9', true),
 
     // Payments still waiting this long get a status check from `ramp:resolve` (never a blind retry).
     'status_check_after_seconds' => 60,

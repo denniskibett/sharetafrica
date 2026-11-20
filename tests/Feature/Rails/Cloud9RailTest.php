@@ -183,7 +183,11 @@ class Cloud9RailTest extends TestCase
         config(['rails.collect_only_for' => ['jane@example.test']]);
         $rails = app(\App\Integrations\Rails::class);
         $this->assertSame('cloud9', $rails->paying(User::factory()->create(['email' => 'jane@example.test'])));
+        // Everyone else: Cloud9 is the default once connected (the paybill only takes over when Cloud9 refuses)
+        $this->assertSame(['cloud9', 'cloud9'], [$rails->paying(User::factory()->create()), $rails->collecting(User::factory()->create())]);
+        config(['rails.prefer_cloud9' => false]);
         $this->assertSame('simulator', $rails->paying(User::factory()->create()));
+        config(['rails.prefer_cloud9' => true]);
 
         // Cloud9 can't be chosen before it is connected
         Integration::where('provider', 'cloud9')->delete();

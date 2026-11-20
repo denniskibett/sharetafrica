@@ -20,14 +20,23 @@ class Rails
     public function collecting(?\App\Models\User $user = null): string
     {
         return $this->routed('collect', $user)
-            ?? (config('rails.collect') && $this->isNamed($user) ? config('rails.collect') : $this->default());
+            ?? ($this->cloud9() ? 'cloud9' : (config('rails.collect') && $this->isNamed($user) ? config('rails.collect') : $this->default()));
     }
 
     /** The rail that pays out for this person, by where the money goes (phone, paybill, till, bank; business wallets: settlement). */
     public function paying(?\App\Models\User $user = null, string $destinationType = 'phone'): string
     {
         return $this->routed(self::movement($user, $destinationType), $user)
-            ?? (config('rails.payout') && $this->isNamed($user) ? config('rails.payout') : $this->default());
+            ?? ($this->cloud9() ? 'cloud9' : (config('rails.payout') && $this->isNamed($user) ? config('rails.payout') : $this->default()));
+    }
+
+    /**
+     * Cloud9 is the default rail for every payment once it is connected (you decided, 21 Nov); the M-PESA paybill
+     * takes over only when Cloud9 refuses (downtime). A route approved on Payment rails still wins. RAIL_PREFER_CLOUD9=false turns it off.
+     */
+    public function cloud9(): bool
+    {
+        return (bool) config('rails.prefer_cloud9') && filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null);
     }
 
     /** Which kind of payment (RailRoute::MOVEMENTS) a payout is. */
@@ -51,9 +60,10 @@ class Rails
             return $route->fallback;
         }
 
-        // The default: an M-PESA prompt Cloud9 can't take goes to Sharet's own paybill (not a card: M-PESA has none)
-        $default = config('rails.collect_fallback');
-        if ($request->kind === 'collect' && $request->rail === 'cloud9' && $default && $default !== 'cloud9'
+        // The default when Cloud9 is down: Sharet's own M-PESA paybill, for money in (an M-PESA prompt; not a card: M-PESA
+        // has none) and for money out (B2C/B2B, when the paybill can pay out and has float)
+        $default = config($request->kind === 'collect' ? 'rails.collect_fallback' : 'rails.payout_fallback');
+        if ($request->rail === 'cloud9' && $default && $default !== 'cloud9'
             && ! in_array($request->meta['method'] ?? null, ['card', 'account_number'], true)
             && ($default !== 'daraja' || \App\Services\Integrations::mpesa()[0])) {
             return $default;
