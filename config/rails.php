@@ -54,6 +54,10 @@ return [
     // (with the full payload and the real receipt) decides, and a query never answers while the customer is on the PIN.
     'callback_wait' => ['daraja' => 60, 'cloud9' => 60],
 
+    // Money in that Cloud9 refuses before accepting goes to Sharet's own M-PESA paybill instead (you decided, 21 Nov),
+    // when the M-Pesa integration is connected. A route's own fallback on Payment rails wins. Empty = no default.
+    'collect_fallback' => env('RAIL_COLLECT_FALLBACK', 'daraja'),
+
     // Payments still waiting this long get a status check from `ramp:resolve` (never a blind retry).
     'status_check_after_seconds' => 60,
 ];

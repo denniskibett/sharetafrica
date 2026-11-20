@@ -41,6 +41,8 @@ class MobileController extends Controller
             'api' => 'v1', 'min_app_version' => config('mobile.min_version', '1.0.0'), 'currency' => config('ledger.currency'),
             'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen(), 'support' => ['email' => 'support@sharet.africa'],
             'test_mode' => config('rails.default') === 'simulator',
+            // banks a payment can go to (through the bank's M-PESA paybill): key => name
+            'banks' => config('pricing.banks'),
             'android' => ($a = \App\Support\AndroidRelease::latest()) ? ['version' => $a['version'], 'build' => $a['build'] ?? null, 'url' => route('app.android')] : null,
         ]);
     }
@@ -155,6 +157,16 @@ class MobileController extends Controller
         return response()->json(['message' => 'Split sent: '.count($rs).' requests.'], 201);
     }
 
+    /** Pay a request from the wallet with the Sharet PIN, inside the app (free between Sharet members). */
+    public function payRequest(Request $request, string $id, \App\Api\PaymentRequests $requests): JsonResponse
+    {
+        $r = \App\Models\ApiPaymentRequest::where('kind', 'personal')->where('public_id', $id)->where('payer_user_id', $request->user()->id)->firstOrFail();
+        $r = $requests->payWithSharet($r, $request->user(), $request->input('pin'));
+        $order = $r->order;
+
+        return response()->json(['message' => 'Paid '.$r->payee->name.'.', 'order' => $order ? $order->present($request->user()) + ['reference' => $order->reference(), 'receipt' => $order->receipt($request->user())] : null]);
+    }
+
     /** decline (asked of me) · remind / cancel (I asked). */
     public function requestAction(Request $request, string $id, string $action): JsonResponse
     {
@@ -213,8 +225,14 @@ class MobileController extends Controller
     /** Sharet to M-PESA, step 1: the full cost (fee, excise) before the PIN. Valid ~10 minutes. */
     public function quote(Request $request): JsonResponse
     {
-        $data = $request->validate(['phone' => 'required|string|max:20', 'amount' => 'required|string|max:20', 'note' => 'nullable|string|max:140']);
-        $order = $this->orders->quote($request->user(), 'phone', ['phone' => $data['phone']], $data['amount'], $data['note'] ?? null, 'wallet');
+        // From the wallet to an M-PESA number, a paybill, a till or a bank account (through its paybill), as on the web
+        $data = $request->validate([
+            'type' => ['nullable', 'in:'.implode(',', \App\Ramp\Destination::TYPES)],
+            'amount' => 'required|string|max:20', 'note' => 'nullable|string|max:140',
+            'phone' => 'nullable|string|max:20', 'paybill' => 'nullable|string|max:10', 'till' => 'nullable|string|max:10',
+            'account' => 'nullable|string|max:30', 'bank' => 'nullable|string|max:20',
+        ]);
+        $order = $this->orders->quote($request->user(), $data['type'] ?? 'phone', $data, $data['amount'], $data['note'] ?? null, 'wallet');
 
         return response()->json(['order' => $order->present($request->user())], 201);
     }
@@ -236,7 +254,8 @@ class MobileController extends Controller
             $order = $this->orders->refresh($order);
         }
 
-        return response()->json(['order' => $order->present($request->user()) + ['reference' => $order->reference()]]);
+        // The receipt lines are the same as the web receipt, PDF and email: the Sharet reference and the network's own
+        return response()->json(['order' => $order->present($request->user()) + ['reference' => $order->reference(), 'receipt' => $order->receipt($request->user())]]);
     }
 
     /** Add money from the user's own M-PESA (STK prompt on their phone). */
@@ -260,6 +279,7 @@ class MobileController extends Controller
     protected function person(User $user): array
     {
         return ['name' => $user->name, 'first_name' => Str::before(trim($user->name), ' '), 'handle' => Handle::for($user), 'phone' => $user->phone,
-            'kyc_level' => $user->kyc_level ?? 'none', 'verified' => in_array($user->kyc_level, ['basic', 'standard'], true), 'pin_set' => TransactionPin::isSet($user)];
+            'kyc_level' => $user->kyc_level ?? 'none', 'verified' => in_array($user->kyc_level, ['basic', 'standard'], true), 'pin_set' => TransactionPin::isSet($user),
+            'sharet_id' => $user->sharet_id, 'email' => $user->email];
     }
 }
