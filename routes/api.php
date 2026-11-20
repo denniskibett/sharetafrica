@@ -81,6 +81,11 @@ Route::prefix('mobile/v1')->name('api.mobile.')->controller(\App\Http\Controller
         Route::get('lookup', 'lookup')->name('lookup');
         Route::post('pin', 'pin')->name('pin');
         Route::get('orders/{uuid}', 'order')->name('order');
+        Route::get('account-number', 'accountNumber')->name('account-number');
+        Route::get('requests', 'requests')->name('requests');
+        Route::post('requests', 'askMoney')->middleware('throttle:20,1,mobile-requests')->name('requests.ask');
+        Route::post('requests/split', 'splitBill')->middleware('throttle:10,1,mobile-requests')->name('requests.split');
+        Route::post('requests/{id}/{action}', 'requestAction')->where('action', 'decline|remind|cancel')->middleware('throttle:20,1,mobile-requests')->name('requests.action');
     });
 });
 
@@ -90,4 +95,5 @@ Route::prefix('mobile/v1')->name('api.money.mobile.')->controller(\App\Http\Cont
         Route::post('quote', 'quote')->name('quote');
         Route::post('orders/{uuid}/confirm', 'confirm')->name('confirm');
         Route::post('add-money', 'addMoney')->name('add-money');
+        Route::post('add-money/card', 'addByCard')->name('add-money-card');
     });
