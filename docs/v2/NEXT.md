@@ -36,7 +36,9 @@ Built, deployed, **switched off**.
 - **Written cover from a licensed partner** (Cashia / Gladys) **or CBK authorisation.**
 - **Email:** live Integrations → Email (SMTP) for `noreply@sharet.africa` (host `sharet.africa`, 587, TLS); SPF
   (`ip4:185.113.249.146`) and DKIM `default._domainkey` at Olitt (notes file `sharet-dns-email-records.md`); one test email.
-- **SMS:** KenyaSMS API key (`ks_live_…`, `sms.send`) and sender ID in live Integrations → KenyaSMS, press Test.
+- **SMS:** KenyaSMS API key (`ks_live_…`, `sms.send`) and sender ID SHARETENT in live Integrations → KenyaSMS, press
+  Test, then **Send test SMS** (always to 0717492048, `SMS_TEST_TO`). Optional backup: Integrations → Africa's Talking
+  (used only when KenyaSMS is off or refuses a message; never when KenyaSMS gave no answer, so no doubled SMS).
 - **FX rate:** none recorded on live.
 - **Backups off the server:** CyberPanel remote backups (S3 / Backblaze / another server).
 - **Break-glass IPs:** `LOCKDOWN_ALLOW_IPS` is empty, so a lockdown can only be lifted from the server.

@@ -100,18 +100,18 @@ return [
         'fields' => [
             'api_url' => ['label' => 'API URL', 'type' => 'url', 'required' => true, 'placeholder' => 'https://kenyasms.com/api/v1', 'sandbox' => 'https://kenyasms.com/api/v1'],
             'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true, 'help' => 'Developers → API Keys on kenyasms.com (ks_live_…). Needs the sms.send scope.'],
-            'sender_id' => ['label' => 'Sender ID', 'required' => true, 'placeholder' => 'SHARET', 'help' => 'Your approved sender name, up to 11 characters.'],
+            'sender_id' => ['label' => 'Sender ID', 'required' => true, 'placeholder' => 'SHARETENT', 'sandbox' => 'SHARETENT', 'help' => 'Your approved sender name, up to 11 characters. Sharet\'s own is SHARETENT.'],
         ],
     ],
     'africastalking' => [
         'name' => "Africa's Talking",
         'category' => 'Messaging',
-        'description' => 'SMS, USSD and airtime across Africa.',
+        'description' => 'Backup SMS gateway: when KenyaSMS is off or refuses a message, it goes through Africa\'s Talking instead.',
         'color' => '#F97316',
         'fields' => [
             'username' => ['label' => 'Username', 'required' => true, 'help' => 'Use "sandbox" for testing.', 'sandbox' => 'sandbox'],
             'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true],
-            'sender_id' => ['label' => 'Sender ID'],
+            'sender_id' => ['label' => 'Sender ID', 'placeholder' => 'SHARETENT', 'help' => 'Leave blank to use Africa\'s Talking\'s shared sender.'],
         ],
     ],
     'smtp' => [
@@ -128,6 +128,18 @@ return [
             'password' => ['label' => 'Password', 'secret' => true],
             'from_address' => ['label' => 'From address', 'type' => 'email', 'required' => true],
             'from_name' => ['label' => 'From name', 'placeholder' => 'Sharet'],
+        ],
+    ],
+    // Sharet's own key: platform scope only (never per company). Staff tools only; Claude advises, people decide.
+    'claude' => [
+        'name' => 'Claude (Anthropic)',
+        'category' => 'AI',
+        'platform_only' => true,
+        'description' => 'Claude reads ID photos as a second opinion for staff reviewing a verification. It never approves or rejects anyone. Photos go to Anthropic only when staff press "Read with Claude".',
+        'color' => '#D97757',
+        'fields' => [
+            'api_key' => ['label' => 'Anthropic API key', 'secret' => true, 'required' => true, 'help' => 'From console.anthropic.com › API keys. Replaces ANTHROPIC_API_KEY in .env while this is on.'],
+            'model' => ['label' => 'Model', 'placeholder' => 'claude-sonnet-5-5', 'help' => 'Leave blank for the default (ANTHROPIC_MODEL, else claude-sonnet-5-5).'],
         ],
     ],
     'google' => [

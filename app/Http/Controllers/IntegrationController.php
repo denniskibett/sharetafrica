@@ -24,7 +24,8 @@ class IntegrationController extends Controller
         $rows = Integration::where('company_id', $companyId)->get()->keyBy('provider');
         $isAdmin = $request->user()->hasAnyRole(DashboardNav::ADMIN);
 
-        $providers = collect(config('integrations'))->map(fn ($p, $key) => $this->state($key, $rows->get($key)));
+        $providers = collect(config('integrations'))->reject(fn ($p) => $companyId && ! empty($p['platform_only']))
+            ->map(fn ($p, $key) => $this->state($key, $rows->get($key)));
         if ($request->wantsJson()) {
             return response()->json(['providers' => $providers->values()]);
         }
@@ -39,7 +40,7 @@ class IntegrationController extends Controller
     public function update(Request $request, string $provider)
     {
         $companyId = $this->companyId($request);
-        $definition = $this->definition($provider);
+        $definition = $this->definition($provider, $companyId);
         $row = Integration::firstOrNew(['company_id' => $companyId, 'provider' => $provider]);
         $saved = $row->credentials ?? [];
         $input = (array) $request->input('values', []);
@@ -126,6 +127,17 @@ class IntegrationController extends Controller
         ], $ok ? 200 : 422);
     }
 
+    /** KenyaSMS / Africa's Talking (platform settings only): a real SMS, always to config('sms.test_to'), never to a customer. */
+    public function sendTestSms(Request $request, string $provider)
+    {
+        abort_unless($this->companyId($request) === null, 404);
+        $row = $this->row($request, $provider);
+        [$ok, $message] = \App\Integrations\Sms\Sms::test($provider);
+        $row->forceFill(['last_tested_at' => now(), 'last_test_ok' => $ok, 'last_test_message' => $message])->save();
+
+        return response()->json(['message' => $message, 'provider' => $this->state($provider, $row->fresh())], $ok ? 200 : 422);
+    }
+
     public function destroy(Request $request, string $provider)
     {
         $this->row($request, $provider)->delete();
@@ -159,14 +171,18 @@ class IntegrationController extends Controller
         ];
     }
 
-    protected function definition(string $provider): array
+    /** A platform_only provider (Sharet's own Claude key) exists only on the platform defaults, never per company. */
+    protected function definition(string $provider, ?int $companyId = null): array
     {
-        return config("integrations.$provider") ?? abort(404);
+        $d = config("integrations.$provider") ?? abort(404);
+        abort_if($companyId && ! empty($d['platform_only']), 404);
+
+        return $d;
     }
 
     protected function row(Request $request, string $provider): Integration
     {
-        $this->definition($provider);
+        $this->definition($provider, $this->companyId($request));
 
         return Integration::where('company_id', $this->companyId($request))->where('provider', $provider)->firstOrFail();
     }

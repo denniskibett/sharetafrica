@@ -28,3 +28,17 @@ Tesseract is installed on the development machine but **not on the server**, so 
 
 Tests: `tests/Unit/KenyanIdTextTest.php` (front, back, unsure text) and the verification test in
 `tests/Feature/VerificationAndIntegrationsTest.php` (photos verify, details filled from a fake reader).
+
+## Second reading by Claude (staff only, advice only)
+
+On a person's page (Administration › Verifications › the person), staff can press **Read with Claude**. Claude
+(Anthropic, `App\Integrations\Claude\DocumentReader`) reads the ID front and back and shows, next to the automatic
+checks: name on the account vs the card, ID number and date of birth on file vs the card, and anything that looks
+edited, cut off or inconsistent. The result is kept under `kyc.assist` with who asked and when.
+
+- **It never decides.** Claude does not approve, reject, change the details on file or the level; it is not one of the
+  automatic checks. Staff still press Approve or Reject (`Kyc::decide`).
+- **Photos go to Anthropic only when staff press the button.** Nothing is sent on upload.
+- **Settings:** Integrations › Claude (Anthropic), platform only (encrypted key; wins over `ANTHROPIC_API_KEY`), model
+  from the card, else `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`). Off until a key is saved.
+- Tests: `tests/Feature/Integrations/ClaudeTest.php` (Anthropic faked with `Http::fake`).

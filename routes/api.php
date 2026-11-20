@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 | Sharet API (prefix /api). Authenticate with "Authorization: Bearer sk_test_…" from Dashboard › API keys.
 */
 
+// Reference FX rates for display (Safaricom's rate, no margin): public, read-only, nothing is quoted (docs/v2/FX.md)
+Route::get('v1/fx/rates', \App\Http\Controllers\Api\V1\FxRatesController::class)->middleware('throttle:60,1,api-fx-rates')->name('api.v1.fx.rates');
+
 Route::prefix('v1')->middleware(['api.key', 'throttle:60,1,api-v1'])->group(function () {
     // Check a key works: returns which key and environment it is
     Route::get('/me', function (Request $request) {

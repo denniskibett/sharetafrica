@@ -2,13 +2,13 @@
 
 namespace App\Support;
 
-use App\Integrations\Sms\KenyaSms;
+use App\Integrations\Sms\Sms;
 use App\Ledger\Money;
 use App\Models\RampOrder;
 use App\Models\User;
 
 /**
- * SMS to customers as a payment moves (KenyaSMS), alongside the M-PESA prompt and the emailed receipt (Receipt):
+ * SMS to customers as a payment moves (Sms: KenyaSMS, Africa's Talking as the backup), alongside the M-PESA prompt and the emailed receipt (Receipt):
  * - the prompt went out: approve it on your phone
  * - finished: paid / added to wallet / not paid / refunded, with the reference
  * - an @name transfer: the person paid gets their own message
@@ -37,13 +37,13 @@ final class CustomerMessages
             default => null,
         };
         if ($text && ($phone = self::phone($o->payer_phone))) {
-            KenyaSms::send($phone, $text, "sms:{$o->uuid}:{$o->status}");
+            Sms::send($phone, $text, "sms:{$o->uuid}:{$o->status}");
         }
 
         // the person paid on an @name transfer
         if ($o->status === 'paid' && $p['transfer'] && ($to = User::find($o->recipient_user_id)) && ($phone = self::phone($to->phone))) {
             $from = '@'.($o->sender?->handle ?? 'sharet');
-            KenyaSms::send($phone, 'Sharet: you received KES '.Money::format($o->amount)." from {$from}. Ref {$ref}.", "sms:{$o->uuid}:received");
+            Sms::send($phone, 'Sharet: you received KES '.Money::format($o->amount)." from {$from}. Ref {$ref}.", "sms:{$o->uuid}:received");
         }
     }
 

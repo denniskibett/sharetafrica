@@ -18,4 +18,7 @@ return [
     ],
     
     'sandbox' => env('SMS_SANDBOX', true),
+
+    // Every test SMS (Integrations › Send test SMS) goes to this number, never to a customer
+    'test_to' => env('SMS_TEST_TO', '0717492048'),
 ];
