@@ -149,6 +149,9 @@ class PostController extends Controller
         $data['slug'] = $slug;
         $data['body'] = RichText::clean($data['body'] ?? '');
         $data['excerpt'] = ($data['excerpt'] ?? null) ?: Str::limit(trim(strip_tags($data['body'])), 200);
+        if (filled($data['published_at'] ?? null)) {   // the editor types Nairobi time
+            $data['published_at'] = \Illuminate\Support\Carbon::parse($data['published_at'], 'Africa/Nairobi')->setTimezone(config('app.timezone'));
+        }
         $data['published_at'] = $data['status'] === 'published' ? ($data['published_at'] ?? $post?->published_at ?? now()) : ($data['published_at'] ?? null);
 
         return $data;

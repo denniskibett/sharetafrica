@@ -59,7 +59,7 @@ class PricingController extends Controller
 
         $t = Tariff::create([
             'version' => (int) Tariff::max('version') + 1,
-            'effective_from' => $data['effective_from'],
+            'effective_from' => \Illuminate\Support\Carbon::parse($data['effective_from'], 'Africa/Nairobi')->setTimezone(config('app.timezone')), // typed in Nairobi time
             'bands' => $bands, 'volume_tiers' => $tiers,
             'excise_bp' => (int) round($data['excise_percent'] * 100),
             'notes' => $data['notes'] ?? null,

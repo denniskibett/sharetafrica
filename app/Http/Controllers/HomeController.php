@@ -115,7 +115,7 @@ class HomeController extends Controller
             'business'            => 'required|string|max:190',
             'trade_type'          => 'required|in:importer,exporter,both,diaspora,intra_africa',
             'corridor'            => 'nullable|string|max:190',
-            'corridor_other'      => 'nullable|string|max:190|required_if:corridor,OTHER',
+            'corridor_other'      => 'nullable|string|max:190', // "Other": the option asks for details in the brief
             'need'                => 'required|in:payment_abroad,receive_from_abroad,intra_africa,credit_line,all',
             'monthly_volume'      => 'nullable|string|max:60',
             'expected_order_size' => 'nullable|string|max:120',
@@ -313,16 +313,12 @@ class HomeController extends Controller
 
     protected function upsertCompany(string $name): Company
     {
-        $slug = Str::slug($name);
-
-        return Company::firstOrCreate(
-            ['slug' => $slug],
-            [
-                'name'   => $name,
-                'type'   => 'business',
-                'status' => true,
-            ]
-        );
+        // Always a new company (the model adds a unique slug): typing an existing business's name must never join it
+        return Company::create([
+            'name'   => $name,
+            'type'   => 'business',
+            'status' => true,
+        ]);
     }
 
     protected function attachWaitingList(User $user, string $intent, string $source, array $meta = [], string $form = 'personal', array $rows = [])

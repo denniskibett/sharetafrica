@@ -74,6 +74,9 @@ class GroupCompanyController extends Controller
             'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp,svg|max:2048',
         ]);
         unset($data['logo']);
+        if (($data['sort'] ?? null) === null) {
+            unset($data['sort']);   // an empty Order keeps the current place (or the next one for a new company)
+        }
 
         $slug = Str::slug(($data['slug'] ?? null) ?: $data['name']);
         for ($i = 2, $base = $slug; GroupCompany::where('slug', $slug)->when($company, fn ($q) => $q->whereKeyNot($company->id))->exists(); $i++) {

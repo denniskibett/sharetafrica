@@ -96,7 +96,8 @@ class OnboardingController extends Controller
             'onboarding_status' => 'in_progress',
         ]);
 
-        return redirect()->route('onboarding.' . $data['lane']);
+        // the Developer lane is stored as intent "techie"; its form is onboarding.developer
+        return redirect()->route('onboarding.' . ($data['lane'] === 'techie' ? 'developer' : $data['lane']));
     }
 
     /*
@@ -125,17 +126,14 @@ class OnboardingController extends Controller
         /** @var User $user */
         $user = auth()->user();
 
-        // Create or link Company
-        $company = Company::firstOrCreate(
-            ['slug' => Str::slug($data['business_name'])],
-            [
-                'name'    => $data['business_name'],
-                'type'    => 'merchant',
-                'country' => $data['country'],
-                'city'    => $data['city'] ?? null,
-                'status'  => true,
-            ]
-        );
+        // The person's own company: a new one (unique slug), never another company that happens to share the name
+        $company = $user->company ?? Company::create([
+            'name'    => $data['business_name'],
+            'type'    => 'merchant',
+            'country' => $data['country'],
+            'city'    => $data['city'] ?? null,
+            'status'  => true,
+        ]);
 
         $user->update([
             'company_id'        => $company->id,
@@ -173,18 +171,16 @@ class OnboardingController extends Controller
         /** @var User $user */
         $user = auth()->user();
 
-        $company = Company::firstOrCreate(
-            ['slug' => Str::slug($data['business_name'])],
-            [
-                'name'                => $data['business_name'],
-                'type'                => 'business',
-                'registration_number' => $data['registration_no'] ?? null,
-                'tax_id'              => $data['tax_id'] ?? null,
-                'country'             => $data['country'],
-                'city'                => $data['city'] ?? null,
-                'status'              => true,
-            ]
-        );
+        // The person's own company: a new one (unique slug), never another company that happens to share the name
+        $company = $user->company ?? Company::create([
+            'name'                => $data['business_name'],
+            'type'                => 'business',
+            'registration_number' => $data['registration_no'] ?? null,
+            'tax_id'              => $data['tax_id'] ?? null,
+            'country'             => $data['country'],
+            'city'                => $data['city'] ?? null,
+            'status'              => true,
+        ]);
 
         $user->update([
             'company_id'        => $company->id,

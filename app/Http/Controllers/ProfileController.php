@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\User;
 use App\Support\Identity;
 use App\Support\Kyc;
@@ -49,7 +50,7 @@ class ProfileController extends Controller
         $level = Kyc::refreshLevel($user);
 
         return response()->json([
-            'user' => $user->only(['name', 'first_name', 'last_name', 'email', 'phone', 'bio', 'country', 'city']) + [
+            'user' => $user->only(['name', 'first_name', 'last_name', 'email', 'phone', 'bio', 'city']) + ['country' => $user->country ? Company::countryName($user->country) : null] + [
                 'avatar' => $user->avatar ? asset('storage/'.$user->avatar) : null,
                 'pin_set' => \App\Support\TransactionPin::isSet($user),
                 'initials' => \App\Support\Table::person($user)['initials'],
@@ -92,6 +93,9 @@ class ProfileController extends Controller
             unset($data['avatar']);
         }
 
+        if (array_key_exists('country', $data)) {   // users.country is ISO 3166 alpha-2: "Kenya" is stored as KE
+            $data['country'] = filled($data['country']) ? Company::countryCode($data['country']) : null;
+        }
         $user->fill($data);
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

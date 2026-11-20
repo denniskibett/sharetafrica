@@ -29,7 +29,7 @@ class CompanySettingsController extends Controller
         $company = $user->company;
         $kyb = $this->kyb($company);
         $kyb['directors'] = $this->withOwner($user, $kyb['directors'] ?? []);
-        $values = ($company?->only(['name', 'legal_name', 'type', 'registration_number', 'tax_id', 'email', 'phone', 'website', 'country', 'city', 'address']) ?? ['country' => 'KE']) + $kyb;
+        $values = ($company?->only(['name', 'legal_name', 'registration_number', 'tax_id', 'email', 'phone', 'website', 'country', 'city', 'address']) ?? ['country' => 'KE']) + $kyb;
         $values['country'] = Company::countryName($values['country'] ?? null);
         $done = self::countDone($values);
 
@@ -89,11 +89,12 @@ class CompanySettingsController extends Controller
                 'errors' => ['owner' => ['Personal account needed.']]], 422);
         }
         $company = $user->company ?? new Company(['status' => true]);
-        $company->fill(collect($data)->only(['name', 'legal_name', 'type', 'registration_number', 'email', 'phone', 'website', 'country', 'city', 'address'])->all());
+        $company->fill(collect($data)->only(['name', 'legal_name', 'registration_number', 'email', 'phone', 'website', 'country', 'city', 'address'])->all());
+        $company->phone = \App\Support\Identity::normalisePhone($data['phone'] ?? null);   // +254… like people's numbers
         $company->tax_id = isset($data['tax_id']) ? strtoupper($data['tax_id']) : null;
         $company->country = Company::countryCode($data['country'] ?? null);   // companies.country is ISO 3166 alpha-2
 
-        $kyb = collect($data)->only(['registered_on', 'vat_number', 'nature_of_business', 'annual_turnover', 'settlement'])->all();
+        $kyb = collect($data)->only(['type', 'registered_on', 'vat_number', 'nature_of_business', 'annual_turnover', 'settlement'])->all();
         $kyb['directors'] = $this->withOwner($user, array_values(array_filter($data['directors'] ?? [], fn ($d) => filled($d['name'] ?? null))));
         $company->settings = array_merge($company->settings ?? [], ['kyb' => encrypt($kyb), 'kyb_updated_at' => now()->toIso8601String()]);
         if (($company->settings['kyb_review']['status'] ?? null) === 'rejected') {   // fixed after a rejection: back in the staff queue
@@ -140,7 +141,7 @@ class CompanySettingsController extends Controller
     /** A saved business's KYB progress for staff review: ['done' => n, 'of' => m]. */
     public static function progressOf(Company $company): array
     {
-        $values = $company->only(['legal_name', 'type', 'registration_number', 'tax_id', 'email', 'phone', 'address']) + (new self)->kyb($company);
+        $values = $company->only(['legal_name', 'registration_number', 'tax_id', 'email', 'phone', 'address']) + (new self)->kyb($company);
 
         return ['done' => self::countDone($values), 'of' => count(self::REQUIRED)];
     }

@@ -59,7 +59,7 @@
           <label class="flex items-center gap-3"><input type="radio" name="status" value="published" x-model="status" class="text-gray-900"> Published</label>
           <div x-show="status === 'published'">
             <label for="published_at" class="mb-1.5 block font-medium text-gray-700 dark:text-gray-300">Publish date</label>
-            <input id="published_at" type="datetime-local" name="published_at" value="{{ $post->published_at?->format('Y-m-d\TH:i') }}" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 dark:border-gray-700 dark:bg-gray-900">
+            <input id="published_at" type="datetime-local" name="published_at" value="{{ $post->published_at?->timezone('Africa/Nairobi')->format('Y-m-d\TH:i') }}" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-3 dark:border-gray-700 dark:bg-gray-900">
             <p class="mt-1 text-xs text-gray-500">Leave empty to publish now. A future date schedules it.</p>
           </div>
         </div>

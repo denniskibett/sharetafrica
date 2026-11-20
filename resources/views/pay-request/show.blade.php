@@ -79,7 +79,7 @@
           </h3>
           <form method="POST" action="{{ route('pay.request.mpesa', $r->token) }}" class="mt-4 space-y-3">
             @csrf
-            <x-ui.form-input label="M-PESA number" name="phone" type="tel" inputmode="tel" :value="old('phone', $r->payer_phone ? '0'.substr($r->payer_phone, 3) : '')" placeholder="0712 345 678" required />
+            <x-ui.form-input label="M-PESA number" name="phone" type="tel" inputmode="tel" :value="old('phone', $r->payer_phone ? '0'.substr(preg_replace('/\D/', '', $r->payer_phone), -9) : '')" placeholder="0712 345 678" required />
             <button type="submit" class="{{ $btn }}">Send M-PESA prompt</button>
           </form>
         </section>
@@ -140,7 +140,7 @@
           <p class="mt-1 text-sm text-app-muted">Your wallet isn't used. The payment still shows in your Sharet history.</p>
           <form method="POST" action="{{ route('pay.request.mpesa', $r->token) }}" class="mt-4 space-y-3">
             @csrf
-            <x-ui.form-input label="M-PESA number" name="phone" type="tel" inputmode="tel" :value="old('phone', $r->payer_phone ? '0'.substr($r->payer_phone, 3) : ($me->phone ? '0'.substr(preg_replace('/\\D/', '', $me->phone), -9) : ''))" placeholder="0712 345 678" required />
+            <x-ui.form-input label="M-PESA number" name="phone" type="tel" inputmode="tel" :value="old('phone', $r->payer_phone ? '0'.substr(preg_replace('/\D/', '', $r->payer_phone), -9) : ($me->phone ? '0'.substr(preg_replace('/\\D/', '', $me->phone), -9) : ''))" placeholder="0712 345 678" required />
             <button type="submit" class="{{ $btn }}">Send M-PESA prompt</button>
           </form>
         </section>
