@@ -139,6 +139,80 @@ class RampOrders
         return $this->ledger->account('2100', $user)->available();
     }
 
+    /**
+     * "Add money" by card on a hosted card page (Cloud9 checkout). The customer pays the card charge on top; the wallet
+     * gets the amount. Returns [order, card page url]. The PAYIN webhook (or the return page's status check) books it.
+     */
+    public function topUpByCard(User $user, string $amount): array
+    {
+        $order = $this->topUp($user, $amount);
+        $req = DB::transaction(function () use ($order) {
+            $o = RampOrder::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            $o->rail = 'cloud9';
+            $req = RailRequest::create([
+                'rail' => 'cloud9', 'kind' => 'collect', 'reference' => "ramp:{$o->uuid}:collect", 'amount' => $o->total, 'currency' => $o->currency,
+                'party' => $o->payer_phone, 'status' => 'pending',
+                'meta' => ['role' => 'collect', 'order' => $o->uuid, 'destination_type' => 'phone', 'destination' => null, 'method' => 'card'],
+            ]);
+            $o->collect_request_id = $req->id;
+            $this->move($o, 'collecting', 'Card page opened for '.Money::format($o->total));
+
+            return $req;
+        });
+        try {
+            [$checkout, $url, $charge] = app(\App\Integrations\Cloud9\Cloud9Rail::class)->checkout($req, $user);
+        } catch (Throwable $e) {
+            report($e);
+            $this->apply($req, RailResult::failed('The card page could not be opened. Try again or use M-PESA.'));
+            throw ValidationException::withMessages(['amount' => 'The card page could not be opened. Try again or add money by M-PESA.']);
+        }
+        $req->forceFill(['provider_reference' => $checkout, 'meta' => array_merge($req->meta, ['checkout_id' => $checkout, 'card_charge' => $charge])])->save();
+
+        return [$order->fresh(), $url];
+    }
+
+    /**
+     * Money paid to a person's own account number from the M-PESA menu (a Cloud9 paybill deposit we did not ask for).
+     * Booked as a top-up: the customer pays the payment charge. Idempotent by the deposit id.
+     */
+    public function creditPaybill(User $user, array $deposit, RailResult $result): ?RampOrder
+    {
+        $id = (string) ($deposit['id'] ?? '');
+        if ($id === '' || $result->status !== 'succeeded') {
+            return null;
+        }
+        $req = DB::transaction(function () use ($user, $deposit, $id) {
+            if (RailRequest::where('rail', 'cloud9')->where('kind', 'collect')->where('provider_reference', $id)->lockForUpdate()->exists()) {
+                return null;
+            }
+            $cents = (int) round(((float) ($deposit['amount'] ?? 0)) * 100);
+            $from = trim((string) ($deposit['narration'] ?? '')) ?: (string) ($deposit['phone_number'] ?? 'M-PESA');
+            $o = RampOrder::create([
+                'uuid' => (string) Str::uuid(), 'user_id' => $user->id, 'rail' => 'cloud9', 'destination_type' => 'wallet',
+                'destination' => ['wallet' => 'Sharet wallet', 'via' => 'account_number', 'from' => mb_substr($from, 0, 80)],
+                'payer_phone' => (string) ($deposit['phone_number'] ?? ''), 'funding' => 'mpesa',
+                'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents, 'currency' => config('ledger.currency'),
+                'status' => 'collecting', 'quote_expires_at' => now(),
+                'timeline' => [$this->event('Paid to your account number from M-PESA · '.mb_substr($from, 0, 80))],
+            ]);
+            $req = RailRequest::create([
+                'rail' => 'cloud9', 'kind' => 'collect', 'reference' => "ramp:{$o->uuid}:collect", 'amount' => $cents, 'currency' => $o->currency,
+                'party' => $o->payer_phone, 'status' => 'pending', 'provider_reference' => $id,
+                'meta' => ['role' => 'collect', 'order' => $o->uuid, 'destination_type' => 'phone', 'destination' => null, 'method' => 'account_number',
+                    'callbacks' => [['at' => now()->toIso8601String(), 'body' => $deposit]]],
+            ]);
+            $o->forceFill(['collect_request_id' => $req->id])->save();
+
+            return $req;
+        });
+        if (! $req) {
+            return null;
+        }
+        $this->apply($req, $result);
+
+        return RampOrder::where('collect_request_id', $req->id)->first();
+    }
+
     /** The payer confirms: we ask their M-PESA to pay (STK push), or take it from their wallet and pay at once. */
     public function confirm(RampOrder $order): RampOrder
     {
@@ -343,11 +417,15 @@ class RampOrders
                 ...$this->collectedLegs($req, $o->total, $topUp),
                 Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $credited),
             ], ['source' => $o, 'memo' => ($topUp ? (\App\Models\ApiPaymentRequest::where('public_id', $o->sharetReference())->where('user_id', $o->user_id)->exists()
-                ? 'Payment request paid by M-PESA from ' : 'Wallet top-up from ') : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
+                ? 'Payment request paid by M-PESA from ' : 'Wallet top-up from ') : 'Collected from ')."{$o->payer_phone} · ".($req->meta['network'] ?? 'M-PESA')." {$req->receipt}"]);
             if ($topUp) {
-                $this->move($o, 'paid', $o->fee
-                    ? 'Added '.Money::format($o->amount)." to your wallet · M-PESA {$req->receipt} · payment charge ".Money::format($o->fee)
-                    : "Added to your wallet · M-PESA {$req->receipt}");
+                $network = ($req->meta['method'] ?? null) === 'card' ? 'card' : ($req->meta['network'] ?? 'M-PESA');
+                $cardCharge = (int) ($req->meta['card_charge'] ?? 0);
+                $this->move($o, 'paid', match (true) {
+                    (bool) $o->fee => 'Added '.Money::format($o->amount)." to your wallet · {$network} {$req->receipt} · payment charge ".Money::format($o->fee),
+                    $cardCharge > 0 => 'Added '.Money::format($o->amount)." to your wallet · card · card charge ".Money::format($cardCharge).' paid on your card',
+                    default => "Added to your wallet · {$network} {$req->receipt}",
+                });
 
                 return null;
             }

@@ -47,6 +47,9 @@ Route::middleware(['auth', 'throttle:60,1,pay-pages'])
         Route::get('chart', 'chart')->name('chart');
         Route::post('quote', 'quote')->name('quote')->middleware('throttle:20,1,pay-quote');
         Route::post('top-up', 'topUp')->name('top-up')->middleware('throttle:20,1,pay-top-up');
+        Route::post('card', 'card')->name('card')->middleware('throttle:10,1,pay-card');
+        Route::get('account-number', 'accountNumber')->name('account-number');
+        Route::get('{order}/card-return', 'cardReturn')->name('card.return');
         Route::post('transfer', 'transfer')->name('transfer')->middleware('throttle:20,1,pay-transfer');
         Route::post('pin', 'pin')->name('pin')->middleware('throttle:10,1,pay-pin');
         Route::post('{order}/confirm', 'confirm')->name('confirm')->middleware('throttle:10,1,pay-confirm');

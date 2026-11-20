@@ -17,6 +17,9 @@
         ['Withdraw', 'arrow-down-tray', "{ mode: 'withdraw' }"],
     ];
     $pill = 'inline-flex items-center gap-2 rounded-full bg-white/[0.08] px-3 py-1.5 text-[13px] text-white/80 transition hover:bg-white/[0.14]';
+    // Your own account number on Sharet's paybill (Cloud9 underneath, never named): shown once it exists; made in Add money
+    $account = \App\Support\AccountNumber::for($user, create: false);
+    $cloud9 = filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null);
 @endphp
 <div class="flex flex-col gap-5"
      x-data="{ hidden: $persist(false).as('walletHidden'), shown: wallet, copy(text, what) { navigator.clipboard?.writeText(text); sharet.toast(what + ' copied') } }"
@@ -43,6 +46,13 @@
       <button type="button" @click="copy('{{ '@'.$handle }}', 'Your @name')" class="{{ $pill }}" aria-label="Copy your @name">
         <x-heroicon-o-at-symbol class="h-4 w-4" />{{ $handle }}<x-heroicon-o-document-duplicate class="h-4 w-4 opacity-60" />
       </button>
+      @if ($account)
+        <button type="button" @click="copy('{{ $account['account'] }}', 'Your account number')" class="{{ $pill }}" aria-label="Copy your account number on paybill {{ $account['paybill'] }}">
+          <x-heroicon-o-hashtag class="h-4 w-4" /><span class="app-num">Paybill {{ $account['paybill'] }} · Account {{ \App\Support\AccountNumber::format($account['account']) }}</span><x-heroicon-o-document-duplicate class="h-4 w-4 opacity-60" />
+        </button>
+      @elseif ($cloud9)
+        <button type="button" @click="sharet.panel('money', { mode: 'receive', from: 'account' })" class="{{ $pill }}"><x-heroicon-o-hashtag class="h-4 w-4" />Get my account number</button>
+      @endif
     </div>
   </section>
 
