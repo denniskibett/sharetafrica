@@ -61,7 +61,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Users with this role</span>
-                        <h4 class="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90" x-text="role.users_count"></h4>
+                        <h4 class="stat-num mt-1" x-text="role.users_count"></h4>
                     </div>
                     <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
                         <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">Permissions</span>
-                        <h4 class="mt-1 text-2xl font-bold text-gray-800 dark:text-white/90" x-text="role.permissions_count"></h4>
+                        <h4 class="stat-num mt-1" x-text="role.permissions_count"></h4>
                     </div>
                     <div class="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30">
                         <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

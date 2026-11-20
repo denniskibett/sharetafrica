@@ -10,6 +10,20 @@
 }
 
 @layer components {
+  /* Every stat / KPI figure, the same in every Sharet product (scharge, Breve): one size, bold, black (white in dark
+     mode), even-width digits. A colour that carries meaning (money in green, out red) is a utility and still wins. */
+  .stat-num {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .dark .stat-num {
+    color: #fff;
+  }
+
   .menu-item {
     @apply relative flex items-center gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium;
   }
@@ -586,6 +600,7 @@ span.flatpickr-weekday,
 /* Numbers (amounts, balances, times, counts) are Outfit semibold, as in the journey designs (the wallet balance bold);
    mark them tabular-nums or app-num */
 .sharet-app .tabular-nums, .sharet-app .app-num { font-family: 'Outfit Variable', 'Outfit', sans-serif; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.sharet-app .stat-num { font-family: 'Outfit Variable', 'Outfit', sans-serif; font-weight: 700; } /* shared stat figure: the app's number font, still bold 700 */
 .sharet-app .tabular-nums.font-bold { font-weight: 700; } /* the wallet balance */
 
 /* Surfaces (both modes: an element carries its light and dark class, the palette decides) */

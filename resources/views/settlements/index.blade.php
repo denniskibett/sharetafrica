@@ -17,7 +17,7 @@
     <div class="mb-6 flex flex-col gap-4 rounded-2xl bg-gray-900 p-5 text-white sm:flex-row sm:items-center">
       <div class="min-w-0 flex-1">
         <p class="text-xs uppercase tracking-wider text-white/60">{{ $company->name }} · business wallet</p>
-        <p class="mt-1 text-2xl font-semibold">KES {{ number_format($balance / 100, 2) }}</p>
+        <p class="stat-num mt-1 text-white">KES {{ number_format($balance / 100, 2) }}</p>
         <p class="mt-1 text-sm text-white/70">{{ $wallet->sharet_id }} · {{ '@'.$wallet->handle }} · {{ $wallet->kyc_level === 'business' ? 'verified' : 'not verified yet' }}</p>
       </div>
       <p class="max-w-xs text-sm text-white/70">Your API keys collect into and pay out from this wallet. Settlements are tied to its Sharet ID.</p>

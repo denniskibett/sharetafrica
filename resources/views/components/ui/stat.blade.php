@@ -1,6 +1,6 @@
 {{-- Stat card. value/delta/hint are Alpine expressions read from the page's JSON (e.g. value="stats.total").
-     format: number | money | raw. delta is a % change vs last period; positive is green, negative red. --}}
-@props(['label', 'value', 'format' => 'number', 'delta' => null, 'hint' => null, 'icon' => null, 'tone' => 'violet'])
+     format: number | money | raw. A figure (number, money, or raw with :figure="true") uses .stat-num; raw text stays smaller. delta is a % change vs last period; positive is green, negative red. --}}
+@props(['label', 'value', 'format' => 'number', 'delta' => null, 'hint' => null, 'icon' => null, 'tone' => 'violet', 'figure' => null])
 @php
     $tones = [
         // Sharet UI colours by meaning: pay violet, money in green, send blue, trade amber, danger red, abroad teal, Sharet lime
@@ -13,11 +13,12 @@
         'teal' => 'bg-app-abroad/15 text-app-abroad',
         'lime' => 'bg-app-lime text-[#050507]',
     ];
+    $figure ??= $format !== 'raw';
     $text = match ($format) { 'money' => "sharet.money($value)", 'raw' => "($value) ?? '—'", default => "sharet.number($value)" };
 @endphp
 <div {{ $attributes->merge(['class' => 'ui-card rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6']) }}>
   <div class="flex items-start justify-between gap-3">
-    <h4 @class(['font-bold text-gray-800 dark:text-white/90', 'text-2xl md:text-[28px] md:leading-9' => $format !== 'raw', 'text-lg leading-7 md:text-xl' => $format === 'raw']) x-text="{{ $text }}">—</h4>
+    <h4 @class(['stat-num' => $figure, 'text-lg font-bold leading-7 text-gray-800 dark:text-white/90 md:text-xl' => ! $figure]) x-text="{{ $text }}">—</h4>
     @if ($icon)
       <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full {{ $tones[$tone] ?? $tones['violet'] }}">
         <x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" />

@@ -45,7 +45,7 @@
         <span class="flex h-10 w-10 items-center justify-center rounded-xl {{ $tone }}"><x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" /></span>
         <span class="text-sm text-gray-500 dark:text-gray-400">{{ $label }}</span>
       </div>
-      <p class="mt-4 text-2xl font-semibold text-gray-900 dark:text-white">{{ $value }}</p>
+      <p class="stat-num mt-4">{{ $value }}</p>
       <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
     </div>
   @endforeach

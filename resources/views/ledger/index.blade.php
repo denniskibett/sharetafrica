@@ -7,8 +7,8 @@
   <x-ui.page-header title="Ledger" subtitle="Every account in Sharet's books. Money only moves through balanced, insert-only journals; the hourly check proves it." />
 
   <x-ui.stats :cols="4" class="mb-6">
-    <x-ui.stat label="Total debits" value="stats.debits" format="raw" icon="arrow-down-left" tone="sky" />
-    <x-ui.stat label="Total credits" value="stats.credits" format="raw" icon="arrow-up-right" tone="violet" />
+    <x-ui.stat label="Total debits" value="stats.debits" format="raw" :figure="true" icon="arrow-down-left" tone="sky" />
+    <x-ui.stat label="Total credits" value="stats.credits" format="raw" :figure="true" icon="arrow-up-right" tone="violet" />
     <x-ui.stat label="Trial balance" value="stats.balanced" format="raw" icon="scale" tone="emerald" />
     <x-ui.stat label="Last ledger check" value="stats.check" format="raw" icon="shield-check" tone="indigo" />
   </x-ui.stats>

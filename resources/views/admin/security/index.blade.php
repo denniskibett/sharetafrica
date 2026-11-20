@@ -46,13 +46,13 @@
       @foreach (['critical' => 'Fix today', 'high' => 'Fix this week', 'medium' => 'Plan it', 'low' => 'Nice to have'] as $k => $hint)
         <button type="button" @click="tab = 'findings'; sev = '{{ $k }}'" class="ui-card rounded-2xl border border-gray-200 bg-white p-5 text-left hover:border-gray-400 dark:border-gray-800 dark:bg-white/[0.03]">
           <p class="text-sm capitalize text-gray-500 dark:text-gray-400">{{ $k }}</p>
-          <p class="mt-2 text-2xl font-bold" style="color: {{ $bar[$k] ?? '#6B7280' }}">{{ $s[$k] ?? 0 }}</p>
+          <p class="stat-num mt-2" style="color: {{ $bar[$k] ?? '#6B7280' }}">{{ $s[$k] ?? 0 }}</p>
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
         </button>
       @endforeach
       <div class="ui-card rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
         <p class="text-sm text-gray-500 dark:text-gray-400">Sites</p>
-        <p class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">{{ count($sites) }}</p>
+        <p class="stat-num mt-2">{{ count($sites) }}</p>
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ count($domains) }} names checked</p>
       </div>
       <div class="ui-card rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -248,7 +248,7 @@
       @foreach ([['Failed (24 h)', $kyc['fail'], $kyc['week_fail'].' in 7 days'], ['Succeeded', $kyc['ok'], 'sign-ins, codes, resets'], ['New accounts', $kyc['signups'], 'sign-ups'], ['Refused', $kyc['blocked'], 'guessing detected']] as [$label, $value, $hint])
         <div class="ui-card rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
           <p class="text-sm text-gray-500 dark:text-gray-400">{{ $label }}</p>
-          <p class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">{{ $value }}</p>
+          <p class="stat-num mt-2">{{ $value }}</p>
           <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $hint }}</p>
         </div>
       @endforeach

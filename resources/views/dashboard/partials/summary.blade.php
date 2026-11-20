@@ -16,7 +16,7 @@
           <p class="truncate text-xs text-app-muted">{{ $label }}</p>
           <x-dynamic-component :component="'heroicon-o-'.$icon" @class(['h-4 w-4 shrink-0', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out', 'text-app-muted' => ! in_array($key, ['month_in', 'month_out'])]) />
         </div>
-        <p @class(['mt-1.5 truncate text-xl font-bold tabular-nums md:text-2xl', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out']) x-text="stats.{{ $key }} ?? '—'"></p>
+        <p @class(['stat-num mt-1.5 truncate', 'text-app-in' => $key === 'month_in', 'text-app-out' => $key === 'month_out']) x-text="stats.{{ $key }} ?? '—'"></p>
         <p class="truncate text-[11px] text-app-muted" x-text="{{ $second }}"></p>
       </div>
     @endforeach

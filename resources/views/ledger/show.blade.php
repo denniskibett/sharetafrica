@@ -8,8 +8,8 @@
   <p class="-mt-4 mb-6 text-sm"><a href="{{ route('ledger.index') }}" class="text-gray-500 hover:underline">← All accounts</a></p>
 
   <x-ui.stats :cols="4" class="mb-6">
-    <x-ui.stat label="Balance" value="stats.balance" format="raw" icon="banknotes" tone="emerald" />
-    <x-ui.stat label="Held" value="stats.held" format="raw" icon="lock-closed" tone="amber" />
+    <x-ui.stat label="Balance" value="stats.balance" format="raw" :figure="true" icon="banknotes" tone="emerald" />
+    <x-ui.stat label="Held" value="stats.held" format="raw" :figure="true" icon="lock-closed" tone="amber" />
     <x-ui.stat label="Available" value="stats.available" format="raw" icon="check-circle" tone="sky" />
     <x-ui.stat label="Postings" value="stats.count" icon="list-bullet" tone="violet" />
   </x-ui.stats>
