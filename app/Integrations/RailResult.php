@@ -12,6 +12,10 @@ final class RailResult
         public readonly ?string $providerReference = null,
         public readonly ?string $receipt = null,
         public readonly ?string $message = null,
+        // What the provider kept for itself, in cents (Cloud9 takes it from a deposit, or on top of a payout). 0 = none.
+        public readonly int $charge = 0,
+        // The network the money really moved on behind the rail (M-PESA, PesaLink, Card, Airtel Money): its reference is $receipt
+        public readonly ?string $network = null,
     ) {
         if (! in_array($status, self::STATUSES, true)) {
             throw new \InvalidArgumentException("Unknown rail status {$status}.");
@@ -23,9 +27,9 @@ final class RailResult
         return new self('pending', $providerReference);
     }
 
-    public static function succeeded(string $receipt, ?string $providerReference = null): self
+    public static function succeeded(string $receipt, ?string $providerReference = null, int $charge = 0, ?string $network = null): self
     {
-        return new self('succeeded', $providerReference, $receipt);
+        return new self('succeeded', $providerReference, $receipt, null, $charge, $network);
     }
 
     public static function failed(string $message, ?string $providerReference = null): self

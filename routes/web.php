@@ -283,6 +283,16 @@ Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/scheduler'
 });
 
 // Staff › Pricing: business tariff tables (docs/v2/INTEGRATION.md §7); saving needs a recent password
+// System › Payment rails: the switch (two people), Cloud9 sandbox checks, and activity across rails
+Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/rails')->controller(\App\Http\Controllers\Admin\RailsController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.rails.index');
+    Route::get('/activity', 'activity')->name('admin.rails.activity');
+    Route::post('/changes', 'propose')->name('admin.rails.propose');
+    Route::post('/changes/{change}/approve', 'approve')->middleware('password.confirm')->name('admin.rails.approve');
+    Route::post('/changes/{change}/reject', 'reject')->name('admin.rails.reject');
+    Route::post('/test', 'test')->middleware('throttle:20,1')->name('admin.rails.test');
+});
+
 Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/pricing')->controller(\App\Http\Controllers\Admin\PricingController::class)->group(function () {
     Route::get('/', 'index')->name('admin.pricing.index');
     Route::post('/', 'store')->middleware('password.confirm')->name('admin.pricing.store');

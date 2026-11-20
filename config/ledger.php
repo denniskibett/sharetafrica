@@ -20,6 +20,7 @@ return [
         '1120' => ['name' => 'M-PESA paybill · utility (payout float)', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
         '1130' => ['name' => 'PSP settlement · Cashia', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
         '1140' => ['name' => 'PSP settlement · Gladys', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
+        '1160' => ['name' => 'Cloud9 · MAIN KES wallet (collections and payouts)', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
         '1150' => ['name' => 'M-PESA money in transit', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
         '1210' => ['name' => 'I&M customer trust account', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
         '1220' => ['name' => 'I&M Sharet operating account', 'type' => 'asset', 'book' => 'rail', 'allow_negative' => false],
@@ -58,7 +59,7 @@ return [
     | Safeguarding (ledger:check): the real money in these accounts must cover everything owed to customers.
     | Codes match by prefix, so '2100' covers every customer's wallet.
     */
-    'safeguarded_assets' => ['1110', '1120', '1130', '1140', '1150', '1210', '1250', '1310'],
+    'safeguarded_assets' => ['1110', '1120', '1130', '1140', '1150', '1160', '1210', '1250', '1310'],
     'customer_liabilities' => ['2100', '2110', '2150', '2200', '2210', '2410'],
 
     // A ramp order account older than this with money still in it is reported by ledger:check.

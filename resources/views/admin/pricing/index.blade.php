@@ -81,7 +81,7 @@
         <label class="block text-sm text-gray-600 dark:text-gray-300">Excise on the fee (%)
           <input class="{{ $input }} mt-1" name="excise_percent" value="{{ ($current?->excise_bp ?? 1500) / 100 }}" required></label>
         <label class="block text-sm text-gray-600 dark:text-gray-300">Why the change
-          <input class="{{ $input }} mt-1" name="notes" maxlength="500" placeholder="e.g. Cashia rates agreed"></label>
+          <input class="{{ $input }} mt-1" name="notes" maxlength="500" placeholder="e.g. Partner rates agreed"></label>
         <button class="inline-flex h-11 items-center gap-2 rounded-full bg-gray-900 px-5 text-sm font-semibold text-white hover:bg-gray-800 dark:bg-[#D4FF3D] dark:text-gray-900"><x-heroicon-o-check class="h-4 w-4" /> Save version {{ ($versions->max('version') ?? 0) + 1 }}</button>
         <p class="text-xs text-gray-500">Quotes already given keep their price. Every payment records the version it was priced with.</p>
       </div>

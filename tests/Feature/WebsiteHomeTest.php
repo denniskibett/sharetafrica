@@ -18,7 +18,7 @@ class WebsiteHomeTest extends TestCase
             ->assertSee('Every wallet talks to every wallet.')
             ->assertSee('Your money, on your phone.')
             ->assertSee('Join Sharet Kenya. Tanzania next.')
-            ->assertSee('Cashia (Kashia Services Limited)')
+            ->assertSee('Payments are carried by licensed payment partners in Kenya')->assertDontSee('Cashia')->assertDontSee('Cloud9')
             ->assertSee('css/site.css', false)
             ->assertSee('href="'.route('register').'"', false)
             ->assertSee('href="'.route('login').'"', false)
