@@ -36,9 +36,13 @@ Built, deployed, **switched off**.
 - **Written cover from a licensed partner** (Cashia / Gladys) **or CBK authorisation.**
 - **Email:** live Integrations → Email (SMTP) for `noreply@sharet.africa` (host `sharet.africa`, 587, TLS); SPF
   (`ip4:185.113.249.146`) and DKIM `default._domainkey` at Olitt (notes file `sharet-dns-email-records.md`); one test email.
-- **SMS:** KenyaSMS API key (`ks_live_…`, `sms.send`) and sender ID SHARETENT in live Integrations → KenyaSMS, press
-  Test, then **Send test SMS** (always to 0717492048, `SMS_TEST_TO`). Optional backup: Integrations → Africa's Talking
-  (used only when KenyaSMS is off or refuses a message; never when KenyaSMS gave no answer, so no doubled SMS).
+- **SMS (KenyaSMS only, SHARETENT account):** every SMS runs on KenyaSMS with sender SHARETENT; no other provider and
+  no fallback (a failed send stays failed, in the log). Go-live step on 185.113.249.146, copying scharge's key
+  server-side without printing it (`<scharge>` = scharge's live folder, `<sharet>` = public_html of sharet.africa):
+  `k=$(grep '^KENYASMS_KEY=' <scharge>/.env | cut -d= -f2-) && cd <sharet> && { grep -q '^KENYASMS_KEY=' .env && sed -i "s|^KENYASMS_KEY=.*|KENYASMS_KEY=$k|" .env || printf 'KENYASMS_KEY=%s\n' "$k" >> .env; } && { grep -q '^SMS_DRIVER=' .env && sed -i 's|^SMS_DRIVER=.*|SMS_DRIVER=kenyasms|' .env || echo SMS_DRIVER=kenyasms >> .env; } && unset k && php artisan config:cache`
+  (the sender is fixed to SHARETENT in `config/sms.php`; `KENYASMS_KEY` wins over the KenyaSMS card's key). Then
+  `php artisan sharet:sms-test` (one SMS, always to 0717492048 = `SMS_TEST_TO`; never prints the key). KenyaSMS's Cloudflare may
+  challenge the server IP until KenyaSMS whitelists it.
 - **FX rate:** none recorded on live.
 - **Backups off the server:** CyberPanel remote backups (S3 / Backblaze / another server).
 - **Break-glass IPs:** `LOCKDOWN_ALLOW_IPS` is empty, so a lockdown can only be lifted from the server.

@@ -53,7 +53,7 @@ class CustomerMessagesTest extends TestCase
         $this->assertStringContainsString('approve KES 500.00 on the M-PESA prompt', $msgs[0]);
         $this->assertStringContainsString('KES 500.00 added to your wallet', $msgs[1]);
         Http::assertSent(fn ($r) => str_contains($r->url(), '/sms/send') && $r->hasHeader('Authorization', 'Bearer ks_live_x')
-            && $r['sender_id'] === 'SHARET' && $r['message_type'] === 'transactional' && str_starts_with($r['idempotency_key'], 'sms:'));
+            && $r['sender_id'] === 'SHARETENT' && $r['message_type'] === 'transactional' && str_starts_with($r['idempotency_key'], 'sms:'));
 
         $juma = $this->person('0722333444', 'Juma Otieno');
         $orders->transfer($jane, '@'.Handle::for($juma), '200');

@@ -3,37 +3,27 @@
 namespace App\Integrations\Sms;
 
 /**
- * The one way Sharet sends an SMS: KenyaSMS first (sender SHARETENT), Africa's Talking as the backup when KenyaSMS is
- * off or clearly refused the message. When KenyaSMS gave no answer (timeout, 5xx) the message may already be on its
- * way, so the backup does not send it again: a missed SMS is better than a doubled money message.
+ * The one way Sharet sends an SMS: KenyaSMS on the SHARETENT account, sender SHARETENT. There is no other provider and
+ * no fallback: a send that fails stays failed (reported to the log).
  */
 class Sms
 {
-    /** $phone 2547…; $key makes a KenyaSMS retry send once. Returns the gateway that took it, or null. */
-    public static function send(string $phone, string $message, ?string $key = null): ?string
+    /** $phone 2547…; $key makes a retry send once. True when KenyaSMS accepted it. */
+    public static function send(string $phone, string $message, ?string $key = null): bool
     {
-        $kenya = KenyaSms::deliver($phone, $message, $key);
-        if ($kenya === 'sent') {
-            return 'kenyasms';
-        }
-        if (in_array($kenya, ['off', 'refused'], true) && AfricasTalking::send($phone, $message)) {
-            return 'africastalking';
-        }
-
-        return null;
+        return KenyaSms::send($phone, $message, $key);
     }
 
-    /** Integrations › Send test SMS: always to config('sms.test_to'), never to a customer. */
-    public static function test(string $provider): array
+    /** Integrations › KenyaSMS › Send test SMS: always to config('sms.test_to'), never to a customer. */
+    public static function test(): array
     {
         $to = self::msisdn((string) config('sms.test_to'));
         if (! $to) {
             return [false, 'SMS_TEST_TO is not a Kenyan mobile number.'];
         }
-        $text = 'Sharet test SMS via '.($provider === 'africastalking' ? "Africa's Talking" : 'KenyaSMS').' at '.now('Africa/Nairobi')->format('H:i').'.';
-        $ok = $provider === 'africastalking' ? AfricasTalking::send($to, $text) : KenyaSms::send($to, $text, 'sms-test:'.now()->timestamp);
+        $ok = KenyaSms::send($to, 'Sharet test SMS via KenyaSMS ('.config('sms.kenyasms.sender_id').') at '.now('Africa/Nairobi')->format('H:i').'.', 'sms-test:'.now()->timestamp);
 
-        return [$ok, $ok ? 'Test SMS sent to 0'.substr($to, 3).'.' : 'The gateway did not accept the test SMS. Check the keys and the sender ID.'];
+        return [$ok, $ok ? 'Test SMS sent to 0'.substr($to, 3).'.' : 'KenyaSMS did not accept the test SMS. Check the key (KENYASMS_KEY or this card) and that SMS_DRIVER=kenyasms.'];
     }
 
     /** 2547…/2541… from 07…, 01…, +254…, or null. */

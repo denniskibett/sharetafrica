@@ -8,7 +8,7 @@ use App\Models\RampOrder;
 use App\Models\User;
 
 /**
- * SMS to customers as a payment moves (Sms: KenyaSMS, Africa's Talking as the backup), alongside the M-PESA prompt and the emailed receipt (Receipt):
+ * SMS to customers as a payment moves (Sms: KenyaSMS only, sender SHARETENT), alongside the M-PESA prompt and the emailed receipt (Receipt):
  * - the prompt went out: approve it on your phone
  * - finished: paid / added to wallet / not paid / refunded, with the reference
  * - an @name transfer: the person paid gets their own message

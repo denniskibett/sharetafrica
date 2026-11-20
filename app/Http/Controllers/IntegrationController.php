@@ -127,12 +127,12 @@ class IntegrationController extends Controller
         ], $ok ? 200 : 422);
     }
 
-    /** KenyaSMS / Africa's Talking (platform settings only): a real SMS, always to config('sms.test_to'), never to a customer. */
+    /** KenyaSMS (platform settings only): a real SMS, always to config('sms.test_to'), never to a customer. */
     public function sendTestSms(Request $request, string $provider)
     {
         abort_unless($this->companyId($request) === null, 404);
         $row = $this->row($request, $provider);
-        [$ok, $message] = \App\Integrations\Sms\Sms::test($provider);
+        [$ok, $message] = \App\Integrations\Sms\Sms::test();
         $row->forceFill(['last_tested_at' => now(), 'last_test_ok' => $ok, 'last_test_message' => $message])->save();
 
         return response()->json(['message' => $message, 'provider' => $this->state($provider, $row->fresh())], $ok ? 200 : 422);

@@ -94,24 +94,13 @@ return [
     'kenyasms' => [
         'name' => 'KenyaSMS',
         'category' => 'Messaging',
-        'description' => 'Bulk and transactional SMS in Kenya with your own sender ID.',
+        'description' => 'Every Sharet SMS: KenyaSMS on the SHARETENT account, sender SHARETENT. The only SMS provider (no fallback). KENYASMS_KEY in .env, when set, wins over the key here.',
         'color' => '#0EA5E9',
         'logo' => 'images/integrations/kenyasms.png',
         'fields' => [
             'api_url' => ['label' => 'API URL', 'type' => 'url', 'required' => true, 'placeholder' => 'https://kenyasms.com/api/v1', 'sandbox' => 'https://kenyasms.com/api/v1'],
             'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true, 'help' => 'Developers → API Keys on kenyasms.com (ks_live_…). Needs the sms.send scope.'],
-            'sender_id' => ['label' => 'Sender ID', 'required' => true, 'placeholder' => 'SHARETENT', 'sandbox' => 'SHARETENT', 'help' => 'Your approved sender name, up to 11 characters. Sharet\'s own is SHARETENT.'],
-        ],
-    ],
-    'africastalking' => [
-        'name' => "Africa's Talking",
-        'category' => 'Messaging',
-        'description' => 'Backup SMS gateway: when KenyaSMS is off or refuses a message, it goes through Africa\'s Talking instead.',
-        'color' => '#F97316',
-        'fields' => [
-            'username' => ['label' => 'Username', 'required' => true, 'help' => 'Use "sandbox" for testing.', 'sandbox' => 'sandbox'],
-            'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true],
-            'sender_id' => ['label' => 'Sender ID', 'placeholder' => 'SHARETENT', 'help' => 'Leave blank to use Africa\'s Talking\'s shared sender.'],
+            'sender_id' => ['label' => 'Sender ID', 'required' => true, 'placeholder' => 'SHARETENT', 'sandbox' => 'SHARETENT', 'help' => 'A business\'s own approved sender applies only to that business. Sharet\'s own SMS (and every one-time code) always go as SHARETENT.'],
         ],
     ],
     'smtp' => [

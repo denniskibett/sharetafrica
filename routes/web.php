@@ -194,7 +194,7 @@ Route::middleware(['auth', 'permission:integrations.manage'])
         Route::patch('/{provider}/toggle', 'toggle')->name('toggle')->where('provider', $provider);
         Route::post('/{provider}/test', 'test')->name('test')->where('provider', $provider);
         Route::post('/smtp/send-test', 'sendTestEmail')->name('smtp.send-test');
-        Route::post('/{provider}/send-test-sms', 'sendTestSms')->name('sms.send-test')->where('provider', 'kenyasms|africastalking');
+        Route::post('/{provider}/send-test-sms', 'sendTestSms')->name('sms.send-test')->where('provider', 'kenyasms');
         Route::delete('/{provider}', 'destroy')->name('destroy')->where('provider', $provider);
     });
 

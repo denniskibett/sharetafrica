@@ -101,9 +101,6 @@ class Integrations
                 'airtel_money' => self::ok(Http::timeout(10)->post(($live ? 'https://openapi.airtel.africa' : 'https://openapiuat.airtel.africa').'/auth/oauth2/token', [
                     'client_id' => $c['client_id'] ?? '', 'client_secret' => $c['client_secret'] ?? '', 'grant_type' => 'client_credentials',
                 ]), 'Airtel Money issued an access token.'),
-                'africastalking' => self::ok(Http::timeout(10)->acceptJson()->withHeaders(['apiKey' => $c['api_key'] ?? ''])
-                    ->get((($c['username'] ?? '') === 'sandbox' ? 'https://api.sandbox.africastalking.com' : 'https://api.africastalking.com').'/version1/user', ['username' => $c['username'] ?? '']),
-                    "Africa's Talking accepted the username and key."),
                 // the balance endpoint proves the key works without sending anything
                 'kenyasms' => self::ok(Http::timeout(10)->acceptJson()->withToken($c['api_key'] ?? '')
                     ->get(rtrim(($c['api_url'] ?? '') ?: \App\Integrations\Sms\KenyaSms::DEFAULT_URL, '/').'/account/balance'), 'Connected: the key reads your KenyaSMS balance.'),

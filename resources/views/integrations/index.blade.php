@@ -144,7 +144,7 @@
           </div>
 
           <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row">
-            <button type="button" x-show="editing.connected && platform && ['kenyasms', 'africastalking'].includes(editing.key)" @click="sendTestSms(editing)" :disabled="busy"
+            <button type="button" x-show="editing.connected && platform && editing.key === 'kenyasms'" @click="sendTestSms(editing)" :disabled="busy"
                     class="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Send test SMS</button>
             <button type="button" x-show="editing.connected && editing.key === 'smtp'" @click="sendTestEmail()" :disabled="busy"
                     class="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Send test email</button>
