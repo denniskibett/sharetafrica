@@ -96,7 +96,7 @@
         </div>
       @endforeach
     </div>
-    <p class="border-t border-gray-100 px-5 py-3 text-xs text-gray-500 dark:border-gray-800">A fallback is only tried when the primary partner refuses before accepting (down, no float, a key problem). After a timeout nothing is resent: the first partner may still pay, so the payment is checked by its id instead.</p>
+    <p class="border-t border-gray-100 px-5 py-3 text-xs text-gray-500 dark:border-gray-800">A fallback is only tried when the primary partner refuses before accepting (down, no float, a key problem). Money in by M-PESA prompt that Cloud9 can't take always goes to Sharet's own M-PESA paybill, unless a route here says otherwise (RAIL_COLLECT_FALLBACK). After a timeout nothing is resent: the first partner may still pay, so the payment is checked by its id instead.</p>
   </div>
 
   <div class="grid gap-6 lg:grid-cols-2">

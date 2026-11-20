@@ -204,4 +204,25 @@ class Cloud9RailTest extends TestCase
         Integration::where('provider', 'cloud9')->first()->update(['credentials' => ['environment' => 'live', 'api_key' => 'tokenLivexyz']]);
         $this->actingAs($admin)->post('/admin/rails/test', ['check' => 'payout'])->assertSessionHasErrors('check');
     }
+
+    public function test_money_in_cloud9_refuses_goes_to_sharets_own_mpesa_paybill_by_default(): void
+    {
+        $this->route('collect', 'cloud9');   // no fallback set on Payment rails
+        Integration::create(['company_id' => null, 'provider' => 'mpesa_sandbox', 'enabled' => true, 'credentials' => [
+            'consumer_key' => 'ck', 'consumer_secret' => 'cs', 'shortcode' => '174379', 'passkey' => 'pk']]);
+        Http::fake([
+            self::BASE.'payin/deposits/init/' => Http::response(['error' => 'Deposits are paused.'], 400),
+            'sandbox.safaricom.co.ke/oauth/*' => Http::response(['access_token' => 't', 'expires_in' => 3599]),
+            'sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest' => Http::response(['ResponseCode' => '0', 'CheckoutRequestID' => 'ws_CO_1']),
+        ]);
+        $order = $this->orders->confirm($this->orders->topUp($this->person(), '100'));
+        $req = RailRequest::find($order->collect_request_id);
+        $this->assertSame(['daraja', 'cloud9', 'pending', 'ws_CO_1'], [$req->rail, $req->meta['fell_back_from'], $req->status, $req->provider_reference]);
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), 'stkpush') && $r['PhoneNumber'] === '254712345678');
+
+        // Switched off: no default, Cloud9's refusal stands
+        config(['rails.collect_fallback' => null]);
+        $second = $this->orders->confirm($this->orders->topUp($this->person('0712345679'), '100'));
+        $this->assertSame(['cloud9', 'failed'], [RailRequest::find($second->collect_request_id)->rail, $second->status]);
+    }
 }

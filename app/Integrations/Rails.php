@@ -46,12 +46,20 @@ class Rails
     {
         $movement = $request->kind === 'collect' ? 'collect' : self::movement($user, $request->meta['destination_type'] ?? 'phone');
         $route = \App\Models\RailRoute::for($movement);
-        if (! $route || ! $route->fallback || $route->fallback === $request->rail || $route->rail !== $request->rail
-            || ($route->audience !== 'everyone' && ! $this->isNamed($user))) {
-            return null;
+        if ($route && $route->fallback && $route->fallback !== $request->rail && $route->rail === $request->rail
+            && ($route->audience === 'everyone' || $this->isNamed($user))) {
+            return $route->fallback;
         }
 
-        return $route->fallback;
+        // The default: an M-PESA prompt Cloud9 can't take goes to Sharet's own paybill (not a card: M-PESA has none)
+        $default = config('rails.collect_fallback');
+        if ($request->kind === 'collect' && $request->rail === 'cloud9' && $default && $default !== 'cloud9'
+            && ! in_array($request->meta['method'] ?? null, ['card', 'account_number'], true)
+            && ($default !== 'daraja' || \App\Services\Integrations::mpesa()[0])) {
+            return $default;
+        }
+
+        return null;
     }
 
     private function routed(string $movement, ?\App\Models\User $user): ?string

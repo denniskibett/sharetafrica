@@ -96,4 +96,5 @@ Route::prefix('mobile/v1')->name('api.money.mobile.')->controller(\App\Http\Cont
         Route::post('orders/{uuid}/confirm', 'confirm')->name('confirm');
         Route::post('add-money', 'addMoney')->name('add-money');
         Route::post('add-money/card', 'addByCard')->name('add-money-card');
+        Route::post('requests/{id}/pay', 'payRequest')->name('requests.pay');
     });

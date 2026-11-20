@@ -45,6 +45,7 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ☐ | **Cloud9 is invisible to customers.** Sharet is the only name in the app, receipts, prompts and the website; Cloud9 appears only on staff screens. | Built | `docs/v2/RAILS.md` |
 | ✓ | **The customer pays Cloud9's charge on a top-up** (you decided, 20 Nov): pay KES 100, KES 98.50 reaches the wallet, the KES 1.50 shows as a payment charge. On sends and payouts the charge comes out of the Sharet fee already shown. | Built | `app/Ramp/RampOrders.php` (chargeToCustomer) |
 | ☐ | **Website footer and About page no longer name Cashia or a trust account:** "Payments are carried by licensed payment partners in Kenya, and customer money is kept apart from Sharet's own money." Have a lawyer read it; add the licensed partner's name if required. | Built, not deployed | `resources/views/site/partials/footer.blade.php` and the pages |
+| ✓ | **Money in Cloud9 can't take goes to Sharet's own M-PESA paybill** (you decided, 21 Nov): an M-PESA prompt Cloud9 refuses before accepting is sent from the paybill instead. Not card top-ups (M-PESA has no card); never after a timeout. | Built | `config/rails.php` `collect_fallback` |
 | ☐ | **Two people to switch a rail**, and fallback only when a rail refuses before accepting (never after a timeout). | Built | System › Payment rails |
 
 ## 1. Money rules

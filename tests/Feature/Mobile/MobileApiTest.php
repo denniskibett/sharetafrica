@@ -161,4 +161,34 @@ class MobileApiTest extends TestCase
         $this->getJson('/api/mobile/v1/account-number', $this->h($token))->assertJsonPath('account_number.formatted', '48 2915');
         $this->postJson('/api/mobile/v1/add-money/card', ['amount' => '1000'], $this->h($token, 'card-top-up-1'))->assertCreated()->assertJsonPath('url', 'https://pay.example/k7');
     }
+
+    public function test_the_app_pays_paybills_tills_and_banks_shows_full_receipts_and_pays_requests_in_app(): void
+    {
+        $juma = $this->person('0712345678', 'Juma Otieno', '5000');
+        $akinyi = $this->person('0722410556', 'Akinyi Wanjiru');
+        $token = $this->signIn('0712345678');
+        $this->getJson('/api/mobile/v1/config')->assertJsonPath('banks.kcb', 'KCB Bank');
+
+        foreach ([['type' => 'paybill', 'paybill' => '888880', 'account' => '54001234'], ['type' => 'till', 'till' => '512345'], ['type' => 'bank', 'bank' => 'kcb', 'account' => '1234567890']] as $i => $to) {
+            $q = $this->postJson('/api/mobile/v1/quote', $to + ['amount' => '100'], $this->h($token, 'quote-key-'.$i))->assertCreated()->json('order');
+            $this->assertSame($to['type'], $q['destination_type'] ?? $to['type']);
+            $this->postJson('/api/mobile/v1/orders/'.$q['uuid'].'/confirm', ['pin' => '4826'], $this->h($token, 'confirm-key-'.$i))->assertOk();
+        }
+        $receipt = $this->getJson('/api/mobile/v1/orders/'.$q['uuid'], $this->h($token))->assertOk()->json('order.receipt');
+        $this->assertArrayHasKey('Sharet reference', $receipt);
+        $this->assertSame('KCB Bank', $receipt['Bank']);
+
+        // Akinyi pays Juma's request inside the app with her PIN
+        $this->postJson('/api/mobile/v1/requests', ['to' => '@'.\App\Support\Handle::for($akinyi), 'amount' => '50'], $this->h($token))->assertCreated();
+        $this->person('0733000001', 'Spare Person', '0');
+        $theirs = $this->signIn('0722410556');
+        $o = app(RampOrders::class)->confirm(app(RampOrders::class)->topUp($akinyi, '100'));
+        while (! $o->final()) {
+            $o = app(RampOrders::class)->refresh($o);
+        }
+        $id = $this->getJson('/api/mobile/v1/requests', $this->h($theirs))->json('to_pay.0.id');
+        $this->postJson("/api/mobile/v1/requests/$id/pay", ['pin' => '0000'], $this->h($theirs, 'pay-request-bad'))->assertUnprocessable();
+        $this->postJson("/api/mobile/v1/requests/$id/pay", ['pin' => '4826'], $this->h($theirs, 'pay-request-ok'))->assertOk()->assertJsonPath('order.receipt.Sharet reference', $id);
+        $this->assertSame('paid', $this->getJson('/api/mobile/v1/requests', $this->h($theirs))->json('to_pay.0.status'));
+    }
 }
