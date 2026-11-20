@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Identity;
 use App\Models\Company;
 use App\Models\DeveloperApplication;
 use App\Models\Enquiry;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Models\WaitingListEntry;
 use Illuminate\Database\QueryException;
 use App\Mail\SharetMail;
+use App\Support\FormIntake;
 use App\Support\Outbox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -47,16 +49,18 @@ class HomeController extends Controller
 
     public function storePersonalSignup(Request $request)
     {
+        if (FormIntake::isBot()) {
+            return $this->done('waitlist', 'You are on the list. We will be in touch when it is your turn.');
+        }
+        Identity::clean($request);
         $data = $request->validate([
-            'name'    => 'required|string|max:120',
-            'email'   => 'required|email|max:190',
-            'phone'   => 'nullable|string|max:32',
+            ...Identity::rules(phoneRequired: false, unique: false),
             'country' => 'nullable|string|size:2',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'individual');
 
-        return $this->attachWaitingList($user, 'individual', 'personal-page');
+        return $this->attachWaitingList($user, 'individual', 'personal-page', [], 'personal', ['Country' => $data['country'] ?? null]);
     }
 
     /*
@@ -67,16 +71,18 @@ class HomeController extends Controller
 
     public function storeMerchantSignup(Request $request)
     {
+        if (FormIntake::isBot()) {
+            return $this->done('waitlist', 'You are on the list. We will be in touch when it is your turn.');
+        }
+        Identity::clean($request);
         $data = $request->validate([
-            'name'     => 'required|string|max:120',
+            ...Identity::rules(phoneRequired: true, unique: false),
             'business' => 'required|string|max:190',
-            'email'    => 'required|email|max:190',
-            'phone'    => 'required|string|max:32',
             'country'  => 'nullable|string|size:2',
             'rails'    => 'nullable|string|max:255',
             'volume'   => 'nullable|string|max:60',
             'brief'    => 'nullable|string|max:2000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'merchant');
 
@@ -85,6 +91,10 @@ class HomeController extends Controller
             'rails'    => $data['rails']  ?? null,
             'volume'   => $data['volume'] ?? null,
             'brief'    => $data['brief']  ?? null,
+        ], 'merchant', [
+            'Country'          => $data['country'] ?? null,
+            'Payment rails'    => $data['rails'] ?? null,
+            'Monthly volume'   => $data['volume'] ?? null,
         ]);
     }
 
@@ -96,11 +106,13 @@ class HomeController extends Controller
 
     public function storeTradeApplication(Request $request)
     {
+        if (FormIntake::isBot()) {
+            return $this->done('trade', 'Thank you — your trade application has been received.');
+        }
+        Identity::clean($request);
         $data = $request->validate([
-            'name'                => 'required|string|max:120',
+            ...Identity::rules(phoneRequired: true, unique: false),
             'business'            => 'required|string|max:190',
-            'email'               => 'required|email|max:190',
-            'phone'               => 'required|string|max:32',
             'trade_type'          => 'required|in:importer,exporter,both,diaspora,intra_africa',
             'corridor'            => 'nullable|string|max:190',
             'corridor_other'      => 'nullable|string|max:190|required_if:corridor,OTHER',
@@ -108,7 +120,7 @@ class HomeController extends Controller
             'monthly_volume'      => 'nullable|string|max:60',
             'expected_order_size' => 'nullable|string|max:120',
             'brief'               => 'nullable|string|max:2000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'business');
 
@@ -134,10 +146,12 @@ class HomeController extends Controller
                 'user_agent'          => substr((string) $request->userAgent(), 0, 500),
             ]);
 
-            return $this->done('trade', 'We updated your existing trade application with the latest details. Our trade team will be in touch.');
+            $ref = $this->recordTrade($user, $data, $corridor, $existing->id);
+
+            return $this->done('trade', 'We updated your existing trade application with the latest details. Our trade team will be in touch.', $ref);
         }
 
-        $user->tradeApplications()->create([
+        $application = $user->tradeApplications()->create([
             'trade_type'          => $data['trade_type'],
             'corridor'            => $corridor,
             'need'                => $data['need'],
@@ -150,8 +164,9 @@ class HomeController extends Controller
         ]);
 
         Outbox::later($user->email, SharetMail::applicationReceived($user, 'trade'));
+        $ref = $this->recordTrade($user, $data, $corridor, $application->id);
 
-        return $this->done('trade', 'Thank you — your trade application has been received. Our trade team will be in touch within 1–2 working days.');
+        return $this->done('trade', 'Thank you — your trade application has been received. Our trade team will be in touch within 1–2 working days.', $ref);
     }
 
     /*
@@ -162,13 +177,16 @@ class HomeController extends Controller
 
     public function storeDeveloperApplication(Request $request)
     {
+        if (FormIntake::isBot()) {
+            return $this->done('dev', 'Thank you — your developer request has been received.');
+        }
+        Identity::clean($request);
         $data = $request->validate([
-            'name'     => 'required|string|max:120',
+            ...Identity::rules(phoneRequired: false, unique: false),
             'company'  => 'nullable|string|max:190',
-            'email'    => 'required|email|max:190',
             'interest' => 'required|in:sandbox,production_keys,white_label,licensing,bespoke_rail',
             'brief'    => 'required|string|max:2000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, 'techie');
 
@@ -184,10 +202,12 @@ class HomeController extends Controller
                 'user_agent' => substr((string) $request->userAgent(), 0, 500),
             ]);
 
-            return $this->done('dev', 'We updated your existing developer request. Check your inbox — sandbox access is usually granted within one working day.');
+            $ref = $this->recordDeveloper($user, $data, $existing->id);
+
+            return $this->done('dev', 'We updated your existing developer request. Check your inbox — sandbox access is usually granted within one working day.', $ref);
         }
 
-        $user->developerApplications()->create([
+        $application = $user->developerApplications()->create([
             'interest'   => $data['interest'],
             'brief'      => $data['brief'],
             'status'     => 'new',
@@ -196,8 +216,9 @@ class HomeController extends Controller
         ]);
 
         Outbox::later($user->email, SharetMail::applicationReceived($user, 'developer'));
+        $ref = $this->recordDeveloper($user, $data, $application->id);
 
-        return $this->done('dev', 'Thank you — your developer request has been received. Sandbox access is usually granted within one working day.');
+        return $this->done('dev', 'Thank you — your developer request has been received. Sandbox access is usually granted within one working day.', $ref);
     }
 
     /*
@@ -208,33 +229,30 @@ class HomeController extends Controller
 
     public function storeContact(Request $request)
     {
+        if (FormIntake::isBot()) {
+            return $this->done('contact', 'Thank you — your note has been received.');
+        }
+        Identity::clean($request);
         $data = $request->validate([
+            ...Identity::rules(phoneRequired: false, unique: false),
             'audience' => 'required|in:merchant,individual,trader,developer,institution,press,career,other',
-            'name'     => 'required|string|max:120',
             'business' => 'nullable|string|max:190',
-            'email'    => 'required|email|max:190',
-            'phone'    => 'nullable|string|max:32',
             'country'  => 'nullable|string|max:60',
             'brief'    => 'required|string|max:3000',
-        ]);
+        ], Identity::MESSAGES);
 
         $user = $this->upsertUser($data, $this->intentFromAudience($data['audience']));
 
-        // Enquiries are never blocked — a user can send many
-        $enquiry = $user->enquiries()->create([
-            'audience'   => $data['audience'],
-            'business'   => $data['business'] ?? null,
-            'brief'      => $data['brief'],
-            'status'     => 'new',
-            'ip_address' => $request->ip(),
-            'user_agent' => substr((string) $request->userAgent(), 0, 500),
+        // Enquiries are never blocked — a user can send many. FormIntake writes it, with its PDF and the team email.
+        $enquiry = FormIntake::record($user, 'contact', $data['audience'], $data['business'] ?? null, $data['brief'], [
+            'You are' => SharetMail::AUDIENCES[$data['audience']] ?? $data['audience'],
+            'Country' => $data['country'] ?? null,
         ]);
 
         $note = $data + ['received_at' => $enquiry->created_at];
         Outbox::later($user->email, SharetMail::contactThanks($note));
-        Outbox::later(config('mail.contact_to'), SharetMail::contactReceived($note));
 
-        return $this->done('contact', 'Thank you — your note has been received. A real person on our team will reply within 48 working hours.');
+        return $this->done('contact', 'Thank you — your note has been received. A real person on our team will reply within 48 working hours.', $enquiry->meta['ref']);
     }
 
     /*
@@ -269,7 +287,10 @@ class HomeController extends Controller
 
         $user->name    = $user->name    ?: ($data['name']  ?? null);
         $user->phone   = $user->phone   ?: ($data['phone'] ?? null);
-        $user->country = $user->country ?: ($data['country'] ?? null);
+        // users.country is a 2-letter code; the contact form's free-text country ("Kenya") stays on the enquiry only.
+        // Before: a new person typing a country made the save fail and the form answer 404.
+        $code = strtoupper(trim((string) ($data['country'] ?? '')));
+        $user->country = $user->country ?: (preg_match('/^[A-Z]{2}$/', $code) ? $code : null);
 
         // First intent wins
         if (!$user->intent || $user->intent === 'undecided') {
@@ -304,16 +325,16 @@ class HomeController extends Controller
         );
     }
 
-    protected function attachWaitingList(User $user, string $intent, string $source, array $meta = [])
+    protected function attachWaitingList(User $user, string $intent, string $source, array $meta = [], string $form = 'personal', array $rows = [])
     {
         $existing = WaitingListEntry::where('user_id', $user->id)->first();
 
         if ($existing) {
-            return $this->done('waitlist', 'You are already on the Sharet waiting list. We will be in touch when it is your turn.');
+            return $this->done('waitlist', 'You are already on the Sharet waiting list. We will be in touch when it is your turn.', $existing->meta['ref'] ?? null);
         }
 
         try {
-            WaitingListEntry::create([
+            $entry = WaitingListEntry::create([
                 'user_id'    => $user->id,
                 'intent'     => $intent,
                 'source'     => $source,
@@ -327,8 +348,16 @@ class HomeController extends Controller
         }
 
         Outbox::later($user->email, SharetMail::waitingList($user));
+        $ref = null;
+        try {
+            $enquiry = FormIntake::record($user, $form, $intent, $meta['business'] ?? null, $meta['brief'] ?? 'Joined the waiting list.', $rows + ['Lane' => ucfirst($intent), 'Signed up on' => $source], ['waiting_list_entry_id' => $entry->id]);
+            $ref = $enquiry->meta['ref'];
+            $entry->update(['meta' => ($entry->meta ?? []) + ['ref' => $ref, 'enquiry_id' => $enquiry->id]]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
 
-        return $this->done('waitlist', 'You are on the list. We will be in touch when it is your turn — usually within a few weeks.');
+        return $this->done('waitlist', 'You are on the list. We will be in touch when it is your turn — usually within a few weeks.', $ref);
     }
 
     protected function intentFromAudience(string $audience): string
@@ -342,11 +371,42 @@ class HomeController extends Controller
         };
     }
 
-    /** Form reply: JSON for the in-page (no reload) forms, a flash message for a normal post. */
-    protected function done(string $key, string $message)
+    protected function recordTrade(User $user, array $data, ?string $corridor, int $applicationId): ?string
     {
+        try {
+            return FormIntake::record($user, 'trade', 'trader', $data['business'] ?? null, $data['brief'] ?? 'Trade application.', [
+                'Trade type' => $data['trade_type'], 'Corridor' => $corridor, 'Needs' => $data['need'],
+                'Monthly volume' => $data['monthly_volume'] ?? null, 'Expected order size' => $data['expected_order_size'] ?? null,
+            ], ['trade_application_id' => $applicationId])->meta['ref'];
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    protected function recordDeveloper(User $user, array $data, int $applicationId): ?string
+    {
+        try {
+            return FormIntake::record($user, 'developer', 'developer', $data['company'] ?? null, $data['brief'], [
+                'Interest' => $data['interest'],
+            ], ['developer_application_id' => $applicationId])->meta['ref'];
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    /** Form reply: JSON for the in-page (no reload) forms, a flash message for a normal post. With the reference when there is one. */
+    protected function done(string $key, string $message, ?string $ref = null)
+    {
+        if ($ref) {
+            $message .= " Your reference is {$ref}.";
+        }
+
         return request()->expectsJson()
-            ? response()->json(['message' => $message])
+            ? response()->json(['message' => $message, 'reference' => $ref])
             : back()->with("{$key}_received", true)->with("{$key}_message", $message);
     }
 }

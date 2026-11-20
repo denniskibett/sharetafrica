@@ -1,89 +1,28 @@
-{{-- resources/views/auth/register.blade.php --}}
-@extends('home.layouts.app')
-@section('robots', 'noindex,follow')
-
-@section('title', 'Create account · Sharet Africa')
+{{-- Create an account (canvas A02): real names as on the ID, a real email, a real mobile number. Checked again on the
+     server by App\Support\Identity (its messages show under each field). Same fields and route as before. --}}
+@extends('layouts.auth')
+@section('title', 'Create account')
 @section('description', 'Create your Sharet account.')
+@section('switch')<a href="{{ route('login') }}" class="inline-flex h-10 items-center rounded-full bg-app-tile px-4 text-sm font-semibold hover:bg-app-raised">Sign in</a>@endsection
+@section('welcome')@include('auth.partials.welcome')@endsection
+@section('heading', 'Create your account')
+@section('lede', 'Use your names as they appear on your ID.')
 
 @section('content')
+<form method="POST" action="{{ route('register') }}" class="space-y-4">
+  @csrf
+  @if ($errors->count() > 1)
+    <p class="flex gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-500/10 dark:text-red-300" role="alert">
+      <x-heroicon-o-exclamation-triangle class="h-5 w-5 shrink-0" /> {{ $errors->count() }} details need fixing.
+    </p>
+  @endif
+  <x-ui.form-input label="Full name" name="name" :value="old('name')" required autofocus autocomplete="name" placeholder="Juma Jones" hint="First and last name, letters only." />
+  <x-ui.form-input label="Email" name="email" type="email" :value="old('email')" required autocomplete="username" placeholder="you@example.com" />
+  <x-ui.form-input label="M-PESA number" name="phone" type="tel" :value="old('phone')" required autocomplete="tel" inputmode="tel" placeholder="0712 345 678" hint="Your mobile number becomes your wallet number." />
+  <x-ui.form-input label="Password" name="password" type="password" required autocomplete="new-password" />
+  <x-ui.form-input label="Confirm password" name="password_confirmation" type="password" required autocomplete="new-password" />
 
-<section class="hero" style="padding-block: var(--space-8) var(--space-7);">
-  <div class="container container--narrow">
-    <div class="section-head" style="grid-template-columns: 1fr; text-align: left; margin-bottom: var(--space-6);">
-      <div>
-        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Create your wallet</span>
-        <h1 class="hero-headline" style="font-size: var(--text-4xl); margin-top: var(--space-4);">
-          Create your<br/>
-          <span class="lime">Sharet account.</span>
-        </h1>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="snug" style="padding-top: 0;">
-  <div class="container container--narrow">
-
-    <form method="POST" action="{{ route('register') }}" class="form-card">
-      @csrf
-
-      <div class="form-row">
-        <div class="form-field">
-          <label for="name">Full name</label>
-          <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name" placeholder="Amina Wanjiru" />
-          @error('name')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
-
-        <div class="form-field">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username" placeholder="you @ email.com" />
-          @error('email')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-field">
-          <label for="phone">Phone number</label>
-          <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" required placeholder="+254 712 XXX XXX" />
-          @error('phone')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
-
-      </div>
-
-      <div class="form-row">
-        <div class="form-field">
-          <label for="password">Password</label>
-          <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="••••••••" />
-          @error('password')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
-
-        <div class="form-field">
-          <label for="password_confirmation">Confirm password</label>
-          <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="••••••••" />
-          @error('password_confirmation')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <small>Already registered? <a href="{{ route('login') }}" style="color: var(--lime);">Sign in →</a></small>
-        <button type="submit" class="btn btn--primary btn--lg">
-          Create account
-          <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </form>
-
-  </div>
-</section>
-
+  <button type="submit" class="mt-2 h-12 w-full rounded-full bg-app-lime text-[15px] font-semibold text-[#050507] hover:brightness-95">Create account</button>
+  <p class="text-center text-sm text-app-muted">Already registered? <a href="{{ route('login') }}" class="font-semibold text-app-ink underline-offset-4 hover:underline">Sign in</a></p>
+</form>
 @endsection

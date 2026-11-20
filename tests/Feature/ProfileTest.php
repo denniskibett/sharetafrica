@@ -96,4 +96,16 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_security_tab_sets_then_changes_the_sharet_pin(): void
+    {
+        $user = User::factory()->create(['onboarding_status' => 'active']);
+        $this->actingAs($user)->get('/profile/edit')->assertOk()->assertSee('Sharet PIN');
+        $this->actingAs($user)->getJson('/profile/data')->assertJsonPath('user.pin_set', false);
+
+        $this->actingAs($user)->postJson('/pay/pin', ['pin' => '5937', 'pin_confirmation' => '5937'])->assertOk();
+        $this->actingAs($user)->getJson('/profile/data')->assertJsonPath('user.pin_set', true);
+        $this->actingAs($user)->postJson('/pay/pin', ['pin' => '8642', 'pin_confirmation' => '8642', 'current' => '0000'])->assertStatus(422);
+        $this->actingAs($user)->postJson('/pay/pin', ['pin' => '8642', 'pin_confirmation' => '8642', 'current' => '5937'])->assertOk();
+    }
 }

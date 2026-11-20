@@ -1,26 +1,36 @@
-{{-- Bank-grade photos: ID front/back (or passport page), three camera selfies, signature.
-     Photos are checked for size, light and sharpness before upload, and stored privately. --}}
-<x-ui.card title="Photos and signature" subtitle="Clear, readable photos only: all four corners of the ID in frame, no glare, no filters. Take a photo, choose a file, or point at a card and paste (⌘V / Ctrl+V).">
+{{-- Verification photos: ID front/back (or passport page) and one guided selfie (three poses, taken by itself) verify the account; the signature
+     is for bank grade. Photos are checked for size, light and sharpness before upload, and stored privately. --}}
+<x-ui.card title="ID and selfies" subtitle="Your ID (front and back) and one quick selfie verify your account. We read your name, ID number and date of birth from the ID: nothing to type. All four corners in frame, no glare.">
   <x-slot:actions>
-    <span :class="sharet.pill(data.level.standard?.documents?.[0] === data.level.standard?.documents?.[1] ? 'success' : 'warning')"
-          x-text="(data.level.standard?.documents?.[0] ?? 0) + ' of ' + (data.level.standard?.documents?.[1] ?? 0) + ' done'"></span>
+    <span x-data="{ get n() { const docs = data.documents || [], up = (t) => docs.find(x => x.type === t)?.uploaded;
+                             const sides = data.kyc.id_type === 'passport' ? ['id_front'] : ['id_front', 'id_back'];
+                             return [sides.filter(up).length + (['selfie_center', 'selfie_left', 'selfie_right'].every(up) ? 1 : 0), sides.length + 1] } }"
+          :class="sharet.pill(n[0] === n[1] ? 'success' : 'warning')" x-text="n[0] + ' of ' + n[1] + ' done'"></span>
   </x-slot:actions>
 
   <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-    <template x-for="d in data.documents" :key="d.type">
+    <template x-for="d in (data.documents || []).filter(x => !['selfie_left', 'selfie_right'].includes(x.type)).map(x => x.type !== 'selfie_center' ? x : selfieCard(x))" :key="d.type">
       <div class="flex flex-col rounded-xl border p-4" :class="d.uploaded ? 'border-emerald-200 dark:border-emerald-500/30' : 'border-gray-200 dark:border-gray-800'">
         <div class="flex items-start justify-between gap-3">
           <div>
             <p class="font-medium text-gray-900 dark:text-white" x-text="d.label"></p>
             <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400" x-text="d.hint"></p>
           </div>
-          <span :class="sharet.pill(d.uploaded ? 'success' : 'neutral')" x-text="d.uploaded ? 'Done' : 'Needed'"></span>
+          <span :class="sharet.pill(d.uploaded ? 'success' : (d.verify ? 'warning' : 'neutral'))" x-text="d.uploaded ? 'Done' : (d.verify ? 'Needed' : 'Bank grade')"></span>
         </div>
 
         <div class="mt-3 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-gray-50 dark:bg-white/[0.03]">
-          <img x-show="d.url" :src="d.url" :alt="d.label" class="h-full w-full object-contain">
+          <img x-show="d.url && !d.poses" :src="d.url" :alt="d.label" class="h-full w-full object-contain">
+          <div x-show="d.poses && d.poses.some(p => p.url)" class="grid h-full w-full grid-cols-3 gap-1">
+            <template x-for="(p, i) in d.poses || []" :key="p.type">
+              <div class="relative h-full">
+                <img x-show="p.url" :src="p.url" :alt="['Straight', 'Left', 'Right'][i]" class="h-full w-full object-cover">
+                <span class="absolute inset-x-0 bottom-0 bg-black/50 py-0.5 text-center text-[10px] font-medium text-white" x-text="['Straight', 'Left', 'Right'][i]"></span>
+              </div>
+            </template>
+          </div>
           <x-heroicon-o-photo x-show="!d.url && d.kind === 'photo'" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
-          <x-heroicon-o-face-smile x-show="!d.url && d.kind === 'selfie'" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
+          <x-heroicon-o-face-smile x-show="d.kind === 'selfie' && !(d.poses || []).some(p => p.url)" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
           <x-heroicon-o-pencil x-show="!d.url && d.kind === 'signature'" class="h-10 w-10 text-gray-300 dark:text-gray-600" />
         </div>
 
@@ -35,7 +45,7 @@
             </label>
           </template>
           <template x-if="d.kind === 'selfie'">
-            <x-ui.button icon="video-camera" @click="sharet.panel('selfie', d)" x-text="d.uploaded ? 'Retake' : 'Open camera'"></x-ui.button>
+            <x-ui.button icon="video-camera" @click="sharet.panel('selfie', d)" x-text="d.uploaded ? 'Retake' : 'Take selfie'"></x-ui.button>
           </template>
           <template x-if="d.kind === 'signature'">
             <x-ui.button icon="pencil" @click="sharet.panel('signature', d)" x-text="d.uploaded ? 'Sign again' : 'Sign'"></x-ui.button>
@@ -46,28 +56,52 @@
   </div>
 </x-ui.card>
 
-{{-- Selfie camera (front camera, face guide, clarity check) --}}
-<x-ui.slide-over name="selfie" title="Selfie" x-text="payload.label">
-  <div x-data="kycCamera()" x-effect="if (open) { $nextTick(() => start()) } else { stop() }" class="space-y-4">
-    <p class="text-sm text-gray-600 dark:text-gray-300" x-text="payload.hint"></p>
+{{-- Guided selfie: one camera session gives the three poses staff check (straight, left, right). It watches the light,
+     takes each pose by itself once it is steady, and uploads each photo in the background while the next is taken. --}}
+<x-ui.slide-over name="selfie" title="Selfie">
+  <div x-data="kycSelfie((t, u) => uploadDoc(t, u))" x-effect="if (open) { $nextTick(() => start()) } else { stop() }" class="space-y-4">
+    <p class="text-sm text-gray-600 dark:text-gray-300">Face a window or a lamp, with a plain wall behind you. Hold the phone at eye level. We take three photos for you: straight, then left, then right.</p>
     <div class="relative mx-auto aspect-[3/4] max-w-sm overflow-hidden rounded-2xl bg-black">
-      <video x-ref="video" x-show="!shot" playsinline muted class="h-full w-full -scale-x-100 object-cover"></video>
-      <img x-show="shot" :src="shot" alt="Your selfie" class="h-full w-full object-cover">
-      <div x-show="!shot" class="pointer-events-none absolute inset-[12%_18%] rounded-[50%] border-4 border-dashed border-[#D4FF3D]/80"></div>
-      <p x-show="!shot" class="absolute inset-x-0 bottom-3 text-center text-xs font-medium text-white/90"
-         x-text="payload.type === 'selfie_left' ? 'Turn your head to the left' : payload.type === 'selfie_right' ? 'Turn your head to the right' : 'Face fills the oval, eyes open'"></p>
+      <video x-ref="video" x-show="!done" playsinline muted class="h-full w-full -scale-x-100 object-cover"></video>
+      <img x-show="done" :src="shots.selfie_center" alt="Your selfie" class="h-full w-full object-cover">
+      <div x-show="!done" class="pointer-events-none absolute inset-[12%_18%] rounded-[50%] border-4 transition-colors duration-300"
+           :class="hint ? 'border-dashed border-white/50' : 'border-solid border-[#D4FF3D]'"></div>
+      <div x-show="!done && stream" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10 text-center">
+        <p class="text-base font-semibold text-white" x-text="current.say"></p>
+        <p class="mt-1 h-4 text-xs text-white/80" x-text="hint || 'Hold still…'"></p>
+      </div>
     </div>
+
+    {{-- The three poses from the one capture: taken, sending, sent --}}
+    <ol class="mx-auto grid max-w-sm grid-cols-3 gap-2">
+      <template x-for="(p, i) in $store.selfieSteps" :key="p.type">
+        <li class="flex flex-col items-center gap-1.5">
+          <div class="relative aspect-square w-full overflow-hidden rounded-xl border"
+               :class="sent[p.type] === 'done' ? 'border-emerald-300 dark:border-emerald-500/40' : (i === step && !done ? 'border-gray-900 dark:border-[#D4FF3D]' : 'border-gray-200 dark:border-gray-800')">
+            <img x-show="shots[p.type]" :src="shots[p.type]" alt="" class="h-full w-full object-cover">
+            <span x-show="sent[p.type] === 'done'" class="absolute right-1 top-1 rounded-full bg-emerald-500 p-0.5 text-white"><x-heroicon-s-check class="h-3 w-3" /></span>
+            <span x-show="sent[p.type] === 'sending'" class="absolute right-1 top-1 rounded-full bg-white/90 p-0.5 text-gray-700"><x-heroicon-o-arrow-path class="h-3 w-3 animate-spin" /></span>
+            <span x-show="sent[p.type] === 'failed'" class="absolute right-1 top-1 rounded-full bg-red-500 p-0.5 text-white"><x-heroicon-s-exclamation-triangle class="h-3 w-3" /></span>
+          </div>
+          <span class="text-xs text-gray-500" x-text="['Straight', 'Left', 'Right'][i]"></span>
+        </li>
+      </template>
+    </ol>
+
     <p x-show="error" x-text="error" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300"></p>
+    <p x-show="failed.length" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-300">A photo did not upload. Check your connection and send it again.</p>
+    <p x-show="finished" class="text-center text-sm font-medium text-emerald-700 dark:text-emerald-400">Selfie done. You can close this.</p>
+
     <div class="flex flex-wrap justify-center gap-2">
-      <x-ui.button x-show="!shot && stream" icon="camera" @click="capture()">Take photo</x-ui.button>
-      <x-ui.button x-show="shot" variant="secondary" icon="arrow-path" @click="start()">Retake</x-ui.button>
-      <x-ui.button x-show="shot" icon="check" @click="uploadDoc(payload.type, shot).then(ok => ok && close())">Use this photo</x-ui.button>
-      <label x-show="error" class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">
-        <x-heroicon-o-arrow-up-tray class="h-5 w-5" /> Upload instead
-        <input type="file" accept="image/jpeg,image/png" capture="user" class="sr-only" @change="uploadDoc(payload.type, $event.target.files[0], { minWidth: 640, minHeight: 480 }).then(ok => ok && close())">
+      <x-ui.button x-show="slow" variant="secondary" icon="camera" @click="take()">Take it now</x-ui.button>
+      <x-ui.button x-show="failed.length" icon="arrow-path" @click="retry()">Send again</x-ui.button>
+      <x-ui.button x-show="done && !failed.length" variant="secondary" icon="arrow-path" @click="start()">Start again</x-ui.button>
+      <x-ui.button x-show="finished" icon="check" @click="close()">Done</x-ui.button>
+      <label x-show="error" class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-5 text-sm font-semibold text-gray-800 hover:bg-gray-200 dark:bg-white/[0.06] dark:text-gray-200">
+        <x-heroicon-o-arrow-up-tray class="h-5 w-5" /> <span x-text="'Upload ' + ['a straight', 'a left-turn', 'a right-turn'][step] + ' photo'"></span>
+        <input type="file" accept="image/jpeg,image/png" capture="user" class="sr-only" @change="uploadDoc(current.type, $event.target.files[0], { minWidth: 640, minHeight: 480 }).then(ok => { if (ok) { sent = { ...sent, [current.type]: 'done' }; step < 2 ? step++ : (done = true) } }); $event.target.value = ''">
       </label>
     </div>
-    <p x-show="docError[payload.type]" x-text="docError[payload.type]" class="text-center text-sm text-red-600"></p>
   </div>
 </x-ui.slide-over>
 
@@ -76,7 +110,7 @@
   <div x-data="signaturePad()" x-effect="open && $nextTick(() => { init(); clear() })" class="space-y-4">
     <p class="text-sm text-gray-600 dark:text-gray-300">Sign with your finger or mouse, the way you sign official documents.</p>
     <canvas x-ref="pad" @pointerdown="down($event)" @pointermove="move($event)" @pointerup="up()" @pointerleave="up()"
-            class="h-56 w-full touch-none rounded-xl border-2 border-dashed border-gray-300 bg-white dark:border-gray-700" aria-label="Signature pad"></canvas>
+            class="h-56 w-full touch-none rounded-2xl border-2 border-dashed border-gray-300 bg-white dark:border-gray-700" aria-label="Signature pad"></canvas>
     <div class="flex justify-between gap-2">
       <x-ui.button variant="secondary" icon="arrow-path" @click="clear()">Clear</x-ui.button>
       <x-ui.button icon="check" x-bind:disabled="!signed" @click="uploadDoc('signature', image()).then(ok => ok && close())">Save signature</x-ui.button>

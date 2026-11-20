@@ -37,6 +37,9 @@
       @endforeach
     </nav>
 
+    <div class="min-w-0">
+    {{-- Outside the settings form: the kill switches post on their own --}}
+    <div x-show="!loading && tab === 'advanced'" x-cloak>@include('admin.system.partials.lockdown')</div>
     <form x-show="!loading" x-cloak @submit.prevent="save($el)" class="space-y-6" enctype="multipart/form-data">
       <div x-show="tab === 'general'">@include('admin.system.partials.general')</div>
       <div x-show="tab === 'regional'">@include('admin.system.partials.regional')</div>
@@ -45,6 +48,7 @@
       <div x-show="tab === 'advanced'">@include('admin.system.partials.advanced')</div>
       <div class="flex justify-end"><x-ui.button type="submit" icon="check" x-bind:disabled="busy">Save settings</x-ui.button></div>
     </form>
+    </div>
   </div>
 </div>
 @endsection

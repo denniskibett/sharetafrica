@@ -1,50 +1,66 @@
-{{-- Customer app top bar. Phones: avatar, greeting, notifications (like the canvas mobile home).
-     Wider screens: page actions "Add money" and "Send money", notifications, account menu. --}}
+{{-- Customer app top bar, the same on every screen.
+     Phones: Sharet logo left; photo and notifications right; "Habari, Juma" with the country and today's rates
+     (KES = USD only: Safaricom's rate less our margin); the header is ink in both themes on the line below.
+     Wider screens: logo, notifications, greeting and rates in one row; light/dark and the account menu right. --}}
 @php
     $user = auth()->user();
-    $hour = (int) now()->timezone('Africa/Nairobi')->format('G');
-    $greeting = $hour < 12 ? 'Good morning' : ($hour < 17 ? 'Good afternoon' : 'Good evening');
     $initials = \App\Support\Table::person($user)['initials'];
     $first = \Illuminate\Support\Str::before(trim($user->name), ' ') ?: $user->name;
+    $icon = 'flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/15'; // ink header in both themes
+    [$cc, $countryName] = \App\Support\HomeRates::country($user);
+    $rates = \App\Support\HomeRates::line();
+    $flags = ['KE' => 'linear-gradient(#0A0A0C 0 30%,#fff 30% 35%,#B00 35% 65%,#fff 65% 70%,#076B32 70%)', 'UG' => 'linear-gradient(#0A0A0C 0 17%,#FCDC04 17% 33%,#D90000 33% 50%,#0A0A0C 50% 67%,#FCDC04 67% 83%,#D90000 83%)',
+              'TZ' => 'linear-gradient(135deg,#1EB53A 0 40%,#FCD116 40% 44%,#0A0A0C 44% 56%,#FCD116 56% 60%,#00A3DD 60%)', 'RW' => 'linear-gradient(#20603D 0 50%,#FAD201 50% 75%,#00A1DE 75%)'];
 @endphp
-<header class="sticky top-0 z-[999] flex h-[72px] shrink-0 items-center gap-3 border-b border-white/[0.08] bg-[#0A0A0C]/90 px-4 backdrop-blur md:px-8">
-  <a href="{{ route('profile.show') }}" class="flex min-w-0 items-center gap-3 md:hidden" aria-label="Your profile">
-    <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#232328] text-[15px] font-semibold">
-      @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
-    </span>
-    <span class="min-w-0"><span class="block text-[13px] text-[#80807A]">{{ $greeting }}</span><span class="block truncate text-base font-semibold">{{ $first }}</span></span>
+<header class="sticky top-0 z-[999] bg-[#0A0A0C] text-[#F4F4F0]">
+ <div class="flex w-full flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 md:h-[72px] md:flex-nowrap md:px-6 md:py-0 2xl:px-8">
+  <a href="{{ route('dashboard') }}" class="order-1 shrink-0 md:pr-2" aria-label="Sharet home">
+    <img src="{{ asset('images/brand/sharet-logo-colour-on-dark.svg') }}" alt="Sharet" class="h-6 w-auto md:h-7">
   </a>
-
-  <div class="ml-auto flex items-center gap-2 md:gap-3">
-    {{-- Shown as "coming soon" until the deposit / transfer pages exist --}}
-    @if (Route::has('wallet.deposit'))
-      <a href="{{ route('wallet.deposit') }}" class="hidden h-[46px] items-center rounded-xl border border-white/[0.16] px-[18px] text-sm font-semibold hover:bg-white/[0.04] md:flex">Add money</a>
-    @else
-      <span title="Coming soon" aria-disabled="true" class="hidden h-[46px] cursor-default items-center rounded-xl border border-white/[0.08] px-[18px] text-sm font-semibold text-[#5A5A55] md:flex">Add money</span>
-    @endif
-    @if (Route::has('wallet.transfer'))
-      <a href="{{ route('wallet.transfer') }}" class="hidden h-[46px] items-center rounded-xl bg-[#D4FF3D] px-[18px] text-sm font-semibold text-[#050507] hover:bg-[#E2FF73] md:flex">Send money</a>
-    @else
-      <span title="Coming soon" aria-disabled="true" class="hidden h-[46px] cursor-default items-center gap-2 rounded-xl bg-[#D4FF3D]/30 px-[18px] text-sm font-semibold text-[#050507] md:flex">Send money <span class="app-mono rounded bg-black/20 px-1.5 py-0.5 text-[10px] uppercase">Soon</span></span>
-    @endif
-    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-      <button type="button" @click="open = !open" aria-label="Notifications" class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#18181C] hover:bg-[#232328]"><x-heroicon-o-bell class="h-5 w-5" /></button>
-      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-white/[0.08] bg-[#18181C] p-5 text-center shadow-xl">
-        <p class="text-sm font-semibold">You're all caught up</p>
-        <p class="mt-1 text-xs text-[#80807A]">Payment and account alerts will show here.</p>
+    {{-- Alerts: the latest payments (a dot while one is still moving); a row opens its receipt --}}
+    <div class="relative order-3 shrink-0 md:order-2" x-data="{ open: false, rows: [], async load() { this.rows = (await (await fetch('{{ route('pay.index') }}?per_page=5&sort=-date', { headers: { Accept: 'application/json' } })).json()).data } }"
+         x-init="load()" @wallet-changed.window="load()" @click.outside="open = false">
+      <button type="button" @click="open = !open; open && load()" aria-label="Notifications" class="{{ $icon }} relative">
+        <x-heroicon-o-bell class="h-5 w-5" />
+        <span x-show="rows.some(r => r.flow === 'pending')" x-cloak class="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-app-wait ring-2 ring-[#0A0A0C]"></span>
+      </button>
+      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-[min(360px,calc(100vw-2rem))] text-app-ink md:left-0 md:right-auto rounded-2xl border border-app-line bg-app-panel p-3 shadow-xl">
+        <p class="px-2 pb-1 text-sm font-semibold">Latest payments</p>
+        <ul x-show="rows.length" class="space-y-1 [&_.row-meta]:!hidden" @click="open = false">
+          <template x-for="r in rows" :key="r.id">@include('pay.partials.row')</template>
+        </ul>
+        <p x-show="!rows.length" class="px-2 py-6 text-center text-sm text-app-muted">Payment alerts will show here.</p>
+        <a href="{{ route('pay.index') }}" class="mt-1 block rounded-lg px-2 py-2 text-center text-sm font-medium text-app-soft hover:bg-app-tile">See all transactions</a>
       </div>
     </div>
+  <div class="order-4 w-full min-w-0 leading-tight md:order-3 md:w-auto">
+    <p class="truncate text-[15px] font-semibold md:text-base">Habari, {{ $first }}</p>
+    <p class="mt-0.5 flex items-center gap-1.5 truncate text-xs text-white/60">
+      <span class="inline-block h-[11px] w-4 shrink-0 rounded-[2px]" style="background: {{ $flags[$cc] }}" aria-hidden="true"></span>
+      <span class="truncate"><span class="hidden sm:inline">{{ $countryName }} · </span><span class="sr-only sm:hidden">{{ $countryName }}: </span>{{ $rates ?? "Today's rates from 9:00" }}</span>
+    </p>
+  </div>
+
+  <div class="order-2 ml-auto flex shrink-0 items-center gap-2 md:order-4 md:gap-3">
+    <button type="button" @click="darkMode = !darkMode" class="{{ $icon }} !hidden md:!flex" :aria-label="darkMode ? 'Light mode' : 'Dark mode'">
+      <x-heroicon-o-sun x-show="darkMode" class="h-5 w-5" /><x-heroicon-o-moon x-show="!darkMode" class="h-5 w-5" />
+    </button>
+    <button type="button" @click="$dispatch('account-sheet')" class="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-[#D4FF3D] text-[#050507] text-sm font-semibold md:hidden" aria-label="Account">
+      @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
+    </button>
     <div class="relative hidden md:block" x-data="{ open: false }" @click.outside="open = false">
-      <button type="button" @click="open = !open" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-white/[0.04]" aria-label="Account menu">
-        <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#232328] text-sm font-semibold">
+      <button type="button" @click="open = !open" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-white/10" aria-label="Account menu">
+        <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#D4FF3D] text-[#050507] text-sm font-semibold">
           @if ($user->avatar)<img src="{{ asset('storage/'.$user->avatar) }}" alt="" class="h-full w-full object-cover">@else{{ $initials }}@endif
         </span>
-        <x-heroicon-o-chevron-down class="h-4 w-4 text-[#80807A]" />
+        <x-heroicon-o-chevron-down class="h-4 w-4 text-white/60" />
       </button>
-      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-60 rounded-2xl border border-white/[0.08] bg-[#18181C] p-2 shadow-xl">
-        <p class="truncate px-3 pb-2 pt-1 text-sm font-semibold">{{ $user->name }}<span class="block truncate text-xs font-normal text-[#80807A]">{{ $user->email }}</span></p>
+      <div x-show="open" x-cloak x-transition class="absolute right-0 mt-3 w-64 text-app-ink rounded-2xl border border-app-line bg-app-panel p-2 shadow-xl">
+        <p class="truncate px-3 pb-2 pt-1 text-sm font-semibold">{{ $user->name }}<span class="block truncate text-xs font-normal text-app-muted">{{ $user->email }}</span></p>
         @include('partials.customer.account-links')
       </div>
     </div>
   </div>
+ </div>
 </header>
+

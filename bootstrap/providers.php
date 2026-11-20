@@ -3,4 +3,6 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\SystemServiceProvider::class,
+    App\Providers\V2ServiceProvider::class,
+    App\SecurityKit\SecurityKitServiceProvider::class,
 ];

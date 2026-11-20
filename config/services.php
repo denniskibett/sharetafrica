@@ -47,4 +47,10 @@ return [
         'sandbox' => env('KENYASMS_SANDBOX', false),
     ],
 
+    // Reads ID photos at verification (App\Integrations\Contracts\IdReader). "none" where tesseract isn't installed.
+    'tesseract' => [
+        'reader' => env('ID_READER', 'tesseract'),
+        'path' => env('TESSERACT_PATH', 'tesseract'),
+    ],
+
 ];

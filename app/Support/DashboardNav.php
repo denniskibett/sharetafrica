@@ -33,6 +33,7 @@ class DashboardNav
                 'title' => 'Wallet',
                 'roles' => ['individual'],
                 'items' => [
+                    ['label' => 'Pay anyone', 'route' => 'pay.index', 'icon' => 'banknotes', 'tone' => 'emerald', 'active' => ['pay.*']],
                     ['label' => 'Wallet', 'route' => 'wallet.index', 'icon' => 'wallet', 'tone' => 'violet'],
                     ['label' => 'Send money', 'route' => 'wallet.transfer', 'icon' => 'paper-airplane', 'tone' => 'emerald'],
                     ['label' => 'Receive money', 'route' => 'wallet.deposit', 'icon' => 'arrow-down-tray', 'tone' => 'sky'],
@@ -50,6 +51,7 @@ class DashboardNav
                     ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
                 ],
             ],
             [
@@ -63,6 +65,7 @@ class DashboardNav
                     ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
                 ],
             ],
             [
@@ -70,6 +73,7 @@ class DashboardNav
                 'roles' => ['techie'],
                 'items' => [
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'amber', 'can' => 'developer.api_keys'],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
                     ['label' => 'Webhooks', 'route' => 'developer.webhooks.index', 'icon' => 'bolt', 'tone' => 'violet'],
                     ['label' => 'Request logs', 'route' => 'developer.logs', 'icon' => 'command-line', 'tone' => 'slate'],
                     ['label' => 'Sandbox', 'route' => 'developer.sandbox', 'icon' => 'beaker', 'tone' => 'teal'],
@@ -83,9 +87,10 @@ class DashboardNav
                         'roles' => ['support', 'operations'], 'active' => ['admin.analytics.*']],
                     ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'document-chart-bar', 'tone' => 'violet', 'can' => 'admin.users', 'roles' => ['support', 'operations']],
                     ['label' => 'Reconciliation', 'route' => 'ops.reconciliation.index', 'icon' => 'scale', 'tone' => 'indigo'],
+                    ['label' => 'Ledger', 'route' => 'ledger.index', 'icon' => 'book-open', 'tone' => 'violet', 'can' => 'admin.reconciliation', 'active' => ['ledger.*']],
                     ['label' => 'Treasury pools', 'route' => 'ops.treasury.index', 'icon' => 'circle-stack', 'tone' => 'emerald'],
                     ['label' => 'Live rails', 'route' => 'ops.rails.index', 'icon' => 'signal', 'tone' => 'teal'],
-                    ['label' => 'Support tickets', 'route' => 'ops.support.index', 'icon' => 'chat-bubble-left-right', 'tone' => 'rose'],
+                    ['label' => 'Support desk', 'route' => 'ops.support.index', 'icon' => 'chat-bubble-left-right', 'tone' => 'rose', 'active' => ['ops.support.*']],
                 ],
             ],
             [
@@ -96,13 +101,19 @@ class DashboardNav
                         'active' => ['admin.analytics.*']],
                     ['label' => 'Reports', 'route' => 'reports.index', 'icon' => 'document-chart-bar', 'tone' => 'violet'],
                     ['label' => 'User management', 'route' => 'users.index', 'icon' => 'users', 'tone' => 'indigo', 'active' => ['users.*']],
+                    ['label' => 'Verifications', 'route' => 'admin.verifications.index', 'icon' => 'identification', 'tone' => 'lime', 'can' => 'admin.users'],
+                    ['label' => 'Businesses', 'route' => 'admin.businesses.index', 'icon' => 'building-storefront', 'tone' => 'emerald', 'can' => 'admin.users', 'active' => ['admin.businesses.*']],
                     ['label' => 'Waiting list', 'route' => 'admin.waiting_list', 'icon' => 'queue-list', 'tone' => 'amber'],
                     ['label' => 'Enquiries', 'route' => 'admin.contact.index', 'icon' => 'inbox-arrow-down', 'tone' => 'sky', 'can' => 'waiting_list.invite'],
                     ['label' => 'Email designs', 'route' => 'admin.emails.index', 'icon' => 'envelope', 'tone' => 'rose', 'can' => 'admin.system',
                         'active' => ['admin.emails.*']],
+                    ['label' => 'Security', 'route' => 'admin.security.index', 'icon' => 'shield-check', 'tone' => 'rose', 'can' => 'admin.system',
+                        'active' => ['admin.security.*', 'securitykit.*']],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
                     ['label' => 'Roles & permissions', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'tone' => 'emerald', 'can' => 'admin.roles'],
+                    ['label' => 'Scheduled jobs', 'route' => 'admin.scheduler.index', 'icon' => 'clock', 'tone' => 'sky', 'can' => 'admin.system'],
+                    ['label' => 'Pricing', 'route' => 'admin.pricing.index', 'icon' => 'calculator', 'tone' => 'emerald', 'can' => 'admin.system'],
                     ['label' => 'System', 'route' => 'admin.system.index', 'icon' => 'adjustments-horizontal', 'tone' => 'slate', 'can' => 'admin.system'],
                 ],
             ],
@@ -132,19 +143,29 @@ class DashboardNav
         return $user !== null && ! $user->hasAnyRole(self::OPS);
     }
 
-    /** The lane's main action for the phone tab bar: [label, route, icon]. */
-    public static function laneAction(?User $user): array
-    {
-        return match ($user?->intent) {
-            'merchant' => ['Accept', 'merchant.accept', 'banknotes'],
-            'business' => ['Pay', 'business.pay', 'paper-airplane'],
-            'techie' => ['API', 'api-keys.index', 'key'],
-            default => ['Send', 'wallet.transfer', 'paper-airplane'],
-        };
-    }
-
     /** Groups this user may see, each item resolved to url/active/ready. */
     public static function for(?User $user): array
+    {
+        return self::isCustomer($user) ? self::customer() : self::staff($user);
+    }
+
+    /**
+     * The customer app's menu: transactions and the website. The dashboard, where everything else starts, is the logo
+     * (and Home on the phone tab bar). Profile and settings live in the header's account menu.
+     */
+    protected static function customer(): array
+    {
+        $items = [
+            ['label' => 'Transactions', 'route' => 'pay.index', 'icon' => 'arrows-right-left', 'active' => ['pay.*']],
+            ['label' => 'Sharet website', 'route' => 'home', 'icon' => 'globe-alt'],
+        ];
+
+        return [['title' => 'Menu', 'items' => array_map(fn ($i) => $i + [
+            'ready' => true, 'url' => route($i['route']), 'current' => request()->routeIs(...($i['active'] ?? [$i['route']])),
+        ], $items)]];
+    }
+
+    protected static function staff(?User $user): array
     {
         $out = [];
         $soon = [];

@@ -33,6 +33,22 @@ class SharetMail extends Mailable
         return new Content(view: 'emails.message', with: $this->data + ['subjectLine' => $this->subjectLine]);
     }
 
+    /** A finished payment above the receipt threshold (App\Support\Receipt), with the PDF attached. */
+    public static function transactionReceipt(\App\Models\RampOrder $order, User $viewer): self
+    {
+        $p = $order->present($viewer);
+        $in = $p['incoming'] || $p['top_up'];
+
+        return new self(($in ? 'You received ' : 'You sent ').'KES '.$p[$in ? 'amount' : 'total'].' · '.$order->reference(), [
+            'preheader' => $p['title'].' · '.$p['state']['label'],
+            'eyebrow' => 'Sharet receipt',
+            'heading' => ($in ? '+ KES ' : '− KES ').$p[$in ? 'amount' : 'total'],
+            'lines' => [$p['title'].'. '.$p['state']['label'].'.', 'Your receipt is below and attached as a PDF.'],
+            'details' => $order->receipt($viewer),
+            'after' => ['If you did not make this payment, reply to this email straight away.'],
+        ]);
+    }
+
     /** Contact form audience codes (HomeController::storeContact) as people read them. */
     public const AUDIENCES = [
         'merchant' => 'Merchant', 'individual' => 'Individual', 'trader' => 'Trader / importer / exporter',
@@ -83,6 +99,36 @@ class SharetMail extends Mailable
             ]),
             'signoff' => 'Sharet website',
         ], $note['email']);
+    }
+
+    /**
+     * To the team inbox for any website form (App\Support\FormIntake): the reference, what was sent, a button to
+     * Administration › Enquiries; the PDF is attached by FormIntake. Reply-to is the sender.
+     */
+    public static function formReceived(\App\Models\Enquiry $enquiry): self
+    {
+        $m = $enquiry->meta ?? [];
+        $person = $enquiry->user;
+
+        return new self(($m['form_name'] ?? 'Website form').' '.($m['ref'] ?? '').' — '.($person?->name ?: $person?->email ?: 'website visitor'), [
+            'preheader' => str($enquiry->brief)->limit(90),
+            'eyebrow' => ($m['form_name'] ?? 'Website form').' · '.($m['ref'] ?? ''),
+            'heading' => ($person?->name ?: 'Someone').' sent the '.strtolower($m['form_name'] ?? 'website').' form',
+            'lines' => ['Reply to this email to answer them directly. The full submission is attached as a PDF and is in Administration › Enquiries.'],
+            'details' => array_filter([
+                'Reference' => $m['ref'] ?? null,
+                'Name' => $person?->name,
+                'Email' => $person?->email,
+                'Phone' => $person?->phone,
+                'Business' => $enquiry->business,
+            ]) + array_map(fn ($v) => is_array($v) ? implode(', ', $v) : (string) $v, $m['rows'] ?? []) + array_filter([
+                'Message' => $enquiry->brief,
+                'Received' => $enquiry->created_at?->timezone('Africa/Nairobi')->format('j M Y, H:i').' EAT',
+            ]),
+            'detailsTitle' => 'What they sent',
+            'button' => ['label' => 'Open Enquiries', 'url' => route('admin.contact.index')],
+            'signoff' => 'Sharet website',
+        ], $person?->email);
     }
 
     /** Trade or developer application received (HomeController). */
@@ -164,11 +210,16 @@ class SharetMail extends Mailable
         return [
             'contact-thanks' => ['Contact form: thank you (to the sender)', self::contactThanks($message)],
             'contact-received' => ['Contact form: new message (to the team)', self::contactReceived($message)],
+            'form-received' => ['Any website form: new submission with PDF (to the team)', self::formReceived(tap(new \App\Models\Enquiry([
+                'audience' => 'merchant', 'business' => 'Nairobi Events Co.', 'brief' => $message['brief'],
+                'meta' => ['ref' => 'SC-7KQ2XD', 'form' => 'contact', 'form_name' => 'Contact form', 'rows' => ['You are' => 'Merchant', 'Country' => 'Kenya']],
+            ]), fn ($e) => $e->setRelation('user', $user)->created_at = now()))],
             'waiting-list' => ['Sign-up: welcome and waiting list', self::waitingList($user)],
             'trade-received' => ['Trade application received', self::applicationReceived($user, 'trade')],
             'developer-received' => ['Developer request received', self::applicationReceived($user, 'developer')],
             'invited' => ['Waiting list: invited to finish setting up', self::invited($user)],
             'password-reset' => ['Password reset', self::passwordReset('https://sharet.africa/reset-password/…')],
+            'email-code' => ['Sign-up: email code', self::emailCode('482913')],
             'verify-email' => ['Verify email address', self::verifyEmail('https://sharet.africa/verify-email/…')],
             'test' => ['Test email (Integrations › Email)', self::test($user, 'smtp.example.com')],
         ];
@@ -179,6 +230,19 @@ class SharetMail extends Mailable
         return self::action('Reset your Sharet password', 'Account security', 'Reset your password',
             ['We received a request to reset the password for your Sharet account.'], 'Choose a new password', $url,
             ['This link expires in '.config('auth.passwords.users.expire', 60).' minutes. If you did not ask for a reset, ignore this email: your password stays the same.']);
+    }
+
+    /** Sign-up email code (App\Support\EmailCode). */
+    public static function emailCode(string $code): self
+    {
+        return new self("{$code} is your Sharet code", [
+            'preheader' => "Your Sharet code is {$code}. It expires in ".\App\Support\EmailCode::TTL_MINUTES.' minutes.',
+            'eyebrow' => 'Confirm your email',
+            'heading' => $code,
+            'lines' => ['Enter this code on the Sharet sign-up page to confirm this is your email address.',
+                'It expires in '.\App\Support\EmailCode::TTL_MINUTES.' minutes. Sharet staff will never ask you for it.'],
+            'after' => ['If you did not create a Sharet account, ignore this email.'],
+        ]);
     }
 
     public static function verifyEmail(string $url): self

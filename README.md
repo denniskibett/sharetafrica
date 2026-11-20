@@ -4,9 +4,6 @@ Cheaper payments across East Africa. Sharet is a money platform for people and b
 M-PESA number, paybill, till or bank account, receives from M-PESA and other Sharet users, and keeps every shilling on a
 double-entry ledger. Live at [sharet.africa](https://sharet.africa).
 
-> **This is the `main` branch (v1).** The money platform and its documentation are on the
-> [`v2` branch](https://github.com/denniskibett/sharetafrica/tree/v2).
->
 > **Status:** v2 is in a controlled live test (simulated money for most accounts, real M-PESA collections for named
 > testers). Personal accounts come first; business, merchant and trade-finance lanes follow.
 
@@ -29,8 +26,8 @@ double-entry ledger. Live at [sharet.africa](https://sharet.africa).
    CI/CD with v1 and v2 deployed side by side, then hardening (load test, security review, restore drill).
 3. **Then:** business and merchant accounts, more rails (Cashia, Airtel, MTN, Vodacom TZ), Uganda and Tanzania, trade finance.
 
-The full plan, build order and decisions: [`docs/v2/README.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/README.md). Where we left off:
-[`docs/v2/NEXT.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/NEXT.md).
+The full plan, build order and decisions: [`docs/v2/README.md`](docs/v2/README.md). Where we left off:
+[`docs/v2/NEXT.md`](docs/v2/NEXT.md).
 
 ## Versions and branches
 
@@ -41,7 +38,7 @@ The full plan, build order and decisions: [`docs/v2/README.md`](https://github.c
 | `v2` | the money platform | `v2.sharet.africa` once its DNS propagates; `sharet.africa` during the current test |
 
 v2 only **adds** to the database (it never alters a v1 table), so the live site can switch between v1 and v2 for an
-audit: [`docs/v2/SWITCHING.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/SWITCHING.md).
+audit: [`docs/v2/SWITCHING.md`](docs/v2/SWITCHING.md).
 
 ## Stack
 
@@ -87,7 +84,7 @@ collections and payouts against a faked Safaricom, reconciliation, receipts, SMS
 
 `scripts/deploy.sh` backs up the live database and files, uploads a new release folder, migrates, swaps it in and checks
 the main pages, swapping back if any fails. Stages, rollback, staging and the server's one-time setup are in
-[`docs/v2/DEPLOY.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/DEPLOY.md). GitHub Actions (tests on every push, `main` and `v2` deploying to their own
+[`docs/v2/DEPLOY.md`](docs/v2/DEPLOY.md). GitHub Actions (tests on every push, `main` and `v2` deploying to their own
 sites) is the next step.
 
 ## Security
@@ -104,7 +101,7 @@ Found a vulnerability? Email **support@sharet.africa** with "Security" in the su
 
 - Branch from `v2` for platform work (`feature/<short-name>`); branch from `main` only for v1 fixes, and merge them into
   `v2` too.
-- Follow the rules in [`docs/v2/README.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/README.md): the five-file layout per area, no full page reloads,
+- Follow the rules in [`docs/v2/README.md`](docs/v2/README.md): the five-file layout per area, no full page reloads,
   external APIs only through `app/Integrations`, money only through the ledger, additive migrations.
 - Every change ships with tests; `php artisan test` must pass before a merge.
 
@@ -112,16 +109,16 @@ Found a vulnerability? Email **support@sharet.africa** with "Security" in the su
 
 | Document | About |
 |---|---|
-| [`docs/v2/README.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/README.md) | Rules, file tree, documentation plan, build order |
-| [`docs/v2/LEDGER.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/LEDGER.md) | Accounts, journals, holds, invariants |
-| [`docs/v2/ORDERS.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/ORDERS.md) | Payment states, wallet payments, PIN, tariff, M-PESA payouts and float escrow |
-| [`docs/v2/RAILS.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/RAILS.md) | The payment rail interface and adapters |
-| [`docs/v2/RECONCILIATION.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/RECONCILIATION.md) | Statement matching and sign-off |
-| [`docs/v2/CUSTOMER_APP.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/CUSTOMER_APP.md) | The customer app |
-| [`docs/v2/KYC.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/KYC.md) | Verification and ID reading |
-| [`docs/v2/RECEIPTS.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/RECEIPTS.md) | Receipts, PDF, email and SMS |
-| [`docs/v2/DEPLOY.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/DEPLOY.md) | Servers, deployment, backups |
-| [`docs/v2/SWITCHING.md`](https://github.com/denniskibett/sharetafrica/blob/v2/docs/v2/SWITCHING.md) | Running v1 and v2 side by side |
+| [`docs/v2/README.md`](docs/v2/README.md) | Rules, file tree, documentation plan, build order |
+| [`docs/v2/LEDGER.md`](docs/v2/LEDGER.md) | Accounts, journals, holds, invariants |
+| [`docs/v2/ORDERS.md`](docs/v2/ORDERS.md) | Payment states, wallet payments, PIN, tariff, M-PESA payouts and float escrow |
+| [`docs/v2/RAILS.md`](docs/v2/RAILS.md) | The payment rail interface and adapters |
+| [`docs/v2/RECONCILIATION.md`](docs/v2/RECONCILIATION.md) | Statement matching and sign-off |
+| [`docs/v2/CUSTOMER_APP.md`](docs/v2/CUSTOMER_APP.md) | The customer app |
+| [`docs/v2/KYC.md`](docs/v2/KYC.md) | Verification and ID reading |
+| [`docs/v2/RECEIPTS.md`](docs/v2/RECEIPTS.md) | Receipts, PDF, email and SMS |
+| [`docs/v2/DEPLOY.md`](docs/v2/DEPLOY.md) | Servers, deployment, backups |
+| [`docs/v2/SWITCHING.md`](docs/v2/SWITCHING.md) | Running v1 and v2 side by side |
 
 ## License
 

@@ -31,7 +31,12 @@ class DashboardController extends Controller
         $lane = $this->lane($user);
 
         // Customers get the Sharet app home (canvas "Mobile home" / "Web dashboard"); staff the admin overview
-        return view(in_array($lane, ['admin', 'ops'], true) ? 'dashboard' : 'dashboard.customer', ['lane' => $lane, 'user' => $user]);
+        if (in_array($lane, ['admin', 'ops'], true)) {
+            return view('dashboard', ['lane' => $lane, 'user' => $user]);
+        }
+
+        return view('dashboard.customer', ['user' => $user, 'handle' => \App\Support\Handle::for($user), 'banks' => config('pricing.banks'),
+            'wallet' => \App\Ledger\Money::format(app(\App\Ramp\RampOrders::class)->walletBalance($user))]);
     }
 
     public function data(Request $request): JsonResponse

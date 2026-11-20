@@ -19,6 +19,21 @@ use App\Models\TradeApplication;
 
 class User extends Authenticatable implements Wallet, Customer
 {
+
+    /** No user is saved with an invalid name, email or phone, whatever creates it (App\Support\Identity). */
+    protected static function booted(): void
+    {
+        static::saving(fn (User $user) => \App\Support\Identity::assertValid($user));
+        // Every account gets its fixed Sharet ID when it's created (docs/v2/INTEGRATION.md §1)
+        static::creating(fn (User $user) => $user->sharet_id ??= \App\Support\SharetId::generate());
+        // Claim on join: their M-PESA number is now verified, so earlier pay-page payments from it join their history
+        static::saved(function (User $user) {
+            if ($user->wasChanged('kyc_level') || ($user->wasRecentlyCreated && $user->kyc_level && $user->kyc_level !== 'none')) {
+                \App\Api\PaymentRequests::claimFor($user);
+            }
+        });
+    }
+
     use HasFactory, Notifiable, SoftDeletes;
     use HasRoles;
     use HasWallet, CanPay;
@@ -63,6 +78,7 @@ class User extends Authenticatable implements Wallet, Customer
         'password',
         'remember_token',
         'kyc', // encrypted verification details; read through ProfileController only
+        'transaction_pin',
     ];
 
     /**
@@ -70,11 +86,14 @@ class User extends Authenticatable implements Wallet, Customer
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'email_code_required_at' => 'datetime',
         'invited_at' => 'datetime',
         'onboarded_at' => 'datetime',
         'social' => 'array',
         'status' => 'boolean',
+        'is_business_wallet' => 'boolean',
         'kyc_submitted_at' => 'datetime',
+        'pin_locked_until' => 'datetime',
     ];
 
     // ==========================================================

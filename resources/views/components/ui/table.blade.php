@@ -1,7 +1,7 @@
 {{-- Data table (Alpine). Sits inside x-data="dataTable({ url })", which loads { data, meta, stats } as JSON.
      columns: [['key' => 'person', 'label' => 'Person', 'type' => 'person', 'sort' => 'name'], ...]
        types: person {name,email,initials,avatar,url} · pill {label,tone} · link {label,url} · text · muted · money · number · code
-     Slots: filters (next to search), buttons (top right), actions (last cell; `row` is in scope), empty. --}}
+     Slots: filters (next to search), buttons (top right, before rows per page), actions (last cell; `row` is in scope), empty. --}}
 @props(['title' => null, 'subtitle' => null, 'columns' => [], 'searchable' => true, 'selectable' => false, 'placeholder' => 'Search…'])
 @php $span = count($columns) + ($selectable ? 1 : 0) + (isset($actions) ? 1 : 0); @endphp
 <div {{ $attributes->merge(['class' => 'overflow-hidden rounded-2xl border border-gray-200 bg-white pt-4 dark:border-gray-800 dark:bg-white/[0.03]']) }}>
@@ -20,6 +20,9 @@
       @endif
       {{ $filters ?? '' }}
       {{ $buttons ?? '' }}
+      <select x-model.number="perPage" aria-label="Rows per page" title="Rows per page" class="h-10 rounded-lg border border-gray-300 bg-transparent py-0 pl-3 pr-8 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+        <option value="10">10 rows</option><option value="25">25 rows</option><option value="50">50 rows</option><option value="100">100 rows</option>
+      </select>
     </div>
   </div>
 
@@ -103,18 +106,15 @@
     </table>
   </div>
 
-  {{-- Footer: count, rows per page, pagination --}}
+  {{-- Footer: count and pagination (rows per page is in the header, top right) --}}
   <div class="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-    <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-      <span>Showing <span class="font-medium text-gray-800 dark:text-white/90" x-text="meta.from || 0"></span> to <span class="font-medium text-gray-800 dark:text-white/90" x-text="meta.to || 0"></span> of <span class="font-medium text-gray-800 dark:text-white/90" x-text="sharet.number(meta.total)"></span></span>
-      <select x-model.number="perPage" aria-label="Rows per page" class="h-8 rounded-lg border border-gray-300 bg-transparent py-0 pl-2 pr-8 text-sm dark:border-gray-700 dark:bg-gray-900">
-        <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option>
-      </select>
+    <div class="text-sm text-gray-500 dark:text-gray-400">
+      Showing <span class="font-medium text-gray-800 dark:text-white/90" x-text="meta.from || 0"></span> to <span class="font-medium text-gray-800 dark:text-white/90" x-text="meta.to || 0"></span> of <span class="font-medium text-gray-800 dark:text-white/90" x-text="sharet.number(meta.total)"></span>
     </div>
     <nav class="flex items-center gap-1" aria-label="Pagination">
-      <button type="button" @click="go(meta.current_page - 1)" :disabled="meta.current_page <= 1"
-              class="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
-        <x-heroicon-o-chevron-left class="h-4 w-4" /> Previous
+      <button type="button" @click="go(meta.current_page - 1)" :disabled="meta.current_page <= 1" aria-label="Previous page" title="Previous page"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+        <x-heroicon-o-chevron-left class="h-4 w-4" />
       </button>
       <template x-for="(p, i) in pages" :key="i">
         <button type="button" @click="p !== '…' && go(p)" :disabled="p === '…'"
@@ -122,9 +122,9 @@
                 :class="p === meta.current_page ? 'bg-gray-900 text-white dark:bg-[#D4FF3D] dark:text-gray-900' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5'"
                 x-text="p"></button>
       </template>
-      <button type="button" @click="go(meta.current_page + 1)" :disabled="meta.current_page >= meta.last_page"
-              class="inline-flex h-9 items-center gap-1 rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
-        Next <x-heroicon-o-chevron-right class="h-4 w-4" />
+      <button type="button" @click="go(meta.current_page + 1)" :disabled="meta.current_page >= meta.last_page" aria-label="Next page" title="Next page"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">
+        <x-heroicon-o-chevron-right class="h-4 w-4" />
       </button>
     </nav>
   </div>

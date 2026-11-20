@@ -4,9 +4,7 @@
 
 @section('content')
 <div x-data="profile('{{ route('profile.data') }}')">
-  <x-ui.page-header title="Profile" subtitle="Your Sharet account at a glance.">
-    <x-ui.button icon="pencil-square" href="{{ route('profile.edit') }}">Edit profile</x-ui.button>
-  </x-ui.page-header>
+  <x-ui.page-header title="Profile" subtitle="Your Sharet account at a glance." />
 
   @include('profile.partials.summary-card')
 

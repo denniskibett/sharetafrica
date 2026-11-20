@@ -51,10 +51,51 @@ class Company extends Model implements Wallet
      */
     protected static function booted(): void
     {
+        // A company's wallet follows its verification: business limits once verified, none before
+        static::updated(function (Company $company) {
+            if ($company->wasChanged('verified_at') && $company->wallet_user_id) {
+                User::whereKey($company->wallet_user_id)->first()?->forceFill(['kyc_level' => $company->verified_at ? 'business' : 'none'])->save();
+            }
+        });
         static::creating(function (Company $company) {
+            $company->sharet_id ??= \App\Support\SharetId::generate();   // fixed business account number (docs/v2/INTEGRATION.md §1)
             if (empty($company->slug)) {
                 $company->slug = Str::slug($company->name) . '-' . Str::lower(Str::random(6));
             }
+        });
+    }
+
+    /**
+     * The company's own Sharet account (docs/v2/INTEGRATION.md §1): the company's Sharet ID, an @name from its name, and
+     * business limits once the company is verified. It can never sign in; API keys of the company act for it.
+     */
+    public function walletUser(): User
+    {
+        if ($this->wallet_user_id && ($u = User::find($this->wallet_user_id))) {
+            return $u;
+        }
+
+        return \Illuminate\Support\Facades\DB::transaction(function () {
+            $base = trim(preg_replace('/[^a-z0-9]+/', '.', \Illuminate\Support\Str::ascii(strtolower($this->name ?: 'business'))), '.') ?: 'business';
+            $base = \Illuminate\Support\Str::limit($base, 24, '');
+            $handle = $base;
+            for ($n = 2; User::where('handle', $handle)->exists(); $n++) {
+                $handle = $base.$n;
+            }
+            $u = new User;
+            $u->forceFill([
+                'name' => $this->name,
+                'email' => 'wallet+'.strtolower($this->sharet_id).'@business.sharet.africa',
+                'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(64)),   // never used: wallets can't sign in
+                'is_business_wallet' => true,
+                'company_id' => $this->id,
+                'sharet_id' => $this->sharet_id,
+                'handle' => $handle,
+                'kyc_level' => $this->verified_at ? 'business' : 'none',
+            ])->save();
+            $this->forceFill(['wallet_user_id' => $u->id])->saveQuietly();
+
+            return $u;
         });
     }
 
@@ -139,10 +180,42 @@ class Company extends Model implements Wallet
      */
     public function verify(?User $by = null): void
     {
+        $settings = $this->settings ?? [];
+        $settings['kyb_review'] = ['status' => 'approved', 'reason' => null, 'by' => $by?->id, 'at' => now()->toIso8601String()];
         $this->update([
             'verified_at' => now(),
             'verified_by' => $by?->id,
+            'settings' => $settings,
         ]);
+    }
+
+    /** Staff reject a business (or revoke a verification): live keys stop working; the owner sees the reason in Business settings. */
+    public function reject(User $by, string $reason): void
+    {
+        $this->update([
+            'verified_at' => null,
+            'verified_by' => null,
+            'settings' => array_merge($this->settings ?? [], ['kyb_review' => ['status' => 'rejected', 'reason' => $reason, 'by' => $by->id, 'at' => now()->toIso8601String()]]),
+        ]);
+    }
+
+    public const COUNTRIES = ['KE' => 'Kenya', 'UG' => 'Uganda', 'TZ' => 'Tanzania', 'RW' => 'Rwanda', 'BI' => 'Burundi', 'SS' => 'South Sudan', 'ET' => 'Ethiopia', 'SO' => 'Somalia', 'NG' => 'Nigeria', 'GH' => 'Ghana', 'ZA' => 'South Africa'];
+
+    /** "Kenya", "kenya" or "KE" → "KE" (companies.country is two letters). Unknown names default to Kenya. */
+    public static function countryCode(?string $country): string
+    {
+        $c = trim((string) $country);
+        if (strlen($c) === 2 && ctype_alpha($c)) {
+            return strtoupper($c);
+        }
+        $code = array_search(strtolower($c), array_map('strtolower', self::COUNTRIES), true);
+
+        return $code ?: 'KE';
+    }
+
+    public static function countryName(?string $code): string
+    {
+        return self::COUNTRIES[strtoupper((string) $code)] ?? ($code ?: 'Kenya');
     }
 
     /**

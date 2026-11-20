@@ -1,50 +1,21 @@
+{{-- Individual onboarding (step 2 of 2), Sharet UI. Same fields and route as before. --}}
 @extends('layouts.app')
-
-@section('title', 'Wallet onboarding · Sharet Africa')
+@section('title', 'Create your wallet')
 
 @section('content')
-<div class="container-fluid px-4 py-10">
-    <div class="mx-auto max-w-2xl">
+<div class="mx-auto max-w-xl py-2 md:py-8">
+  @include('onboarding.partials.head', ['lane' => 'Individual', 'title' => 'Create your wallet', 'lede' => 'One more step and your Sharet wallet is ready. No fees to hold money.'])
 
-        <div class="mb-8">
-            <p class="text-xs uppercase tracking-wider text-gray-500">Step 2 of 2 · Individual</p>
-            <h1 class="mt-2 text-3xl font-semibold text-gray-900">Create your wallet</h1>
-            <p class="mt-2 text-sm text-gray-500">One more step and your Sharet wallet is ready. No fees to hold. Send across East Africa.</p>
-        </div>
-
-        <form method="POST" action="{{ route('onboarding.individual.store') }}" class="rounded-2xl border border-gray-200 bg-white p-6">
-            @csrf
-
-            <div class="grid gap-5 md:grid-cols-2">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Country</label>
-                    <select name="country" required class="mt-1 block w-full rounded-md border-gray-300 focus:border-[#D4FF3D] focus:ring-[#D4FF3D]">
-                        <option value="KE">Kenya</option>
-                        <option value="TZ">Tanzania</option>
-                        <option value="UG">Uganda</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">City</label>
-                    <input type="text" name="city" value="{{ old('city') }}"
-                           class="mt-1 block w-full rounded-md border-gray-300 focus:border-[#D4FF3D] focus:ring-[#D4FF3D]" />
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700">What will you use Sharet for? (optional)</label>
-                    <textarea name="use_case" rows="3"
-                              class="mt-1 block w-full rounded-md border-gray-300 focus:border-[#D4FF3D] focus:ring-[#D4FF3D]">{{ old('use_case') }}</textarea>
-                </div>
-            </div>
-
-            <div class="mt-6 flex justify-end">
-                <button type="submit" class="inline-flex rounded-lg bg-[#D4FF3D] px-6 py-3 text-sm font-semibold text-gray-900 hover:brightness-95">
-                    Create my wallet
-                </button>
-            </div>
-        </form>
-
+  <form method="POST" action="{{ route('onboarding.individual.store') }}" class="mt-6 space-y-4 rounded-[24px] bg-app-panel p-5 md:p-6">
+    @csrf
+    <div class="grid gap-4 sm:grid-cols-2">
+      <x-ui.form-input as="select" label="Country" name="country" required>
+        @include('onboarding.partials.countries')
+      </x-ui.form-input>
+      <x-ui.form-input label="City" name="city" :value="old('city')" autocomplete="address-level2" placeholder="Nairobi" />
     </div>
+    <x-ui.form-input as="textarea" label="What will you use Sharet for? (optional)" name="use_case" rows="3">{{ old('use_case') }}</x-ui.form-input>
+    @include('onboarding.partials.submit', ['text' => 'Create my wallet'])
+  </form>
 </div>
 @endsection

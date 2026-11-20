@@ -41,7 +41,9 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Business wallets are accounts, not people: nobody signs in as one
+        $wallet = \App\Models\User::where('email', \Illuminate\Support\Str::lower((string) $this->input('email')))->where('is_business_wallet', true)->exists();
+        if ($wallet || ! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

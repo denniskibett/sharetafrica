@@ -15,10 +15,13 @@ class ApiKeyController extends Controller
     public function index(Request $request)
     {
         if ($request->wantsJson()) {
-            return response()->json(['keys' => $this->visible($request)->with('user:id,name', 'company:id,name')->latest()->get()->map(fn ($k) => $this->present($k))->values()]);
+            return response()->json(['keys' => $this->visible($request)->with('user:id,name,sharet_id', 'company:id,name,sharet_id')->latest()->get()->map(fn ($k) => $this->present($k))->values()]);
         }
 
-        return view('api-keys.index', ['isAdmin' => $request->user()->hasAnyRole(DashboardNav::ADMIN)]);
+        $company = $request->user()->company;
+
+        return view('api-keys.index', ['isAdmin' => $request->user()->hasAnyRole(DashboardNav::ADMIN), 'company' => $company,
+            'wallet' => $company?->walletUser()]);
     }
 
     public function store(Request $request)
@@ -26,13 +29,35 @@ class ApiKeyController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:80',
             'environment' => 'required|in:test,live',
+            'scopes' => 'nullable|array',
+            'scopes.*' => 'in:'.implode(',', ApiKey::SCOPES),
         ]);
+        $data['scopes'] = array_values(array_unique(array_merge(['read'], $data['scopes'] ?? [])));   // every key can read
+        $ips = ApiKey::parseIps($request->input('allowed_ips'));
+        if ($ips === null) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['allowed_ips' => 'Use IP addresses or ranges like 41.90.12.7 or 196.201.0.0/16, separated by commas.']);
+        }
+        $data['allowed_ips'] = $ips;
 
         $key = new ApiKey($data + ['user_id' => $request->user()->id, 'company_id' => $request->user()->company_id, 'enabled' => true]);
         $plain = $key->issue();
         $key->save();
 
-        return response()->json(['message' => 'Key created. Copy it now: it will not be shown again.', 'plain' => $plain, 'key' => $this->present($key->load('user:id,name', 'company:id,name'))], 201);
+        return response()->json(['message' => 'Key created. Copy it now: it will not be shown again.', 'plain' => $plain, 'key' => $this->present($key->load('user:id,name,sharet_id', 'company:id,name,sharet_id'))], 201);
+    }
+
+    /** Change what a key may do and where live payouts may come from. */
+    public function settings(Request $request, int $id)
+    {
+        $key = $this->find($request, $id);
+        $data = $request->validate(['scopes' => 'nullable|array', 'scopes.*' => 'in:'.implode(',', ApiKey::SCOPES)]);
+        $ips = ApiKey::parseIps($request->input('allowed_ips'));
+        if ($ips === null) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['allowed_ips' => 'Use IP addresses or ranges like 41.90.12.7 or 196.201.0.0/16, separated by commas.']);
+        }
+        $key->update(['scopes' => array_values(array_unique(array_merge(['read'], $data['scopes'] ?? []))), 'allowed_ips' => $ips]);
+
+        return response()->json(['message' => 'Saved.', 'key' => $this->present($key->fresh(['user:id,name,sharet_id', 'company:id,name,sharet_id']))]);
     }
 
     public function toggle(Request $request, int $id)
@@ -81,6 +106,11 @@ class ApiKeyController extends Controller
             'name' => $k->name,
             'environment' => $k->environment,
             'masked' => $k->masked(),
+            'hint' => $k->prefix.'…'.$k->last_four,   // copyable key ID (the secret itself is never stored)
+            'account' => $k->company?->sharet_id ?? $k->user?->sharet_id,   // the Sharet ID the key acts for
+            'scopes' => $k->scopes ?? ['read'],
+            'allowed_ips' => $k->allowed_ips ?? [],
+            'payout_blocked' => $k->environment === 'live' && in_array('payout', $k->scopes ?? [], true) && empty($k->allowed_ips),
             'enabled' => $k->enabled,
             'owner' => $k->company?->name ?? $k->user?->name,
             'created_at' => $k->created_at?->timezone('Africa/Nairobi')->format('j M Y'),

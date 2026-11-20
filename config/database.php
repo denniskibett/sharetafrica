@@ -18,6 +18,9 @@ return [
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
+    // Where `php artisan db:backup` keeps its dumps (live: a hidden folder outside the web folder). Empty = storage/app/backups.
+    'backup_path' => env('DB_BACKUP_PATH'),
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections

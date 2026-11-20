@@ -1,16 +1,34 @@
+// Fonts ship with the app (no Google Fonts request): Outfit for numbers and staff pages, Inter Tight for customer text
+import '@fontsource-variable/outfit';
+import '@fontsource-variable/inter-tight';
 import './bootstrap';
 
 import Alpine from 'alpinejs';
+import { installPasswordEyes } from './password-eye';
+installPasswordEyes();
 import persist from '@alpinejs/persist';
 import focus from '@alpinejs/focus';
 import collapse from '@alpinejs/collapse';
-import { dataTable, chart, alertModal, profile, kycCamera, signaturePad, checkPhoto, installHelpers, installImagePaste } from './dashboard';
+import intersect from '@alpinejs/intersect';
+import { dataTable, chart, alertModal, profile, kycCamera, kycSelfie, SELFIE_STEPS, signaturePad, checkPhoto, installHelpers, installImagePaste } from './dashboard';
 
 /**
  * Dashboard forms save in the background: sharet.send() returns the JSON reply, shows a toast,
  * and throws { status, errors } on validation errors so the form can show them inline.
  */
 window.sharet = {
+    /** Counts an amount like "KES 48,250.00" up from zero (skipped for reduced motion). set(text) receives each frame. */
+    count(target, set, ms = 700) {
+        const m = String(target ?? '').match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/);
+        if (!m || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return set(target);
+        const end = parseFloat(m[2].replace(/,/g, '')), dec = (m[2].split('.')[1] || '').length, t0 = performance.now();
+        const step = (t) => {
+            const p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3);
+            set(m[1] + (end * e).toLocaleString('en-KE', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + m[3]);
+            if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    },
     async send(method, url, data = null) {
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
         // FormData (file uploads) goes as multipart; anything else as JSON
@@ -85,10 +103,15 @@ Alpine.data('chart', chart);
 Alpine.data('alertModal', alertModal);
 Alpine.data('profile', profile);
 Alpine.data('kycCamera', kycCamera);
+Alpine.data('kycSelfie', kycSelfie);
+Alpine.store('selfieSteps', SELFIE_STEPS);
 Alpine.data('signaturePad', signaturePad);
 window.sharet.checkPhoto = checkPhoto;
+/** Draw a QR code for `text` on a canvas (the receive panel). The library loads only when a QR is shown. */
+window.sharet.qr = async (canvas, text) => (await import('qrcode')).toCanvas(canvas, text, { width: 220, margin: 1, color: { dark: '#050507', light: '#FFFFFF' } });
 Alpine.plugin(persist);
 Alpine.plugin(focus);
 Alpine.plugin(collapse);
+Alpine.plugin(intersect);
 window.Alpine = Alpine;
 Alpine.start();

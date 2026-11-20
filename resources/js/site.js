@@ -1,3 +1,6 @@
+import { installPasswordEyes } from './password-eye';
+installPasswordEyes();
+
 /* Brivon — free HTML template. Minimal vanilla JS: mobile drawer + scroll-reveal. */
 (function () {
   'use strict';

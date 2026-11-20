@@ -1,61 +1,16 @@
-{{-- resources/views/auth/forgot-password.blade.php --}}
-@extends('home.layouts.app')
-@section('robots', 'noindex,follow')
-
-@section('title', 'Reset password · Sharet Africa')
+{{-- Forgot password: email a reset link. Same field and route as before. --}}
+@extends('layouts.auth')
+@section('title', 'Reset password')
+@section('switch')<a href="{{ route('login') }}" class="inline-flex h-10 items-center rounded-full bg-app-tile px-4 text-sm font-semibold hover:bg-app-raised">Sign in</a>@endsection
+@section('icon')<x-heroicon-o-key class="h-7 w-7" />@endsection
+@section('heading', 'Forgot your password?')
+@section('lede', 'No problem. Enter your email and we will send you a link to choose a new one.')
 
 @section('content')
-
-<section class="hero" style="padding-block: var(--space-8) var(--space-7);">
-  <div class="container container--narrow">
-    <div class="section-head" style="grid-template-columns: 1fr; margin-bottom: var(--space-6);">
-      <div>
-        <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Account recovery</span>
-        <h1 class="hero-headline" style="font-size: var(--text-4xl); margin-top: var(--space-4);">
-          Forgot your<br/>
-          <span class="lime">password?</span>
-        </h1>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="snug" style="padding-top: 0;">
-  <div class="container container--narrow">
-
-    <p class="lede" style="margin-bottom: var(--space-6);">
-      No problem. Enter your email address and we will send you a password reset link so you can choose a new one.
-    </p>
-
-    @if (session('status'))
-      <div style="background: rgba(212,255,61,0.08); border: 1px solid var(--rule-lime); border-radius: var(--radius); padding: var(--space-4); margin-bottom: var(--space-5); font-family: var(--font-mono); font-size: var(--text-sm); color: var(--lime);">
-        {{ session('status') }}
-      </div>
-    @endif
-
-    <form method="POST" action="{{ route('password.email') }}" class="form-card">
-      @csrf
-
-      <div class="form-row form-row--full">
-        <div class="form-field">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus placeholder="you @ email.com" />
-          @error('email')
-            <span style="color: var(--lime); font-family: var(--font-mono); font-size: var(--text-xs);">{{ $message }}</span>
-          @enderror
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <small>Remembered it? <a href="{{ route('login') }}" style="color: var(--lime);">Sign in →</a></small>
-        <button type="submit" class="btn btn--primary btn--lg">
-          Send reset link
-          <svg class="arrow" width="16" height="10" viewBox="0 0 14 10" fill="none" aria-hidden="true"><path d="M1 5h12m0 0L9 1m4 4L9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </form>
-
-  </div>
-</section>
-
+<form method="POST" action="{{ route('password.email') }}" class="space-y-4">
+  @csrf
+  <x-ui.form-input label="Email" name="email" type="email" :value="old('email')" required autofocus autocomplete="username" placeholder="you@example.com" />
+  <button type="submit" class="mt-2 h-12 w-full rounded-full bg-gray-900 text-[15px] font-semibold text-white hover:bg-gray-800">Send reset link</button>
+  <p class="text-center text-sm text-app-muted">Remembered it? <a href="{{ route('login') }}" class="font-semibold text-app-ink underline-offset-4 hover:underline">Sign in</a></p>
+</form>
 @endsection

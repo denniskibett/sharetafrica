@@ -34,9 +34,49 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/developers', 'developers')->name('developers');
     Route::get('/company', 'company')->name('company');
     Route::get('/contact', 'contact')->name('contact');
+});
+
+// Dashboard › Settlements: second approval for large API batches. Names under "pay." so the ledger freeze stops approvals.
+Route::middleware(['auth', 'permission:developer.api_keys'])->prefix('settlements')->controller(\App\Http\Controllers\SettlementApprovalsController::class)->group(function () {
+    Route::get('/', 'index')->name('settlements.index');
+    Route::post('/{settlement}/approve', 'approve')->middleware('password.confirm')->name('pay.settlements.approve');
+    Route::post('/{settlement}/reject', 'reject')->middleware('password.confirm')->name('pay.settlements.reject');
+});
+
+// Connected accounts, the person's side (docs/v2/INTEGRATION.md §6): consent with the PIN, and disconnect any time
+Route::prefix('connect/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\ConnectConsentController::class)->group(function () {
+    Route::get('/', 'show')->middleware('throttle:60,1,connect-show')->name('connect.show');
+    Route::post('/approve', 'approve')->middleware(['auth', 'throttle:10,1,connect-approve'])->name('connect.approve');
+    Route::post('/decline', 'decline')->middleware(['auth', 'throttle:10,1,connect-decline'])->name('connect.decline');
+});
+Route::middleware('auth')->controller(\App\Http\Controllers\ConnectConsentController::class)->group(function () {
+    Route::get('/connected-apps', 'index')->name('connections.index');
+    Route::post('/connected-apps/{connection}/disconnect', 'revoke')->name('connections.revoke');
+});
+
+// Public API docs (the contract: docs/v2/INTEGRATION.md). Error types link to /docs/errors#type.
+Route::view('/docs', 'docs.index')->name('docs');
+Route::get('/docs/errors', fn () => view('docs.index'))->name('docs.errors');
+
+// Hosted pay page for API payment requests (docs/v2/INTEGRATION.md §3). Paying moves money: names under "pay." so the
+// ledger freeze stops it. Sharet wallet needs sign-in and the PIN; M-PESA works for anyone with the link.
+Route::prefix('r/{token}')->where(['token' => '[A-Za-z0-9]{40}'])->controller(\App\Http\Controllers\PayRequestController::class)->group(function () {
+    Route::get('/', 'show')->middleware('throttle:60,1,pay-request-show')->name('pay-request.show');
+    Route::get('/status', 'status')->middleware('throttle:60,1,pay-request-status')->name('pay-request.status');
+    Route::post('/sharet', 'sharet')->middleware(['auth', 'throttle:10,1,pay-request-sharet'])->name('pay.request.sharet');
+    Route::post('/top-up', 'topUp')->middleware(['auth', 'throttle:5,1,pay-request-top-up'])->name('pay.request.top-up');   // signed in: M-PESA into my wallet, then on to the payee
+    Route::post('/pin', 'pin')->middleware(['auth', 'throttle:10,1,pay-request-pin'])->name('pay-request.pin');   // first-time Sharet PIN, then approve
+    Route::post('/mpesa', 'mpesa')->middleware('throttle:5,1,pay-request-mpesa')->name('pay.request.mpesa');
+    Route::post('/sandbox', 'sandbox')->middleware('throttle:20,1,pay-request-sandbox')->name('pay-request.sandbox');
+});
+
+// The Android app (APK uploaded by the app's scripts/release-android.sh; offered on the Developers page for testing only)
+Route::get('/app/android/{abi?}', [\App\Http\Controllers\AppDownloadController::class, 'android'])->name('app.android');
+
+Route::controller(HomeController::class)->group(function () {
 
     // Form submissions (public — do NOT require auth); thank-you emails are sent from HomeController
-    Route::middleware('throttle:10,10')->group(function () {
+    Route::middleware('throttle:10,10,site-forms')->group(function () {
         Route::post('/personal/signup', 'storePersonalSignup')->name('personal.signup');
         Route::post('/merchants/signup', 'storeMerchantSignup')->name('merchants.signup');
         Route::post('/trade/apply', 'storeTradeApplication')->name('trade.apply');
@@ -51,7 +91,7 @@ Route::controller(HomeController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::post('/t', TrackController::class)->middleware('throttle:240,1')
+Route::post('/t', TrackController::class)->middleware('throttle:240,1,track')
     ->withoutMiddleware([\App\Http\Middleware\ApplyIntegrations::class])->name('track');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::view('/privacy', 'privacy')->name('privacy');
@@ -71,6 +111,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/chart/{name}', [DashboardController::class, 'chart'])->name('dashboard.chart')->where('name', '[a-z]+');
     Route::get('/dashboard/activity', [DashboardController::class, 'activity'])->name('dashboard.activity');
     Route::get('/dashboard/menu', [DashboardController::class, 'menu'])->name('dashboard.menu');
+    Route::get('/search', \App\Http\Controllers\SearchController::class)->middleware('throttle:120,1,search')->name('search');   // header search
 
     // Waiting list status page (user side)
     Route::get('/waiting-list', [WaitingListController::class, 'show'])->name('waiting_list.show');
@@ -119,6 +160,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
+        Route::post('/users/{user}/verification', [UserController::class, 'verify'])->name('users.verify');
+        Route::get('/admin/verifications', [\App\Http\Controllers\Admin\VerificationsController::class, 'index'])->name('admin.verifications.index');
+        Route::get('/admin/businesses', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('admin.businesses.index');
+        Route::post('/admin/businesses/{company}/decision', [\App\Http\Controllers\Admin\BusinessesController::class, 'decide'])->name('admin.businesses.decide');
         Route::view('/reports', 'reports.index')->name('reports.index');
     });
 
@@ -163,6 +208,7 @@ Route::middleware(['auth', 'permission:developer.api_keys'])
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
         Route::patch('/{id}/toggle', 'toggle')->name('toggle')->whereNumber('id');
+        Route::patch('/{id}/settings', 'settings')->name('settings');
         Route::post('/{id}/rotate', 'rotate')->name('rotate')->whereNumber('id');
         Route::delete('/{id}', 'destroy')->name('destroy')->whereNumber('id');
     });
@@ -210,6 +256,17 @@ Route::middleware(['auth', 'permission:admin.system'])->controller(EmailDesignCo
 });
 Route::middleware(['auth', 'permission:waiting_list.invite'])
     ->get('/admin/enquiries', [EmailDesignController::class, 'messages'])->name('admin.contact.index');
+Route::middleware(['auth', 'permission:waiting_list.invite'])
+    ->get('/admin/enquiries/{enquiry}/pdf', [EmailDesignController::class, 'pdf'])->whereNumber('enquiry')->name('admin.contact.pdf');
+
+/*
+|--------------------------------------------------------------------------
+| Security: every domain and site on the VPS (defense agent report, ops in the scharge repo)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'permission:admin.system'])
+    ->get('/admin/security', [\App\Http\Controllers\Admin\SecurityController::class, 'index'])->name('admin.security.index');
 
 /*
 |--------------------------------------------------------------------------
@@ -217,11 +274,25 @@ Route::middleware(['auth', 'permission:waiting_list.invite'])
 |--------------------------------------------------------------------------
 */
 
+// Administration › Scheduled jobs: cron status and "Run now" for a fixed list of commands (fresh password, logged)
+Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/scheduler')->controller(\App\Http\Controllers\Admin\SchedulerController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.scheduler.index');
+    Route::post('/run', 'run')->middleware('password.confirm')->name('admin.scheduler.run');
+});
+
+// Staff › Pricing: business tariff tables (docs/v2/INTEGRATION.md §7); saving needs a recent password
+Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/pricing')->controller(\App\Http\Controllers\Admin\PricingController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.pricing.index');
+    Route::post('/', 'store')->middleware('password.confirm')->name('admin.pricing.store');
+    Route::post('/companies/{company}/group', 'group')->middleware('password.confirm')->name('admin.pricing.group');
+});
+
 Route::middleware(['auth', 'permission:admin.system'])->group(function () {
     Route::get('/admin/system', [SystemController::class, 'index'])->name('admin.system.index');
     Route::put('/admin/system', [SystemController::class, 'update'])->name('system.update');
     Route::post('/admin/system/clear-cache', [SystemController::class, 'clearCache'])->name('system.clear-cache');
     Route::post('/admin/system/maintenance', [SystemController::class, 'toggleMaintenance'])->name('system.toggle-maintenance');
+    Route::post('/admin/system/lockdown', [SystemController::class, 'lockdown'])->middleware('role:super_admin')->name('system.lockdown');
 
     Route::prefix('admin/team')->name('admin.team.')->controller(TeamController::class)->group(function () {
         Route::get('/', 'index')->name('index');

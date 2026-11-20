@@ -1,0 +1,363 @@
+{
+ "_note": "Brand marks of banks, mobile-money providers, PesaLink and card schemes, used only to show where money goes. Fetched 2026-11-07 from each company's own website, or Wikimedia Commons where 'licence' says so. Trademarks belong to their owners; check each brand's usage rules before any marketing use.",
+ "abc": {
+  "name": "African Banking Corporation",
+  "file": "abc.png",
+  "source": "https://www.abcthebank.com/wp-content/uploads/2020/12/cropped-abc-new-logo-180x180.png",
+  "site": "https://www.abcthebank.com/",
+  "licence": null,
+  "kind": "mark",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "absa": {
+  "name": "ABSA Bank Kenya",
+  "file": "absa.svg",
+  "source": "https://commons.wikimedia.org/wiki/File:Absa_Logo.svg",
+  "site": "https://www.absabank.co.ke/",
+  "licence": "Wikimedia Commons (public domain, text logo)",
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "access": {
+  "name": "Access Bank Kenya",
+  "file": "access.png",
+  "source": "https://kenya.accessbankplc.com/Content/images/access-lg-logo.png",
+  "site": "https://kenya.accessbankplc.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "airtel": {
+  "name": "Airtel Money",
+  "file": "airtel.svg",
+  "source": "https://commons.wikimedia.org/wiki/File:Airtel_Africa_logo.svg",
+  "site": "https://www.airtelkenya.com/",
+  "licence": "Wikimedia Commons (public domain, text logo)",
+  "kind": "mark",
+  "on_dark": false,
+  "type": "mobile_money"
+ },
+ "boa": {
+  "name": "Bank of Africa Kenya",
+  "file": "boa.png",
+  "source": "https://boakenya.com/wp-content/uploads/2025/02/BOA-LOGO_01-e1739260048122.png",
+  "site": "https://boakenya.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "citi": {
+  "name": "Citibank Kenya",
+  "file": "citi.png",
+  "source": "https://www.citigroup.com/global/citigroup-ui/akpublic/images/gpa_favicon.ico",
+  "site": "https://www.citigroup.com/global/about-us/global-presence/kenya",
+  "licence": null,
+  "kind": "mark",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "consolidated": {
+  "name": "Consolidated Bank",
+  "file": "consolidated.png",
+  "source": "https://www.consolidated-bank.com/images/consolidated_bank_logo.png",
+  "site": "https://www.consolidated-bank.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "coop": {
+  "name": "Co-operative Bank",
+  "file": "coop.png",
+  "source": "https://www.co-opbank.co.ke/wp-content/uploads/2026/05/Coop-Logo-02-1.png",
+  "site": "https://www.co-opbank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": true,
+  "type": "bank"
+ },
+ "credit": {
+  "name": "Credit Bank",
+  "file": "credit.png",
+  "source": "https://creditbank.co.ke/storage/2023/04/New-Credit-Bank-Logo-1.png",
+  "site": "https://creditbank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "dbk": {
+  "name": "Development Bank of Kenya",
+  "file": "dbk.png",
+  "source": "https://www.devbank.com/public/uploads/logo.png",
+  "site": "https://devbank.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "dib": {
+  "name": "DIB Bank Kenya",
+  "file": "dib.png",
+  "source": "https://www.dibkenya.co.ke/wp-content/themes/dib/Assets/images/favicon.ico",
+  "site": "https://www.dibkenya.co.ke/",
+  "licence": null,
+  "kind": "mark",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "dtb": {
+  "name": "Diamond Trust Bank",
+  "file": "dtb.png",
+  "source": "https://dtbk.dtbafrica.com/storage/uploads/a7c2dbbc-a2fe-4a88-aa0a-ba6833abe2a1/logo.png",
+  "site": "https://dtbk.dtbafrica.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "equity": {
+  "name": "Equity Bank",
+  "file": "equity.png",
+  "source": "https://commons.wikimedia.org/wiki/File:Equity_Group_Logo.png",
+  "site": null,
+  "licence": "Wikimedia Commons (public domain, text logo)",
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "family": {
+  "name": "Family Bank",
+  "file": "family.jpg",
+  "source": "https://familybank.co.ke/family-bank/wp-content/themes/family-bank/assets/images/family-bank-40-logo.jpg",
+  "site": "https://familybank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "guardian": {
+  "name": "Guardian Bank",
+  "file": "guardian.png",
+  "source": "https://guardian-bank.com/wp-content/uploads/2017/05/logo.png",
+  "site": "https://guardian-bank.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "gulf": {
+  "name": "Gulf African Bank",
+  "file": "gulf.png",
+  "source": "https://gulfafricanbank.com/wp-content/uploads/2023/03/new-gulf-african-bank-logo.png",
+  "site": "https://www.gulfafricanbank.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "habib": {
+  "name": "Habib Bank AG Zurich",
+  "file": "habib.png",
+  "source": "https://habibbank.com/wp-content/uploads/2023/11/Favicon.png",
+  "site": "https://www.habibbank.com/",
+  "licence": null,
+  "kind": "mark",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "imbank": {
+  "name": "I&M Bank",
+  "file": "imbank.png",
+  "source": "https://www.imbankgroup.com/ke/wp-content/themes/imbank/assets/imgs/design-assets/imbank-logo.png",
+  "site": "https://www.imbankgroup.com/ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "kcb": {
+  "name": "KCB Bank",
+  "file": "kcb.png",
+  "source": "https://ke.kcbgroup.com/imgs/kcb-bank.png",
+  "site": "https://ke.kcbgroup.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "mastercard": {
+  "name": "Mastercard",
+  "file": "mastercard.svg",
+  "source": "https://commons.wikimedia.org/wiki/File:Mastercard_2019_logo.svg",
+  "site": null,
+  "licence": "Wikimedia Commons (public domain, text logo)",
+  "kind": "logo",
+  "on_dark": false,
+  "type": "card"
+ },
+ "meb": {
+  "name": "Middle East Bank",
+  "file": "meb.svg",
+  "source": "https://mebkenya.com/logo/middle-east-bank-kenya.svg",
+  "site": "https://www.mebkenya.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "mpesa": {
+  "name": "M-PESA",
+  "file": "mpesa.svg",
+  "source": "https://upload.wikimedia.org/wikipedia/commons/1/15/M-PESA_LOGO-01.svg",
+  "site": "https://www.safaricom.co.ke/",
+  "licence": "Wikimedia Commons (public domain, text logo)",
+  "kind": "logo",
+  "on_dark": false,
+  "type": "mobile_money"
+ },
+ "mtn": {
+  "name": "MTN MoMo",
+  "file": "mtn.svg",
+  "source": "https://www.mtn.co.ug/wp-content/themes/mtn-vivid-wp/public/img/mtn-logo.svg",
+  "site": "https://www.mtn.co.ug/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "mobile_money"
+ },
+ "nbk": {
+  "name": "National Bank of Kenya",
+  "file": "nbk.svg",
+  "source": "https://www.nationalbank.co.ke/templates/nbk/images/logo.svg",
+  "site": "https://www.nationalbank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "ncba": {
+  "name": "NCBA Bank",
+  "file": "ncba.svg",
+  "source": "https://ncbagroup.com/wp-content/uploads/sites/2/2024/10/ncba-logo-dark.svg",
+  "site": "https://ke.ncbagroup.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "paramount": {
+  "name": "Paramount Bank",
+  "file": "paramount.png",
+  "source": "https://paramountbank.co.ke/wp-content/uploads/2023/05/paramoiunt-white.png",
+  "site": "https://www.paramountbank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": true,
+  "type": "bank"
+ },
+ "pesalink": {
+  "name": "PesaLink",
+  "file": "pesalink.png",
+  "source": "https://pesalink.co.ke/storage/images/logos/pesalink-logo-dark.png",
+  "site": "https://www.pesalink.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "switch"
+ },
+ "prime": {
+  "name": "Prime Bank",
+  "file": "prime.svg",
+  "source": "https://www.primebank.co.ke/wp-content/themes/prime-bank/images/Prime-Bank-logo-main.svg",
+  "site": "https://www.primebank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "sbm": {
+  "name": "SBM Bank Kenya",
+  "file": "sbm.png",
+  "source": "https://www.sbmbank.co.ke/templates/sbm/images/logo.png",
+  "site": "https://www.sbmbank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "sidian": {
+  "name": "Sidian Bank",
+  "file": "sidian.png",
+  "source": "https://sidianbank.co.ke/wp-content/uploads/2023/02/Sidian-bank-Logo-1.png",
+  "site": "https://sidianbank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "spire": {
+  "name": "Spire Bank",
+  "file": "spire.png",
+  "source": "http://www.spirebank.co.ke/wp-content/uploads/2016/06/spire-Logo.png",
+  "site": "https://www.spirebank.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "stanbic": {
+  "name": "Stanbic Bank Kenya",
+  "file": "stanbic.png",
+  "source": "https://www.stanbicbank.co.ke/static_file/assets/favicons/apple-icon-57x57.png",
+  "site": "https://www.stanbicbank.co.ke/kenya/personal",
+  "licence": null,
+  "kind": "mark",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "stanchart": {
+  "name": "Standard Chartered Kenya",
+  "file": "stanchart.png",
+  "source": "https://av.sc.com/ke/content/images/content/images/cropped-512x512-1-200x200.png",
+  "site": "https://www.sc.com/ke/",
+  "licence": null,
+  "kind": "mark",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "tkash": {
+  "name": "T-Kash",
+  "file": "tkash.png",
+  "source": "https://telkom.co.ke/wp-content/uploads/2022/03/logo-telkom.png",
+  "site": "https://telkom.co.ke/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "mobile_money"
+ },
+ "uba": {
+  "name": "UBA Kenya",
+  "file": "uba.svg",
+  "source": "https://www.ubagroup.com/nigeria/wp-content/uploads/sites/3/2018/06/UBA-Logo.svg",
+  "site": "https://www.ubakenya.com/",
+  "licence": null,
+  "kind": "logo",
+  "on_dark": false,
+  "type": "bank"
+ },
+ "visa": {
+  "name": "Visa",
+  "file": "visa.svg",
+  "source": "https://commons.wikimedia.org/wiki/File:Visa_Inc._logo_(2021–present).svg",
+  "site": null,
+  "licence": "Wikimedia Commons (public domain, text logo)",
+  "kind": "logo",
+  "on_dark": false,
+  "type": "card"
+ }
+}

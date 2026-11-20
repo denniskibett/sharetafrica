@@ -10,39 +10,81 @@
 
     <a href="{{ route('dashboard') }}" class="md:hidden" aria-label="Dashboard"><x-brand :size="28" /></a>
 
-    {{-- Search the dashboard menu (same items as the sidebar). ⌘K / Ctrl+K focuses it; ↑ ↓ Enter to pick. --}}
+    {{-- Header search: jump to a menu page or open a payment, person, business, support case or ledger account.
+         Data: SearchController (GET /search), scoped to what this person may open. ⌘K / Ctrl+K or "/" focuses it. --}}
     <div class="relative hidden sm:block sm:w-72 lg:w-96"
          x-data="{
-            q: '', open: false, i: 0, items: [],
-            async load() { if (!this.items.length) this.items = await (await fetch('{{ route('dashboard.menu') }}', { headers: { Accept: 'application/json' } })).json() },
-            get results() {
-                const q = this.q.trim().toLowerCase();
-                if (!q) return this.items.filter(x => x.ready).slice(0, 8);
-                return this.items.filter(x => (x.label + ' ' + x.group).toLowerCase().includes(q)).slice(0, 10);
+            q: '', results: [], active: 0, open: false, loading: false, seq: 0, isMac: /Mac|iPhone|iPad/.test(navigator.platform),
+            async search() {
+                const n = ++this.seq;
+                this.loading = true;
+                try {
+                    const r = await fetch(@js(route('search')) + '?q=' + encodeURIComponent(this.q.trim()), { headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+                    const d = await r.json();
+                    if (n !== this.seq) return; // a newer search finished first
+                    this.results = d.results || []; this.active = 0; this.open = true;
+                } catch (e) { if (n === this.seq) this.results = []; }
+                if (n === this.seq) this.loading = false;
             },
-            go(item) { if (item?.ready) location.href = item.url },
+            focus() { this.open = true; if (!this.results.length) this.search() },
+            move(step) {
+                if (!this.results.length) return;
+                this.active = (this.active + step + this.results.length) % this.results.length;
+                this.$nextTick(() => this.$refs.list?.querySelector('[aria-selected=true]')?.scrollIntoView({ block: 'nearest' }));
+            },
+            go(i = this.active) { const r = this.results[i]; if (!r) return; this.close(); location.href = r.url },
+            close() { this.open = false; this.q = ''; this.results = []; this.$refs.q?.blur() },
+            shortcut(e) {
+                const typing = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable;
+                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.$refs.q.focus() }
+                else if (e.key === '/' && !typing) { e.preventDefault(); this.$refs.q.focus() }
+            },
+            icon(name) { const t = this.$refs.icons?.content.querySelector('[data-icon=&quot;' + name + '&quot;]'); return t ? t.innerHTML : '' },
          }"
-         @keydown.window.meta.k.prevent="$refs.q.focus()" @keydown.window.ctrl.k.prevent="$refs.q.focus()"
-         @click.outside="open = false">
-      <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-      <input x-ref="q" x-model="q" type="search" placeholder="Search the dashboard…" autocomplete="off" aria-label="Search the dashboard"
-             @focus="open = true; load()" @input="open = true; i = 0"
-             @keydown.down.prevent="i = Math.min(i + 1, results.length - 1)" @keydown.up.prevent="i = Math.max(i - 1, 0)"
-             @keydown.enter.prevent="go(results[i])" @keydown.escape="open = false; $el.blur()"
-             class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-14 text-sm text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-800 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:bg-gray-900">
-      <kbd class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[11px] text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">⌘K</kbd>
+         @keydown.window="shortcut($event)" @click.outside="open = false">
+      <form role="search" @submit.prevent="go()">
+        <x-heroicon-o-magnifying-glass class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <input x-ref="q" x-model="q" type="search" placeholder="Search or jump to…" autocomplete="off" aria-label="Search"
+               role="combobox" aria-controls="header-search-results" :aria-expanded="open && results.length > 0"
+               @focus="focus()" @input.debounce.150ms="search()"
+               @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter.prevent="go()" @keydown.escape.prevent="close()"
+               class="h-10 w-full rounded-lg border border-gray-200 bg-gray-50 pl-10 pr-20 text-sm text-gray-800 placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-violet-500/10 dark:border-gray-800 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30 dark:focus:bg-gray-900 [&::-webkit-search-cancel-button]:hidden">
+        <x-heroicon-o-arrow-path x-show="loading" x-cloak class="pointer-events-none absolute right-14 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
+        <kbd class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md border border-gray-200 bg-white px-1.5 py-0.5 font-sans text-[11px] text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"><span x-text="isMac ? '⌘' : 'Ctrl '">⌘</span>K</kbd>
+      </form>
 
-      <div x-show="open" x-cloak x-transition class="absolute left-0 right-0 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
-        <template x-for="(item, n) in results" :key="item.label">
-          <a :href="item.ready ? item.url : null" @mouseenter="i = n"
-             class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
-             :class="[n === i ? 'bg-gray-100 dark:bg-white/5' : '', item.ready ? 'cursor-pointer text-gray-800 dark:text-gray-200' : 'cursor-default text-gray-400 dark:text-gray-500']">
-            <span x-text="item.label"></span>
-            <span class="text-xs text-gray-400" x-text="item.ready ? item.group : 'Coming soon'"></span>
-          </a>
-        </template>
-        <p x-show="!results.length" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">Nothing matches "<span x-text="q"></span>".</p>
+      {{-- Results, grouped under small headings --}}
+      <div x-show="open && (results.length || (q.trim().length >= 2 && !loading))" x-cloak
+           x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 -translate-y-1" x-transition:enter-end="opacity-100 translate-y-0"
+           class="absolute left-0 right-0 top-full z-[1000] mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900 lg:right-auto lg:w-[430px]">
+        <ul id="header-search-results" x-ref="list" role="listbox" class="max-h-[60vh] overflow-y-auto p-2">
+          <template x-for="(r, i) in results" :key="r.group + r.url + i">
+            <li role="option" :aria-selected="i === active">
+              <p x-show="i === 0 || results[i - 1].group !== r.group" x-text="r.group" class="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-gray-400"></p>
+              <a :href="r.url" @mouseenter="active = i" @click.prevent="go(i)"
+                 :class="i === active ? 'bg-violet-50 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200' : 'text-gray-700 dark:text-gray-300'"
+                 class="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-white/5" x-html="icon(r.icon) || icon('magnifying-glass')"></span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-medium" x-text="r.label"></span>
+                  <span class="block truncate text-xs text-gray-500 dark:text-gray-400" x-text="r.sub"></span>
+                </span>
+              </a>
+            </li>
+          </template>
+          <li x-show="!loading && q.trim().length >= 2 && !results.length" class="px-3 py-8 text-center text-sm text-gray-500 dark:text-gray-400">Nothing found for “<span x-text="q"></span>”.</li>
+        </ul>
+        <div class="flex items-center gap-4 border-t border-gray-200 px-4 py-2.5 text-xs text-gray-400 dark:border-gray-800">
+          <span><kbd class="font-sans">↑</kbd> <kbd class="font-sans">↓</kbd> to move</span><span><kbd class="font-sans">Enter</kbd> to open</span><span class="ml-auto"><kbd class="font-sans">Esc</kbd> to close</span>
+        </div>
       </div>
+
+      {{-- Icons the results can use, rendered once on the server --}}
+      <template x-ref="icons">
+        @foreach (\App\Http\Controllers\SearchController::icons($user) as $ic)
+          <span data-icon="{{ $ic }}"><x-dynamic-component :component="'heroicon-o-'.$ic" class="h-4 w-4" /></span>
+        @endforeach
+      </template>
     </div>
 
     <div class="ml-auto flex items-center gap-2 sm:gap-3">
