@@ -161,6 +161,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
         Route::get('/users/{user}/activity', [UserController::class, 'activity'])->name('users.activity');
         Route::post('/users/{user}/verification', [UserController::class, 'verify'])->name('users.verify');
+        Route::post('/users/{user}/verification/claude', [UserController::class, 'readWithClaude'])->middleware('throttle:20,1,claude-read')->name('users.verify.claude');
         Route::get('/admin/verifications', [\App\Http\Controllers\Admin\VerificationsController::class, 'index'])->name('admin.verifications.index');
         Route::get('/admin/businesses', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('admin.businesses.index');
         Route::post('/admin/businesses/{company}/decision', [\App\Http\Controllers\Admin\BusinessesController::class, 'decide'])->name('admin.businesses.decide');
@@ -193,6 +194,7 @@ Route::middleware(['auth', 'permission:integrations.manage'])
         Route::patch('/{provider}/toggle', 'toggle')->name('toggle')->where('provider', $provider);
         Route::post('/{provider}/test', 'test')->name('test')->where('provider', $provider);
         Route::post('/smtp/send-test', 'sendTestEmail')->name('smtp.send-test');
+        Route::post('/{provider}/send-test-sms', 'sendTestSms')->name('sms.send-test')->where('provider', 'kenyasms|africastalking');
         Route::delete('/{provider}', 'destroy')->name('destroy')->where('provider', $provider);
     });
 

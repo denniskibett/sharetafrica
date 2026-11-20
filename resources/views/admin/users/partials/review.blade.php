@@ -1,5 +1,11 @@
 {{-- Verification review: the automatic checks, the name on the account vs the ID, and Approve / Reject (reason shown to the person). --}}
-<div id="verification" x-data="{ reason: '', busy: false, err: '',
+<div id="verification" x-data="{ reason: '', busy: false, err: '', reading: false, readErr: '',
+        async readWithClaude() {
+          this.reading = true; this.readErr = '';
+          try { await window.sharet.send('POST', '{{ route('users.verify.claude', $user) }}'); await load(); }
+          catch (e) { this.readErr = e.body?.message || 'Claude could not read the ID.'; await load(); }
+          finally { this.reading = false; }
+        },
         async decide(decision) {
           this.busy = true; this.err = '';
           try { await window.sharet.send('POST', '{{ route('users.verify', $user) }}', { decision, reason: this.reason }); this.reason = ''; await load(); }
@@ -22,6 +28,27 @@
         </li>
       </template>
     </ul>
+
+    {{-- Second reading by Claude: advice for the reviewer, never a decision --}}
+    <div x-show="d.review?.submitted && !d.self && (d.review?.claude?.available || d.review?.claude?.assist)" class="mt-4 space-y-2 border-t border-gray-100 pt-4 text-sm dark:border-gray-800">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="font-medium text-gray-900 dark:text-white">Second reading by Claude <span class="font-normal text-gray-500">· advice only</span></p>
+        <x-ui.button variant="secondary" icon="sparkles" x-show="d.review?.claude?.available" x-bind:disabled="reading" @click="readWithClaude()"><span x-text="reading ? 'Reading…' : (d.review?.claude?.assist ? 'Read again' : 'Read with Claude')"></span></x-ui.button>
+      </div>
+      <template x-if="d.review?.claude?.assist?.status === 'read'">
+        <div class="space-y-1">
+          <template x-for="r in d.review.claude.assist.compare" :key="r.label">
+            <p class="flex flex-wrap gap-x-2"><span :class="r.same ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300'" x-text="r.same ? 'Same' : 'Check'"></span>
+              <span class="text-gray-900 dark:text-white" x-text="r.label"></span>
+              <span class="text-gray-500">on file: <span x-text="r.on_file || '—'"></span> · on the card: <span x-text="r.on_card || 'not readable'"></span></span></p>
+          </template>
+          <p x-show="d.review.claude.assist.concerns" class="text-amber-700 dark:text-amber-300" x-text="'Note: ' + d.review.claude.assist.concerns"></p>
+        </div>
+      </template>
+      <p x-show="d.review?.claude?.assist?.status === 'failed'" class="text-amber-700 dark:text-amber-300" x-text="d.review?.claude?.assist?.error"></p>
+      <p x-show="readErr && !d.review?.claude?.assist" x-text="readErr" class="text-red-600"></p>
+      <p x-show="d.review?.claude?.assist" class="text-xs text-gray-500">Asked by <span x-text="d.review?.claude?.assist?.by"></span> · <span x-text="d.review?.claude?.assist?.at"></span> · <span x-text="d.review?.claude?.assist?.model"></span>. Claude can be wrong: you decide.</p>
+    </div>
 
     <p x-show="d.review?.by" class="mt-4 text-xs text-gray-500"><span x-text="d.review?.by"></span> · <span x-text="d.review?.at"></span><span x-show="d.review?.reason"> · “<span x-text="d.review?.reason"></span>”</span></p>
 

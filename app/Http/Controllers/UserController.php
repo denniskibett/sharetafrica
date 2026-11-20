@@ -149,6 +149,7 @@ class UserController extends Controller
                 'submitted' => $progress['basic']['submitted'],
                 'account_name' => $user->name, 'id_name' => $kyc['full_name'] ?? null,
                 'checks' => collect(Kyc::checks($user, $kyc))->map(fn ($c) => ['key' => $c[0], 'label' => $c[1], 'ok' => $c[2], 'note' => $c[3]])->values(),
+                'claude' => ['available' => \App\Integrations\Claude\Claude::enabled(), 'assist' => self::assistView($kyc['assist'] ?? null)],
                 'history' => collect($kyc['review_history'] ?? [])->reverse()->take(5)->map(fn ($h) => [
                     'status' => $h['status'], 'who' => $h['staff_name'] ?? '', 'reason' => $h['reason'] ?? null,
                     'at' => \Carbon\Carbon::parse($h['at'])->timezone('Africa/Nairobi')->format('j M Y, H:i'),
@@ -181,6 +182,29 @@ class UserController extends Controller
         \App\Security\Lockdown::log('staff '.$data['decision'].'d a verification', ['person' => $user->id, 'reason' => $data['reason'] ?? null]);
 
         return response()->json(['message' => $data['decision'] === 'approve' ? "{$user->name} is verified." : "{$user->name} was asked to retake their photos."]);
+    }
+
+    /**
+     * Staff ask Claude for a second reading of the person's ID photos. Advice only: the review status, the details
+     * on file and the level stay exactly as they are; staff still approve or reject above.
+     */
+    public function readWithClaude(Request $request, User $user)
+    {
+        abort_if($user->is($request->user()), 403, 'You cannot review your own account.');
+        abort_unless(\App\Integrations\Claude\Claude::enabled(), 422, 'Claude is not set up: add the Anthropic key under Integrations.');
+        $assist = \App\Integrations\Claude\DocumentReader::assist($user, $request->user());
+
+        return response()->json(['assist' => self::assistView($assist), 'message' => $assist['status'] === 'read' ? 'Claude read the ID. Compare, then decide.' : $assist['error']],
+            $assist['status'] === 'read' ? 200 : 422);
+    }
+
+    private static function assistView(?array $a): ?array
+    {
+        return $a ? [
+            'status' => $a['status'], 'error' => $a['error'] ?? null, 'legible' => $a['legible'] ?? null,
+            'compare' => $a['compare'] ?? [], 'concerns' => $a['concerns'] ?? '', 'by' => $a['by'] ?? '', 'model' => $a['model'] ?? '',
+            'at' => \Carbon\Carbon::parse($a['at'])->timezone('Africa/Nairobi')->format('j M Y, H:i'),
+        ] : null;
     }
 
     /** Wallet transactions for one person (table JSON). */

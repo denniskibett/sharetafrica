@@ -144,6 +144,8 @@
           </div>
 
           <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row">
+            <button type="button" x-show="editing.connected && platform && ['kenyasms', 'africastalking'].includes(editing.key)" @click="sendTestSms(editing)" :disabled="busy"
+                    class="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Send test SMS</button>
             <button type="button" x-show="editing.connected && editing.key === 'smtp'" @click="sendTestEmail()" :disabled="busy"
                     class="flex h-11 flex-1 items-center justify-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/5">Send test email</button>
             <button type="button" x-show="editing.connected" @click="test(editing)" :disabled="busy"
@@ -210,6 +212,7 @@
   function integrationsPage(base, scope) {
     return {
       providers: [],
+      platform: String(scope) === 'platform',
       async init() { this.providers = (await (await fetch(`${base}?company=${scope}`, { headers: { Accept: 'application/json' } })).json()).providers; },
       filter: 'All', editing: null, details: null, removing: null, form: {}, errors: {}, busy: false,
       get categories() { return [...new Set(this.providers.map(p => p.category))]; },
@@ -249,6 +252,12 @@
       async test(p) {
         this.busy = true;
         try { const r = await sharet.send('POST', this.url(p, '/test')); this.replace(r.provider); }
+        catch (e) { if (e.body?.provider) this.replace(e.body.provider); }
+        this.busy = false;
+      },
+      async sendTestSms(p) {
+        this.busy = true;
+        try { const r = await sharet.send('POST', `${base}/${p.key}/send-test-sms?company=${scope}`); this.replace(r.provider); }
         catch (e) { if (e.body?.provider) this.replace(e.body.provider); }
         this.busy = false;
       },

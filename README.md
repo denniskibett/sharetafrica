@@ -31,11 +31,15 @@ The full plan, build order and decisions: [`docs/v2/README.md`](docs/v2/README.m
 
 ## Versions and branches
 
-| Branch | Version | Deploys to |
+| Branch | What it holds | Deploys to |
 |---|---|---|
-| `main` | v1 in production | `sharet.africa` (kept deployable for audits) |
-| `staging` | a copy of `main` where its changes are tried first | a staging site, then merged into `main` |
-| `v2` | the money platform | `v2.sharet.africa` once its DNS propagates; `sharet.africa` during the current test |
+| `main` | **what is live**: the v2 platform | `sharet.africa` (only from `main`) |
+| `staging` | the next release: every change lands here first and is tried | a staging site, then merged into `main` |
+| `v2` | the old v2 working branch, now the same as `main` (kept, no new work) | — |
+| tag `v1-final` | v1 as it was in production until 2026-11 | parked on the server at `/home/sharet.africa/versions/v1` |
+
+Flow: feature branch → `staging` (tests pass, tried) → `main` → deploy. `main` never gets a change that did not go
+through `staging`.
 
 v2 only **adds** to the database (it never alters a v1 table), so the live site can switch between v1 and v2 for an
 audit: [`docs/v2/SWITCHING.md`](docs/v2/SWITCHING.md).

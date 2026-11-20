@@ -108,6 +108,7 @@ class Integrations
                 'kenyasms' => self::ok(Http::timeout(10)->acceptJson()->withToken($c['api_key'] ?? '')
                     ->get(rtrim(($c['api_url'] ?? '') ?: \App\Integrations\Sms\KenyaSms::DEFAULT_URL, '/').'/account/balance'), 'Connected: the key reads your KenyaSMS balance.'),
                 'smtp' => self::smtp($c),
+                'claude' => \App\Integrations\Claude\Claude::test($integration),
                 default => [true, 'Saved. This provider has no connection test.'],
             };
         } catch (TransportExceptionInterface $e) {

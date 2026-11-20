@@ -24,9 +24,19 @@ class KenyaSms
     /** $phone 2547…; $key makes a retry send once (KenyaSMS idempotency_key). */
     public static function send(string $phone, string $message, ?string $key = null): bool
     {
+        return self::deliver($phone, $message, $key) === 'sent';
+    }
+
+    /**
+     * Like send(), but says what happened, so Sms::send knows whether a backup gateway may try:
+     * 'sent', 'off' (not set up), 'refused' (KenyaSMS answered no: safe to try elsewhere) or 'unknown' (no answer:
+     * it may have gone out, so nobody else sends it).
+     */
+    public static function deliver(string $phone, string $message, ?string $key = null): string
+    {
         $c = Integrations::credentials('kenyasms');
         if (blank($c['api_key'] ?? null) || blank($c['sender_id'] ?? null)) {
-            return false; // not set up yet
+            return 'off'; // not set up yet
         }
         try {
             $res = Http::timeout(15)->acceptJson()->withToken($c['api_key'])
@@ -37,15 +47,16 @@ class KenyaSms
                     'message_type' => 'transactional',
                     'idempotency_key' => $key,
                 ]));
-            if (! $res->json('success')) {
-                report(new \RuntimeException('KenyaSMS refused: '.($res->json('error.code') ?? 'HTTP '.$res->status())));
+            if ($res->json('success')) {
+                return 'sent';
             }
+            report(new \RuntimeException('KenyaSMS refused: '.($res->json('error.code') ?? 'HTTP '.$res->status())));
 
-            return (bool) $res->json('success');
+            return $res->serverError() ? 'unknown' : 'refused';
         } catch (Throwable $e) {
             report($e);
 
-            return false;
+            return 'unknown';
         }
     }
 }

@@ -53,4 +53,12 @@ return [
         'path' => env('TESSERACT_PATH', 'tesseract'),
     ],
 
+    // Claude (Anthropic) for staff tools (App\Integrations\Claude). The key saved on the "Claude (Anthropic)" integration
+    // card wins over ANTHROPIC_API_KEY; the card's model wins over ANTHROPIC_MODEL.
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-5-5'),
+        'timeout' => (int) env('ANTHROPIC_TIMEOUT', 90),
+    ],
+
 ];
