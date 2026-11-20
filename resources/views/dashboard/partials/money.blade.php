@@ -10,6 +10,15 @@
     $tile = 'flex w-full items-center gap-3 rounded-2xl border-2 bg-app-tile px-3 py-2.5 text-left text-sm transition hover:bg-app-raised';
     $primary = 'h-12 w-full rounded-full bg-app-lime text-[15px] font-semibold text-[#050507] disabled:opacity-40';
     $verified = in_array($user->kyc_level, ['basic', 'standard'], true);
+    // Cloud9 underneath (customers only ever see Sharet): your own account number and card top-ups, once it is connected
+    $cloud9 = filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null);
+    $promptCharged = app(\App\Integrations\Rails::class)->collecting($user) === 'cloud9';
+    $ways = array_filter([
+        ['sharet', 'From a Sharet wallet', 'Your @name and QR · free', 'at-symbol', 'bg-app-lime text-[#050507]'],
+        ['mpesa', 'M-PESA prompt', 'We send a prompt to your phone', 'device-phone-mobile', 'bg-app-send/15 text-app-send'],
+        $cloud9 ? ['account', 'My account number', 'Anyone pays it from the M-PESA menu', 'hashtag', 'bg-app-pay/15 text-app-pay'] : null,
+        $cloud9 ? ['card', 'Debit or credit card', 'Visa or Mastercard', 'credit-card', 'bg-orange-500/15 text-orange-600 dark:text-orange-300'] : null,
+    ]);
     $receiveUrl = route('dashboard', ['panel' => 'send', 'to' => '@'.$handle]);
     $destinations = [
         // [key, label, hint, icon, colour by meaning: Sharet lime, people blue, bills and tills violet, banks orange]
@@ -21,7 +30,7 @@
     ];
 @endphp
 <x-ui.slide-over name="money" title="Money" width="max-w-[720px]" x-text="({ send: 'Send money', receive: 'Receive money', withdraw: 'Withdraw' })[payload.mode] || 'Money'">
-  <div x-data="moneyPanel({ urls: { quote: '{{ route('pay.quote') }}', topUp: '{{ route('pay.top-up') }}', transfer: '{{ route('pay.transfer') }}', pin: '{{ route('pay.pin') }}', base: '{{ url('pay') }}' },
+  <div x-data="moneyPanel({ urls: { quote: '{{ route('pay.quote') }}', topUp: '{{ route('pay.top-up') }}', card: '{{ route('pay.card') }}', account: '{{ route('pay.account-number') }}', transfer: '{{ route('pay.transfer') }}', pin: '{{ route('pay.pin') }}', base: '{{ url('pay') }}' },
                             payer: @js($user->phone), receiveUrl: @js($receiveUrl), pinSet: @js(\App\Support\TransactionPin::isSet($user)) })"
        @slide-over.window="$event.detail.name === 'money' && start($event.detail.payload || {})" class="space-y-5">
 
@@ -174,9 +183,14 @@
 
     {{-- RECEIVE: your @name and QR for other Sharet wallets; or add from your own M-PESA --}}
     <div x-show="mode === 'receive' && step === 'who'" class="space-y-5">
-      <div class="grid grid-cols-2 gap-1 rounded-full bg-app-tile p-1 text-sm">
-        <button type="button" @click="receiveFrom = 'sharet'" :class="receiveFrom === 'sharet' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-9 rounded-full font-medium">From a Sharet wallet</button>
-        <button type="button" @click="receiveFrom = 'mpesa'" :class="receiveFrom === 'mpesa' ? 'bg-app-panel text-app-ink shadow-sm' : 'text-app-muted'" class="h-9 rounded-full font-medium">From my M-PESA</button>
+      <div class="grid gap-2 sm:grid-cols-2" role="tablist" aria-label="How to add money">
+        @foreach ($ways as [$key, $text, $hint, $icon, $tone])
+          <button type="button" role="tab" @click="receiveFrom = '{{ $key }}'; '{{ $key }}' === 'account' && loadAccount()" :aria-selected="receiveFrom === '{{ $key }}'" class="{{ $tile }}"
+                  :class="receiveFrom === '{{ $key }}' ? 'border-app-ink' : 'border-transparent'">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $tone }}"><x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" /></span>
+            <span class="min-w-0"><span class="block font-semibold">{{ $text }}</span><span class="block truncate text-xs text-gray-500">{{ $hint }}</span></span>
+          </button>
+        @endforeach
       </div>
       <div x-show="receiveFrom === 'sharet'" class="rounded-2xl bg-app-tile p-5 text-center">
         <p class="text-sm text-gray-500">Free and instant between Sharet wallets</p>
@@ -188,13 +202,45 @@
       </div>
       @if ($verified)
         <form x-show="receiveFrom === 'mpesa'" @submit.prevent="addMoney()" class="space-y-4 text-center">
-          <p class="text-sm text-gray-500">We send a prompt to {{ $user->phone ?: 'your number (add it in Account settings)' }}. No fee.</p>
+          <p class="text-sm text-gray-500">We send a prompt to {{ $user->phone ?: 'your number (add it in Account settings)' }}. {{ $promptCharged ? 'From KES 20. A small payment charge comes off what arrives; your receipt shows it.' : 'No fee.' }}</p>
           <div class="flex items-baseline justify-center gap-2">
             <span class="text-xl font-semibold text-gray-400">KES</span>
             <input x-model="form.amount" inputmode="numeric" placeholder="0" aria-label="Amount in KES" class="w-48 border-0 bg-transparent p-0 text-center text-5xl font-semibold tabular-nums placeholder:text-gray-300 focus:ring-0 dark:text-white">
           </div>
           <p class="{{ $err }}" x-text="errors.amount?.[0] || errors.payer?.[0]"></p>
           <button type="submit" :disabled="busy" class="{{ $primary }}" x-text="busy ? 'One moment…' : 'Continue'"></button>
+        </form>
+      @endif
+      @if ($cloud9)
+        {{-- Your own account number on Sharet's paybill --}}
+        <div x-show="receiveFrom === 'account'" x-cloak class="space-y-4">
+          <div class="rounded-2xl bg-app-tile p-5">
+            <template x-if="account.loading"><p class="text-sm text-gray-500">Getting your account number…</p></template>
+            <template x-if="!account.loading && !account.account"><p class="text-sm text-gray-500">Your account number isn't ready yet. Try again in a minute.</p></template>
+            <dl x-show="account.account" class="space-y-3">
+              <div class="flex items-center justify-between"><dt class="text-sm text-gray-500">Paybill</dt><dd class="app-num text-2xl font-semibold" x-text="account.paybill"></dd></div>
+              <div class="flex items-center justify-between"><dt class="text-sm text-gray-500">Account number</dt><dd class="app-num text-2xl font-semibold" x-text="account.formatted"></dd></div>
+              <div class="flex items-center justify-between"><dt class="text-sm text-gray-500">Name</dt><dd class="font-semibold">{{ $user->name }} · Sharet</dd></div>
+            </dl>
+          </div>
+          <ol class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+            <li>1. M-PESA › Lipa na M-PESA › Pay Bill</li>
+            <li>2. Business number <b class="app-num" x-text="account.paybill"></b>, account number <b class="app-num" x-text="account.account"></b></li>
+            <li>3. Amount, then the M-PESA PIN. It lands in your Sharet wallet in seconds.</li>
+          </ol>
+          <p class="text-xs text-gray-500">Yours for good, and anyone can use it to pay you. A small payment charge comes off what arrives; every receipt shows it.</p>
+          <button type="button" x-show="account.account" @click="navigator.clipboard?.writeText(account.account); sharet.toast('Account number copied')" class="h-12 w-full rounded-full bg-app-tile text-sm font-semibold hover:bg-app-raised">Copy account number</button>
+        </div>
+        {{-- Card: a secure card page; the card charge is paid on top --}}
+        <form x-show="receiveFrom === 'card'" x-cloak @submit.prevent="addByCard()" class="space-y-4 text-center">
+          <p class="text-sm text-gray-500">Pay on a secure card page. From KES 20. The card charge is shown there before you pay, and added to what your card pays.</p>
+          <div class="flex items-baseline justify-center gap-2">
+            <span class="text-xl font-semibold text-gray-400">KES</span>
+            <input x-model="form.amount" inputmode="numeric" placeholder="0" aria-label="Amount in KES" class="w-48 border-0 bg-transparent p-0 text-center text-5xl font-semibold tabular-nums placeholder:text-gray-300 focus:ring-0 dark:text-white">
+          </div>
+          <p class="{{ $err }}" x-text="errors.amount?.[0]"></p>
+          <button type="submit" :disabled="busy" class="{{ $primary }}" x-text="busy ? 'Opening the card page…' : 'Continue to card page'"></button>
+          <p class="text-xs text-gray-500">Your card number goes straight to the card processor. Sharet never sees it.</p>
         </form>
       @endif
     </div>
@@ -211,7 +257,7 @@
   function moneyPanel({ urls, payer, receiveUrl, pinSet }) {
     const blank = () => ({ handle: '', phone: '', paybill: '', till: '', account: '', bank: '', amount: '', note: '', pin: '', pin2: '' });
     return {
-      mode: 'send', step: 'who', to: 'sharet', funding: 'wallet', receiveFrom: 'sharet', pinSet,
+      mode: 'send', step: 'who', to: 'sharet', funding: 'wallet', receiveFrom: 'sharet', pinSet, account: { loading: false, account: null, paybill: null, formatted: null },
       form: blank(), errors: {}, quote: null, order: null, busy: false, timer: null,
       init() {
         // ?panel=send|receive|withdraw (&to=@name): links from other pages and scanned QR codes open the panel here
@@ -223,7 +269,7 @@
       start(p) {
         clearTimeout(this.timer); this.quote = null; this.order = null; this.errors = {}; this.form = blank();
         this.setMode(p.mode || 'send');
-        if (p.from) this.receiveFrom = p.from; // receive: 'sharet' (QR, @name) or 'mpesa' (add money by STK)
+        if (p.from) { this.receiveFrom = p.from; p.from === 'account' && this.loadAccount(); } // receive: sharet (QR, @name) · mpesa (prompt) · account (account number) · card
         if (p.to) { this.to = 'sharet'; this.form.handle = p.to; }
         if (p.type) { this.to = p.type; Object.assign(this.form, p.dest || {}); }
         if (p.to || p.type) this.step = 'amount';
@@ -262,6 +308,19 @@
         try { this.quote = (await sharet.send('POST', urls.quote, this.body())).order; this.step = 'review'; }
         catch (e) { this.errors = e.errors || {}; if (['phone', 'paybill', 'till', 'account', 'bank'].some(k => this.errors[k])) this.step = 'who'; }
         this.busy = false;
+      },
+      /** Your own account number (made the first time you open it). */
+      async loadAccount() {
+        if (this.account.account || this.account.loading) return;
+        this.account.loading = true;
+        try { const r = await fetch(urls.account, { headers: { Accept: 'application/json' } }); Object.assign(this.account, await r.json()); }
+        finally { this.account.loading = false; }
+      },
+      /** Card: open the secure card page; it brings you back to the payment's receipt. */
+      async addByCard() {
+        this.busy = true; this.errors = {};
+        try { const r = await window.sharet.send('POST', urls.card, { amount: this.form.amount }); window.location.href = r.url; }
+        catch (e) { this.errors = e.errors || { amount: [e.body?.message || 'The card page could not be opened.'] }; this.busy = false; }
       },
       async addMoney() {
         this.busy = true; this.errors = {};

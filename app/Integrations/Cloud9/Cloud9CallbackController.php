@@ -31,6 +31,45 @@ class Cloud9CallbackController
 
         $kind = $event === 'PAYIN' ? 'collect' : 'payout';
         $req = RailRequest::where('rail', 'cloud9')->where('kind', $kind)->where('provider_reference', (string) $request->input('id'))->first();
+        // A card top-up is known by its checkout until its deposit exists
+        if (! $req && $kind === 'collect' && filled($request->input('checkout_id'))) {
+            $req = RailRequest::where('rail', 'cloud9')->where('kind', 'collect')->where('provider_reference', (string) $request->input('checkout_id'))->first();
+            if ($req) {
+                try {
+                    $res = $rail->http()->get('payin/deposits/'.$request->input('id').'/');
+                    $result = $res->successful() && ($res->json('checkout_id') === $request->input('checkout_id'))
+                        ? Cloud9Rail::cardResult($res->json(), $req) : RailResult::unknown();
+                } catch (\Throwable $e) {
+                    report($e);
+                    $result = RailResult::unknown();
+                }
+                $meta = $req->meta ?? [];
+                $meta['callbacks'] = array_merge($meta['callbacks'] ?? [], [['at' => now()->toIso8601String(), 'body' => $request->all()]]);
+                $req->forceFill(['meta' => $meta])->save();
+                $result->final() && $orders->apply($req, $result);
+
+                return response()->json(['ok' => true]);
+            }
+        }
+        // Paid to someone's own account number from the M-PESA menu: credit their wallet
+        if (! $req && $kind === 'collect' && ($account = $request->input('paybill_account.account'))) {
+            $user = \App\Models\User::where('cloud9_account', (int) $account)->first();
+            if ($user) {
+                try {
+                    $res = $rail->http()->get('payin/deposits/'.$request->input('id').'/');
+                    $deposit = $res->successful() ? $res->json() : null;
+                } catch (\Throwable $e) {
+                    report($e);
+                    $deposit = null;
+                }
+                // Only what Cloud9 itself confirms, and only to that same account number
+                if ($deposit && (int) ($deposit['paybill_account']['account'] ?? 0) === (int) $account) {
+                    $orders->creditPaybill($user, $deposit, Cloud9Rail::result($deposit, 'collect'));
+                }
+
+                return response()->json(['ok' => true]);
+            }
+        }
         if (! $req) {
             // A paybill deposit straight to Sharet's Cloud9 account number, or a payment we don't know: reconciliation
             // finds it on the statement and staff place it (credit a customer or park in suspense)

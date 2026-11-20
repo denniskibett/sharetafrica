@@ -219,6 +219,9 @@ class RampOrder extends Model
                 'sharet', 'wallet' => 'Sharet wallet',
                 default => 'M-PESA (Safaricom)',
             },
+            // A top-up the customer paid a payment charge on (money in through a partner): what was paid and what was kept
+            'Paid in' => $this->destination_type === 'wallet' && $this->fee ? 'KES '.Money::format($this->total) : null,
+            'Payment charge' => $this->destination_type === 'wallet' && $this->fee ? 'KES '.Money::format($this->fee) : null,
             'From' => $p['from'],
             'Transaction ID' => $this->reference(),
             'Sharet reference' => $this->sharetReference(),

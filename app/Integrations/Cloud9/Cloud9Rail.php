@@ -87,11 +87,27 @@ class Cloud9Rail implements PaymentRail, ProvidesStatements
         return RailResult::failed('The payment could not be sent: '.self::error($res));
     }
 
-    /** What Cloud9 says now, read by the deposit's or payout's id. */
+    /** What Cloud9 says now, read by the deposit's or payout's id (a card top-up: its checkout, then its deposit). */
     public function status(RailRequest $request): RailResult
     {
         if (! $request->provider_reference) {
             return RailResult::unknown('The payment partner never acknowledged this request.');
+        }
+        if (($request->meta['method'] ?? null) === 'card' && $request->provider_reference === ($request->meta['checkout_id'] ?? null)) {
+            $res = $this->http()->get('checkout/sessions/'.$request->provider_reference.'/');
+            if (! $res->successful()) {
+                return RailResult::unknown('No answer to the status check ('.$res->status().').');
+            }
+            $deposit = $res->json('deposit_id');
+            $state = strtoupper((string) $res->json('status'));
+            if (! $deposit) {
+                return in_array($state, ['EXPIRED', 'FAILED', 'CANCELLED'], true)
+                    ? RailResult::failed('The card payment was not completed.', $request->provider_reference)
+                    : RailResult::pending($request->provider_reference);
+            }
+            $res = $this->http()->get('payin/deposits/'.$deposit.'/');
+
+            return $res->successful() ? self::cardResult($res->json(), $request) : RailResult::unknown('No answer to the status check ('.$res->status().').');
         }
         $path = $request->kind === 'collect' ? 'payin/deposits/' : 'payout/payouts/';
         $res = $this->http()->get($path.$request->provider_reference.'/');
@@ -113,6 +129,83 @@ class Cloud9Rail implements PaymentRail, ProvidesStatements
             'FAILED' => RailResult::failed(self::plain($p['message'] ?? null) ?: ($kind === 'collect' ? 'The M-PESA payment was not completed.' : 'The payment could not be delivered.'), $id),
             default => RailResult::pending($id),   // PENDING, PROCESSING, IN_REVIEW: wait for the webhook, never resend
         };
+    }
+
+    /**
+     * A card top-up's deposit. The customer pays the card charge on top (charge_bearer CUSTOMER), so the wallet gets
+     * the amount asked for: no charge for the ledger; the card charge is kept on the request for the receipt.
+     */
+    public static function cardResult(array $p, RailRequest $request): RailResult
+    {
+        $r = self::result($p, 'collect');
+        if ($r->status !== 'succeeded') {
+            return $r;
+        }
+        $net = self::cents($p['net_amount'] ?? $p['amount'] ?? 0);
+        if ($net < $request->amount) {
+            return RailResult::unknown('The card payment arrived short: left for reconciliation.');
+        }
+
+        return RailResult::succeeded($r->receipt, $r->providerReference, 0, 'Card');
+    }
+
+    /** A hosted card page for a top-up: the customer pays the card charge on top. Returns [checkout id, url]. */
+    public function checkout(RailRequest $request, \App\Models\User $user): array
+    {
+        if ($request->amount < self::MIN_IN) {
+            throw new \RuntimeException('Card payments start at KES 20.');
+        }
+        [$first, $last] = array_pad(explode(' ', trim((string) $user->name), 2), 2, '');
+        $res = $this->http()->post('checkout/sessions/', array_filter([
+            'amount' => number_format($request->amount / 100, 2, '.', ''),
+            'currency' => 'KES',
+            'charge_bearer' => 'CUSTOMER',
+            'customer' => array_filter(['email' => $user->email, 'first_name' => $first, 'last_name' => $last, 'phone_number' => $user->phone ? self::phone($user->phone) : null]),
+            'reference' => self::sharetReference($request),
+            'description' => 'Sharet wallet top-up',
+            'wallet_id' => $this->credentials()['wallet_id'] ?? null,
+            'redirect_url' => route('pay.card.return', $request->meta['order'] ?? ''),
+            'callback_url' => route('rails.cloud9.callback'),
+        ]));
+        if (! $res->successful() || ! $res->json('checkout_url')) {
+            throw new \RuntimeException('The card page could not be opened: '.self::error($res));
+        }
+
+        return [(string) $res->json('checkout_id'), (string) $res->json('checkout_url'), self::cents($res->json('charge') ?? 0) + self::cents($res->json('taxes') ?? 0)];
+    }
+
+    /** Sharet's MAIN KES wallet at Cloud9 (the integration's wallet ID, else read once from the API). */
+    public function mainWalletId(): string
+    {
+        $c = $this->credentials();
+        if (filled($c['wallet_id'] ?? null)) {
+            return $c['wallet_id'];
+        }
+
+        return \Illuminate\Support\Facades\Cache::rememberForever('cloud9:main-wallet:'.md5($c['api_key']), function () {
+            $wallet = collect((array) $this->http()->get('wallets/')->throw()->json('results'))
+                ->first(fn ($w) => ($w['currency'] ?? '') === 'KES' && ($w['wallet_type'] ?? '') === 'MAIN');
+
+            return $wallet['wallet_id'] ?? throw new \RuntimeException('Cloud9 has no MAIN KES wallet for this key.');
+        });
+    }
+
+    /**
+     * A person's own account number on Sharet's paybill: anyone pays it from the M-PESA menu and it lands in their
+     * wallet. Cloud9 picks the number; it never changes. Label = their name, reference = their Sharet ID.
+     * @return array{account_id: string, account: int, paybill: string}
+     */
+    public function createAccount(\App\Models\User $user): array
+    {
+        $res = $this->http()->post('wallets/'.$this->mainWalletId().'/paybill_accounts/', [
+            'label' => mb_substr((string) $user->name, 0, 100),
+            'reference' => self::clean((string) $user->sharet_id),
+        ]);
+        if (! $res->successful() || ! $res->json('account')) {
+            throw new \RuntimeException('Cloud9 did not create the account number: '.self::error($res));
+        }
+
+        return ['account_id' => (string) $res->json('account_id'), 'account' => (int) $res->json('account'), 'paybill' => (string) $res->json('paybill_number')];
     }
 
     /**

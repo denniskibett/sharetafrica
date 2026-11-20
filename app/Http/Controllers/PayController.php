@@ -144,6 +144,36 @@ class PayController extends Controller
         return response()->json(['order' => $this->orders->topUp($request->user(), $data['amount'])->present()]);
     }
 
+    /** Add money by card: a hosted card page (the customer pays the card charge on top). Answers with its address. */
+    public function card(Request $request)
+    {
+        $data = $request->validate(['amount' => ['required', 'string', 'max:20']]);
+        [$order, $url] = $this->orders->topUpByCard($request->user(), $data['amount']);
+
+        return response()->json(['order' => $order->present(), 'url' => $url]);
+    }
+
+    /** Back from the card page: check the payment, then show its receipt page. */
+    public function cardReturn(Request $request, RampOrder $order)
+    {
+        $this->own($request, $order);
+        $order = $this->orders->refresh($order);
+
+        return redirect()->route('pay.show', $order)->with('status', match ($order->status) {
+            'paid' => 'Card payment received: '.\App\Ledger\Money::format($order->amount).' added to your wallet.',
+            'failed' => 'The card payment was not completed. Nothing was taken from your wallet.',
+            default => 'Waiting for the card payment to confirm. This page updates by itself.',
+        });
+    }
+
+    /** Your own account number on Sharet's paybill (created the first time). */
+    public function accountNumber(Request $request)
+    {
+        $a = \App\Support\AccountNumber::for($request->user());
+
+        return response()->json($a ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : ['paybill' => null, 'account' => null]);
+    }
+
     /** Money from M-PESA is approved by the M-PESA PIN on the phone; money from the wallet needs the Sharet PIN. */
     public function confirm(Request $request, RampOrder $order)
     {
