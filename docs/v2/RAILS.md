@@ -55,8 +55,11 @@ Safaricom cuts the account at 12 characters, so `STK-SHUK7Q2M`) and "Sharet"; fa
 - **Three references per payment:** Sharet's (`SH…`, the order), the rail's (`rail_requests.provider_reference`, the
   Cloud9 id) and the network's own (`rail_requests.receipt`: the M-PESA receipt, bank or card reference), with the
   network named in `rail_requests.meta.network` (M-PESA, PesaLink (bank), Card, Airtel Money).
-- **Ledger:** Sharet's one MAIN KES wallet at Cloud9 = account **1160** (safeguarded). Cloud9's charge is Sharet's
-  cost (**5130**): taken out of a deposit (1160 gets the net) and added on top of a payout (1160 pays amount + charge).
+- **Ledger:** Sharet's one MAIN KES wallet at Cloud9 = account **1160** (safeguarded). Cloud9 takes its charge out of
+  a deposit (1160 gets the net). On a **wallet top-up the customer pays it** (you decided, 20 Nov): the wallet gets the
+  net, and the order shows total = paid by M-PESA, fee = the charge, amount = what reached the wallet ("Added KES 98.50
+  · payment charge 1.50"). On a payment collected to send on, and on payouts (Cloud9 adds its charge on top: 1160
+  pays amount + charge), the charge comes out of the Sharet fee the customer was shown (Sharet's cost, **5130**).
 - **The switch** (System › Payment rails, `rail_routes`): per kind of payment (money in, to a phone, paybill/till,
   bank, business settlements) a primary rail, an optional fallback and who it applies to (test list or everyone).
   One person proposes with a reason, a different person approves with their password; both logged. No route = the

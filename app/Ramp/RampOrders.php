@@ -275,9 +275,10 @@ class RampOrders
             $req->fill(['status' => 'succeeded', 'receipt' => $result->receipt, 'failure' => null, 'completed_at' => now()])->save();
             $topUp = $o->destination_type === 'wallet';
             $req->forceFill(['meta' => array_merge($req->meta ?? [], array_filter(['charge' => $result->charge ?: null, 'network' => $result->network]))])->save();
+            $credited = $topUp ? $this->chargeToCustomer($o, $req) : $o->total;
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
-                ...$this->collectedLegs($req, $o->total),
-                Ledger::credit($this->ledger->account('2100', $o->user), $o->total),
+                ...$this->collectedLegs($req, $o->total, $topUp),
+                Ledger::credit($this->ledger->account('2100', $o->user), $credited),
             ], ['source' => $o, 'memo' => 'Late M-PESA confirmation from '.$o->payer_phone.' · '.$result->receipt]);
             $o->failure = null;
             $this->move($o, $topUp ? 'paid' : 'failed', $topUp
@@ -337,13 +338,16 @@ class RampOrders
                 return null;
             }
             $topUp = $o->destination_type === 'wallet';
+            $credited = $topUp ? $this->chargeToCustomer($o, $req) : $o->total;
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
-                ...$this->collectedLegs($req, $o->total),
-                Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $o->total),
+                ...$this->collectedLegs($req, $o->total, $topUp),
+                Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $credited),
             ], ['source' => $o, 'memo' => ($topUp ? (\App\Models\ApiPaymentRequest::where('public_id', $o->sharetReference())->where('user_id', $o->user_id)->exists()
                 ? 'Payment request paid by M-PESA from ' : 'Wallet top-up from ') : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
             if ($topUp) {
-                $this->move($o, 'paid', "Added to your wallet · M-PESA {$req->receipt}");
+                $this->move($o, 'paid', $o->fee
+                    ? 'Added '.Money::format($o->amount)." to your wallet · M-PESA {$req->receipt} · payment charge ".Money::format($o->fee)
+                    : "Added to your wallet · M-PESA {$req->receipt}");
 
                 return null;
             }
@@ -402,15 +406,33 @@ class RampOrders
         return null;
     }
 
-    /** Money in from a rail: what landed in its account, and what the provider kept (Sharet's cost, 5130). */
-    private function collectedLegs(RailRequest $req, int $gross): array
+    /**
+     * Money in from a rail: what landed in its account, and what the provider kept. On a wallet top-up the customer
+     * pays the charge (their wallet gets the rest: chargeToCustomer); on a payment collected to send on, it comes out
+     * of the Sharet fee they were shown (Sharet's cost, 5130).
+     */
+    private function collectedLegs(RailRequest $req, int $gross, bool $customerPays = false): array
     {
         $charge = min((int) ($req->meta['charge'] ?? 0), $gross);
 
         return array_values(array_filter([
             Ledger::debit($this->ledger->account($this->rails->account($req->rail, 'collect')), $gross - $charge),
-            $charge ? Ledger::debit($this->ledger->account('5130'), $charge) : null,
+            $charge && ! $customerPays ? Ledger::debit($this->ledger->account('5130'), $charge) : null,
         ]));
+    }
+
+    /**
+     * A top-up the rail charged for (Cloud9 takes its charge out of the deposit): the customer pays it. The order keeps
+     * what they paid by M-PESA as total, the charge as fee, and what reached the wallet as amount. Returns that amount.
+     */
+    private function chargeToCustomer(RampOrder $o, RailRequest $req): int
+    {
+        $charge = min((int) ($req->meta['charge'] ?? 0), $o->total);
+        if ($charge) {
+            $o->forceFill(['fee' => $charge, 'amount' => $o->total - $charge]);
+        }
+
+        return $o->total - $charge;
     }
 
     /** Money out through a rail: the amount sent plus what the provider charged on top (Sharet's cost, 5130). */

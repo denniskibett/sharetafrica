@@ -59,7 +59,7 @@ class Cloud9RailTest extends TestCase
         return $this->postJson('/rails/cloud9/callback', ['event_type' => $event] + $body, ['X-Cloud9-Callback-Secret' => $secret]);
     }
 
-    public function test_money_in_by_cloud9_books_its_charge_as_sharets_cost_and_the_customer_sees_only_sharet(): void
+    public function test_money_in_by_cloud9_the_customer_pays_the_charge_and_sees_only_sharet(): void
     {
         $this->route('collect', 'cloud9');
         $deposit = ['id' => '68MW27JX', 'provider' => 'MPESA-C2B', 'status' => 'SUCCESS', 'amount' => '100.00', 'charge' => '1.50', 'taxes' => '0.00', 'net_amount' => '98.50', 'provider_reference' => 'NLJ7RT61SV'];
@@ -82,18 +82,19 @@ class Cloud9RailTest extends TestCase
         $this->webhook('PAYIN', $deposit, 'in-secret')->assertOk();   // Cloud9 retries: booked once
         $order = $order->fresh();
         $this->assertSame('paid', $order->status);
-        $this->assertSame(10000, $this->orders->walletBalance($jane));
+        // The customer pays the charge: KES 100 by M-PESA, KES 98.50 in the wallet, KES 1.50 shown as the fee
+        $this->assertSame(9850, $this->orders->walletBalance($jane));
+        $this->assertSame([10000, 150, 9850], [$order->total, $order->fee, $order->amount]);
+        $this->assertSame('+98.50', $order->present($jane)['signed']);
+        $this->assertStringContainsString('payment charge 1.50', json_encode($order->timeline));
         $this->assertSame(9850, $this->ledger->account('1160')->fresh()->natural());
-        $this->assertSame(150, $this->ledger->account('5130')->fresh()->natural());
+        $this->assertSame(0, (int) $this->ledger->account('5130')->fresh()->natural());
         // Three references: Sharet's, Cloud9's, and the network's own (the M-PESA receipt)
         $req = RailRequest::find($order->collect_request_id);
         $this->assertSame(['68MW27JX', 'NLJ7RT61SV', 'M-PESA'], [$req->provider_reference, $req->receipt, $req->meta['network']]);
         $this->assertMatchesRegularExpression('/^SH[A-Z0-9]+$/', $order->sharetReference());
         $this->assertStringNotContainsStringIgnoringCase('cloud9', json_encode($order->timeline).$order->failure);
-        // Sharet absorbs the charge: until Sharet tops the Cloud9 wallet up from its own money, the check shows the gap honestly
-        $checks = collect(app(Invariants::class)->run())->keyBy('check');
-        $this->assertStringContainsString('safeguarded 98.50, owed 100.00', $checks['Safeguarded money covers what customers are owed']['detail']);
-        $this->assertSame(['Safeguarded money covers what customers are owed'], $checks->reject(fn ($c) => $c['status'] === 'ok')->keys()->all());
+        $this->assertTrue(Invariants::passed(app(Invariants::class)->run()), 'safeguarded money covers what customers are owed');
     }
 
     public function test_money_out_by_cloud9_takes_amount_plus_charge_from_the_cloud9_wallet(): void
