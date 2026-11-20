@@ -49,7 +49,7 @@ class RampOrders
         }
 
         // someone whose money is real (real collections) must not have it "sent" by the simulator: refuse until payouts are real
-        if ($this->rails->collecting($user) !== $this->rails->default() && $this->rails->paying($user) === 'simulator') {
+        if ($this->rails->collecting($user) !== $this->rails->default() && $this->rails->paying($user, $type) === 'simulator') {
             throw ValidationException::withMessages(['amount' => 'Sending to M-PESA and banks is not live yet: your money stays safe in your wallet. Sharet @name transfers work.']);
         }
 
@@ -63,7 +63,7 @@ class RampOrders
         return RampOrder::create([
             'uuid' => (string) Str::uuid(),
             'user_id' => $user->id,
-            'rail' => $this->rails->paying($user),
+            'rail' => $this->rails->paying($user, $type),
             'destination_type' => $type,
             'destination' => $dest,
             'payer_phone' => $payer,
@@ -241,6 +241,10 @@ class RampOrders
                 'checks' => $req->checks + ($fromStatusCheck ? 1 : 0),
                 'last_checked_at' => $fromStatusCheck ? now() : $req->last_checked_at,
                 'completed_at' => $result->final() ? now() : null,
+                // what the provider kept (Cloud9): booked as Sharet's cost when the order is posted; and the network the money
+                // really moved on (M-PESA, bank, card…), whose own reference is the receipt. Three references per payment:
+                // Sharet's (the order), the rail's (provider_reference) and the network's (receipt).
+                'meta' => array_merge($req->meta ?? [], array_filter(['charge' => $result->charge ?: null, 'network' => $result->network ?? ($req->rail === 'daraja' ? 'M-PESA' : null)])),
             ])->save();
             if (! $result->final()) {
                 return null;
@@ -270,8 +274,9 @@ class RampOrders
             }
             $req->fill(['status' => 'succeeded', 'receipt' => $result->receipt, 'failure' => null, 'completed_at' => now()])->save();
             $topUp = $o->destination_type === 'wallet';
+            $req->forceFill(['meta' => array_merge($req->meta ?? [], array_filter(['charge' => $result->charge ?: null, 'network' => $result->network]))])->save();
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
-                Ledger::debit($this->ledger->account($this->rails->account($o->rail, 'collect')), $o->total),
+                ...$this->collectedLegs($req, $o->total),
                 Ledger::credit($this->ledger->account('2100', $o->user), $o->total),
             ], ['source' => $o, 'memo' => 'Late M-PESA confirmation from '.$o->payer_phone.' · '.$result->receipt]);
             $o->failure = null;
@@ -333,7 +338,7 @@ class RampOrders
             }
             $topUp = $o->destination_type === 'wallet';
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
-                Ledger::debit($this->ledger->account($this->rails->account($req->rail, 'collect')), $o->total),
+                ...$this->collectedLegs($req, $o->total),
                 Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $o->total),
             ], ['source' => $o, 'memo' => ($topUp ? (\App\Models\ApiPaymentRequest::where('public_id', $o->sharetReference())->where('user_id', $o->user_id)->exists()
                 ? 'Payment request paid by M-PESA from ' : 'Wallet top-up from ') : 'Collected from ')."{$o->payer_phone} · M-PESA {$req->receipt}"]);
@@ -353,7 +358,7 @@ class RampOrders
             if ($ok) {
                 $legs = array_values(array_filter([
                     Ledger::debit($orderAcct, $o->total),
-                    Ledger::credit($this->ledger->account($this->rails->account($req->rail, 'payout')), $o->amount),
+                    ...$this->paidOutLegs($req, $o->amount),
                     $o->fee ? Ledger::credit($this->ledger->account('4100'), $o->fee) : null,
                     $o->excise ? Ledger::credit($this->ledger->account('2300'), $o->excise) : null,
                     $o->rounding ? Ledger::credit($this->ledger->account('4900'), $o->rounding) : null,
@@ -384,7 +389,7 @@ class RampOrders
             if ($ok) {
                 $this->settleFloat($req, "ramp:{$o->uuid}:refunded", 'ramp_refund', [
                     Ledger::debit($orderAcct, $o->total),
-                    Ledger::credit($this->ledger->account($this->rails->account($req->rail, 'payout')), $o->total),
+                    ...$this->paidOutLegs($req, $o->total),
                 ], ['source' => $o, 'memo' => "Refunded to {$o->payer_phone} · ref {$req->receipt}"]);
                 $this->move($o, 'refunded', 'Refunded in full to '.$o->payer_phone." · ref {$req->receipt}");
 
@@ -397,23 +402,87 @@ class RampOrders
         return null;
     }
 
-    /** Hand a request to its rail, outside any transaction. A crash or timeout leaves it "unknown" for a status check. */
+    /** Money in from a rail: what landed in its account, and what the provider kept (Sharet's cost, 5130). */
+    private function collectedLegs(RailRequest $req, int $gross): array
+    {
+        $charge = min((int) ($req->meta['charge'] ?? 0), $gross);
+
+        return array_values(array_filter([
+            Ledger::debit($this->ledger->account($this->rails->account($req->rail, 'collect')), $gross - $charge),
+            $charge ? Ledger::debit($this->ledger->account('5130'), $charge) : null,
+        ]));
+    }
+
+    /** Money out through a rail: the amount sent plus what the provider charged on top (Sharet's cost, 5130). */
+    private function paidOutLegs(RailRequest $req, int $amount): array
+    {
+        $charge = (int) ($req->meta['charge'] ?? 0);
+
+        return array_values(array_filter([
+            Ledger::credit($this->ledger->account($this->rails->account($req->rail, 'payout')), $amount + $charge),
+            $charge ? Ledger::debit($this->ledger->account('5130'), $charge) : null,
+        ]));
+    }
+
+    /**
+     * Hand a request to its rail, outside any transaction. A crash or timeout leaves it "unknown" for a status check.
+     * If the rail refuses before accepting (nothing was sent: no provider id) and the switch names a fallback, the
+     * request moves to that rail and is tried there once. A timeout never falls back: the first rail may still pay.
+     */
     private function send(RailRequest $request): void
     {
-        $rail = $this->rails->for($request->rail);
-        try {
-            $result = $request->kind === 'collect' ? $rail->collect($request) : $rail->payout($request);
-        } catch (Throwable $e) {
-            report($e);
-            $result = RailResult::unknown('No answer from the provider: we will check, not resend.');
+        $result = $this->attempt($request);
+        if ($result->status === 'failed' && ! $result->providerReference && ! ($request->meta['fell_back_from'] ?? null)) {
+            $order = RampOrder::where('uuid', $request->meta['order'] ?? '-')->first();
+            if (($fallback = $this->rails->fallbackFor($request, $order?->user)) && $this->moveToRail($request, $fallback, $result->message)) {
+                $request = $request->fresh();
+                $result = $this->attempt($request);
+            }
         }
         $this->apply($request, $result);
+    }
+
+    private function attempt(RailRequest $request): RailResult
+    {
+        try {
+            $rail = $this->rails->for($request->rail);
+
+            return $request->kind === 'collect' ? $rail->collect($request) : $rail->payout($request);
+        } catch (Throwable $e) {
+            report($e);
+
+            return RailResult::unknown('No answer from the provider: we will check, not resend.');
+        }
+    }
+
+    /** Re-point a refused request at another rail (its float hold moves too). False when that rail has no float for it. */
+    private function moveToRail(RailRequest $request, string $rail, ?string $why): bool
+    {
+        return DB::transaction(function () use ($request, $rail, $why) {
+            $req = RailRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            if ($req->status !== 'pending') {
+                return false;
+            }
+            $from = $req->rail;
+            $held = $req->kind === 'payout' && \App\Models\LedgerHold::where('reference', 'float:'.$req->reference)->where('status', 'open')->exists();
+            $held && $this->releaseFloat($req);
+            $req->forceFill(['rail' => $rail, 'meta' => array_merge($req->meta ?? [], ['fell_back_from' => $from, 'fell_back_because' => $why])])->save();
+            if ($held && ! $this->reserveFloat($req)) {
+                $req->forceFill(['rail' => $from])->save();
+                $this->reserveFloat($req);
+
+                return false;
+            }
+            $req->kind === 'payout' && RampOrder::where('uuid', $req->meta['order'] ?? '-')->update(['rail' => $rail]);   // the order's rail is its payout rail
+
+            return true;
+        });
     }
 
     private function newRequest(RampOrder $o, string $role, string $party, int $amount): RailRequest
     {
         return RailRequest::create([
-            'rail' => $role === 'collect' ? $this->rails->collecting($o->user) : $this->rails->paying($o->user),
+            'rail' => $role === 'collect' ? $this->rails->collecting($o->user) : $this->rails->paying($o->user, $role === 'refund' ? 'phone' : $o->destination_type),
             'kind' => $role === 'collect' ? 'collect' : 'payout',
             'reference' => "ramp:{$o->uuid}:{$role}",
             'amount' => $amount,

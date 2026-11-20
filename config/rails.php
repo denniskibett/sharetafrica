@@ -22,6 +22,7 @@ return [
     'adapters' => [
         'simulator' => App\Integrations\Simulator\SimulatorRail::class,
         // 'cashia' => App\Integrations\Cashia\CashiaRail::class,   (to integrate)
+        'cloud9' => App\Integrations\Cloud9\Cloud9Rail::class,   // Cloud9 wallets API: STK push, B2C, B2B, bank paybills (docs/v2/RAILS.md)
         'daraja' => App\Integrations\Daraja\DarajaRail::class,     // collections (STK push); payouts need B2C credentials
     ],
 
@@ -33,6 +34,8 @@ return [
         // collections land in the paybill's working account, payouts leave its utility account (move float between
         // them in the M-PESA portal, then record it: php artisan ledger:float 1110 1120 <amount>)
         'daraja' => ['collect' => '1110', 'payout' => env('RAIL_DARAJA_PAYOUT_ACCOUNT', '1120')],
+        // Sharet's own MAIN KES wallet at Cloud9 takes deposits and pays out (one balance, no float transfer needed)
+        'cloud9' => ['collect' => '1160', 'payout' => '1160'],
     ],
 
     'simulator' => [
@@ -49,7 +52,7 @@ return [
 
     // Rails that answer by callback: no status query until this many seconds have passed without one, so the callback
     // (with the full payload and the real receipt) decides, and a query never answers while the customer is on the PIN.
-    'callback_wait' => ['daraja' => 60],
+    'callback_wait' => ['daraja' => 60, 'cloud9' => 60],
 
     // Payments still waiting this long get a status check from `ramp:resolve` (never a blind retry).
     'status_check_after_seconds' => 60,

@@ -49,6 +49,21 @@ return [
             'security_credential' => ['label' => 'Security credential', 'secret' => true, 'help' => 'Generate it on the portal with the sandbox certificate.'],
         ],
     ],
+    // Cloud9 (cloud9.money): a payment rail only. Customers never see the name; everything they see is Sharet.
+    'cloud9' => [
+        'name' => 'Cloud9',
+        'category' => 'Payments',
+        'description' => 'Payment rail behind Sharet: M-PESA prompts, payouts to phones, paybills, tills and banks, from Sharet\'s own Cloud9 wallets. Choose which payments use it in Payment rails.',
+        'color' => '#2F6BFF',
+        'logo' => 'images/integrations/cloud9.svg',
+        'fields' => [
+            'environment' => ['label' => 'Environment', 'help' => 'Sandbox: sandbox-wallets.cloud9.money (no real money). Live: wallets.cloud9.money.'] + $env,
+            'api_key' => ['label' => 'API key', 'secret' => true, 'required' => true, 'help' => 'Cloud9 dashboard › Security › Regenerate API Key. Starts with tokenTest (sandbox) or tokenLive (live).'],
+            'payin_secret' => ['label' => 'PAYIN callback secret', 'secret' => true, 'help' => 'Cloud9 › Security, next to the PAYIN callback URL.'],
+            'payout_secret' => ['label' => 'PAYOUT callback secret', 'secret' => true, 'help' => 'Cloud9 › Security, next to the PAYOUT callback URL.'],
+            'wallet_id' => ['label' => 'MAIN KES wallet ID', 'placeholder' => '7VXW9MJD', 'help' => 'Optional: Cloud9 uses your MAIN KES wallet when empty.'],
+        ],
+    ],
     'mtn_momo' => [
         'name' => 'MTN MoMo',
         'category' => 'Payments',

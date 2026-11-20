@@ -28,6 +28,9 @@ class V2ServiceProvider extends ServiceProvider
             ->middleware('throttle:120,1,rails-daraja-callback')->name('rails.daraja.callback');
         Route::post('rails/daraja/result/{token}', [\App\Integrations\Daraja\DarajaResultController::class, 'result'])
             ->middleware('throttle:120,1,rails-daraja-result')->name('rails.daraja.result');
+        // Cloud9 posts PAYIN and PAYOUT webhooks here: the X-Cloud9-Callback-Secret header is the guard
+        Route::post('rails/cloud9/callback', \App\Integrations\Cloud9\Cloud9CallbackController::class)
+            ->middleware('throttle:240,1,rails-cloud9-callback')->name('rails.cloud9.callback');
         Route::post('rails/daraja/timeout/{token}', [\App\Integrations\Daraja\DarajaResultController::class, 'timeout'])
             ->middleware('throttle:120,1,rails-daraja-timeout')->name('rails.daraja.timeout');
 
@@ -37,6 +40,9 @@ class V2ServiceProvider extends ServiceProvider
             $schedule->command('ledger:check')->hourly()->withoutOverlapping();
             $schedule->command('ramp:resolve')->everyMinute()->withoutOverlapping();
             $schedule->command('recon:run')->dailyAt('00:30')->withoutOverlapping();
+            // Cloud9's own records against the ledger, once Cloud9 is connected
+            $schedule->command('recon:run --rail=cloud9')->dailyAt('00:40')->withoutOverlapping()
+                ->when(fn () => filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null));
             $schedule->command('db:backup')->dailyAt('01:30')->timezone('Africa/Nairobi')->withoutOverlapping();
         });
     }

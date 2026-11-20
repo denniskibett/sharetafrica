@@ -18,6 +18,15 @@ The ledger holds only real money. `ledger:check` passes: safeguarded KES 110, ow
   test switches in the live `.env` (`RAIL_SIMULATOR_IN_PRODUCTION`, `RAIL_COLLECT`, `RAIL_COLLECT_ONLY_FOR`).
   The ledger is insert-only: reverse, never delete.
 
+## Cloud9 rail (built 20 Nov on branch `claude/cloud9-rails`, not deployed)
+
+Every payment through Sharet, moved by Cloud9 (docs/v2/RAILS.md, canvas page "Phase 1 · Payment rails"). To use it:
+1. **You:** in the Cloud9 sandbox dashboard › Security, regenerate the API key; enter it with the PAYIN and PAYOUT
+   callback secrets in **Integrations › Cloud9** (environment Sandbox).
+2. **Staff:** System › Payment rails › Sandbox checks: read wallets, KES 20 prompt, KES 10 payout to your own number.
+3. **Two people:** approve routes to Cloud9 (test list first, then Everyone) for each kind of payment.
+4. Live: the live key and secrets, Cloud9 allow-lists `185.113.249.146`, environment Live.
+
 ## To pick up first: real M-PESA payouts (send / withdraw)
 
 Built, deployed, **switched off**.

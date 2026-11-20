@@ -105,6 +105,8 @@ class Integrations
                 'kenyasms' => self::ok(Http::timeout(10)->acceptJson()->withToken($c['api_key'] ?? '')
                     ->get(rtrim(($c['api_url'] ?? '') ?: \App\Integrations\Sms\KenyaSms::DEFAULT_URL, '/').'/account/balance'), 'Connected: the key reads your KenyaSMS balance.'),
                 'smtp' => self::smtp($c),
+                'cloud9' => self::ok(Http::timeout(10)->acceptJson()->withToken($c['api_key'] ?? '')
+                    ->get(\App\Integrations\Cloud9\Cloud9Rail::baseUrl($c['environment'] ?? 'sandbox').'wallets/'), 'Connected: the key reads your Cloud9 wallets.'),
                 'claude' => \App\Integrations\Claude\Claude::test($integration),
                 default => [true, 'Saved. This provider has no connection test.'],
             };

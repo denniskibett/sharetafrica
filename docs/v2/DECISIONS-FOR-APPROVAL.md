@@ -38,6 +38,15 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ☐ | **Business wallet limits** (sample): KES 1,000,000 per payment and 10,000,000 a day for verified businesses (`config/pricing.php` → `limits.business`). Confirm. |
 | ☐ | Collection by M-PESA prompt: cost passed through. Confirm the rate with Cashia/Safaricom. |
 
+## 0c. Cloud9 as the payment rail (20 Nov)
+
+| ✓ | Decision | Now | To change |
+|---|---|---|---|
+| ☐ | **Cloud9 is invisible to customers.** Sharet is the only name in the app, receipts, prompts and the website; Cloud9 appears only on staff screens. | Built | `docs/v2/RAILS.md` |
+| ☐ | **Who pays Cloud9's charges?** Today Sharet absorbs them (customer gets the full amount in; Sharet's fee covers payouts). On money in that leaves the Cloud9 wallet short by the charge, so Sharet must top it up from its own money, or the customer pays the charge. `ledger:check` shows the gap. | Sharet absorbs | `app/Ramp/RampOrders.php` (collectedLegs) |
+| ☐ | **Website footer and About page no longer name Cashia or a trust account:** "Payments are carried by licensed payment partners in Kenya, and customer money is kept apart from Sharet's own money." Have a lawyer read it; add the licensed partner's name if required. | Built, not deployed | `resources/views/site/partials/footer.blade.php` and the pages |
+| ☐ | **Two people to switch a rail**, and fallback only when a rail refuses before accepting (never after a timeout). | Built | System › Payment rails |
+
 ## 1. Money rules
 
 | ✓ | Decision | Now | To change |
