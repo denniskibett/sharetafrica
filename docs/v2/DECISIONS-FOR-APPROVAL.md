@@ -43,7 +43,7 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ✓ | Decision | Now | To change |
 |---|---|---|---|
 | ☐ | **Cloud9 is invisible to customers.** Sharet is the only name in the app, receipts, prompts and the website; Cloud9 appears only on staff screens. | Built | `docs/v2/RAILS.md` |
-| ☐ | **Who pays Cloud9's charges?** Today Sharet absorbs them (customer gets the full amount in; Sharet's fee covers payouts). On money in that leaves the Cloud9 wallet short by the charge, so Sharet must top it up from its own money, or the customer pays the charge. `ledger:check` shows the gap. | Sharet absorbs | `app/Ramp/RampOrders.php` (collectedLegs) |
+| ✓ | **The customer pays Cloud9's charge on a top-up** (you decided, 20 Nov): pay KES 100, KES 98.50 reaches the wallet, the KES 1.50 shows as a payment charge. On sends and payouts the charge comes out of the Sharet fee already shown. | Built | `app/Ramp/RampOrders.php` (chargeToCustomer) |
 | ☐ | **Website footer and About page no longer name Cashia or a trust account:** "Payments are carried by licensed payment partners in Kenya, and customer money is kept apart from Sharet's own money." Have a lawyer read it; add the licensed partner's name if required. | Built, not deployed | `resources/views/site/partials/footer.blade.php` and the pages |
 | ☐ | **Two people to switch a rail**, and fallback only when a rail refuses before accepting (never after a timeout). | Built | System › Payment rails |
 
