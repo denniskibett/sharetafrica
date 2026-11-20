@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /** A business asking someone to pay (docs/v2/INTEGRATION.md §3). The hosted page is /r/{token}. */
 class ApiPaymentRequest extends Model
 {
-    protected $fillable = ['public_id', 'token', 'api_key_id', 'user_id', 'environment', 'amount', 'reference', 'payer_user_id', 'payer_phone',
+    protected $fillable = ['public_id', 'kind', 'group', 'reminded_at', 'token', 'api_key_id', 'user_id', 'environment', 'amount', 'reference', 'payer_user_id', 'payer_phone',
         'channels', 'metadata', 'splits', 'split_status', 'split_failure', 'status', 'paid_via', 'ramp_order_id', 'paid_at', 'expires_at'];
 
-    protected $casts = ['channels' => 'array', 'metadata' => 'array', 'splits' => 'array', 'paid_at' => 'datetime', 'expires_at' => 'datetime'];
+    protected $casts = ['channels' => 'array', 'metadata' => 'array', 'splits' => 'array', 'paid_at' => 'datetime', 'expires_at' => 'datetime', 'reminded_at' => 'datetime'];
 
     public function payee(): BelongsTo
     {

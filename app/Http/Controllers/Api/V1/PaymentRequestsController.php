@@ -46,7 +46,7 @@ class PaymentRequestsController extends Controller
 
     private function find(Request $request, string $id): ?ApiPaymentRequest
     {
-        $mine = fn () => ApiPaymentRequest::where('user_id', $request->user()->id)
+        $mine = fn () => ApiPaymentRequest::where('user_id', $request->user()->id)->where('kind', 'api')   // personal requests are not the API's
             ->where('environment', $request->attributes->get('api_key')->environment);
         $id = str_starts_with(strtoupper($id), 'SH') ? strtoupper($id) : $id;
         $r = $mine()->where('public_id', $id)->first();
