@@ -35,6 +35,15 @@
               {{ $b->legal_name ?: 'No legal name' }} · {{ $b->registration_number ?: 'no registration no.' }} · {{ $b->tax_id ?: 'no KRA PIN' }}
             </p>
             <p class="truncate text-xs text-gray-500">Owner: {{ $b->users->map(fn ($u) => $u->name.' ('.$u->email.')')->join(', ') ?: 'nobody' }}</p>
+            <p class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+              @foreach ($b->kyb_documents as $doc)
+                @if ($doc['uploaded'])
+                  <a href="{{ $doc['url'] }}" target="_blank" rel="noopener" class="font-medium text-gray-900 underline dark:text-white">{{ $doc['label'] }}</a>
+                @elseif ($doc['required'])
+                  <span class="text-amber-700 dark:text-amber-400">{{ $doc['label'] }} missing</span>
+                @endif
+              @endforeach
+            </p>
             <p class="text-xs text-gray-500">Profile {{ $b->kyb_progress['done'] }}/{{ $b->kyb_progress['of'] }} complete · updated {{ $b->updated_at?->timezone('Africa/Nairobi')->format('j M, H:i') }}
               @if ($b->verified_at) · verified {{ $b->verified_at->timezone('Africa/Nairobi')->format('j M Y') }}{{ $b->verifier ? ' by '.$b->verifier->name : '' }}@endif
               @if (($review['status'] ?? null) === 'rejected') · rejected: “{{ $review['reason'] }}”@endif

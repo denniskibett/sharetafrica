@@ -50,8 +50,8 @@ class DashboardNav
                     ['label' => 'Reconciliation', 'route' => 'merchant.reconcile', 'icon' => 'scale', 'tone' => 'indigo'],
                     ['label' => 'Business settings', 'route' => 'settings.company', 'icon' => 'building-storefront', 'tone' => 'slate'],
                     ['label' => 'Integrations', 'route' => 'integrations.index', 'icon' => 'puzzle-piece', 'tone' => 'violet', 'can' => 'integrations.manage', 'company' => true],
-                    ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
-                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => 'developer.api_keys'],
+                    ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => ['developer.api_keys', 'merchant.accept']],
+                    ['label' => 'API approvals', 'route' => 'settlements.index', 'icon' => 'check-badge', 'tone' => 'emerald', 'can' => ['developer.api_keys', 'merchant.accept']],
                 ],
             ],
             [
@@ -179,7 +179,7 @@ class DashboardNav
 
             $items = [];
             foreach ($group['items'] as $item) {
-                if (! self::allowed($user, $item['roles'] ?? null) || (isset($item['can']) && ! $user?->can($item['can']))
+                if (! self::allowed($user, $item['roles'] ?? null) || (isset($item['can']) && ! $user?->canAny((array) $item['can']))
                     || (! empty($item['company']) && ! $user?->company_id && ! $user?->hasAnyRole(self::ADMIN))) {
                     continue;
                 }

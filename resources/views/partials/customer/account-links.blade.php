@@ -8,13 +8,12 @@
   <a href="{{ route('pay.index') }}" class="{{ $link }}"><x-heroicon-o-arrows-right-left class="h-5 w-5" /> Transactions</a>
   <a href="{{ route('home') }}" class="{{ $link }}"><x-heroicon-o-globe-alt class="h-5 w-5" /> Sharet website</a>
   <a href="{{ route('requests') }}" class="{{ $link }}"><x-heroicon-o-arrow-down-left class="h-5 w-5" /> Request and split</a>
-  @if ($user->company_id || $user->hasAnyRole(['merchant', 'business']))
-    <a href="{{ route('settings.company') }}" class="{{ $link }}"><x-heroicon-o-building-storefront class="h-5 w-5" /> Business settings</a>
-  @endif
-  @can('developer.api_keys')
+  {{-- Every account holder can start a business from here (Business settings creates it on the first save) --}}
+  <a href="{{ route('settings.company') }}" class="{{ $link }}"><x-heroicon-o-building-storefront class="h-5 w-5" /> {{ $user->company_id ? 'Business settings' : 'Start a business' }}</a>
+  @canany(['developer.api_keys', 'merchant.accept'])
     <a href="{{ route('api-keys.index') }}" class="{{ $link }}"><x-heroicon-o-key class="h-5 w-5" /> API keys</a>
     <a href="{{ route('docs') }}" class="{{ $link }}"><x-heroicon-o-code-bracket class="h-5 w-5" /> Developer docs</a>
-  @endcan
+  @endcanany
   <div class="my-1 border-t border-app-line"></div>
   @foreach ([['card', 'credit-card', 'Card'], ['abroad', 'globe-europe-africa', 'Send abroad']] as [$soonRoute, $soonIcon, $soonLabel])
     <a href="{{ route($soonRoute) }}" class="{{ $link }}"><x-dynamic-component :component="'heroicon-o-'.$soonIcon" class="h-5 w-5" /> {{ $soonLabel }}

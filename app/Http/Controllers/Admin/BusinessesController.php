@@ -26,10 +26,21 @@ class BusinessesController extends Controller
             default => Company::whereNull('verified_at')->where(fn ($q) => $q->whereNull('settings->kyb_review->status')->orWhere('settings->kyb_review->status', '!=', 'rejected')),
         };
         $businesses = $scope($tab)->with('users:id,name,email,company_id', 'verifier:id,name')->orderBy('updated_at', $tab === 'pending' ? 'asc' : 'desc')->paginate(25)->withQueryString();
-        $businesses->getCollection()->each(fn (Company $c) => $c->setAttribute('kyb_progress', CompanySettingsController::progressOf($c)));
+        $businesses->getCollection()->each(fn (Company $c) => $c->setAttribute('kyb_progress', CompanySettingsController::progressOf($c))
+            ->setAttribute('kyb_documents', CompanySettingsController::documentsOf($c, (new CompanySettingsController)->kyb($c)['type'] ?? null,
+                fn ($type) => route('admin.businesses.document', [$c, $type]))));
         $counts = collect(self::TABS)->map(fn ($l, $t) => $scope($t)->count());
 
         return view('admin.businesses.index', ['businesses' => $businesses, 'tab' => $tab, 'counts' => $counts, 'tabs' => self::TABS, 'me' => $request->user()]);
+    }
+
+    /** Staff open a business's document to check it. Logged. */
+    public function document(Request $request, Company $company, string $type)
+    {
+        abort_unless(isset(CompanySettingsController::DOCUMENTS[$type]), 404);
+        \App\Security\Lockdown::log('staff opened a business document', ['company' => $company->id, 'type' => $type]);
+
+        return CompanySettingsController::streamDocument($company, $type);
     }
 
     /** Approve or reject (a rejection needs a reason the owner will see; rejecting a verified business revokes it). Logged. */

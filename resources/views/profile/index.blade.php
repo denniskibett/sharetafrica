@@ -8,6 +8,14 @@
 
   @include('profile.partials.summary-card')
 
+  @php $company = auth()->user()->company; @endphp
+  <x-ui.card class="mb-6" :title="$company ? $company->name : 'Start a business'"
+             :subtitle="$company ? ($company->verified_at ? 'Verified business. You are its account holder.' : 'Your business. Finish its details and documents so our team can verify it.') : 'Run a shop or a company? Open a business account from this one: its own Sharet ID, payments and settlements. Your personal account stays as it is.'">
+    <x-slot:actions>
+      <x-ui.button :variant="$company ? 'secondary' : 'primary'" icon="building-storefront" href="{{ route('settings.company') }}">{{ $company ? 'Business settings' : 'Start a business' }}</x-ui.button>
+    </x-slot:actions>
+  </x-ui.card>
+
   <x-ui.stats :cols="4" class="mb-6">
     <x-ui.stat label="Account level" value="data.level.label" format="raw" icon="shield-check" tone="lime" />
     <x-ui.stat label="Wallet balance" value="data.wallet.balance" format="money" icon="wallet" tone="emerald" />

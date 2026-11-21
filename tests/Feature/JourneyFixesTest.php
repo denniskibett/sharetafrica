@@ -43,7 +43,10 @@ class JourneyFixesTest extends TestCase
     {
         $merchant = $this->person('merchant');
         $this->actingAs($merchant)->get('/settings/business')->assertOk()
-            ->assertDontSee(route('integrations.index'), false)->assertDontSee(route('api-keys.index'), false);
+            ->assertDontSee(route('integrations.index'), false)->assertSee(route('api-keys.index'), false);   // merchants have API keys since 21 Nov
+
+        $individual = $this->person('individual');
+        $this->actingAs($individual)->get('/settings/business')->assertOk()->assertDontSee(route('api-keys.index'), false);
 
         $developer = $this->person('techie');
         $this->actingAs($developer)->get('/settings/business')->assertOk()

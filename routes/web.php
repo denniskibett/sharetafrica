@@ -37,7 +37,7 @@ Route::controller(HomeController::class)->group(function () {
 });
 
 // Dashboard › Settlements: second approval for large API batches. Names under "pay." so the ledger freeze stops approvals.
-Route::middleware(['auth', 'permission:developer.api_keys'])->prefix('settlements')->controller(\App\Http\Controllers\SettlementApprovalsController::class)->group(function () {
+Route::middleware(['auth', 'permission:developer.api_keys|merchant.accept'])->prefix('settlements')->controller(\App\Http\Controllers\SettlementApprovalsController::class)->group(function () {
     Route::get('/', 'index')->name('settlements.index');
     Route::post('/{settlement}/approve', 'approve')->middleware('password.confirm')->name('pay.settlements.approve');
     Route::post('/{settlement}/reject', 'reject')->middleware('password.confirm')->name('pay.settlements.reject');
@@ -153,6 +153,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings/business', [CompanySettingsController::class, 'edit'])->name('settings.company');
     Route::put('/settings/business', [CompanySettingsController::class, 'update'])->name('settings.company.update');
     Route::post('/settings/business/logo', [CompanySettingsController::class, 'logo'])->name('settings.company.logo');
+    Route::post('/settings/business/documents/{type}', [CompanySettingsController::class, 'uploadDocument'])->middleware('throttle:30,1')->name('settings.company.document.upload');
+    Route::get('/settings/business/documents/{type}', [CompanySettingsController::class, 'document'])->name('settings.company.document');
 
     // People lists and reports (admins and support)
     Route::middleware('permission:admin.users')->group(function () {
@@ -165,6 +167,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/verifications', [\App\Http\Controllers\Admin\VerificationsController::class, 'index'])->name('admin.verifications.index');
         Route::get('/admin/businesses', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('admin.businesses.index');
         Route::post('/admin/businesses/{company}/decision', [\App\Http\Controllers\Admin\BusinessesController::class, 'decide'])->name('admin.businesses.decide');
+        Route::get('/admin/businesses/{company}/documents/{type}', [\App\Http\Controllers\Admin\BusinessesController::class, 'document'])->name('admin.businesses.document');
         Route::view('/reports', 'reports.index')->name('reports.index');
     });
 
@@ -204,7 +207,7 @@ Route::middleware(['auth', 'permission:integrations.manage'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'permission:developer.api_keys'])
+Route::middleware(['auth', 'permission:developer.api_keys|merchant.accept'])
     ->prefix('api-keys')->name('api-keys.')->controller(ApiKeyController::class)
     ->group(function () {
         Route::get('/', 'index')->name('index');

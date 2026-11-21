@@ -11,13 +11,23 @@ use Illuminate\Support\Facades\Storage;
 /**
  * Business settings for a tenant (merchant or business): the bank-grade business profile (KYB).
  * Public details live on `companies`; directors and the settlement account are encrypted in settings.kyb.
- * Only someone with a personal Sharet account (name + M-Pesa number) can register a business, and they
- * are always listed as its first director. Full business verification also needs their personal
+ * Any verified personal account can start a business here (Account menu › Start a business; the first save creates
+ * it and makes the holder a merchant), and they are always listed as its first director. Business documents
+ * (DOCUMENTS) are uploaded here, stored privately and encrypted in settings.kyb_documents. Full business verification also needs their personal
  * bank-grade verification (App\Support\Kyc).
  */
 class CompanySettingsController extends Controller
 {
-    public const REQUIRED = ['legal_name', 'type', 'registration_number', 'tax_id', 'nature_of_business', 'address', 'email', 'phone', 'directors', 'settlement'];
+    public const REQUIRED = ['legal_name', 'type', 'registration_number', 'tax_id', 'nature_of_business', 'address', 'email', 'phone', 'directors', 'settlement', 'documents'];
+
+    /** Business documents staff check before approving (Administration › Businesses). `required`: always, never, or only for one business type. */
+    public const DOCUMENTS = [
+        'certificate' => ['label' => 'Certificate of registration', 'hint' => 'Business name or incorporation certificate from BRS.', 'required' => true],
+        'kra_pin' => ['label' => 'KRA PIN certificate', 'hint' => "The business's PIN certificate from iTax.", 'required' => true],
+        'cr12' => ['label' => 'CR12', 'hint' => 'Limited companies: the official list of directors and shareholders.', 'required' => 'limited_company'],
+        'bank_letter' => ['label' => 'Bank letter or statement', 'hint' => 'Shows the settlement account in the business name.', 'required' => true],
+        'permit' => ['label' => 'Business permit', 'hint' => 'County single business permit, if you have one.', 'required' => false],
+    ];
 
     public function edit(Request $request)
     {
@@ -31,6 +41,7 @@ class CompanySettingsController extends Controller
         $kyb['directors'] = $this->withOwner($user, $kyb['directors'] ?? []);
         $values = ($company?->only(['name', 'legal_name', 'registration_number', 'tax_id', 'email', 'phone', 'website', 'country', 'city', 'address']) ?? ['country' => 'KE']) + $kyb;
         $values['country'] = Company::countryName($values['country'] ?? null);
+        $values['documents'] = self::documentsComplete($company, $kyb['type'] ?? null) ? ['all'] : null;
         $done = self::countDone($values);
 
         return response()->json([
@@ -39,10 +50,13 @@ class CompanySettingsController extends Controller
                 'settlement' => $kyb['settlement'] ?? ['method' => 'bank', 'bank' => '', 'branch' => '', 'account_name' => '', 'account_number' => '', 'paybill' => ''],
             ],
             'logo' => $company?->logo ? asset('storage/'.$company->logo) : null,
+            'documents' => self::documentsOf($company, $kyb['type'] ?? null, fn ($type) => route('settings.company.document', $type)),
             'progress' => ['done' => $done, 'of' => count(self::REQUIRED)],
             'verified' => (bool) $company?->verified_at,
             'review' => $company?->settings['kyb_review'] ?? null,   // staff decision (Administration › Businesses); a rejection carries a reason
             'exists' => (bool) $company,
+            // The business's own Sharet account (separate from the owner's personal one): payments, API keys and settlements run on it
+            'account' => $company ? ['sharet_id' => $company->walletUser()->sharet_id, 'handle' => $company->walletUser()->handle] : null,
             'owner' => [
                 'name' => $user->name,
                 'personal' => Kyc::progress($user)['basic']['complete'],
@@ -108,9 +122,84 @@ class CompanySettingsController extends Controller
         if (! $user->company_id) {
             $user->update(['company_id' => $company->id]);
         }
+        $company->walletUser();   // the business's own account exists from the first save (its Sharet ID and @name)
+        // A business started from a personal account: the holder can now take payments as a merchant (test keys at once;
+        // live keys only take money once staff verify the business). The personal account stays as it is.
+        if (! $user->hasAnyRole(['merchant', 'business'])) {
+            $user->assignRole('merchant');
+        }
         $user->setRelation('company', $company);
 
         return response()->json(['message' => 'Business details saved. Our team reviews them before raising your limits.']);
+    }
+
+    /** Upload one business document (PDF or photo, 8 MB), stored privately; replaces the previous one of that kind. */
+    public function uploadDocument(Request $request, string $type): JsonResponse
+    {
+        abort_unless(isset(self::DOCUMENTS[$type]), 404);
+        $request->validate(['file' => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:8192'],
+            ['file.mimes' => 'Upload a PDF or a photo (JPG, PNG or WebP).', 'file.max' => 'That file is over 8 MB.']);
+        $company = $request->user()->company;
+        if (! $company) {
+            return response()->json(['message' => 'Save your business details first, then add its documents.', 'errors' => ['file' => ['Save your business details first.']]], 422);
+        }
+
+        $docs = self::documentFiles($company);
+        isset($docs[$type]['path']) && Storage::disk('local')->delete($docs[$type]['path']);
+        $file = $request->file('file');
+        $docs[$type] = ['path' => $file->storeAs('kyb/'.$company->id, $type.'-'.\Illuminate\Support\Str::random(10).'.'.strtolower($file->extension()), 'local'),
+            'name' => mb_substr($file->getClientOriginalName(), 0, 120), 'at' => now()->toIso8601String(), 'by' => $request->user()->id];
+        $settings = array_merge($company->settings ?? [], ['kyb_documents' => encrypt($docs)]);
+        if (($settings['kyb_review']['status'] ?? null) === 'rejected') {   // a new document after a rejection: back in the staff queue
+            $settings['kyb_review'] = ['status' => 'pending'] + $settings['kyb_review'];
+        }
+        $company->update(['settings' => $settings]);
+
+        return response()->json(['message' => self::DOCUMENTS[$type]['label'].' uploaded.']);
+    }
+
+    /** The owner opens one of their business documents. */
+    public function document(Request $request, string $type)
+    {
+        return self::streamDocument($request->user()->company ?? abort(404), $type);
+    }
+
+    /** Streams a stored business document (owner here, staff in Administration › Businesses). */
+    public static function streamDocument(Company $company, string $type)
+    {
+        $path = self::documentFiles($company)[$type]['path'] ?? null;
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path, null, ['Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    /** @return array<string, array{path: string, name: string, at: string}> */
+    public static function documentFiles(?Company $company): array
+    {
+        try {
+            return isset($company?->settings['kyb_documents']) ? (array) decrypt($company->settings['kyb_documents']) : [];
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /** What the business must send for its type, with what it has sent. $url gives each document's link. */
+    public static function documentsOf(?Company $company, ?string $businessType, callable $url): array
+    {
+        $files = self::documentFiles($company);
+
+        return collect(self::DOCUMENTS)->map(fn ($d, $type) => [
+            'type' => $type, 'label' => $d['label'], 'hint' => $d['hint'],
+            'required' => $d['required'] === true || $d['required'] === $businessType,
+            'uploaded' => isset($files[$type]), 'name' => $files[$type]['name'] ?? null,
+            'at' => isset($files[$type]) ? \Illuminate\Support\Carbon::parse($files[$type]['at'])->timezone('Africa/Nairobi')->format('j M Y, H:i') : null,
+            'url' => isset($files[$type]) ? $url($type) : null,
+        ])->values()->all();
+    }
+
+    public static function documentsComplete(?Company $company, ?string $businessType): bool
+    {
+        return $company !== null && collect(self::documentsOf($company, $businessType, fn () => null))->every(fn ($d) => ! $d['required'] || $d['uploaded']);
     }
 
     public function logo(Request $request): JsonResponse
@@ -145,11 +234,12 @@ class CompanySettingsController extends Controller
     public static function progressOf(Company $company): array
     {
         $values = $company->only(['legal_name', 'registration_number', 'tax_id', 'email', 'phone', 'address']) + (new self)->kyb($company);
+        $values['documents'] = self::documentsComplete($company, $values['type'] ?? null) ? ['all'] : null;
 
         return ['done' => self::countDone($values), 'of' => count(self::REQUIRED)];
     }
 
-    protected function kyb(?Company $company): array
+    public function kyb(?Company $company): array
     {
         try {
             return isset($company?->settings['kyb']) ? (array) decrypt($company->settings['kyb']) : [];

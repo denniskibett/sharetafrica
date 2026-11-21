@@ -90,7 +90,7 @@ final class Settlements
         $company = $s->key?->company_id;
 
         return $s->status === 'awaiting_approval' && $company && $u->company_id === $company
-            && $u->id !== $s->user_id && $u->id !== $s->key->user_id && $u->can('developer.api_keys');
+            && $u->id !== $s->user_id && $u->id !== $s->key->user_id && $u->canAny(['developer.api_keys', 'merchant.accept']);
     }
 
     /** Work out the batch's status from its payments, and tell the business once it's finished. */

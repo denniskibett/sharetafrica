@@ -5,7 +5,12 @@
 @php $select = 'h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white/90'; @endphp
 
 @section('content')
-<div x-data="{ d: { company: { directors: [], settlement: {} }, progress: {} }, loading: true, busy: false, errors: {},
+<div x-data="{ d: { company: { directors: [], settlement: {} }, progress: {}, documents: [] }, loading: true, busy: false, errors: {}, docBusy: {}, docErr: {},
+               async upload(type, file) { if (!file) return; this.docBusy = { ...this.docBusy, [type]: true }; this.docErr = { ...this.docErr, [type]: '' };
+                 const body = new FormData(); body.append('file', file);
+                 try { await sharet.send('POST', '{{ url('settings/business/documents') }}/' + type, body); await this.load() }
+                 catch (e) { this.docErr = { ...this.docErr, [type]: Object.values(e.errors || {})[0]?.[0] || e.body?.message || 'That did not upload.' } }
+                 this.docBusy = { ...this.docBusy, [type]: false } },
                async load() { this.d = await (await fetch('{{ route('settings.company') }}', { headers: { Accept: 'application/json' } })).json(); this.loading = false },
                async save() { this.busy = true; this.errors = {};
                  try { await sharet.send('PUT', '{{ route('settings.company.update') }}', this.d.company); await this.load() }
@@ -14,7 +19,7 @@
      x-init="load()">
   <x-ui.page-header title="Business settings" subtitle="The details a bank needs to open a business account. Complete them to accept and settle larger amounts.">
     @can('integrations.manage')<x-ui.button variant="secondary" icon="puzzle-piece" href="{{ route('integrations.index') }}">Integrations</x-ui.button>@endcan
-    @can('developer.api_keys')<x-ui.button variant="secondary" icon="key" href="{{ route('api-keys.index') }}">API keys</x-ui.button>@endcan
+    @canany(['developer.api_keys', 'merchant.accept'])<x-ui.button variant="secondary" icon="key" href="{{ route('api-keys.index') }}">API keys</x-ui.button>@endcanany
   </x-ui.page-header>
 
   <x-ui.stats :cols="3" class="mb-6">
@@ -32,6 +37,19 @@
   <div x-show="!loading && d.owner?.personal && !d.owner?.bank_grade" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100 sm:flex-row sm:items-center sm:justify-between">
     <p>Your business can't be fully verified until <strong>your own bank-grade verification</strong> is done (ID photos, selfies and signature).</p>
     <x-ui.button variant="secondary" href="{{ route('profile.edit') }}#verification">Finish my verification</x-ui.button>
+  </div>
+
+  <div x-show="!loading && !d.exists && d.owner?.personal" x-cloak class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 text-sm text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300">
+    <p><strong class="text-gray-900 dark:text-white">Start your business.</strong> Fill in its details and save: your business gets its own Sharet ID and you are its first director. Then upload its documents and our team verifies it. Your personal account stays as it is.</p>
+  </div>
+
+  <div x-show="!loading && d.account" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl bg-gray-900 p-5 text-sm text-white sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <p class="text-xs uppercase tracking-wide text-white/60">Business account</p>
+      <p class="mt-1 text-base font-semibold"><span x-text="d.company.name"></span> · <code class="font-mono text-[#D4FF3D]" x-text="d.account?.sharet_id"></code> · <span x-text="'@' + d.account?.handle"></span></p>
+      <p class="mt-1 text-white/70">Its own account, separate from your personal one. Payments, API keys and settlements run on it; live payments open once our team verifies the business.</p>
+    </div>
+    @canany(['developer.api_keys', 'merchant.accept'])<x-ui.button variant="secondary" icon="key" href="{{ route('api-keys.index') }}">Take payments</x-ui.button>@endcanany
   </div>
 
   <div x-show="!loading && !d.verified && d.review?.status === 'rejected'" x-cloak class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-900 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-100">
@@ -104,7 +122,30 @@
       <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Directors' ID numbers and account details are encrypted at rest.</p>
     </x-ui.card>
 
-    <div class="flex justify-end"><x-ui.button type="submit" icon="check" x-bind:disabled="busy">Save business details</x-ui.button></div>
+    <x-ui.card title="Documents" subtitle="PDF or a clear photo, up to 8 MB each. Stored privately: only you and our verification team can open them.">
+      <p x-show="!d.exists" class="text-sm text-gray-500 dark:text-gray-400">Save your business details first, then add its documents here.</p>
+      <ul x-show="d.exists" class="divide-y divide-gray-100 dark:divide-gray-800">
+        <template x-for="doc in d.documents" :key="doc.type">
+          <li class="flex flex-wrap items-center gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-gray-900 dark:text-white"><span x-text="doc.label"></span>
+                <span x-show="!doc.required" class="ml-1 text-xs font-normal text-gray-500">optional</span></p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="doc.uploaded ? doc.name + ' · ' + doc.at : doc.hint"></p>
+              <p x-show="docErr[doc.type]" x-text="docErr[doc.type]" class="mt-1 text-xs text-red-600 dark:text-red-400"></p>
+            </div>
+            <span :class="sharet.pill(doc.uploaded ? 'success' : (doc.required ? 'warning' : 'neutral'))" x-text="doc.uploaded ? 'Uploaded' : (doc.required ? 'Needed' : 'Optional')"></span>
+            <a x-show="doc.url" :href="doc.url" target="_blank" rel="noopener" class="text-sm font-medium text-gray-700 underline dark:text-gray-300">View</a>
+            <label class="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-4 text-sm font-semibold text-gray-800 hover:bg-gray-200 dark:bg-white/[0.06] dark:text-gray-200"
+                   :class="docBusy[doc.type] && 'pointer-events-none opacity-60'">
+              <x-heroicon-o-arrow-up-tray class="h-4 w-4" /> <span x-text="docBusy[doc.type] ? 'Uploading…' : (doc.uploaded ? 'Replace' : 'Upload')"></span>
+              <input type="file" accept="application/pdf,image/jpeg,image/png,image/webp" class="sr-only" @change="upload(doc.type, $event.target.files[0]); $event.target.value = ''">
+            </label>
+          </li>
+        </template>
+      </ul>
+    </x-ui.card>
+
+    <div class="flex justify-end"><x-ui.button type="submit" icon="check" x-bind:disabled="busy"><span x-text="d.exists ? 'Save business details' : 'Create my business'"></span></x-ui.button></div>
   </form>
 </div>
 @endsection
