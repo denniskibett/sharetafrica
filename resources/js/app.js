@@ -42,6 +42,10 @@ window.sharet = {
         const body = await res.json().catch(() => ({}));
         if (res.status === 419) {
             this.toast('Your session expired. Reload the page and try again.', 'error');
+        } else if (res.status === 423 && body.error === 'staff_password_not_reconfirmed') {
+            // Money consoles ask staff for their password again after a while: open that screen, it returns here
+            this.toast(body.message, 'error');
+            setTimeout(() => { window.location.href = '/confirm-password'; }, 900);
         } else if (body.message && (res.ok || res.status !== 422 || !body.errors)) {
             this.toast(body.message, res.ok ? 'success' : 'error');
         }

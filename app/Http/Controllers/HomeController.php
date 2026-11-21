@@ -286,7 +286,12 @@ class HomeController extends Controller
         }
 
         $user->name    = $user->name    ?: ($data['name']  ?? null);
-        $user->phone   = $user->phone   ?: ($data['phone'] ?? null);
+        // A number already on another account stays with that account (users.phone is unique): this person is saved
+        // without it, and the enquiry still records it. Before: the save failed and the form answered 404.
+        $phone = $data['phone'] ?? null;
+        if (! $user->phone && $phone && ! User::withTrashed()->where('phone', $phone)->when($user->exists, fn ($q) => $q->whereKeyNot($user->id))->exists()) {
+            $user->phone = $phone;
+        }
         // users.country is a 2-letter code; the contact form's free-text country ("Kenya") stays on the enquiry only.
         // Before: a new person typing a country made the save fail and the form answer 404.
         $code = strtoupper(trim((string) ($data['country'] ?? '')));

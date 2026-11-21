@@ -20,12 +20,24 @@ class SystemController extends Controller
         }
 
         $system = System::settings();
-        $file = fn ($path) => $path ? (str_starts_with($path, 'http') ? $path : asset('storage/'.$path)) : null;
+        // An uploaded file (public disk), a file shipped in public/, or else Sharet's own logo: never a broken image
+        // (the seeded branding/*.svg paths were never uploaded, so the Brand tab showed three broken images).
+        $file = function (?string $path, string $fallback) {
+            if ($path && str_starts_with($path, 'http')) {
+                return $path;
+            }
+            if ($path && Storage::disk('public')->exists($path)) {
+                return asset('storage/'.$path);
+            }
+
+            return asset($path && is_file(public_path($path)) ? $path : $fallback);
+        };
 
         return response()->json([
             'values' => $system->only(['name', 'slogan', 'timezone', 'date_format', 'time_format', 'currency', 'currency_symbol', 'primary_color',
                 'secondary_color', 'contact_email', 'contact_phone', 'address', 'meta_description', 'meta_keywords', 'pagination_limit', 'custom_css', 'custom_js']),
-            'files' => ['logo' => $file($system->logo), 'logo_dark' => $file($system->logo_dark), 'logo_icon' => $file($system->logo_icon), 'favicon' => $file($system->favicon)],
+            'files' => ['logo' => $file($system->logo, 'images/logo/logo.svg'), 'logo_dark' => $file($system->logo_dark, 'images/logo/logo-dark.svg'),
+                'logo_icon' => $file($system->logo_icon, 'images/logo/logo-icon.svg'), 'favicon' => $file($system->favicon, 'favicon.ico')],
             'maintenance' => (bool) $system->maintenance_mode,
             'lockdown' => $this->lockdownState($request),
             'timezones' => \DateTimeZone::listIdentifiers(\DateTimeZone::AFRICA),

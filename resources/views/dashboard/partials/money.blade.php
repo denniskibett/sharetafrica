@@ -257,7 +257,7 @@
   function moneyPanel({ urls, payer, receiveUrl, pinSet }) {
     const blank = () => ({ handle: '', phone: '', paybill: '', till: '', account: '', bank: '', amount: '', note: '', pin: '', pin2: '' });
     return {
-      mode: 'send', step: 'who', to: 'sharet', funding: 'wallet', receiveFrom: 'sharet', pinSet, account: { loading: false, account: null, paybill: null, formatted: null },
+      mode: 'send', step: 'who', to: 'sharet', funding: 'wallet', receiveFrom: 'sharet', pinSet, payer, account: { loading: false, account: null, paybill: null, formatted: null },
       form: blank(), errors: {}, quote: null, order: null, busy: false, timer: null,
       init() {
         // ?panel=send|receive|withdraw (&to=@name): links from other pages and scanned QR codes open the panel here

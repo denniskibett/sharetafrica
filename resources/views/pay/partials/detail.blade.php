@@ -62,7 +62,7 @@
       </dl>
 
       <div x-show="order?.final" class="grid grid-cols-2 gap-2">
-        <a :href="order?.url + '/receipt'" class="flex h-12 items-center justify-center gap-2 rounded-xl border border-gray-300 text-sm font-semibold dark:border-gray-700">
+        <a :href="order?.url ? order.url + '/receipt' : null" x-show="order?.url" class="flex h-12 items-center justify-center gap-2 rounded-xl border border-gray-300 text-sm font-semibold dark:border-gray-700">
           <x-heroicon-o-arrow-down-tray class="h-5 w-5" /> Download</a>
         <button type="button" @click="share()" class="flex h-12 items-center justify-center gap-2 rounded-xl bg-gray-900 text-sm font-semibold text-white dark:bg-[#D4FF3D] dark:text-gray-900">
           <x-heroicon-o-share class="h-5 w-5" /> Share</button>

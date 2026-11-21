@@ -46,6 +46,7 @@ class CompanySettingsController extends Controller
             'owner' => [
                 'name' => $user->name,
                 'personal' => Kyc::progress($user)['basic']['complete'],
+                'phone' => filled($user->phone), // with a number on file, what is missing is the ID check, not the number
                 'bank_grade' => Kyc::isBankGrade($user),
             ],
         ]);
@@ -85,7 +86,9 @@ class CompanySettingsController extends Controller
 
         $user = $request->user();
         if (! Kyc::progress($user)['basic']['complete']) {
-            return response()->json(['message' => 'Add your M-Pesa number to your personal account first: only account holders can register a business.',
+            return response()->json(['message' => filled($user->phone)
+                    ? 'Verify your personal account first (ID photos and a selfie): only verified account holders can register a business.'
+                    : 'Add your M-Pesa number to your personal account first: only account holders can register a business.',
                 'errors' => ['owner' => ['Personal account needed.']]], 422);
         }
         $company = $user->company ?? new Company(['status' => true]);

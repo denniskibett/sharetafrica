@@ -1,5 +1,5 @@
-{{-- The account menu, shared by the desktop header dropdown and the phone "Account" sheet: transactions, website, the
-     designed features that are coming (read-only previews), then the account and Help. --}}
+{{-- The account menu, shared by the desktop header dropdown and the phone "Account" sheet: transactions, website, requests,
+     business settings and developer tools for those lanes, the designed features that are coming (read-only previews), then the account and Help. --}}
 @php
     $user = auth()->user();
     $link = 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-app-soft hover:bg-app-tile hover:text-app-ink';
@@ -7,8 +7,16 @@
 <div class="flex flex-col gap-0.5 text-sm">
   <a href="{{ route('pay.index') }}" class="{{ $link }}"><x-heroicon-o-arrows-right-left class="h-5 w-5" /> Transactions</a>
   <a href="{{ route('home') }}" class="{{ $link }}"><x-heroicon-o-globe-alt class="h-5 w-5" /> Sharet website</a>
+  <a href="{{ route('requests') }}" class="{{ $link }}"><x-heroicon-o-arrow-down-left class="h-5 w-5" /> Request and split</a>
+  @if ($user->company_id || $user->hasAnyRole(['merchant', 'business']))
+    <a href="{{ route('settings.company') }}" class="{{ $link }}"><x-heroicon-o-building-storefront class="h-5 w-5" /> Business settings</a>
+  @endif
+  @can('developer.api_keys')
+    <a href="{{ route('api-keys.index') }}" class="{{ $link }}"><x-heroicon-o-key class="h-5 w-5" /> API keys</a>
+    <a href="{{ route('docs') }}" class="{{ $link }}"><x-heroicon-o-code-bracket class="h-5 w-5" /> Developer docs</a>
+  @endcan
   <div class="my-1 border-t border-app-line"></div>
-  @foreach ([['requests', 'arrow-down-left', 'Request and split'], ['card', 'credit-card', 'Card'], ['abroad', 'globe-europe-africa', 'Send abroad']] as [$soonRoute, $soonIcon, $soonLabel])
+  @foreach ([['card', 'credit-card', 'Card'], ['abroad', 'globe-europe-africa', 'Send abroad']] as [$soonRoute, $soonIcon, $soonLabel])
     <a href="{{ route($soonRoute) }}" class="{{ $link }}"><x-dynamic-component :component="'heroicon-o-'.$soonIcon" class="h-5 w-5" /> {{ $soonLabel }}
       <span class="ml-auto rounded-full bg-app-wait/15 px-2 py-0.5 text-[10.5px] font-semibold text-app-wait">Soon</span></a>
   @endforeach

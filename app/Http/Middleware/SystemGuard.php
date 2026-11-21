@@ -65,9 +65,14 @@ class SystemGuard
             }
             if (! $request->isMethodSafe() && $request->hasSession()
                 && now()->timestamp - (int) $request->session()->get('auth.password_confirmed_at', 0) > config('security.staff_reconfirm_seconds', 900)) {
-                return $request->expectsJson()
-                    ? $this->refuse($request, 423, 'Re-enter your password to continue.', 'staff password not reconfirmed')
-                    : redirect()->guest(route('password.confirm'));
+                if ($request->expectsJson()) {
+                    // The page sends staff to the password screen (resources/js/app.js); afterwards they land back on it
+                    $request->session()->put('url.intended', url()->previous());
+
+                    return $this->refuse($request, 423, 'Re-enter your password to continue.', 'staff password not reconfirmed');
+                }
+
+                return redirect()->guest(route('password.confirm'));
             }
         }
 

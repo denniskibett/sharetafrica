@@ -13,8 +13,8 @@
                  this.busy = false } }"
      x-init="load()">
   <x-ui.page-header title="Business settings" subtitle="The details a bank needs to open a business account. Complete them to accept and settle larger amounts.">
-    @if (Route::has('integrations.index'))<x-ui.button variant="secondary" icon="puzzle-piece" href="{{ route('integrations.index') }}">Integrations</x-ui.button>@endif
-    @if (Route::has('api-keys.index'))<x-ui.button variant="secondary" icon="key" href="{{ route('api-keys.index') }}">API keys</x-ui.button>@endif
+    @can('integrations.manage')<x-ui.button variant="secondary" icon="puzzle-piece" href="{{ route('integrations.index') }}">Integrations</x-ui.button>@endcan
+    @can('developer.api_keys')<x-ui.button variant="secondary" icon="key" href="{{ route('api-keys.index') }}">API keys</x-ui.button>@endcan
   </x-ui.page-header>
 
   <x-ui.stats :cols="3" class="mb-6">
@@ -24,8 +24,10 @@
   </x-ui.stats>
 
   <div x-show="!loading && !d.owner?.personal" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100 sm:flex-row sm:items-center sm:justify-between">
-    <p><strong>You need a personal account first.</strong> Only account holders can register a business, and you are listed as its first director. Add your M-Pesa number to get one.</p>
-    <x-ui.button href="{{ route('profile.edit') }}#personal">Add my M-Pesa number</x-ui.button>
+    <p><strong>You need a verified personal account first.</strong> Only account holders can register a business, and you are listed as its first director.
+      <span x-text="d.owner?.phone ? 'Verify your ID (photos and a quick selfie) to get one.' : 'Add your M-Pesa number to get one.'"></span></p>
+    <x-ui.button x-show="!d.owner?.phone" href="{{ route('profile.edit') }}#personal">Add my M-Pesa number</x-ui.button>
+    <x-ui.button x-show="d.owner?.phone" href="{{ route('profile.edit') }}#verification">Verify my ID</x-ui.button>
   </div>
   <div x-show="!loading && d.owner?.personal && !d.owner?.bank_grade" x-cloak class="mb-6 flex flex-col gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sm text-sky-900 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-100 sm:flex-row sm:items-center sm:justify-between">
     <p>Your business can't be fully verified until <strong>your own bank-grade verification</strong> is done (ID photos, selfies and signature).</p>
