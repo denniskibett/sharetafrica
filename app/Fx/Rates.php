@@ -69,21 +69,29 @@ class Rates
         [$pair, $direct] = $this->find($from, $to);
         $ref = $this->reference($pair);
         $side = $direct ? 'buy' : 'sell';   // pairs are KES/X: from KES = buying X
-        $bps = $this->markupBps($side);
-        $m = bcdiv((string) $bps, '10000', self::SCALE);
+        $foreign = $direct ? $to : $from;
+        $fixed = $this->fixedKes($foreign, $side);
+        $bps = $fixed === null ? $this->markupBps($side) : null;
 
         // Units of $to per 1 $from: the reference, then the markup in Sharet's favour
         $refRate = $direct ? $ref : bcdiv('1', $ref, self::SCALE);
-        $customerRate = $side === 'buy'
-            ? bcdiv($refRate, bcadd('1', $m, self::SCALE), self::SCALE)    // X costs (1 + markup) × the reference in KES
-            : bcmul($refRate, bcsub('1', $m, self::SCALE), self::SCALE);   // X fetches (1 − markdown) × the reference in KES
+        if ($fixed !== null) {
+            // a fixed number of shillings per unit: what one unit costs (buy) or fetches (sell) in KES
+            $kesPerUnit = $this->kesPer($foreign, $side, bcdiv('1', $ref, self::SCALE), self::SCALE);
+            $customerRate = $side === 'buy' ? bcdiv('1', $kesPerUnit, self::SCALE) : $kesPerUnit;
+        } else {
+            $m = bcdiv((string) $bps, '10000', self::SCALE);
+            $customerRate = $side === 'buy'
+                ? bcdiv($refRate, bcadd('1', $m, self::SCALE), self::SCALE)    // X costs (1 + markup) × the reference in KES
+                : bcmul($refRate, bcsub('1', $m, self::SCALE), self::SCALE);   // X fetches (1 − markdown) × the reference in KES
+        }
 
         $toAmount = (int) bcmul((string) $amount, $customerRate, 0);            // bcmul with scale 0 truncates: rounds down
         $atReference = (int) bcmul((string) $amount, $refRate, 0);
 
         return [
             'from' => $from, 'to' => $to, 'amount' => $amount, 'to_amount' => $toAmount, 'side' => $side,
-            'reference_rate' => $refRate, 'customer_rate' => $customerRate, 'markup_bps' => $bps,
+            'reference_rate' => $refRate, 'customer_rate' => $customerRate, 'markup_bps' => $bps, 'markup_kes' => $fixed,
             'spread' => $atReference - $toAmount,                                // in $to minor units, Sharet's
             'source' => DB::table('fx_rates')->where('pair', $pair)->where('rate_date', now(config('fx.timezone'))->toDateString())->orderByDesc('id')->value('source') ?? config('fx.source'),
             'pair' => $pair,
@@ -97,14 +105,26 @@ class Rates
         return (int) ($side === 'buy' ? config('fx.buy_markup_bps') : config('fx.sell_markdown_bps'));
     }
 
-    /** What a customer pays in KES for one unit of $currency today ('buy') or gets for it ('sell'), 4 decimals. */
-    public function kesPer(string $currency, string $side = 'buy', ?string $kesPerReference = null): string
+    /** Sharet's fixed markup in KES per unit for $currency ('buy' or 'sell'), or null when it is priced in basis points. */
+    public function fixedKes(string $currency, string $side): ?string
+    {
+        $v = config('fx.fixed_kes.'.strtoupper($currency).'.'.$side);
+
+        return is_numeric($v) ? bcadd((string) $v, '0', 2) : null;
+    }
+
+    /** What a customer pays in KES for one unit of $currency today ('buy') or gets for it ('sell'). */
+    public function kesPer(string $currency, string $side = 'buy', ?string $kesPerReference = null, int $scale = 4): string
     {
         $kesPerReference ??= bcdiv('1', $this->reference('KES/'.strtoupper($currency)), self::SCALE);
-        $m = bcdiv((string) $this->markupBps($side), '10000', self::SCALE);
-        $v = $side === 'buy' ? bcmul($kesPerReference, bcadd('1', $m, self::SCALE), self::SCALE) : bcmul($kesPerReference, bcsub('1', $m, self::SCALE), self::SCALE);
+        if (($fixed = $this->fixedKes($currency, $side)) !== null) {
+            $v = $side === 'buy' ? bcadd($kesPerReference, $fixed, self::SCALE) : bcsub($kesPerReference, $fixed, self::SCALE);
+        } else {
+            $m = bcdiv((string) $this->markupBps($side), '10000', self::SCALE);
+            $v = $side === 'buy' ? bcmul($kesPerReference, bcadd('1', $m, self::SCALE), self::SCALE) : bcmul($kesPerReference, bcsub('1', $m, self::SCALE), self::SCALE);
+        }
 
-        return bcadd($v, '0', 4);
+        return bcadd($v, '0', $scale);
     }
 
     protected function find(string $from, string $to): array

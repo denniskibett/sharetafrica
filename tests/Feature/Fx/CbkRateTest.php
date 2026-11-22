@@ -48,7 +48,7 @@ HTML;
         $this->getJson('/api/v1/fx/rates')->assertOk()
             ->assertJsonPath('pairs.KES/USD', '0.00769230')->assertJsonPath('rates.USD', '0.00769230')
             ->assertJsonPath('kes_per.USD', '130.0001')->assertJsonPath('source', 'cbk')->assertJsonPath('stale', []);
-        $this->assertSame('USD 1 = KES 131.95', \App\Support\HomeRates::line());   // customers buy at CBK's rate + 1.5%
+        $this->assertSame('USD 1 = KES 131.30', \App\Support\HomeRates::line());   // customers buy at CBK's rate + KES 1.30
 
         // treasury set it by hand today: left alone unless --force
         DB::table('fx_rates')->delete();

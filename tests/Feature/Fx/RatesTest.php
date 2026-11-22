@@ -16,7 +16,7 @@ class RatesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['fx.buy_markup_bps' => 150, 'fx.sell_markdown_bps' => 350]);
+        config(['fx.buy_markup_bps' => 150, 'fx.sell_markdown_bps' => 350, 'fx.fixed_kes' => ['USD' => ['buy' => '1.30', 'sell' => '3.00']]]);
         $this->fx = app(Rates::class);
     }
 
@@ -41,14 +41,14 @@ class RatesTest extends TestCase
         $this->assertSame('safaricom', $q['source']);
     }
 
-    public function test_dollars_cost_cbk_plus_one_and_a_half_percent_and_fetch_cbk_less_three_and_a_half(): void
+    public function test_dollars_cost_cbk_plus_kes_1_30_and_fetch_cbk_less_kes_3(): void
     {
-        $this->fx->record('KES/USD', bcdiv('1', '130', 8), source: 'cbk');   // CBK: USD 1 = KES 130.00
-        $this->assertSame(['131.9501', '125.4501'], [$this->fx->kesPer('USD', 'buy'), $this->fx->kesPer('USD', 'sell')]);
-        $buy = $this->fx->quote('KES', 'USD', 1_319_500);   // KES 13,195.00
-        $this->assertSame([9_999, 'cbk'], [$buy['to_amount'], $buy['source']]);   // USD 99.99 (rounded down)
+        $this->fx->record('KES/USD', bcdiv('1', '130', 8), source: 'cbk');   // CBK: USD 1 = KES 130.00 (stored 0.00769230)
+        $this->assertSame(['131.3001', '127.0001'], [$this->fx->kesPer('USD', 'buy'), $this->fx->kesPer('USD', 'sell')]);
+        $buy = $this->fx->quote('KES', 'USD', 1_313_000);   // KES 13,130.00
+        $this->assertSame([9_999, 'cbk', 'buy', '1.30'], [$buy['to_amount'], $buy['source'], $buy['side'], $buy['markup_kes']]);   // USD 99.99, rounded down
         $sell = $this->fx->quote('USD', 'KES', 10_000);      // USD 100.00
-        $this->assertSame(1_254_501, $sell['to_amount']);     // KES 12,545.01 (CBK's 130.00 stored as 0.00769230 dollars per shilling)
+        $this->assertSame([1_270_001, '3.00'], [$sell['to_amount'], $sell['markup_kes']]);   // KES 12,700.01
     }
 
     public function test_the_reverse_direction_also_favours_sharet(): void

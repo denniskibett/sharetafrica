@@ -13,9 +13,13 @@ return [
     'source' => 'safaricom',
     'currencies' => ['KES', 'UGX', 'TZS', 'RWF', 'USD', 'EUR', 'GBP', 'CNY', 'AED', 'INR', 'ZAR'],
     'pairs' => ['KES/UGX', 'KES/TZS', 'KES/RWF', 'KES/USD'],
-    // Sharet's markup on the reference rate, by direction (owner, 22 Nov 2026), in basis points:
-    //   buy  (the customer buys foreign currency with KES): pays the reference plus 1.5% (150)
-    //   sell (the customer sells foreign currency for KES): gets the reference less 3.5% (350)
+    // Sharet's markup on the reference rate, by direction (owner, 22 Nov 2026: "don't be hungry and chase clients off").
+    // Dollars: a fixed number of shillings per dollar. Buying a dollar costs CBK + KES 1.30; selling one fetches
+    // CBK − KES 3.00 (CBK 130.00 → buy 131.30, sell 127.00).
+    'fixed_kes' => [
+        'USD' => ['buy' => env('FX_USD_BUY_KES', '1.30'), 'sell' => env('FX_USD_SELL_KES', '3.00')],
+    ],
+    // Other currencies (UGX, TZS, RWF), in basis points of the reference: buy +1.5%, sell −3.5% (owner: keep these).
     'buy_markup_bps' => (int) env('FX_BUY_MARKUP_BPS', 150),
     'sell_markdown_bps' => (int) env('FX_SELL_MARKDOWN_BPS', 350),
     'quote_minutes' => 15,
