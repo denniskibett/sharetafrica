@@ -93,3 +93,37 @@ Code: `app/Trade/*`, `app/Http/Controllers/Mobile/TradeController.php`.
 abroad yet) or `409 quote_expired`; nothing is taken.
 
 Tests: `tests/Feature/Business/BusinessAppTest.php`, `tests/Feature/Trade/TradeAppTest.php`.
+
+## Merchant and cashier (Phase 2)
+
+**Owner** (signed in as usual, the shop's owner only; otherwise `403 no_shop`), prefix `merchant/`:
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `merchant` | `shop` (null if none), today's sales / fees / net, balance, recent sales, refunds waiting, tills |
+| POST | `merchant/setup` | `name`, `kra_pin` → creates the shop (verified personal accounts only); takes money once Sharet verifies it |
+| GET | `merchant/get-paid` | Account number on Sharet's paybill and the counter QR payload |
+| GET | `merchant/sales?day=&till=` | A day's sales and totals |
+| GET | `merchant/sales/{uuid}` · POST `…/cancel` | One sale with its refunds |
+| POST | `merchant/charges` | `amount`, `method` (`mpesa` + `phone` · `link` + `description` · `qr`) |
+| GET | `merchant/refunds` | `waiting` and `done` |
+| POST | `merchant/refunds/{uuid}/approve` | `pin` · POST `…/decline` |
+| POST | `merchant/sales/{uuid}/refund` | `amount`, `reason`, `pin`: refund directly |
+| GET/POST | `merchant/team` | Tills; add a cashier `name`, `phone` → `code` (also by SMS) |
+| POST | `merchant/tills/{n}/{pause\|resume\|remove\|code\|close}` | |
+| GET/POST | `merchant/settlement` | `mode` (`keep`/`bank`/`mpesa`), `bank`, `account`, `phone`, `settle_at`, `pin` |
+
+**Cashier** (shop phone: `Authorization: Bearer <till token>` + `X-Device-Id`), prefix `cashier/`:
+
+| Method | Path | Notes |
+|---|---|---|
+| POST | `cashier/link` | Public. `phone`, `code`, `pin`, `pin_confirmation`, `device_id` → `201 {token, till}` |
+| GET | `cashier/me` | Shop, till, cashier, `open` (PIN entered this shift) |
+| POST | `cashier/sign-in` · `sign-out` · `unlink` | `pin` opens the till (`401 till_locked` until then; `403 till_paused`) |
+| POST | `cashier/charges` | `amount`, `method` (`mpesa` + `phone`, or `qr` → `pay_url` to show as a QR) |
+| GET | `cashier/sales/{uuid}` | Poll while waiting: `pending` → `paid` / `failed` |
+| POST | `cashier/sales/{uuid}/{cancel\|receipt\|refund}` | refund: `reason`, optional `amount` (asks the owner) |
+| GET | `cashier/today` | This till's sales since its last close, refunds asked, today's totals |
+| POST | `cashier/close` | End of day for this till; locks the phone |
+
+Money calls (need `Idempotency-Key`): `merchant/charges`, `merchant/refunds/{uuid}/approve`, `merchant/sales/{uuid}/refund`, `cashier/charges`. Tests: `tests/Feature/Mobile/MerchantCashierTest.php`.

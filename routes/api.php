@@ -144,3 +144,54 @@ Route::prefix('mobile/v1')->name('api.money.mobile.')->middleware([\App\Http\Mid
     Route::post('trade/orders/{id}/pay', [\App\Http\Controllers\Mobile\TradeController::class, 'pay'])->whereNumber('id')->name('trade.orders.pay');
     Route::post('trade/fx-quotes/{id}/pay', [\App\Http\Controllers\Mobile\TradeController::class, 'payQuote'])->name('trade.fx-quotes.pay');
 });
+
+/*
+| Phase 2 · Merchant and cashier (docs/v2/MOBILE-API.md § Merchant). The owner signs in like anyone (device token); a
+| cashier's shop phone is linked to one till (till token) and opened with the cashier PIN each shift.
+*/
+Route::prefix('mobile/v1/merchant')->name('api.mobile.merchant.')->controller(\App\Http\Controllers\Mobile\MerchantController::class)
+    ->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:120,1,mobile-device'])->group(function () {
+        Route::get('/', 'home')->name('home');
+        Route::post('setup', 'setup')->middleware('throttle:10,1,mobile-merchant-setup')->name('setup');
+        Route::get('get-paid', 'getPaid')->name('get-paid');
+        Route::get('sales', 'sales')->name('sales');
+        Route::get('sales/{uuid}', 'sale')->name('sale');
+        Route::post('sales/{uuid}/cancel', 'cancelSale')->name('sale.cancel');
+        Route::get('refunds', 'refunds')->name('refunds');
+        Route::post('refunds/{uuid}/decline', 'declineRefund')->name('refunds.decline');
+        Route::get('team', 'team')->name('team');
+        Route::post('team', 'addCashier')->middleware('throttle:20,1,mobile-merchant-team')->name('team.add');
+        Route::post('tills/{number}/{action}', 'tillAction')->whereNumber('number')->where('action', 'pause|resume|remove|code|close')->middleware('throttle:30,1,mobile-merchant-team')->name('tills.action');
+        Route::get('settlement', 'settlement')->name('settlement');
+        Route::post('settlement', 'saveSettlement')->middleware('throttle:10,1,mobile-merchant-settlement')->name('settlement.save');
+    });
+
+Route::prefix('mobile/v1/merchant')->name('api.money.mobile.merchant.')->controller(\App\Http\Controllers\Mobile\MerchantController::class)
+    ->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:30,1,mobile-money', \App\Http\Middleware\Idempotent::class])->group(function () {
+        Route::post('charges', 'charge')->name('charge');
+        Route::post('refunds/{uuid}/approve', 'approveRefund')->name('refunds.approve');
+        Route::post('sales/{uuid}/refund', 'refundSale')->name('sale.refund');
+    });
+
+Route::prefix('mobile/v1/cashier')->name('api.mobile.cashier.')->controller(\App\Http\Controllers\Mobile\CashierController::class)->group(function () {
+    Route::post('link', 'link')->middleware('throttle:10,1,mobile-cashier-link')->name('link');
+    Route::middleware([\App\Http\Middleware\AuthenticateTill::class, 'throttle:120,1,mobile-till'])->group(function () {
+        Route::get('me', 'me')->name('me');
+        Route::post('sign-in', 'signIn')->middleware('throttle:10,1,mobile-till-pin')->name('sign-in');
+        Route::post('unlink', 'unlink')->name('unlink');
+    });
+    Route::middleware([\App\Http\Middleware\AuthenticateTill::class.':open', 'throttle:120,1,mobile-till'])->group(function () {
+        Route::post('sign-out', 'signOut')->name('sign-out');
+        Route::get('today', 'today')->name('today');
+        Route::get('sales/{uuid}', 'sale')->name('sale');
+        Route::post('sales/{uuid}/cancel', 'cancel')->name('sale.cancel');
+        Route::post('sales/{uuid}/receipt', 'receipt')->middleware('throttle:10,1,mobile-till-receipt')->name('sale.receipt');
+        Route::post('sales/{uuid}/refund', 'askRefund')->middleware('throttle:10,1,mobile-till-refund')->name('sale.refund');
+        Route::post('close', 'close')->name('close');
+    });
+});
+
+Route::prefix('mobile/v1/cashier')->name('api.money.mobile.cashier.')->controller(\App\Http\Controllers\Mobile\CashierController::class)
+    ->middleware([\App\Http\Middleware\AuthenticateTill::class.':open', 'throttle:30,1,mobile-till-money', \App\Http\Middleware\Idempotent::class])->group(function () {
+        Route::post('charges', 'charge')->name('charge');
+    });

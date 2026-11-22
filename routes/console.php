@@ -87,3 +87,19 @@ Artisan::command('inspire', function () {
 foreach (['09:30', '12:00', '15:00'] as $at) {
     \Illuminate\Support\Facades\Schedule::command('fx:cbk')->dailyAt($at)->timezone('Africa/Nairobi')->withoutOverlapping();
 }
+
+// Merchant end of day (Phase 2): at each shop's time (Kenyan time, default 17:00) every till closes and, once switched
+// on (MERCHANT_AUTO_SETTLE), the shop's balance goes to its bank or M-PESA. Once a day per shop.
+\Illuminate\Support\Facades\Artisan::command('merchant:close-day', function () {
+    $now = now(config('merchant.timezone'))->format('H:i');
+    $n = 0;
+    \App\Models\Company::whereIn('id', \App\Models\MerchantTill::select('company_id'))->orderBy('id')->each(function ($shop) use ($now, &$n) {
+        if ($now >= \App\Merchant\Shop::settings($shop)['settle_at']) {
+            $r = app(\App\Merchant\Sales::class)->closeDay($shop);
+            $n += $r['closed'];
+            $r['settlement'] && $this->line($shop->name.': settlement '.$r['settlement']['status']);
+        }
+    });
+    $this->info($n.' tills closed.');
+})->purpose('Close merchant tills at each shop\'s end of day and settle if switched on');
+\Illuminate\Support\Facades\Schedule::command('merchant:close-day')->everyFiveMinutes()->withoutOverlapping();
