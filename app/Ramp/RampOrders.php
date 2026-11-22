@@ -687,11 +687,13 @@ class RampOrders
     /**
      * Escrow for the float: hold the payout's amount on its rail's payout account until M-PESA's result, so two payouts
      * can never spend the same float and nothing is sent the books can't cover. False = not enough float.
+     * On Cloud9 the hold also covers Cloud9's payout charge, which it takes from the same wallet after the payout
+     * (paidOutLegs posts amount + charge), so the float can never go short by the charge.
      */
     private function reserveFloat(RailRequest $req): bool
     {
         try {
-            $this->ledger->hold($this->ledger->account($this->rails->account($req->rail, 'payout')), $req->amount, 'float:'.$req->reference, 'Payout in flight');
+            $this->ledger->hold($this->ledger->account($this->rails->account($req->rail, 'payout')), $req->amount + $this->payoutChargeToHold($req), 'float:'.$req->reference, 'Payout in flight');
 
             return true;
         } catch (LedgerException $e) {
@@ -701,6 +703,21 @@ class RampOrders
 
             return false;
         }
+    }
+
+    /** Cloud9's charge for this payout (its quote; Safaricom's band when Cloud9 can't be asked). Other rails charge nothing on the float. */
+    private function payoutChargeToHold(RailRequest $req): int
+    {
+        if ($req->rail !== 'cloud9' || $req->kind !== 'payout') {
+            return 0;
+        }
+        $charge = \App\Integrations\Cloud9\Cloud9Rail::payoutCharge((string) ($req->meta['destination_type'] ?? 'phone'), $req->amount);
+        if ($charge === null) {
+            $bands = config('pricing.safaricom_bands');
+            $charge = (collect($bands)->first(fn ($b) => $req->amount <= $b[0]) ?? end($bands))[1];
+        }
+
+        return max(0, (int) $charge);
     }
 
     /** M-PESA confirmed the payout: the hold becomes the posting (Ledger::capture). Older payouts without a hold just post. */

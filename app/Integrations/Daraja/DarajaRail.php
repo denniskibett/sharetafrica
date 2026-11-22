@@ -37,7 +37,7 @@ class DarajaRail implements PaymentRail
             'PartyB' => $till && filled($c['party_b'] ?? null) ? $c['party_b'] : $c['shortcode'],
             'PhoneNumber' => $request->party,
             'CallBackURL' => route('rails.daraja.callback', self::callbackToken()),
-            'AccountReference' => 'Sharet',
+            'AccountReference' => self::accountReference($request),
             'TransactionDesc' => 'Sharet '.substr(strtoupper(str_replace('ramp:', '', $request->reference)), 0, 8),
         ]);
 
@@ -100,6 +100,17 @@ class DarajaRail implements PaymentRail
                 ?? throw new \RuntimeException('No M-PESA paybill for bank '.($d['bank'] ?? '?')), 'account' => $d['account'] ?? null],
             default => ['type' => 'phone', 'party' => $request->party],
         };
+    }
+
+    /**
+     * What the customer sees as "account" on their M-PESA prompt: the Sharet ID of the wallet the money is for
+     * (e.g. "SH-4K7Q2M"), not the word "Sharet". Safaricom allows 12 characters; "Sharet" only when no order is found.
+     */
+    public static function accountReference(RailRequest $request): string
+    {
+        $id = \App\Models\RampOrder::where('uuid', $request->meta['order'] ?? '-')->first()?->user?->sharet_id;
+
+        return mb_substr(filled($id) ? (string) $id : 'Sharet', 0, 12);
     }
 
     /** Our id for a payout, echoed back in the result: lets the callback find the request even without the ConversationID. */

@@ -59,4 +59,16 @@ class WebsitePagesTest extends TestCase
     {
         $this->get('/blog')->assertOk()->assertSee('The first posts are on their way.');
     }
+
+    /** Sharet does not send to Airtel Money yet: no price row or line may say it does. */
+    public function test_home_and_personal_pages_do_not_promise_sending_to_airtel(): void
+    {
+        foreach (['/', '/personal'] as $url) {
+            $html = $this->get($url)->assertOk()->getContent();
+            $this->assertStringContainsString('<td>Send to M-Pesa</td>', $html, $url);
+            foreach (['M-Pesa or Airtel', '<mark>Airtel Money</mark>', 'M-Pesa, Airtel Money, T-Kash', 'M-Pesa, Airtel or', 'M-Pesa to Airtel', 'Airtel Money · name confirmed', 'to Airtel Money, T-Kash', 'Airtel Money and T-Kash from one Send button'] as $claim) {
+                $this->assertStringNotContainsString($claim, $html, "{$url}: {$claim}");
+            }
+        }
+    }
 }

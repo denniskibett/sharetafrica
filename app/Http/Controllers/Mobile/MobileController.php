@@ -132,6 +132,7 @@ class MobileController extends Controller
             'quick_pay_limit' => ($q = \App\Support\QuickPay::limit($request)) ? Money::format($q) : null,
             'phone_lock' => \App\Support\QuickPay::phoneLock($request),
             'frozen' => (bool) $user->frozen_at,
+            'unfreeze' => \App\Support\Freeze::state($user),   // null, or pending / rejected with words for the person
             'account_number' => ($a = \App\Support\AccountNumber::for($user, create: false)) ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : null,
             'add_ways' => array_values(array_filter(['mpesa', filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'account' : null,
                 filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'card' : null]))]);
@@ -268,20 +269,34 @@ class MobileController extends Controller
     /** Freeze: stops every payment out at once (no PIN needed, for a lost phone or a scam call). */
     public function freeze(Request $request): JsonResponse
     {
-        $request->user()->forceFill(['frozen_at' => now()])->save();
+        \App\Support\Freeze::freeze($request->user());
         \App\Security\Lockdown::log('customer froze their account', ['user' => $request->user()->id]);
 
         return response()->json(['frozen' => true, 'message' => 'Account frozen. Nothing can leave your wallet; money can still come in.']);
     }
 
-    /** Unfreeze with the PIN. */
+    /**
+     * Unfreeze: the PIN and a fresh selfie (a camera data: URL or an image file). Nothing unfreezes here: the selfie waits
+     * for a person in Administration › Verifications to compare it with the verification selfie (App\Support\Freeze).
+     */
     public function unfreeze(Request $request): JsonResponse
     {
-        TransactionPin::check($request->user(), $request->input('pin'));
-        $request->user()->forceFill(['frozen_at' => null])->save();
-        \App\Security\Lockdown::log('customer unfroze their account', ['user' => $request->user()->id]);
+        $user = $request->user();
+        TransactionPin::check($user, $request->input('pin'));
+        if (! $user->frozen_at) {
+            return response()->json(['frozen' => false, 'message' => 'Your account is not frozen.']);
+        }
+        $request->validate(['selfie' => ['required', function ($attr, $value, $fail) {
+            $ok = $value instanceof \Illuminate\Http\UploadedFile
+                ? str_starts_with((string) $value->getMimeType(), 'image/') && $value->getSize() <= 8 * 1024 * 1024
+                : is_string($value) && preg_match('#^data:image/(jpeg|jpg|png|webp);base64,#', $value) && strlen($value) <= 11 * 1024 * 1024;
+            $ok || $fail('Take a selfie so we can check it is you.');
+        }]], ['selfie.required' => 'Take a selfie so we can check it is you.']);
+        \App\Support\Freeze::requestUnfreeze($user, $request->file('selfie') ?? (string) $request->input('selfie'));
+        \App\Security\Lockdown::log('customer asked to unfreeze with a selfie', ['user' => $user->id]);
 
-        return response()->json(['frozen' => false, 'message' => 'Account unfrozen.']);
+        return response()->json(['frozen' => true, 'unfreeze' => \App\Support\Freeze::state($user->fresh()),
+            'message' => 'Selfie received. A person at Sharet compares it with your verification selfie, usually within an hour. Your account stays frozen until then.'], 202);
     }
 
     /** Check an @name before sending: shows whose wallet it is. */

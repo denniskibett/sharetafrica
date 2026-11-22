@@ -93,6 +93,8 @@ class User extends Authenticatable implements Wallet, Customer
         'status' => 'boolean',
         'is_business_wallet' => 'boolean',
         'kyc_submitted_at' => 'datetime',
+        'frozen_at' => 'datetime',
+        'unfreeze_requested_at' => 'datetime',
         'pin_locked_until' => 'datetime',
     ];
 
