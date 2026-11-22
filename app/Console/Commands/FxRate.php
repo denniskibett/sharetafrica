@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Fx\FxException;
 use App\Fx\Rates;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Treasury, each morning: record Safaricom's M-PESA rate for the day.
@@ -35,14 +36,14 @@ class FxRate extends Command
         foreach (config('fx.pairs') as $pair) {
             try {
                 $ref = $rates->reference($pair);
-                [$b] = explode('/', $pair);
-                $q = $rates->quote($b, explode('/', $pair)[1], 1_000_000);
-                $rows[] = [$pair, $ref, $q['customer_rate'], $rates->marginBps($pair).' bps', number_format($q['to_amount'] / 100, 2)];
+                $cur = explode('/', $pair)[1];
+                $rows[] = [$pair, $ref, $rates->kesPer($cur, 'buy'), $rates->kesPer($cur, 'sell'), DB::table('fx_rates')->where('pair', $pair)->orderByDesc('rate_date')->orderByDesc('id')->value('source')];
             } catch (FxException $e) {
-                $rows[] = [$pair, '—', '—', $rates->marginBps($pair).' bps', $e->reason];
+                $rows[] = [$pair, '—', '—', '—', $e->reason];
             }
         }
-        $this->table(['Pair', 'Safaricom today', 'Customer rate', 'Margin', '10,000 '.'base → quote'], $rows);
+        $this->info('Customers buy at the reference + '.($rates->markupBps('buy') / 100).'% and sell at the reference − '.($rates->markupBps('sell') / 100).'%.');
+        $this->table(['Pair', 'Reference today', 'Customer buys 1 at (KES)', 'Customer sells 1 for (KES)', 'Source'], $rows);
 
         return self::SUCCESS;
     }

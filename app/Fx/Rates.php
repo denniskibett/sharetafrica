@@ -6,7 +6,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Fiat-only FX on Safaricom's daily M-PESA rate plus Sharet's margin (config/fx.php).
+ * Fiat-only FX on the day's reference rate (CBK for KES/USD, else Safaricom's) plus Sharet's buy markup or less its
+ * sell markdown (config/fx.php).
  *
  *   record('KES/UGX', '28.65')            treasury, each morning
  *   quote('KES', 'UGX', 1_000_000)        KES 10,000.00 → UGX the customer gets, locked 15 min
@@ -53,8 +54,8 @@ class Rates
     }
 
     /**
-     * What the customer gets for $amount (minor units of $from), at today's rate less the margin.
-     * Works for BASE→QUOTE and QUOTE→BASE of any configured pair.
+     * What the customer gets for $amount (minor units of $from), locked 15 minutes. KES→foreign is a buy: the customer
+     * pays the reference rate plus the buy markup. Foreign→KES is a sell: they get the reference less the sell markdown.
      */
     public function quote(string $from, string $to, int $amount): array
     {
@@ -67,27 +68,43 @@ class Rates
         }
         [$pair, $direct] = $this->find($from, $to);
         $ref = $this->reference($pair);
-        $m = bcdiv((string) $this->marginBps($pair), '10000', self::SCALE);
+        $side = $direct ? 'buy' : 'sell';   // pairs are KES/X: from KES = buying X
+        $bps = $this->markupBps($side);
+        $m = bcdiv((string) $bps, '10000', self::SCALE);
 
-        // Units of $to per 1 $from: the reference, then the margin taken in Sharet's favour
+        // Units of $to per 1 $from: the reference, then the markup in Sharet's favour
         $refRate = $direct ? $ref : bcdiv('1', $ref, self::SCALE);
-        $customerRate = bcmul($refRate, bcsub('1', $m, self::SCALE), self::SCALE);
+        $customerRate = $side === 'buy'
+            ? bcdiv($refRate, bcadd('1', $m, self::SCALE), self::SCALE)    // X costs (1 + markup) × the reference in KES
+            : bcmul($refRate, bcsub('1', $m, self::SCALE), self::SCALE);   // X fetches (1 − markdown) × the reference in KES
 
         $toAmount = (int) bcmul((string) $amount, $customerRate, 0);            // bcmul with scale 0 truncates: rounds down
         $atReference = (int) bcmul((string) $amount, $refRate, 0);
 
         return [
-            'from' => $from, 'to' => $to, 'amount' => $amount, 'to_amount' => $toAmount,
-            'reference_rate' => $refRate, 'customer_rate' => $customerRate, 'margin_bps' => $this->marginBps($pair),
+            'from' => $from, 'to' => $to, 'amount' => $amount, 'to_amount' => $toAmount, 'side' => $side,
+            'reference_rate' => $refRate, 'customer_rate' => $customerRate, 'markup_bps' => $bps,
             'spread' => $atReference - $toAmount,                                // in $to minor units, Sharet's
-            'source' => config('fx.source'), 'pair' => $pair,
+            'source' => DB::table('fx_rates')->where('pair', $pair)->where('rate_date', now(config('fx.timezone'))->toDateString())->orderByDesc('id')->value('source') ?? config('fx.source'),
+            'pair' => $pair,
             'expires_at' => now()->addMinutes(config('fx.quote_minutes'))->toIso8601String(),
         ];
     }
 
-    public function marginBps(string $pair): int
+    /** Sharet's markup in basis points: 'buy' (customer buys foreign currency) or 'sell' (customer sells it). */
+    public function markupBps(string $side): int
     {
-        return (int) (config("fx.pair_margin_bps.$pair") ?? config('fx.margin_bps'));
+        return (int) ($side === 'buy' ? config('fx.buy_markup_bps') : config('fx.sell_markdown_bps'));
+    }
+
+    /** What a customer pays in KES for one unit of $currency today ('buy') or gets for it ('sell'), 4 decimals. */
+    public function kesPer(string $currency, string $side = 'buy', ?string $kesPerReference = null): string
+    {
+        $kesPerReference ??= bcdiv('1', $this->reference('KES/'.strtoupper($currency)), self::SCALE);
+        $m = bcdiv((string) $this->markupBps($side), '10000', self::SCALE);
+        $v = $side === 'buy' ? bcmul($kesPerReference, bcadd('1', $m, self::SCALE), self::SCALE) : bcmul($kesPerReference, bcsub('1', $m, self::SCALE), self::SCALE);
+
+        return bcadd($v, '0', 4);
     }
 
     protected function find(string $from, string $to): array

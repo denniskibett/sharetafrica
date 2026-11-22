@@ -16,7 +16,7 @@ class RatesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['fx.margin_bps' => 150, 'fx.pair_margin_bps' => []]);
+        config(['fx.buy_markup_bps' => 150, 'fx.sell_markdown_bps' => 350]);
         $this->fx = app(Rates::class);
     }
 
@@ -30,23 +30,34 @@ class RatesTest extends TestCase
         }
     }
 
-    public function test_quotes_use_todays_safaricom_rate_less_the_margin_and_round_down(): void
+    public function test_buying_foreign_currency_costs_the_reference_plus_the_buy_markup_and_rounds_down(): void
     {
         $this->fx->record('KES/UGX', '28.65');
-        $q = $this->fx->quote('KES', 'UGX', 1_000_000);        // KES 10,000.00
+        $q = $this->fx->quote('KES', 'UGX', 1_000_000);        // KES 10,000.00 buys UGX
 
-        $this->assertSame('28.65000000', $q['reference_rate']);
-        $this->assertSame(28_220_250, $q['to_amount']);         // 10,000 × 28.65 × 0.985 = UGX 282,202.50
-        $this->assertSame(429_750, $q['spread']);               // UGX 4,297.50 to Sharet
+        $this->assertSame(['28.65000000', 'buy', 150], [$q['reference_rate'], $q['side'], $q['markup_bps']]);
+        $this->assertSame(28_226_600, $q['to_amount']);         // 10,000 × 28.65 / 1.015 = UGX 282,266.00
+        $this->assertSame(423_400, $q['spread']);               // UGX 4,234.00 to Sharet
         $this->assertSame('safaricom', $q['source']);
+    }
+
+    public function test_dollars_cost_cbk_plus_one_and_a_half_percent_and_fetch_cbk_less_three_and_a_half(): void
+    {
+        $this->fx->record('KES/USD', bcdiv('1', '130', 8), source: 'cbk');   // CBK: USD 1 = KES 130.00
+        $this->assertSame(['131.9501', '125.4501'], [$this->fx->kesPer('USD', 'buy'), $this->fx->kesPer('USD', 'sell')]);
+        $buy = $this->fx->quote('KES', 'USD', 1_319_500);   // KES 13,195.00
+        $this->assertSame([9_999, 'cbk'], [$buy['to_amount'], $buy['source']]);   // USD 99.99 (rounded down)
+        $sell = $this->fx->quote('USD', 'KES', 10_000);      // USD 100.00
+        $this->assertSame(1_254_501, $sell['to_amount']);     // KES 12,545.01 (CBK's 130.00 stored as 0.00769230 dollars per shilling)
     }
 
     public function test_the_reverse_direction_also_favours_sharet(): void
     {
         $this->fx->record('KES/UGX', '28.65');
         $q = $this->fx->quote('UGX', 'KES', 30_000_000);       // UGX 300,000.00 home to Kenya
-        // at the reference: 300,000 / 28.65 = KES 10,471.20; customer gets 1.5% less, rounded down
-        $this->assertSame(1_031_413, $q['to_amount']);
+        // at the reference: 300,000 / 28.65 = KES 10,471.20; selling, the customer gets 3.5% less, rounded down
+        $this->assertSame(1_010_470, $q['to_amount']);
+        $this->assertSame('sell', $q['side']);
         $this->assertGreaterThan(0, $q['spread']);
         $this->assertLessThan(bcdiv('1', '28.65', 8), $q['customer_rate']);
     }
