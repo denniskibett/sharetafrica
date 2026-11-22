@@ -62,6 +62,28 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 
 Revenue share screen: Administration › Revenue share (who kept what, by rail, kind and payment).
 
+## 0f. Business and Trade in the app (Phase 2, built 22 Nov, not deployed)
+
+Built from the canvas pages *Phase 2 · Mobile app · Business* and *· Trade*. Server on `staging`; the Android screens
+are on the app branch `claude/business-trade` (not released). Figures in `config/business.php`; all are samples.
+
+| ✓ | Decision needed | Now | To change |
+|---|---|---|---|
+| ☐ | **Two checkers above** what batch total? (canvas: "[LIMIT]") | KES 1,000,000 | `BUSINESS_TWO_CHECKERS_ABOVE` |
+| ☐ | **A checker's own limit** when the owner sets none | KES 500,000 | `BUSINESS_DEFAULT_CHECKER_LIMIT` |
+| ☐ | **New payee cool-off**: a batch paying someone the business never paid waits this long unless the owner approves | 24 hours | `BUSINESS_NEW_PAYEE_HOURS` |
+| ☐ | **The owner has no approval limit** unless one is set on them, but still can't approve a batch they prepared themselves. | Built | `app/Business/Team.php` |
+| ☐ | **Who is owner:** the person who registered the business. Owners add people who already have a verified Sharet account (phone, @name or email), with their PIN. | Built | `Team::ensureOwner` |
+| ☐ | **Business wallet limits** (per payout / per day) apply to each batch line | KES 1,000,000 / 10,000,000 | `config/pricing.php` `limits.business` |
+| ☐ | **Payouts need a verified business** (KYB) to be prepared at all, in test mode too. | Built | `Batches::assertVerified` |
+| ☐ | **Paying an invoice** is one approval: the owner, or a checker who did not raise the LPO, with their PIN, within their limit. Two people for an invoice too? | Built | `app/Trade/TradeOrders.php` |
+| ☐ | **Largest LPO / invoice** | KES 10,000,000 | `TRADE_MAX_ORDER` |
+| ☐ | **Suppliers must be verified businesses on Sharet** to receive an LPO; payment is wallet to wallet (free). | Built | |
+| ☐ | **Trade finance (lenders)** is off: needs lender agreements (e.g. Aimzone) and a credit licence check. Repayments ("auto from sales 10%") not built. Which lenders, and the repayment cap? | Off | `business.trade.finance` |
+| ☐ | **Paying suppliers abroad** stops at a locked quote (USD at CBK + KES 1.30; UGX, TZS, RWF + 1.5%, 15 minutes) and says "not available yet". Needs a bank partner for SWIFT (USD) and payout partners in Uganda, Tanzania, Rwanda. Which partners? | Quote only | `business.trade.abroad.*.partner` |
+| ☐ | **Countries a USD quote may name** (supplier's country) | US, CN, AE, IN, GB, ZA, UG, TZ, RW | `business.trade.abroad.USD.countries` |
+| ☐ | **Not built yet** from the canvas: LPO and invoice PDFs, collections webhook to the business system, scheduled batches (held balance), daily settlement to the company bank. | To do | |
+
 ## 0d. AML screening (you asked, 22 Nov: "before anything hits Cloud9")
 
 Every payment is screened when it is confirmed, before any money moves (an M-PESA prompt, a payout through Cloud9 or the paybill, a Sharet-to-Sharet transfer). A rule either **holds** it for a person (Compliance › AML checks: approve → it carries on; stop → nothing moved; never your own payment; fresh password; logged) or **blocks** it. Figures in `config/aml.php`; please set them.

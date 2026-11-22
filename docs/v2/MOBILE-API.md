@@ -53,3 +53,43 @@ the previous release and checks the live link. No website deploy is needed.
 
 The release key is in `~/mobile/sharet-keys/` (never in git). **Back it up**: without it, no update can ever be
 installed over the current app.
+
+## Business (Phase 2)
+
+A person acts for a company wallet through `business_members` (owner, maker, checker, viewer); the person who
+registered the business is its owner. Code: `app/Business/*`, `app/Http/Controllers/Mobile/BusinessController.php`.
+Figures: `config/business.php`.
+
+| Method | Path | Who | Notes |
+|---|---|---|---|
+| GET | `business` | anyone | `{business: null}` when on no team; else name, Sharet ID, balance, role, limit, batches waiting, what you can do. |
+| GET | `business/batches?status=` | team | Newest first, 20 a page. |
+| POST | `business/batches` | owner, maker | `name` + `lines: [{name, to: {type, phone…}, amount}]` or `csv` ("name, number or account, amount"; `@name`, `SH-…`, `247247#ACC`, `till 123456`, `kcb:0123…`). Priced from the business tariff, flags duplicates and new payees. Nothing moves. |
+| GET | `business/batches/{id}` · `/report` | team | Lines, status, references; the report is CSV. |
+| POST | `business/batches/{id}/repeat` | owner, maker | Same lines as a new batch (`name`). |
+| POST | `business/batches/{id}/reject` · `/cancel` | checker, owner · maker, owner | Reject needs a `reason`. |
+| GET | `business/payees` | owner, maker | Everyone paid before. |
+| GET/POST/PATCH/DELETE | `business/team[/{id}]` | owner (changes, with `pin`) | `who` (phone, @name or email), `role`, `approval_limit`. |
+| GET | `business/statement?month=YYYY-MM[&format=csv]` | team (viewers too) | In, out, fees; both references per line. |
+
+**Money:** `POST business/batches/{id}/approve` (`pin`, Idempotency-Key). Never the maker; within the checker's limit;
+above `business.two_checkers_above` two different checkers; a batch with new payees waits `new_payee_hours` unless the
+owner approves. The last approval pays every line as its own order; a failed line returns to the wallet in full.
+
+## Trade (Phase 2)
+
+Code: `app/Trade/*`, `app/Http/Controllers/Mobile/TradeController.php`.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `trade` | `to_pay`, `to_invoice`, `orders`, `finance` (off), `abroad` (not available). |
+| POST | `trade/orders` | LPO: `supplier` (Sharet ID or @name of a **verified** business), `items`, `amount`, `terms` (on_delivery, 30_days, 60_days). |
+| POST | `trade/orders/{id}/invoice` · `/decline` · `/cancel` | Supplier invoices (`number`, `amount` ≤ LPO, `due`) or declines (`reason`); importer cancels. |
+| POST | `trade/orders/{id}/finance` | `409 not_available` until lender agreements and a credit licence check exist. |
+| POST | `trade/fx-quotes` | `currency` (USD, UGX, TZS, RWF), `amount` (supplier's currency), `supplier_name`, `country`, `invoice_reference` → KES cost at today's reference + markup, locked `fx.quote_minutes`. Fiat only. |
+
+**Money:** `POST trade/orders/{id}/pay` (`pin`): owner, or a checker who didn't raise the LPO; wallet to wallet with
+"Invoice N · LPO N" on the payment. `POST trade/fx-quotes/{id}/pay` always answers `409 not_available` (no partner
+abroad yet) or `409 quote_expired`; nothing is taken.
+
+Tests: `tests/Feature/Business/BusinessAppTest.php`, `tests/Feature/Trade/TradeAppTest.php`.

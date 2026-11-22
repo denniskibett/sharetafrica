@@ -104,3 +104,43 @@ Route::prefix('mobile/v1')->name('api.money.mobile.')->controller(\App\Http\Cont
         Route::post('add-money/card', 'addByCard')->name('add-money-card');
         Route::post('requests/{id}/pay', 'payRequest')->name('requests.pay');
     });
+
+/*
+| Business and Trade in the app (Phase 2; docs/v2/MOBILE-API.md § Business, § Trade). Preparing, rejecting and team
+| changes move nothing; approving a batch and paying an invoice are money routes (Idempotency-Key, ledger freeze).
+*/
+Route::prefix('mobile/v1')->name('api.mobile.')->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:120,1,mobile-device'])->group(function () {
+    Route::controller(\App\Http\Controllers\Mobile\BusinessController::class)->prefix('business')->name('business.')->group(function () {
+        Route::get('/', 'home')->name('home');
+        Route::get('batches', 'batches')->name('batches');
+        Route::post('batches', 'store')->middleware('throttle:20,1,mobile-business-prepare')->name('batches.store');
+        Route::get('batches/{id}', 'batch')->name('batches.show');
+        Route::get('batches/{id}/report', 'report')->name('batches.report');
+        Route::post('batches/{id}/repeat', 'repeat')->middleware('throttle:20,1,mobile-business-prepare')->name('batches.repeat');
+        Route::post('batches/{id}/reject', 'reject')->name('batches.reject');
+        Route::post('batches/{id}/cancel', 'cancel')->name('batches.cancel');
+        Route::get('payees', 'payees')->name('payees');
+        Route::get('team', 'team')->name('team');
+        Route::post('team', 'invite')->middleware('throttle:10,1,mobile-business-team')->name('team.invite');
+        Route::patch('team/{id}', 'updateMember')->whereNumber('id')->middleware('throttle:10,1,mobile-business-team')->name('team.update');
+        Route::delete('team/{id}', 'removeMember')->whereNumber('id')->middleware('throttle:10,1,mobile-business-team')->name('team.remove');
+        Route::get('statement', 'statement')->name('statement');
+    });
+    Route::controller(\App\Http\Controllers\Mobile\TradeController::class)->prefix('trade')->name('trade.')->group(function () {
+        Route::get('/', 'home')->name('home');
+        Route::post('orders', 'store')->middleware('throttle:20,1,mobile-trade')->name('orders.store');
+        Route::get('orders/{id}', 'show')->whereNumber('id')->name('orders.show');
+        Route::post('orders/{id}/invoice', 'invoice')->whereNumber('id')->name('orders.invoice');
+        Route::post('orders/{id}/decline', 'decline')->whereNumber('id')->name('orders.decline');
+        Route::post('orders/{id}/cancel', 'cancel')->whereNumber('id')->name('orders.cancel');
+        Route::post('orders/{id}/finance', 'finance')->whereNumber('id')->name('orders.finance');
+        Route::post('fx-quotes', 'quote')->middleware('throttle:30,1,mobile-trade')->name('fx-quotes.store');
+        Route::get('fx-quotes/{id}', 'showQuote')->name('fx-quotes.show');
+    });
+});
+
+Route::prefix('mobile/v1')->name('api.money.mobile.')->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:30,1,mobile-money', \App\Http\Middleware\Idempotent::class])->group(function () {
+    Route::post('business/batches/{id}/approve', [\App\Http\Controllers\Mobile\BusinessController::class, 'approve'])->name('business.batches.approve');
+    Route::post('trade/orders/{id}/pay', [\App\Http\Controllers\Mobile\TradeController::class, 'pay'])->whereNumber('id')->name('trade.orders.pay');
+    Route::post('trade/fx-quotes/{id}/pay', [\App\Http\Controllers\Mobile\TradeController::class, 'payQuote'])->name('trade.fx-quotes.pay');
+});
