@@ -19,7 +19,7 @@ class Rates
 {
     public const SCALE = 8;
 
-    public function record(string $pair, string $rate, ?string $date = null, ?int $by = null, bool $confirm = false, ?string $note = null): object
+    public function record(string $pair, string $rate, ?string $date = null, ?int $by = null, bool $confirm = false, ?string $note = null, ?string $source = null): object
     {
         [$base, $quote] = $this->pair($pair);
         if (! is_numeric($rate) || bccomp($rate, '0', self::SCALE) <= 0) {
@@ -33,7 +33,7 @@ class Rates
                 throw FxException::make('rate_jump', sprintf('%s moved %.1f%% from yesterday (%s). Check the Safaricom rate and confirm.', "$base/$quote", $move, $previous));
             }
         }
-        $id = DB::table('fx_rates')->insertGetId(['pair' => "$base/$quote", 'rate' => $rate, 'rate_date' => $date, 'source' => config('fx.source'),
+        $id = DB::table('fx_rates')->insertGetId(['pair' => "$base/$quote", 'rate' => $rate, 'rate_date' => $date, 'source' => $source ?? config('fx.source'),
             'recorded_by' => $by, 'note' => $note, 'created_at' => now(), 'updated_at' => now()]);
 
         return DB::table('fx_rates')->find($id);

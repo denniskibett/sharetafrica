@@ -27,7 +27,8 @@ class FxRatesEndpointTest extends TestCase
             ->assertExactJson([
                 'base' => 'KES', 'date' => $today,
                 'pairs' => ['KES/UGX' => '28.66000000', 'KES/USD' => '0.00770000'],   // reference, no margin
-                'dates' => ['KES/UGX' => $today, 'KES/USD' => $yesterday],
+                'rates' => ['UGX' => '28.66000000', 'USD' => '0.00770000'], 'kes_per' => ['UGX' => '0.0348', 'USD' => '129.8701'],
+                'dates' => ['KES/UGX' => $today, 'KES/USD' => $yesterday], 'sources' => ['KES/UGX' => 'safaricom', 'KES/USD' => 'safaricom'],
                 'stale' => ['KES/USD'], 'source' => 'safaricom', 'margin' => 'none', 'use' => 'display_only',
             ]);
 
