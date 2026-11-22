@@ -17,12 +17,14 @@
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#ffffff">
     <style>[x-cloak]{display:none!important}</style>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&family=Geist+Mono:wght@400;500&display=swap">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="sharet-app min-h-screen bg-app-panel text-app-ink antialiased md:bg-app-bg">
 <div class="mx-auto flex min-h-screen w-full max-w-[1040px] flex-col px-4 md:px-6">
   <header class="flex h-16 items-center justify-between md:h-20">
-    <a href="{{ route('home') }}" aria-label="Sharet home"><img src="{{ asset('images/brand/sharet-logo-colour-on-light.svg') }}" alt="Sharet" class="h-6 w-auto md:h-7"></a>
+    <a href="{{ route('home') }}" class="sh-lg sh-lg-light !text-[20px]" aria-label="Sharet home">sharet<i>.</i></a>
     @yield('switch')
   </header>
 
@@ -31,7 +33,7 @@
       @hasSection('welcome')
         <aside class="hidden lg:block">@yield('welcome')</aside>
       @endif
-      <div class="w-full md:mx-auto md:max-w-[440px] md:rounded-[28px] md:bg-app-panel md:p-8 md:shadow-[0_1px_2px_rgb(10_10_12/0.04),0_10px_30px_-18px_rgb(10_10_12/0.18)]">
+      <div class="w-full md:mx-auto md:max-w-[440px] md:rounded-[24px] md:border md:border-app-ink/[.08] md:bg-app-panel md:p-8">
         @hasSection('icon')
           <span class="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-app-lime text-[#050507]">@yield('icon')</span>
         @endif
