@@ -41,6 +41,7 @@ class RampOrders
     public function quote(User $user, string $type, array $destination, string $amount, ?string $note = null, string $funding = 'mpesa', ?array $price = null): RampOrder
     {
         // A business wallet pays from its balance and has no M-PESA number of its own
+        \App\Support\Freeze::assertOpen($user);   // a frozen account sends nothing
         $payer = $user->is_business_wallet && $funding === 'wallet' ? '' : $this->payer($user);
         [$dest, $party] = Destination::normalise($type, $destination);
         $cents = $this->cents($amount);
@@ -103,6 +104,7 @@ class RampOrders
     /** Wallet to wallet, to another Sharet user's @handle. Immediate, no fee, no rail: Dr 2100 sender / Cr 2100 recipient. */
     public function transfer(User $from, string $handle, string $amount, ?string $note = null, ?string $ref = null): RampOrder
     {
+        \App\Support\Freeze::assertOpen($from);
         $to = Handle::find($handle) ?? throw ValidationException::withMessages(['handle' => 'No Sharet wallet has that @name.']);
         if ($to->is($from)) {
             throw ValidationException::withMessages(['handle' => 'That is your own wallet.']);
@@ -244,6 +246,7 @@ class RampOrders
             }
             $this->checkLimits($o->user, $o->total, $o->id);
             if ($o->funding === 'wallet') {
+                \App\Support\Freeze::assertOpen($o->user);
                 $this->ledger->post("ramp:{$o->uuid}:funded", 'wallet_spend', [
                     Ledger::debit($this->ledger->account('2100', $o->user), $o->total),
                     Ledger::credit($this->ledger->account('2200', $o), $o->total),

@@ -191,4 +191,40 @@ class MobileApiTest extends TestCase
         $this->postJson("/api/mobile/v1/requests/$id/pay", ['pin' => '4826'], $this->h($theirs, 'pay-request-ok'))->assertOk()->assertJsonPath('order.receipt.Sharet reference', $id);
         $this->assertSame('paid', $this->getJson('/api/mobile/v1/requests', $this->h($theirs))->json('to_pay.0.status'));
     }
+
+    public function test_quick_pay_freeze_favourites_and_month_totals(): void
+    {
+        $juma = $this->person('0712345678', 'Juma Otieno', '20000');
+        $akinyi = $this->person('0722410556', 'Akinyi Wanjiru');
+        $to = '@'.\App\Support\Handle::for($akinyi);
+        $token = $this->signIn('0712345678');
+
+        // Quick pay is off until set with the PIN
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '100', 'biometric' => true], $this->h($token, 'quickpay-qp-off-1'))->assertJsonValidationErrors('pin');
+        $this->postJson('/api/mobile/v1/quick-pay', ['limit' => 1000, 'pin' => '0000'], $this->h($token))->assertJsonValidationErrors('pin');
+        $this->postJson('/api/mobile/v1/quick-pay', ['limit' => 1000, 'pin' => '4826'], $this->h($token))->assertOk()->assertJsonPath('quick_pay_limit', '1,000.00');
+        $this->getJson('/api/mobile/v1/me', $this->h($token))->assertJsonPath('quick_pay_limit', '1,000.00');
+
+        // Fingerprint within the limit; above it, the PIN; the day is capped at 3 × the limit
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '900', 'biometric' => true], $this->h($token, 'quickpay-qp-ok-1'))->assertCreated();
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '1500', 'biometric' => true], $this->h($token, 'quickpay-qp-big-1'))->assertJsonValidationErrors('pin');
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '1000', 'biometric' => true], $this->h($token, 'quickpay-qp-ok-2'))->assertCreated();
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '1000', 'biometric' => true], $this->h($token, 'quickpay-qp-ok-3'))->assertCreated();
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '200', 'biometric' => true], $this->h($token, 'quickpay-qp-cap-1'))->assertJsonValidationErrors('pin');   // 2,900 + 200 > 3,000
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '200', 'pin' => '4826'], $this->h($token, 'quickpay-qp-pin-1'))->assertCreated();
+
+        // Pay again and this month's totals
+        $this->getJson('/api/mobile/v1/favourites', $this->h($token))->assertJsonPath('favourites.0.type', 'sharet')->assertJsonPath('favourites.0.times', 4)->assertJsonPath('favourites.0.fields.handle', $to);
+        $this->getJson('/api/mobile/v1/activity', $this->h($token))->assertJsonPath('month.out', '3,100.00')->assertJsonPath('month.in', '20,000.00');
+
+        // Freeze: nothing leaves; money can still come in; unfreeze needs the PIN
+        $this->postJson('/api/mobile/v1/me/freeze', [], $this->h($token))->assertOk();
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '100', 'pin' => '4826'], $this->h($token, 'quickpay-frozen-1'))->assertJsonValidationErrors('amount');
+        $this->postJson('/api/mobile/v1/quote', ['phone' => '0733112908', 'amount' => '100'], $this->h($token, 'quickpay-frozen-2'))->assertJsonValidationErrors('amount');
+        $this->postJson('/api/mobile/v1/add-money', ['amount' => '100'], $this->h($token, 'quickpay-frozen-3'))->assertCreated();
+        $this->getJson('/api/mobile/v1/me', $this->h($token))->assertJsonPath('frozen', true);
+        $this->postJson('/api/mobile/v1/me/unfreeze', ['pin' => '0000'], $this->h($token))->assertJsonValidationErrors('pin');
+        $this->postJson('/api/mobile/v1/me/unfreeze', ['pin' => '4826'], $this->h($token))->assertOk();
+        $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '100', 'pin' => '4826'], $this->h($token, 'quickpay-after-1'))->assertCreated();
+    }
 }
