@@ -21,9 +21,12 @@ Rates are never edited; a correction is a new row the same day (the latest wins)
 yesterday needs `--confirm` (typo guard). No rate for today = no quote: cross-currency payments pause rather
 than use a stale rate. `sharet:golive` warns when a pair is missing.
 
-**Customer rate.** Reference rate less Sharet's margin (`FX_MARGIN_BPS`, default 150 = 1.5%; KES/USD 200),
-in both directions, and every amount paid out rounds **down**. The quote returns `spread` (what Sharet keeps,
-in the destination currency) for booking to FX income, and locks for 15 minutes.
+**Customer rate** (owner, 22 Nov 2026). Buying foreign currency with KES costs the reference **plus 1.5%**
+(`FX_BUY_MARKUP_BPS`, 150); selling it for KES fetches the reference **less 3.5%** (`FX_SELL_MARKDOWN_BPS`, 350). With
+CBK at USD 1 = KES 130.00: a customer buys a dollar for KES 131.95 and sells one for KES 125.45. Every amount paid out
+rounds **down**. The quote returns `side` (buy or sell), `markup_bps` and `spread` (what Sharet keeps, in the
+destination currency) for booking to FX income, and locks for 15 minutes. The app and dashboard line
+"USD 1 = KES 131.95" is the buying price. `php artisan fx:rate` lists both prices for every pair.
 
 **Published reference rates (display only).** `GET /api/v1/fx/rates` (public, no key, 60 a minute) returns the latest
 reference rate per pair, no margin, for Sharet's own products (Breve, scharge) to *show* converted figures:
