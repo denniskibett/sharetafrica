@@ -22,6 +22,8 @@ class TariffsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // These tests are about the tariff table; the floor (partner charge + Sharet's markup) has its own test
+        config(['pricing.sharet_markup.bp' => 0, 'pricing.sharet_markup.min' => 0, 'pricing.safaricom_bands' => [[PHP_INT_MAX, 0]]]);
         $this->seed([LedgerAccountSeeder::class, RolePermissionSeeder::class]);
     }
 
@@ -59,6 +61,16 @@ class TariffsTest extends TestCase
 
         $this->assertSame(0, $t->quote($w, 'sharet', 900_000_000)['fee']);
         $this->assertSame(800, $t->quote($w, 'mpesa', 50_000)['fee']);   // KES 500 to M-PESA: the band's fixed fee
+    }
+
+    public function test_a_business_never_pays_less_than_the_partners_charge_plus_sharets_markup(): void
+    {
+        config(['pricing.sharet_markup.bp' => 50, 'pricing.sharet_markup.min' => 100, 'pricing.safaricom_bands' => [[PHP_INT_MAX, 10_800]]]);
+        $w = $this->wallet();
+        // KES 5,000 to a bank: the table says KES 50, but the partner charges 108.00 and Sharet's markup is 25.00
+        $this->assertSame(13_300, app(Tariffs::class)->quote($w, 'bank', 500_000)['fee']);
+        // Sharet ↔ Sharet stays free
+        $this->assertSame(0, app(Tariffs::class)->quote($w, 'sharet', 500_000)['fee']);
     }
 
     public function test_monthly_volume_tiers_discount_outside_fees_and_sharet_companies_go_one_tier_up(): void

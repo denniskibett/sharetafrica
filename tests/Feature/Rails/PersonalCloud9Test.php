@@ -64,13 +64,22 @@ class PersonalCloud9Test extends TestCase
         $this->postJson('/rails/cloud9/callback', ['event_type' => 'PAYIN'] + $deposit, ['X-Cloud9-Callback-Secret' => 'in-secret'])->assertOk();   // retried: once
 
         $order = RampOrder::where('user_id', $juma->id)->sole();
-        $this->assertSame(['paid', 100000, 1500, 98500], [$order->status, $order->total, $order->fee, $order->amount]);
-        $this->assertSame(98500, $this->orders->walletBalance($juma));
+        // paid 1,000.00: Cloud9 kept 15.00, Sharet's markup 5.00 (0.5%), 980.00 lands in the wallet
+        $this->assertSame(['paid', 100000, 2000, 98000], [$order->status, $order->total, $order->fee, $order->amount]);
+        $this->assertSame(98000, $this->orders->walletBalance($juma));
+        $this->assertSame([425, 75], [app(Ledger::class)->account('4100')->fresh()->natural(), app(Ledger::class)->account('2300')->fresh()->natural()]);
         $this->assertSame('MAMA WANJIKU', $order->destination['from']);
         $req = RailRequest::find($order->collect_request_id);
         $this->assertSame(['DEPX1', 'NLJ7RT61SV', 'M-PESA'], [$req->provider_reference, $req->receipt, $req->meta['network']]);
         $this->assertStringNotContainsStringIgnoringCase('cloud9', json_encode($order->timeline));
         $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
+
+        // Revenue share: who kept what
+        $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+        $admin = User::factory()->create();
+        $admin->assignRole('super_admin');
+        $this->actingAs($admin)->get('/admin/revenue')->assertOk()->assertSee('Money in · account number')->assertSee('1,000.00')->assertSee('15.00')->assertSee('4.25')->assertSee('0.75');
+        $this->actingAs($juma)->get('/admin/revenue')->assertForbidden();
 
         // Someone else's account number never credits Juma
         $other = ['id' => 'DEPX2', 'paybill_account' => ['account' => 999999]] + $deposit;
@@ -96,9 +105,10 @@ class PersonalCloud9Test extends TestCase
 
         $this->postJson('/rails/cloud9/callback', ['event_type' => 'PAYIN'] + $deposit, ['X-Cloud9-Callback-Secret' => 'in-secret'])->assertOk();
         $order = $order->fresh();
-        $this->assertSame(['paid', 200000, 0], [$order->status, $order->amount, $order->fee]);
-        $this->assertSame(200000, $this->orders->walletBalance($juma));
-        $this->assertStringContainsString('card charge 70.00 paid on your card', json_encode($order->timeline));
+        // card: the customer paid the card charge on top; Sharet's markup 10.00 comes off the 2,000.00
+        $this->assertSame(['paid', 199000, 1000], [$order->status, $order->amount, $order->fee]);
+        $this->assertSame(199000, $this->orders->walletBalance($juma));
+        $this->assertStringContainsString('payment charge 10.00 · card charge 70.00 paid on your card', collect($order->timeline)->pluck('text')->implode(' | '));
         $this->assertSame(200000, app(Ledger::class)->account('1160')->fresh()->natural());
         $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
 

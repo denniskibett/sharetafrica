@@ -174,6 +174,25 @@ class Cloud9Rail implements PaymentRail, ProvidesStatements
         return [(string) $res->json('checkout_id'), (string) $res->json('checkout_url'), self::cents($res->json('charge') ?? 0) + self::cents($res->json('taxes') ?? 0)];
     }
 
+    /**
+     * What Cloud9 will charge for a payout of $amount to this kind of destination (GET payout/payouts/quote/), cached for
+     * 10 minutes. Null when Cloud9 can't be asked: the caller then uses Safaricom's band charge.
+     */
+    public static function payoutCharge(string $destinationType, int $amount): ?int
+    {
+        $provider = in_array($destinationType, ['paybill', 'till', 'bank'], true) ? 'MPESA-B2B' : 'MPESA-B2C';
+        $shillings = intdiv($amount, 100);
+        try {
+            return \Illuminate\Support\Facades\Cache::remember("cloud9:quote:{$provider}:{$shillings}", now()->addMinutes(10), function () use ($provider, $shillings) {
+                $res = app(self::class)->http()->get('payout/payouts/quote/', ['provider' => $provider, 'amount' => $shillings]);
+
+                return $res->successful() ? self::cents($res->json('charge') ?? 0) + self::cents($res->json('taxes') ?? 0) : throw new \RuntimeException('no quote');
+            });
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     /** Sharet's MAIN KES wallet at Cloud9 (the integration's wallet ID, else read once from the API). */
     public function mainWalletId(): string
     {

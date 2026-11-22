@@ -49,6 +49,19 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ✓ | **Money in Cloud9 can't take goes to Sharet's own M-PESA paybill** (you decided, 21 Nov): an M-PESA prompt Cloud9 refuses before accepting is sent from the paybill instead. Not card top-ups (M-PESA has no card); never after a timeout. | Built | `config/rails.php` `collect_fallback` |
 | ☐ | **Two people to switch a rail**, and fallback only when a rail refuses before accepting (never after a timeout). | Built | System › Payment rails |
 
+## 0e. Revenue share and markup (you decided, 22 Nov)
+
+| ✓ | Decision | Built | Where |
+|---|---|---|---|
+| ✓ | Every money movement is priced as the partner's own charge (Cloud9's, or Safaricom's on our paybill) **plus Sharet's markup of 0.5%, at least KES 1**, nothing up to KES 100. Sharet keeps the markup (4100), excise (15%) set aside from it (2300). | Yes | `config/pricing.php` `sharet_markup`, `app/Ramp/Markup.php` |
+| ✓ | Money in: the markup comes off what arrives (with the partner's charge). Money out: added to the fee shown before the PIN. Card top-ups: card charge on top, markup off the amount. | Yes | |
+| ✓ | Businesses: the same markup less their volume discount; a business tariff never prices below partner charge + markup. | Yes | `app/Api/Tariffs.php` |
+| ✓ | Sharet ↔ Sharet stays free. | Yes | |
+| ☐ | **No cap on the 0.5%**: KES 50,000 out now costs a KES 358 fee (was 129.60). Cap it (e.g. KES 200)? | Uncapped | `sharet_markup` |
+| ☐ | Website price table now says "Network charge + 0.5%" for adding money and "Bank's charge + 0.5%" for banks; it still says "Send to M-Pesa or Airtel" though Cloud9 pays M-PESA only. | Edited | `index`, `personal` |
+
+Revenue share screen: Administration › Revenue share (who kept what, by rail, kind and payment).
+
 ## 0d. AML screening (you asked, 22 Nov: "before anything hits Cloud9")
 
 Every payment is screened when it is confirmed, before any money moves (an M-PESA prompt, a payout through Cloud9 or the paybill, a Sharet-to-Sharet transfer). A rule either **holds** it for a person (Compliance › AML checks: approve → it carries on; stop → nothing moved; never your own payment; fresh password; logged) or **blocks** it. Figures in `config/aml.php`; please set them.

@@ -55,7 +55,9 @@ class RampOrders
         }
 
         // API payments bring their own price from the business tariff (App\Api\Tariffs); the app uses the personal one
-        $price = $price !== null ? array_intersect_key($price, array_flip(['fee', 'excise', 'rounding', 'total'])) : Pricing::quote($cents);
+        $rail = $this->rails->paying($user, $type);
+        $price = $price !== null ? array_intersect_key($price, array_flip(['fee', 'excise', 'rounding', 'total']))
+            : Pricing::quote($cents, $rail === 'cloud9' ? \App\Integrations\Cloud9\Cloud9Rail::payoutCharge($type, $cents) : null, $user);   // partner charge + Sharet's markup
         $this->checkLimits($user, $price['total']);
         if ($funding === 'wallet' && $this->walletBalance($user) < $price['total']) {
             throw ValidationException::withMessages(['amount' => 'Your wallet has KES '.Money::format($this->walletBalance($user)).'. Add money or pay from M-PESA.']);
@@ -424,10 +426,11 @@ class RampOrders
             $req->fill(['status' => 'succeeded', 'receipt' => $result->receipt, 'failure' => null, 'completed_at' => now()])->save();
             $topUp = $o->destination_type === 'wallet';
             $req->forceFill(['meta' => array_merge($req->meta ?? [], array_filter(['charge' => $result->charge ?: null, 'network' => $result->network]))])->save();
-            $credited = $topUp ? $this->chargeToCustomer($o, $req) : $o->total;
+            [$credited, $markup] = $topUp ? $this->chargeToCustomer($o, $req) : [$o->total, 0];
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
                 ...$this->collectedLegs($req, $o->total, $topUp),
                 Ledger::credit($this->ledger->account('2100', $o->user), $credited),
+                ...$this->markupLegs($markup),
             ], ['source' => $o, 'memo' => 'Late M-PESA confirmation from '.$o->payer_phone.' · '.$result->receipt]);
             $o->failure = null;
             $this->move($o, $topUp ? 'paid' : 'failed', $topUp
@@ -487,20 +490,20 @@ class RampOrders
                 return null;
             }
             $topUp = $o->destination_type === 'wallet';
-            $credited = $topUp ? $this->chargeToCustomer($o, $req) : $o->total;
+            [$credited, $markup] = $topUp ? $this->chargeToCustomer($o, $req) : [$o->total, 0];
             $this->ledger->post("ramp:{$o->uuid}:collected", 'ramp_collect', [
                 ...$this->collectedLegs($req, $o->total, $topUp),
                 Ledger::credit($topUp ? $this->ledger->account('2100', $o->user) : $orderAcct, $credited),
+                ...$this->markupLegs($markup),
             ], ['source' => $o, 'memo' => ($topUp ? (\App\Models\ApiPaymentRequest::where('public_id', $o->sharetReference())->where('user_id', $o->user_id)->exists()
                 ? 'Payment request paid by M-PESA from ' : 'Wallet top-up from ') : 'Collected from ')."{$o->payer_phone} · ".($req->meta['network'] ?? 'M-PESA')." {$req->receipt}"]);
             if ($topUp) {
                 $network = ($req->meta['method'] ?? null) === 'card' ? 'card' : ($req->meta['network'] ?? 'M-PESA');
                 $cardCharge = (int) ($req->meta['card_charge'] ?? 0);
-                $this->move($o, 'paid', match (true) {
-                    (bool) $o->fee => 'Added '.Money::format($o->amount)." to your wallet · {$network} {$req->receipt} · payment charge ".Money::format($o->fee),
-                    $cardCharge > 0 => 'Added '.Money::format($o->amount)." to your wallet · card · card charge ".Money::format($cardCharge).' paid on your card',
-                    default => "Added to your wallet · {$network} {$req->receipt}",
-                });
+                $this->move($o, 'paid', ($o->fee || $cardCharge ? 'Added '.Money::format($o->amount).' to your wallet' : 'Added to your wallet')
+                    .' · '.($network === 'card' ? 'card' : "{$network} {$req->receipt}")
+                    .($o->fee ? ' · payment charge '.Money::format($o->fee) : '')
+                    .($cardCharge > 0 ? ' · card charge '.Money::format($cardCharge).' paid on your card' : ''));
 
                 return null;
             }
@@ -578,14 +581,27 @@ class RampOrders
      * A top-up the rail charged for (Cloud9 takes its charge out of the deposit): the customer pays it. The order keeps
      * what they paid by M-PESA as total, the charge as fee, and what reached the wallet as amount. Returns that amount.
      */
-    private function chargeToCustomer(RampOrder $o, RailRequest $req): int
+    private function chargeToCustomer(RampOrder $o, RailRequest $req): array
     {
         $charge = min((int) ($req->meta['charge'] ?? 0), $o->total);
-        if ($charge) {
-            $o->forceFill(['fee' => $charge, 'amount' => $o->total - $charge]);
+        // Sharet's markup on money in through a partner (Cloud9 or our M-PESA paybill), not the simulator
+        $markup = in_array($req->rail, config('pricing.sharet_markup.money_in_rails'), true) ? min(Markup::cents($o->total, $o->user), $o->total - $charge) : 0;
+        if ($charge || $markup) {
+            $o->forceFill(['fee' => $charge + $markup, 'amount' => $o->total - $charge - $markup]);
         }
 
-        return $o->total - $charge;
+        return [$o->total - $charge - $markup, $markup];
+    }
+
+    /** Sharet's markup on money in: its income (4100), with the excise inside it set aside (2300). */
+    private function markupLegs(int $markup): array
+    {
+        if ($markup <= 0) {
+            return [];
+        }
+        $excise = Markup::excise($markup);
+
+        return array_values(array_filter([Ledger::credit($this->ledger->account('4100'), $markup - $excise), $excise ? Ledger::credit($this->ledger->account('2300'), $excise) : null]));
     }
 
     /** Money out through a rail: the amount sent plus what the provider charged on top (Sharet's cost, 5130). */
