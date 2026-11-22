@@ -1,6 +1,6 @@
 {{-- Dashboard top bar: menu toggle, logo on phones, light/dark switch, notifications, account menu. --}}
 @php $user = auth()->user(); @endphp
-<header class="sticky top-0 z-[999] flex h-[72px] w-full shrink-0 items-center border-b border-gray-200 bg-white/90 px-4 backdrop-blur dark:border-gray-800 dark:bg-gray-900/90 md:px-6">
+<header class="sh-top sticky top-0 z-[999] flex h-[72px] w-full shrink-0 items-center bg-app-bg/90 px-4 backdrop-blur md:px-6">
   <div class="flex w-full items-center gap-3">
     <button type="button" @click.stop="sidebarToggle = !sidebarToggle"
             class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 dark:border-gray-800 dark:text-gray-400 dark:hover:bg-white/5"

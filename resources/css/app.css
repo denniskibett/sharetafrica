@@ -667,3 +667,65 @@ span.flatpickr-weekday,
 .sharet-app .ui-card { border-color: transparent !important; border-radius: 24px; box-shadow: 0 1px 2px rgb(10 10 12 / 0.04), 0 10px 30px -18px rgb(10 10 12 / 0.18); }
 .dark .sharet-app .ui-card { border-color: rgb(var(--app-ink) / 0.06) !important; box-shadow: none; }
 .sharet-app .ui-input { background-color: rgb(var(--app-tile)) !important; }
+
+/* ===== Sharet UI · canvas layer (22 Nov 2026): the dashboards match the canvas boards "Dashboard · Customer web",
+   "Dashboard · Admin" and "Components · dashboard parts", and the 1.5 mobile app. Surf page (#F4F4F0), white panels
+   with a hairline and radius 20 (no shadow), an ink sidebar with the current page in lime, a light top bar, Geist Mono
+   for small labels, table heads and status pills, ink buttons radius 14, outlined fields, coloured square action tiles. */
+.sharet-app { --app-bg: 244 244 240; --app-panel: 255 255 255; --app-tile: 244 244 240; --app-raised: 236 236 230; --app-line: 229 229 222; }
+.dark .sharet-app { --app-bg: 10 10 12; --app-panel: 17 17 20; --app-tile: 24 24 28; --app-raised: 35 35 40; }
+.sharet-app .sh-mono, .sharet-app .app-mono { font-family: 'Geist Mono', ui-monospace, Menlo, monospace; }
+
+/* Wordmark: sharet. with the lime dot */
+.sh-lg { font-family: 'Boldonse', 'Outfit Variable', 'Outfit', sans-serif; font-weight: 400; font-size: 17px; line-height: 1; letter-spacing: 0; color: inherit; }
+.sh-lg i { color: #D4FF3D; font-style: normal; }
+.sh-top .sh-lg i, .sh-lg-light i { -webkit-text-stroke: .5px #0A0A0C; } /* lime dot on light, outlined like the website */
+
+/* Customer sidebar (the staff one uses utilities, same colours) */
+.sh-side { position: sticky; top: 0; height: 100vh; width: 232px; flex-shrink: 0; flex-direction: column; gap: 2px; overflow-y: auto;
+  background: #0A0A0C; color: #C9C9C2; padding: 20px 12px; font-size: 13.5px; }
+.sh-side .sh-lg { color: #fff; padding: 6px 10px 20px; font-size: 18px; }
+.sh-side a, .sh-side .sh-sbtn { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 8px 10px; border-radius: 10px; width: 100%; text-align: left; color: #C9C9C2; transition: background .15s, color .15s; }
+.sh-side a:hover, .sh-side .sh-sbtn:hover { background: rgb(255 255 255 / .06); color: #fff; }
+.sh-side a.on { background: #D4FF3D; color: #0A0A0C; font-weight: 600; }
+.sh-side small { font: 500 10px 'Geist Mono', ui-monospace, monospace; letter-spacing: .14em; color: #6E6E68; padding: 16px 10px 4px; }
+.sh-side em { margin-left: auto; font: 500 9.5px 'Geist Mono', ui-monospace, monospace; letter-spacing: .1em; text-transform: uppercase; font-style: normal; color: #8A8A84; background: rgb(255 255 255 / .06); border-radius: 999px; padding: 2px 7px; }
+.sh-side a.on em { color: #0A0A0C; background: rgb(10 10 12 / .1); }
+.sh-top { border-bottom: 1px solid rgb(var(--app-ink) / .08); }
+
+/* Panels and cards: white, hairline, radius 20, flat */
+.sharet-app main .bg-app-panel, .sharet-app .ui-card, .sharet-app main .rounded-2xl.bg-white, .sharet-app main .rounded-xl.bg-white {
+  border: 1px solid rgb(var(--app-ink) / .08) !important; border-radius: 20px; box-shadow: none !important; }
+.dark .sharet-app main .bg-app-panel, .dark .sharet-app .ui-card { border-color: rgb(var(--app-ink) / .08) !important; }
+
+/* Headings: Inter Tight bold, as in the app */
+.sharet-app .app-display, .sharet-app main h1 { font-family: 'Inter Tight Variable', 'Inter Tight', sans-serif; font-weight: 700; letter-spacing: -0.025em; }
+
+/* Tables: mono uppercase heads, hairline rows, numbers in Outfit */
+.sharet-app main table th { font-family: 'Geist Mono', ui-monospace, Menlo, monospace !important; font-size: 10.5px !important; font-weight: 500 !important;
+  letter-spacing: .1em !important; text-transform: uppercase; color: rgb(var(--app-muted)) !important; }
+.sharet-app main table thead, .sharet-app main table thead tr { background: transparent !important; }
+.sharet-app main table td { border-color: rgb(var(--app-ink) / .07) !important; }
+
+/* Status pills: anything rounded-full and tiny that says a state reads as a mono pill */
+.sharet-app .sh-pill, .sharet-app main .rounded-full.text-\[10px\], .sharet-app main .rounded-full.text-\[10\.5px\], .sharet-app main .rounded-full.text-\[11px\] {
+  font-family: 'Geist Mono', ui-monospace, Menlo, monospace; letter-spacing: .06em; font-weight: 500; }
+
+/* Buttons: radius 14; the primary (brand) button is ink, as in the app; lime stays for Sharet's own money action */
+.sharet-app main button.rounded-lg, .sharet-app main a.rounded-lg, .sharet-app main button.rounded-xl, .sharet-app main a.rounded-xl { border-radius: 14px; }
+.sharet-app .bg-brand-500, .sharet-app .hover\:bg-brand-600:hover { background-color: #0A0A0C !important; color: #fff !important; }
+.dark .sharet-app .bg-brand-500 { background-color: #F4F4F0 !important; color: #0A0A0C !important; }
+
+/* Fields: outlined on white, as in the app */
+.sharet-app main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), .sharet-app main select, .sharet-app main textarea, .sharet-app .ui-input {
+  background-color: rgb(var(--app-panel)) !important; border: 1px solid #D6D6CD !important; border-radius: 14px; }
+.dark .sharet-app main input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), .dark .sharet-app main select, .dark .sharet-app main textarea, .dark .sharet-app .ui-input { border-color: rgb(255 255 255 / .14) !important; }
+.sharet-app main input:focus, .sharet-app main select:focus, .sharet-app main textarea:focus { border-color: #0A0A0C !important; box-shadow: 0 0 0 3px rgb(212 255 61 / .45) !important; outline: none; }
+
+/* Coloured square tiles (the app's SquareIcon tones) */
+.sh-tone-in { background: #E3F5EA; color: #13683A; } .sh-tone-send { background: #E6EEFF; color: #1B3FA8; }
+.sh-tone-pay { background: #EEE8FF; color: #4B27B8; } .sh-tone-out { background: #FFEBDD; color: #9A3F07; }
+.sh-tone-abroad { background: #DDF5F4; color: #0A6463; } .sh-tone-trade { background: #FFF3D1; color: #7A5300; }
+.dark .sh-tone-in { background: rgb(74 222 128 / .14); color: #86EFAC; } .dark .sh-tone-send { background: rgb(120 160 255 / .16); color: #A9C2FF; }
+.dark .sh-tone-pay { background: rgb(170 140 255 / .16); color: #C9B6FF; } .dark .sh-tone-out { background: rgb(251 146 60 / .16); color: #FDBA74; }
+.sh-act:hover > span { transform: translateY(-2px); }
