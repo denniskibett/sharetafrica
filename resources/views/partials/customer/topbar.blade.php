@@ -1,6 +1,6 @@
 {{-- Customer app top bar, the same on every screen.
      Phones: Sharet logo left; photo and notifications right; "Habari, Juma" with the country and today's rates
-     (1 USD = KES, USD being Sharet's main reference: Safaricom's rate less our margin; the last recorded one, dated, if today's isn't in yet); the header is ink in both themes on the line below.
+     (USD 1 = KES, USD being Sharet's main reference: Safaricom's rate less our margin; the last recorded one, dated, if today's isn't in yet); the header is ink in both themes on the line below.
      Wider screens: logo, notifications, greeting and rates in one row; light/dark and the account menu right. --}}
 @php
     $user = auth()->user();

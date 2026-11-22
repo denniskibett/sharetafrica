@@ -8,7 +8,7 @@ use App\Support\HomeRates;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** USD is Sharet's main reference: "1 USD = KES 131.58" on the customer header and in the app, with the country. */
+/** USD is Sharet's main reference: "USD 1 = KES 131.58" on the customer header and in the app, with the country. */
 class UsdLineTest extends TestCase
 {
     use RefreshDatabase;
@@ -21,10 +21,10 @@ class UsdLineTest extends TestCase
         $this->assertNull(HomeRates::line());   // strict: today's only (the website hero)
         $line = HomeRates::line(latest: true);
         // 1 / (0.00775 × (1 − 2%)) = 131.67
-        $this->assertSame('1 USD = KES 131.67 · '.now('Africa/Nairobi')->subDay()->format('j M'), $line);
+        $this->assertSame('USD 1 = KES 131.67 · '.now('Africa/Nairobi')->subDay()->format('j M'), $line);
 
         app(Rates::class)->record('KES/USD', '0.00770');
-        $this->assertSame('1 USD = KES 132.52', HomeRates::line());
+        $this->assertSame('USD 1 = KES 132.52', HomeRates::line());
         $this->assertTrue(HomeRates::usd()['today']);
     }
 
@@ -36,7 +36,7 @@ class UsdLineTest extends TestCase
         $token = $this->postJson('/api/mobile/v1/auth/login', ['identifier' => '0712345678', 'password' => 'Secret-pass-1', 'device_id' => 'sh-usd-test', 'platform' => 'android'])->assertCreated()->json('token');
         $this->withHeaders(['Authorization' => "Bearer $token", 'X-Device-Id' => 'sh-usd-test'])->getJson('/api/mobile/v1/me')->assertOk()
             ->assertJsonPath('country', ['code' => 'KE', 'name' => 'Kenya'])
-            ->assertJsonPath('usd.rate', '132.52')->assertJsonPath('rates', '1 USD = KES 132.52');
-        $this->getJson('/api/mobile/v1/config')->assertJsonPath('usd.line', '1 USD = KES 132.52');
+            ->assertJsonPath('usd.rate', '132.52')->assertJsonPath('rates', 'USD 1 = KES 132.52');
+        $this->getJson('/api/mobile/v1/config')->assertJsonPath('usd.line', 'USD 1 = KES 132.52');
     }
 }
