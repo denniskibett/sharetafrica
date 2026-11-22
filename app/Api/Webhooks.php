@@ -43,6 +43,7 @@ final class Webhooks
     public function orderMoved(RampOrder $order): void
     {
         app(PaymentRequests::class)->orderMoved($order);   // an M-PESA collection paying a payment request
+        \App\Merchant\Sales::orderMoved($order);   // shop sales, account-number deposits and refunds (Phase 2 · Merchant)
         $p = ApiPayment::where('ramp_order_id', $order->id)->first();
         if (! $p) {
             return;

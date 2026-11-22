@@ -333,6 +333,7 @@ final class PaymentRequests
     {
         $r->update(['status' => 'paid', 'paid_via' => $via, 'paid_at' => now(), 'ramp_order_id' => $order?->id ?? $r->ramp_order_id]);
         $r->kind === 'personal' || $this->webhooks->fire($r->payee, $r->environment, 'payment_request.paid', self::present($r->fresh()));
+        $r->kind === 'merchant' && \App\Merchant\Sales::requestPaid($r->fresh());   // a shop sale: book the merchant fee
         if ($r->splits) {
             $this->settle($r->fresh());
         }

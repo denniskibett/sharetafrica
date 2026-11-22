@@ -177,3 +177,22 @@ email (SMTP) not set (mail only logs) · SMS key not entered ·
 M-PESA B2C initiator + credential missing · payout float 0 · FX rate not recorded on live ·
 nightly backups not off the server · v2.sharet.africa DNS record · **written cover from a licensed partner
 (Cashia / Gladys) or CBK authorisation**. Simulator still on for everyone not in `RAIL_COLLECT_ONLY_FOR`. (Cron and test-money reset done 7 Nov.)
+
+## 8. Merchant and cashier (Phase 2, built 22 Nov: server on `claude/merchant-app-5d3e0e`, app on `claude/merchant-app`; test mode only)
+
+Built from the canvas page "Phase 2 · Mobile app · Merchant and cashier". Every figure below is a proposal in
+`config/merchant.php` (changeable without code). Nothing here is live until you say "go live".
+
+| ✓ | # | Decision | Proposed now |
+|---|---|---|---|
+| ☐ | M1 | **Merchant fee** per sale, M-PESA prompt / QR / link paid by M-PESA, and money paid to the shop's account number | **1.5%** of the sale, excise inside it (the design's "[MERCHANT RATE]"). Taken from the shop's wallet when the sale is paid, its own ledger journal (4110 + 2300) |
+| ☐ | M2 | Fee when the customer pays from a **Sharet wallet** (QR or link) | **Free** for the shop (0%), to push Sharet wallets. Say if it should be the same 1.5% |
+| ☐ | M3 | **Card** payment links ("[CARD RATE]", Cloud9 3.5% underneath) | **Not built yet**: links take M-PESA and Sharet wallet. Need the card rate and who pays the card charge by default |
+| ☐ | M4 | **Cashier limit** per sale | **KES 150,000** a sale; the owner charges up to the shop's own limits. No daily cap per cashier yet; want one? |
+| ☐ | M5 | **Refund rules** | Cashier asks (own till's sales, up to **30 days** old); only the **owner approves, with their Sharet PIN**; partial refunds allowed, never more than the sale. Back the way it came: Sharet wallet at once (free), M-PESA payout with **the payout fee paid by the shop**. Managers who can approve: not built (owner only) |
+| ☐ | M6 | Is Sharet's **fee returned** when a sale is refunded in full? | **No** (kept). Switch: `MERCHANT_REFUND_RETURNS_FEE=true` |
+| ☐ | M7 | **End of day and settlement** | Tills close automatically at the shop's time (default **17:00**, the owner can change it) and a cashier can close their own till earlier. **Automatic settlement is OFF** (`MERCHANT_AUTO_SETTLE`): when on, the whole wallet balance goes daily to the owner's chosen bank (through its paybill) or M-PESA number, the payout fee from the balance. "[SETTLEMENT FEE]" per day: none beyond the normal payout fee. Changing where money settles needs the owner's PIN |
+| ☐ | M8 | **Who can open a shop** | A verified personal account holder (basic KYC); the shop takes money only after Sharet verifies the business (KYB, `verified_at`), as on the web |
+| ☐ | M9 | **Cashier sign-in** | Owner adds a cashier by phone → an invite code by SMS (valid 48 h, also shown to the owner) → on the shop phone the cashier enters phone + code and picks a 4-digit cashier PIN. Each shift opens with the PIN (14 h); 5 wrong PINs lock the till 15 min; pausing a till stops it at once |
+| ☐ | M10 | **Shop QR for the counter** | Encodes the shop's paybill + account number (pay from the M-PESA menu). A QR where the customer types the amount on a Sharet page is not built; the cashier's QR carries the amount |
+| ☐ | M11 | Owner web screens | None in the design, so none built: the owner uses the app. Staff see shops in Administration › Businesses as before |
