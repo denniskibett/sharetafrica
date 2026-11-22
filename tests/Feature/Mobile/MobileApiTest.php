@@ -217,14 +217,16 @@ class MobileApiTest extends TestCase
         $this->getJson('/api/mobile/v1/favourites', $this->h($token))->assertJsonPath('favourites.0.type', 'sharet')->assertJsonPath('favourites.0.times', 4)->assertJsonPath('favourites.0.fields.handle', $to);
         $this->getJson('/api/mobile/v1/activity', $this->h($token))->assertJsonPath('month.out', '3,100.00')->assertJsonPath('month.in', '20,000.00');
 
-        // Freeze: nothing leaves; money can still come in; unfreeze needs the PIN
+        // Freeze: nothing leaves; money can still come in; unfreeze needs the PIN and a selfie a person approves
         $this->postJson('/api/mobile/v1/me/freeze', [], $this->h($token))->assertOk();
         $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '100', 'pin' => '4826'], $this->h($token, 'quickpay-frozen-1'))->assertJsonValidationErrors('amount');
         $this->postJson('/api/mobile/v1/quote', ['phone' => '0733112908', 'amount' => '100'], $this->h($token, 'quickpay-frozen-2'))->assertJsonValidationErrors('amount');
         $this->postJson('/api/mobile/v1/add-money', ['amount' => '100'], $this->h($token, 'quickpay-frozen-3'))->assertCreated();
         $this->getJson('/api/mobile/v1/me', $this->h($token))->assertJsonPath('frozen', true);
         $this->postJson('/api/mobile/v1/me/unfreeze', ['pin' => '0000'], $this->h($token))->assertJsonValidationErrors('pin');
-        $this->postJson('/api/mobile/v1/me/unfreeze', ['pin' => '4826'], $this->h($token))->assertOk();
+        $this->postJson('/api/mobile/v1/me/unfreeze', ['pin' => '4826'], $this->h($token))->assertJsonValidationErrors('selfie');
+        $this->postJson('/api/mobile/v1/me/unfreeze', ['pin' => '4826', 'selfie' => 'data:image/jpeg;base64,'.base64_encode('jpeg')], $this->h($token))->assertStatus(202)->assertJsonPath('frozen', true);
+        \App\Support\Freeze::decide($juma->fresh(), User::factory()->create(), 'approve', null);
         $this->postJson('/api/mobile/v1/send/sharet', ['handle' => $to, 'amount' => '100', 'pin' => '4826'], $this->h($token, 'quickpay-after-1'))->assertCreated();
     }
 }
