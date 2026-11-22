@@ -71,6 +71,18 @@ class DarajaRailTest extends TestCase
         $this->assertSame('TKA1B2C3D4', $o->fresh()->reference());
     }
 
+    public function test_the_prompt_shows_the_persons_sharet_id_as_the_account(): void
+    {
+        $this->fakeSafaricom();
+        $orders = app(RampOrders::class);
+        $orders->confirm($orders->topUp($jane = $this->jane(), '500'));
+
+        $this->assertMatchesRegularExpression(\App\Support\SharetId::PATTERN, $jane->sharet_id);
+        Http::assertSent(fn ($r) => str_ends_with($r->url(), '/mpesa/stkpush/v1/processrequest')
+            && $r['AccountReference'] === $jane->sharet_id && strlen($r['AccountReference']) <= 12);
+        Http::assertNotSent(fn ($r) => str_ends_with($r->url(), '/mpesa/stkpush/v1/processrequest') && $r['AccountReference'] === 'Sharet');
+    }
+
     public function test_a_cancelled_prompt_fails_and_a_wrong_amount_is_left_for_reconciliation(): void
     {
         $this->fakeSafaricom();

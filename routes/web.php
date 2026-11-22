@@ -165,6 +165,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/users/{user}/verification', [UserController::class, 'verify'])->name('users.verify');
         Route::post('/users/{user}/verification/claude', [UserController::class, 'readWithClaude'])->middleware('throttle:20,1,claude-read')->name('users.verify.claude');
         Route::get('/admin/verifications', [\App\Http\Controllers\Admin\VerificationsController::class, 'index'])->name('admin.verifications.index');
+        Route::post('/admin/verifications/unfreeze/{user}', [\App\Http\Controllers\Admin\VerificationsController::class, 'unfreeze'])->name('admin.verifications.unfreeze');
         Route::get('/admin/businesses', [\App\Http\Controllers\Admin\BusinessesController::class, 'index'])->name('admin.businesses.index');
         Route::post('/admin/businesses/{company}/decision', [\App\Http\Controllers\Admin\BusinessesController::class, 'decide'])->name('admin.businesses.decide');
         Route::get('/admin/businesses/{company}/documents/{type}', [\App\Http\Controllers\Admin\BusinessesController::class, 'document'])->name('admin.businesses.document');

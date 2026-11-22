@@ -40,6 +40,10 @@
     </script>
     <style>[x-cloak]{display:none!important}</style>
 
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boldonse&family=Geist+Mono:wght@400;500&display=swap">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- Instant page changes: the browser fetches a link's page when you hover it (Chrome/Edge; others ignore) --}}
     <script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/logout","/t","/*\\?*","/admin/emails/*"]}},{"not":{"selector_matches":"[data-no-prefetch], [target=_blank]"}}]},"eagerness":"moderate"}]}</script>
@@ -328,14 +332,19 @@
       x-data="{ darkMode: document.documentElement.classList.contains('dark'), sidebarToggle: false }"
       x-init="$watch('darkMode', v => { document.documentElement.classList.toggle('dark', v); localStorage.setItem('darkMode', JSON.stringify(v)) })">
 <a href="#main" class="sr-only z-[100003] rounded-lg bg-app-lime px-4 py-2 text-sm font-semibold text-[#050507] focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
+{{-- Canvas "Dashboard · Customer web": ink sidebar from tablet width up, light top bar, content beside it; phones get the tab bar --}}
+<div class="md:flex">
+@include('partials.customer.sidebar')
+<div class="min-w-0 flex-1">
 @include('partials.customer.topbar')
 <main id="main" tabindex="-1">
-    {{-- A personal app, not a back office: no sidebar, full width; room for the tab bar on phones --}}
-    <div class="w-full px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-8 2xl:px-8">
+    <div class="mx-auto w-full max-w-[1400px] px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-6 2xl:px-8">
         @yield('content')
         {{ $slot ?? '' }}
     </div>
 </main>
+</div>
+</div>
 @include('partials.customer.tabbar')
 @include('pay.partials.detail')
 @else
