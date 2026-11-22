@@ -10,8 +10,8 @@
     $paused = \App\Security\Lockdown::ledgerFrozen();
     $testMode = config('rails.default') === 'simulator';
     $faq = [
-        ['How do I add money?', 'Tap Add on Home and enter the amount. M-PESA sends a prompt to your phone: approve it with your M-PESA PIN and the money lands in your wallet. Adding money is free.'],
-        ['How much does sending cost?', 'Sending to another Sharet member (@name) is free and instant. Sending to an M-PESA number, paybill, till or bank is free up to KES 100; above that you pay Safaricom\'s charge plus a small Sharet fee. You always see the full fee before you confirm.'],
+        ['How do I add money?', 'Tap Add on Home and enter the amount. M-PESA sends a prompt to your phone: approve it with your M-PESA PIN and the money lands in your wallet. Up to KES 100 is free; above that the network\'s charge plus Sharet\'s 0.5% comes off what arrives, and your receipt shows it.'],
+        ['How much does sending cost?', 'Sending to another Sharet member (@name) is free and instant. Sending to an M-PESA number, paybill, till or bank is free up to KES 100; above that you pay the network\'s charge plus Sharet\'s 0.5% (at least KES 1). You always see the full fee before you confirm.'],
         ['What are my limits?', 'Verified accounts can send up to '.$kes($limits['basic']['per_order']).' per payment and '.$kes($limits['basic']['per_day']).' per day. Bank grade raises this to '.$kes($limits['standard']['per_order']).' per payment and '.$kes($limits['standard']['per_day']).' per day.'],
         ['Why do I need to verify my ID?', 'The law asks us to know who moves money. Photograph your ID (front and back) and take a quick selfie: it takes about two minutes and we read your details from the ID. Until then you can receive, but not send.'],
         ['What is my Sharet PIN?', 'Four digits you choose to approve payments from your wallet. It is not your M-PESA PIN. Never share it: Sharet staff will never ask for it.'],

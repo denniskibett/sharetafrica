@@ -295,6 +295,9 @@ Route::middleware(['auth', 'permission:compliance.view'])->prefix('admin/aml')->
     Route::delete('/watch/{watch}', 'unwatch')->name('admin.aml.unwatch');
 });
 
+// Revenue share: who kept what on every payment (partner charge vs Sharet's markup)
+Route::middleware(['auth', 'permission:admin.system'])->get('admin/revenue', [\App\Http\Controllers\Admin\RevenueController::class, 'index'])->name('admin.revenue.index');
+
 // System › Payment rails: the switch (two people), Cloud9 sandbox checks, and activity across rails
 Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/rails')->controller(\App\Http\Controllers\Admin\RailsController::class)->group(function () {
     Route::get('/', 'index')->name('admin.rails.index');

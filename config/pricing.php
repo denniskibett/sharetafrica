@@ -25,7 +25,11 @@ return [
         [2_000_000, 10_500],  // 15,001 – 20,000
         [25_000_000, 10_800], // 20,001 – 250,000
     ],
-    'markup_bp' => 2000,      // 20% on top of Safaricom's charge
+    'markup_bp' => 2000,      // (old: 20% of Safaricom's charge; replaced by sharet_markup below, kept for reference)
+    // Sharet's markup on every money movement (you decided, 22 Nov): the partner's own charge (Cloud9's, or Safaricom's on
+    // our paybill) plus this, kept by Sharet (4100, excise set aside). Money in: taken from what arrives. Money out: added
+    // to the fee. Businesses: less their volume discount (business tariff). Up to free_up_to is free; Sharet ↔ Sharet is free.
+    'sharet_markup' => ['bp' => 50, 'min' => 100, 'free_up_to' => 10_000, 'money_in_rails' => ['cloud9', 'daraja']],
     'excise_bp' => 1500,      // 15% of our markup
     'receipt_email_min' => (int) env('RECEIPT_EMAIL_MIN', 100_000), // finished payments from KES 1,000.00 get an emailed receipt (PDF attached)
     'min_amount' => 1000,     // 10.00

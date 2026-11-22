@@ -77,12 +77,12 @@ class WalletPaymentsTest extends TestCase
         $paid = $this->settle($this->orders->confirm($this->orders->quote($jane, 'phone', ['phone' => '0722111222'], '985', null, 'wallet')));
         $this->assertSame('paid', $paid->status);
         $this->assertNull($paid->collect_request_id, 'no M-PESA prompt for a wallet payment');
-        $this->assertSame(200000 - 100100, $this->wallet($jane));
+        $this->assertSame(200000 - 100400, $this->wallet($jane));   // 985 + fee 17.93 + excise 0.74, rounded
 
         // the simulator fails numbers ending 0000: the money returns to the wallet, no rail refund
         $failed = $this->settle($this->orders->confirm($this->orders->quote($jane, 'phone', ['phone' => '0722110000'], '100', null, 'wallet')));
         $this->assertSame('refunded', $failed->status);
-        $this->assertSame(99900, $this->wallet($jane));
+        $this->assertSame(99600, $this->wallet($jane));
 
         $this->expectException(ValidationException::class); // more than the wallet holds
         $this->orders->quote($jane, 'phone', ['phone' => '0722111222'], '5,000', null, 'wallet');

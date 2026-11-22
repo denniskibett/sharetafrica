@@ -29,7 +29,7 @@ class DarajaPayoutTest extends TestCase
     {
         parent::setUp();
         $this->seed(LedgerAccountSeeder::class);
-        config(['rails.default' => 'simulator', 'rails.collect' => 'daraja', 'rails.payout' => 'daraja', 'rails.collect_only_for' => []]);
+        config(['pricing.sharet_markup.money_in_rails' => [], 'rails.default' => 'simulator', 'rails.collect' => 'daraja', 'rails.payout' => 'daraja', 'rails.collect_only_for' => []]);
         Integration::create(['provider' => 'mpesa_sandbox', 'enabled' => true, 'credentials' => [
             'consumer_key' => 'key', 'consumer_secret' => 'secret', 'shortcode' => '600000', 'passkey' => 'pass',
             'initiator_name' => 'testapi', 'security_credential' => 'cred==',

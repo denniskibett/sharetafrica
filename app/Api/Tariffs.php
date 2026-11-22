@@ -48,12 +48,30 @@ final class Tariffs
         $volume = $this->monthlyVolume($account);
         $discountBp = $this->discount($tariff, $volume, $this->isGroup($account));
         $fee = $raw - intdiv($raw * $discountBp, 10_000);
+        // Never below the partner's own charge plus Sharet's markup (less the same discount): Sharet never pays to move a business's money
+        $fee = max($fee, Pricing::quote($amount, $this->partnerCharge($account, $type, $amount), $account)['fee']);
         $excise = intdiv($fee * (int) $tariff->excise_bp + 5_000, 10_000);
         $subtotal = $amount + $fee + $excise;
         $total = intdiv($subtotal + 99, 100) * 100;
 
         return ['fee' => $fee, 'excise' => $excise, 'rounding' => $total - $subtotal, 'total' => $total,
             'tariff_id' => $tariff->id, 'tariff_version' => $tariff->version, 'discount_bp' => $discountBp, 'volume' => $volume];
+    }
+
+    /** What the partner carrying this payout charges: Cloud9's own quote when Cloud9 pays it, else null (Safaricom's band). */
+    private function partnerCharge(User $account, string $type, int $amount): ?int
+    {
+        $rail = app(\App\Integrations\Rails::class)->paying($account, \App\Api\PaymentInput::rampType($type));
+
+        return $rail === 'cloud9' ? \App\Integrations\Cloud9\Cloud9Rail::payoutCharge(\App\Api\PaymentInput::rampType($type), $amount) : null;
+    }
+
+    /** The business's volume discount (Table 2) now, in basis points; 0 without a tariff. */
+    public function discountBp(User $account): int
+    {
+        $tariff = Tariff::current();
+
+        return $tariff ? $this->discount($tariff, $this->monthlyVolume($account), $this->isGroup($account)) : 0;
     }
 
     /** The account's outside payouts this calendar month (Nairobi), before this one. */
