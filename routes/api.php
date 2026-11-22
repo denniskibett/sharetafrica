@@ -84,6 +84,8 @@ Route::prefix('mobile/v1')->name('api.mobile.')->controller(\App\Http\Controller
         Route::get('account-number', 'accountNumber')->name('account-number');
         Route::get('favourites', 'favourites')->name('favourites');
         Route::post('quick-pay', 'quickPay')->middleware('throttle:10,1,mobile-quick-pay')->name('quick-pay');
+        Route::post('phone-lock', 'phoneLock')->middleware('throttle:10,1,mobile-phone-lock')->name('phone-lock');
+        Route::post('auth/unlock', 'unlock')->middleware('throttle:10,1,mobile-unlock')->name('unlock');
         Route::post('me/freeze', 'freeze')->name('freeze');
         Route::post('me/unfreeze', 'unfreeze')->middleware('throttle:10,1,mobile-unfreeze')->name('unfreeze');
         Route::get('requests', 'requests')->name('requests');
