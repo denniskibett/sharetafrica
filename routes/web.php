@@ -286,6 +286,15 @@ Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/scheduler'
 });
 
 // Staff › Pricing: business tariff tables (docs/v2/INTEGRATION.md §7); saving needs a recent password
+// Compliance › AML checks: held payments, blocks, the watch list (decisions need a fresh password)
+Route::middleware(['auth', 'permission:compliance.view'])->prefix('admin/aml')->controller(\App\Http\Controllers\Admin\AmlController::class)->group(function () {
+    Route::get('/', 'index')->name('admin.aml.index');
+    Route::post('/checks/{check}/approve', 'approve')->middleware('password.confirm')->name('admin.aml.approve');
+    Route::post('/checks/{check}/reject', 'reject')->middleware('password.confirm')->name('admin.aml.reject');
+    Route::post('/watch', 'watch')->name('admin.aml.watch');
+    Route::delete('/watch/{watch}', 'unwatch')->name('admin.aml.unwatch');
+});
+
 // System › Payment rails: the switch (two people), Cloud9 sandbox checks, and activity across rails
 Route::middleware(['auth', 'permission:admin.system'])->prefix('admin/rails')->controller(\App\Http\Controllers\Admin\RailsController::class)->group(function () {
     Route::get('/', 'index')->name('admin.rails.index');

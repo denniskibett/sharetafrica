@@ -111,17 +111,32 @@ class RampOrders
         }
         $cents = $this->cents($amount);
         $this->checkLimits($from, $cents);
+        $fields = [
+            'uuid' => (string) Str::uuid(), 'user_id' => $from->id, 'recipient_user_id' => $to->id, 'rail' => 'internal',
+            'destination_type' => 'sharet', 'destination' => ['handle' => Handle::for($to), 'name' => $to->name] + ($ref ? ['ref' => $ref] : []),   // $ref: the payment request it pays
+            'payer_phone' => filled($from->phone) ? Destination::phone((string) $from->phone, 'payer') : '', 'funding' => 'wallet',
+            'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents, 'currency' => config('ledger.currency'),
+            'note' => $note ? Str::limit(strip_tags($note), 140, '') : null, 'quote_expires_at' => now(),
+        ];
+        if ($this->walletBalance($from) < $cents) {
+            throw ValidationException::withMessages(['amount' => 'Your wallet has KES '.Money::format($this->walletBalance($from)).'.']);
+        }
+        // AML before the money moves, as for every payment
+        $aml = \App\Aml\Screening::evaluate(new RampOrder($fields));
+        if ($aml['decision'] === 'block') {
+            \App\Aml\Screening::record(new RampOrder($fields), $aml);
+            throw ValidationException::withMessages(['amount' => 'This payment can\'t be made. If you think that\'s wrong, contact us.']);
+        }
+        if ($aml['decision'] === 'hold') {
+            $o = RampOrder::create($fields + ['status' => 'held', 'timeline' => [$this->event('Being checked by Sharet. Usually within an hour; nothing has moved yet')]]);
+            \App\Aml\Screening::record($o, $aml);
+
+            return $o;
+        }
 
         try {
-            return DB::transaction(function () use ($from, $to, $cents, $note, $ref) {
-                $o = RampOrder::create([
-                    'uuid' => (string) Str::uuid(), 'user_id' => $from->id, 'recipient_user_id' => $to->id, 'rail' => 'internal',
-                    'destination_type' => 'sharet', 'destination' => ['handle' => Handle::for($to), 'name' => $to->name] + ($ref ? ['ref' => $ref] : []),   // $ref: the payment request it pays
-                    'payer_phone' => filled($from->phone) ? Destination::phone((string) $from->phone, 'payer') : '', 'funding' => 'wallet',
-                    'amount' => $cents, 'fee' => 0, 'excise' => 0, 'rounding' => 0, 'total' => $cents, 'currency' => config('ledger.currency'),
-                    'note' => $note ? Str::limit(strip_tags($note), 140, '') : null, 'status' => 'paid', 'quote_expires_at' => now(),
-                    'timeline' => [$this->event('Sent from your wallet to @'.Handle::for($to))],
-                ]);
+            return DB::transaction(function () use ($from, $to, $cents, $fields) {
+                $o = RampOrder::create($fields + ['status' => 'paid', 'timeline' => [$this->event('Sent from your wallet to @'.Handle::for($to))]]);
                 $this->ledger->post("transfer:{$o->uuid}", 'wallet_transfer', [
                     Ledger::debit($this->ledger->account('2100', $from), $cents),
                     Ledger::credit($this->ledger->account('2100', $to), $cents),
@@ -133,6 +148,44 @@ class RampOrders
             throw $e->reason === 'insufficient_funds'
                 ? ValidationException::withMessages(['amount' => 'Your wallet has KES '.Money::format($this->walletBalance($from)).'.']) : $e;
         }
+    }
+
+    /**
+     * Compliance approved a held payment: it carries on as if just confirmed (the screening passes it now). A transfer
+     * posts at once; a rail payment is confirmed and sent. Money may have changed meanwhile: limits and balance are checked again.
+     */
+    public function releaseHeld(RampOrder $order): RampOrder
+    {
+        $o = RampOrder::whereKey($order->id)->firstOrFail();
+        if ($o->status !== 'held') {
+            return $o;
+        }
+        if ($o->destination_type === 'sharet' && $o->rail === 'internal') {
+            DB::transaction(function () use ($o) {
+                $this->ledger->post("transfer:{$o->uuid}", 'wallet_transfer', [
+                    Ledger::debit($this->ledger->account('2100', $o->user), $o->total),
+                    Ledger::credit($this->ledger->account('2100', User::findOrFail($o->recipient_user_id)), $o->total),
+                ], ['source' => $o, 'memo' => 'Released after an AML check']);
+                $this->move($o, 'paid', 'Checked by Sharet and sent');
+            });
+            app(\App\Api\PaymentRequests::class)->orderMoved($o->fresh());
+
+            return $o->fresh();
+        }
+        $o->forceFill(['status' => 'quoted', 'quote_expires_at' => now()->addMinutes(10)])->save();
+
+        return $this->confirm($o);
+    }
+
+    /** Compliance stopped a held payment: nothing had moved, so nothing to return. */
+    public function rejectHeld(RampOrder $order, ?string $reason): RampOrder
+    {
+        $o = RampOrder::whereKey($order->id)->firstOrFail();
+        if ($o->status === 'held') {
+            $this->move($o, 'rejected', 'Stopped by Sharet after a check. Nothing left your wallet', $reason ?: 'Stopped by Sharet');
+        }
+
+        return $o->fresh();
     }
 
     /** What the user's wallet holds now (cents). */
@@ -227,6 +280,12 @@ class RampOrders
         if ($request === 'expired') {
             throw ValidationException::withMessages(['order' => 'This quote has expired. Get a new one.']);
         }
+        if ($request === 'blocked') {
+            throw ValidationException::withMessages(['amount' => 'This payment can\'t be made. If you think that\'s wrong, contact us with reference '.$order->sharetReference().'.']);
+        }
+        if ($request === 'held') {
+            return $order->fresh();   // waiting for a person in Compliance: nothing has moved
+        }
         $request && $this->send($request);
 
         return $order->fresh();
@@ -245,6 +304,19 @@ class RampOrders
                 return 'expired';
             }
             $this->checkLimits($o->user, $o->total, $o->id);
+            // AML, before anything moves (Compliance › AML checks): held → a person decides; blocked → never sent
+            $aml = \App\Aml\Screening::evaluate($o);
+            if ($aml['decision'] !== 'allow') {
+                \App\Aml\Screening::record($o, $aml);
+                if ($aml['decision'] === 'block') {
+                    $this->move($o, 'rejected', 'Stopped by Sharet before anything moved', 'Stopped by Sharet');
+
+                    return 'blocked';
+                }
+                $this->move($o, 'held', 'Being checked by Sharet. Usually within an hour; nothing has moved yet');
+
+                return 'held';
+            }
             if ($o->funding === 'wallet') {
                 \App\Support\Freeze::assertOpen($o->user);
                 $this->ledger->post("ramp:{$o->uuid}:funded", 'wallet_spend', [
