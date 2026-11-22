@@ -126,6 +126,41 @@ class Cloud9RailTest extends TestCase
         $this->assertTrue(Invariants::passed(app(Invariants::class)->run()));
     }
 
+    public function test_the_float_hold_for_a_cloud9_payout_includes_cloud9s_charge(): void
+    {
+        $this->route('collect', 'cloud9');
+        $this->route('payout_phone', 'cloud9');
+        $in = ['id' => 'DEP1', 'status' => 'SUCCESS', 'amount' => '2000.00', 'charge' => '0.00', 'taxes' => '0.00', 'provider_reference' => 'RCPT1'];
+        Http::fake([
+            self::BASE.'payin/deposits/init/' => Http::response(['id' => 'DEP1', 'status' => 'PENDING']),
+            self::BASE.'payin/deposits/DEP1/' => Http::response($in),
+            self::BASE.'payout/payouts/quote/*' => Http::response(['charge' => '15.00', 'taxes' => '0.00']),
+            self::BASE.'payout/payouts/init/' => Http::response(['id' => 'V3MWVE4N', 'status' => 'PENDING', 'charge' => '15.00']),
+        ]);
+        $jane = $this->person();
+        $this->orders->confirm($this->orders->topUp($jane, '2000'));
+        $this->webhook('PAYIN', $in, 'in-secret')->assertOk();
+
+        $before = $this->orders->walletBalance($jane);
+        // Another payout already holds KES 1,000 of the KES 2,000 float: KES 1,000 is free
+        $this->ledger->hold($this->ledger->account('1160'), 100000, 'float:other', 'Payout in flight');
+
+        // KES 990 fits the free float, but not with Cloud9's KES 15 charge on top: refused before anything moves
+        try {
+            $this->orders->confirm($this->orders->quote($jane, 'phone', ['phone' => '0722333444'], '990', null, 'wallet'));
+            $this->fail('the payout should be refused');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertStringContainsString('float is low', json_encode($e->errors()));
+        }
+        $this->assertSame($before, $this->orders->walletBalance($jane), 'nothing was taken');
+        Http::assertNotSent(fn (Request $r) => $r->url() === self::BASE.'payout/payouts/init/');
+
+        // KES 900 + KES 15 fits: the hold is the amount plus the charge
+        $order = $this->orders->confirm($this->orders->quote($jane, 'phone', ['phone' => '0722333444'], '900', null, 'wallet'));
+        $this->assertSame('paying', $order->status);
+        $this->assertSame(90000 + 1500, \App\Models\LedgerHold::where('reference', 'float:ramp:'.$order->uuid.':payout')->value('amount'));
+    }
+
     public function test_a_refusal_before_acceptance_falls_back_but_a_timeout_never_does(): void
     {
         $this->route('collect', 'cloud9', 'simulator');
