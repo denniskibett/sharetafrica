@@ -126,7 +126,7 @@ final class PaymentRequests
     }
 
     /** Sharet wallet: the signed-in payer approves with their PIN; a free wallet-to-wallet transfer pays the request. */
-    public function payWithSharet(ApiPaymentRequest $r, User $payer, ?string $pin): ApiPaymentRequest
+    public function payWithSharet(ApiPaymentRequest $r, User $payer, ?string $pin, bool $approved = false): ApiPaymentRequest
     {
         $this->assertPayable($r, 'sharet');
         if ($r->payer_user_id && $r->payer_user_id !== $payer->id) {
@@ -135,7 +135,7 @@ final class PaymentRequests
         if ($payer->is($r->payee)) {
             throw ValidationException::withMessages(['pay' => 'You can\'t pay your own request.']);
         }
-        TransactionPin::check($payer, $pin);
+        $approved || TransactionPin::check($payer, $pin);   // $approved: the app already checked the PIN or quick pay (QuickPay::approve)
 
         if ($r->environment === 'test') {
             return $this->markPaid($r, 'sandbox', null);

@@ -82,6 +82,10 @@ Route::prefix('mobile/v1')->name('api.mobile.')->controller(\App\Http\Controller
         Route::post('pin', 'pin')->name('pin');
         Route::get('orders/{uuid}', 'order')->name('order');
         Route::get('account-number', 'accountNumber')->name('account-number');
+        Route::get('favourites', 'favourites')->name('favourites');
+        Route::post('quick-pay', 'quickPay')->middleware('throttle:10,1,mobile-quick-pay')->name('quick-pay');
+        Route::post('me/freeze', 'freeze')->name('freeze');
+        Route::post('me/unfreeze', 'unfreeze')->middleware('throttle:10,1,mobile-unfreeze')->name('unfreeze');
         Route::get('requests', 'requests')->name('requests');
         Route::post('requests', 'askMoney')->middleware('throttle:20,1,mobile-requests')->name('requests.ask');
         Route::post('requests/split', 'splitBill')->middleware('throttle:10,1,mobile-requests')->name('requests.split');

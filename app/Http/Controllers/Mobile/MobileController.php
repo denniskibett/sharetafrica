@@ -113,6 +113,8 @@ class MobileController extends Controller
         return response()->json(['user' => $this->person($user), 'wallet' => ['balance' => Money::format($this->orders->walletBalance($user)), 'currency' => config('ledger.currency')],
             'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen(),
             // your own account number on Sharet's paybill (once made), and which ways to add money are open
+            'quick_pay_limit' => ($q = \App\Support\QuickPay::limit($request)) ? Money::format($q) : null,
+            'frozen' => (bool) $user->frozen_at,
             'account_number' => ($a = \App\Support\AccountNumber::for($user, create: false)) ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : null,
             'add_ways' => array_values(array_filter(['mpesa', filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'account' : null,
                 filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'card' : null]))]);
@@ -161,7 +163,8 @@ class MobileController extends Controller
     public function payRequest(Request $request, string $id, \App\Api\PaymentRequests $requests): JsonResponse
     {
         $r = \App\Models\ApiPaymentRequest::where('kind', 'personal')->where('public_id', $id)->where('payer_user_id', $request->user()->id)->firstOrFail();
-        $r = $requests->payWithSharet($r, $request->user(), $request->input('pin'));
+        \App\Support\QuickPay::approve($request, $request->user(), (int) $r->amount);
+        $r = $requests->payWithSharet($r, $request->user(), null, approved: true);
         $order = $r->order;
 
         return response()->json(['message' => 'Paid '.$r->payee->name.'.', 'order' => $order ? $order->present($request->user()) + ['reference' => $order->reference(), 'receipt' => $order->receipt($request->user())] : null]);
@@ -187,8 +190,64 @@ class MobileController extends Controller
         $page = RampOrder::where(fn ($q) => $q->where('user_id', $user->id)->orWhere('recipient_user_id', $user->id))
             ->whereNotIn('status', ['quoted', 'expired', 'reversed'])->latest('id')->paginate(20);
 
+        // This month: money in, money out, and every fee and charge paid (nothing hidden)
+        $month = RampOrder::where('created_at', '>=', now('Africa/Nairobi')->startOfMonth()->utc())->where('status', 'paid')
+            ->where(fn ($q) => $q->where('user_id', $user->id)->orWhere('recipient_user_id', $user->id))->get();
+        $in = fn ($o) => $o->recipient_user_id === $user->id || $o->destination_type === 'wallet';
+
         return response()->json(['data' => $page->getCollection()->map(fn ($o) => $o->present($user))->values(),
-            'meta' => ['page' => $page->currentPage(), 'last_page' => $page->lastPage()]]);
+            'meta' => ['page' => $page->currentPage(), 'last_page' => $page->lastPage()],
+            'month' => ['in' => Money::format((int) $month->filter($in)->sum('amount')), 'out' => Money::format((int) $month->reject($in)->sum('total')),
+                'fees' => Money::format((int) $month->where('user_id', $user->id)->sum(fn ($o) => $o->fee + $o->excise))]]);
+    }
+
+    /** Pay again: the five people and billers this person paid most in the last 90 days, ready to pay. */
+    public function favourites(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $rows = RampOrder::where('user_id', $user->id)->where('status', 'paid')->whereIn('destination_type', ['sharet', 'phone', 'paybill', 'till', 'bank'])
+            ->where('created_at', '>=', now()->subDays(90))->latest('id')->limit(300)->get()
+            ->groupBy(fn ($o) => $o->destination_type.':'.json_encode(array_intersect_key((array) $o->destination, array_flip(['handle', 'phone', 'paybill', 'account', 'till', 'bank']))))
+            ->sortByDesc(fn ($g) => $g->count())->take(5)
+            ->map(function ($g) {
+                $o = $g->first();
+                $d = (array) $o->destination;
+
+                return ['type' => $o->destination_type, 'label' => $o->recipient(), 'times' => $g->count(), 'last_amount' => Money::format($o->amount),
+                    'fields' => array_filter(['handle' => isset($d['handle']) ? '@'.$d['handle'] : null, 'phone' => $d['phone'] ?? null, 'paybill' => $d['paybill'] ?? null,
+                        'account' => $d['account'] ?? null, 'till' => $d['till'] ?? null, 'bank' => $d['bank'] ?? null])];
+            })->values();
+
+        return response()->json(['favourites' => $rows]);
+    }
+
+    /** Quick pay for this phone: a limit in KES (0 = off), with the PIN. */
+    public function quickPay(Request $request): JsonResponse
+    {
+        $data = $request->validate(['limit' => 'required|integer|min:0|max:'.intdiv(\App\Support\QuickPay::MAX, 100), 'pin' => 'required|string']);
+        $cents = \App\Support\QuickPay::set($request, $request->user(), (int) $data['limit']);
+
+        return response()->json(['quick_pay_limit' => $cents ? Money::format($cents) : null,
+            'message' => $cents ? 'Quick pay on: up to KES '.Money::format($cents).' with your fingerprint on this phone.' : 'Quick pay off: every payment asks for your PIN.']);
+    }
+
+    /** Freeze: stops every payment out at once (no PIN needed, for a lost phone or a scam call). */
+    public function freeze(Request $request): JsonResponse
+    {
+        $request->user()->forceFill(['frozen_at' => now()])->save();
+        \App\Security\Lockdown::log('customer froze their account', ['user' => $request->user()->id]);
+
+        return response()->json(['frozen' => true, 'message' => 'Account frozen. Nothing can leave your wallet; money can still come in.']);
+    }
+
+    /** Unfreeze with the PIN. */
+    public function unfreeze(Request $request): JsonResponse
+    {
+        TransactionPin::check($request->user(), $request->input('pin'));
+        $request->user()->forceFill(['frozen_at' => null])->save();
+        \App\Security\Lockdown::log('customer unfroze their account', ['user' => $request->user()->id]);
+
+        return response()->json(['frozen' => false, 'message' => 'Account unfrozen.']);
     }
 
     /** Check an @name before sending: shows whose wallet it is. */
@@ -215,8 +274,8 @@ class MobileController extends Controller
     /** Sharet to Sharet: free and instant. Needs the PIN and an Idempotency-Key. */
     public function sendSharet(Request $request): JsonResponse
     {
-        $data = $request->validate(['handle' => 'required|string|max:40', 'amount' => 'required|string|max:20', 'note' => 'nullable|string|max:140', 'pin' => 'required|string']);
-        TransactionPin::check($request->user(), $data['pin']);
+        $data = $request->validate(['handle' => 'required|string|max:40', 'amount' => 'required|string|max:20', 'note' => 'nullable|string|max:140', 'pin' => 'nullable|string', 'biometric' => 'boolean']);
+        \App\Support\QuickPay::approve($request, $request->user(), Money::cents($data['amount']));
         $order = $this->orders->transfer($request->user(), $data['handle'], $data['amount'], $data['note'] ?? null);
 
         return response()->json(['order' => $order->present($request->user()), 'message' => 'Sent to '.$order->recipient().'.'], 201);
@@ -241,7 +300,7 @@ class MobileController extends Controller
     public function confirm(Request $request, string $uuid): JsonResponse
     {
         $order = $this->owned($request, $uuid);
-        TransactionPin::check($request->user(), $request->input('pin'));
+        \App\Support\QuickPay::approve($request, $request->user(), (int) $order->total);
         $order = $this->orders->confirm($order);
 
         return response()->json(['order' => $order->present($request->user()), 'message' => 'Taken from your wallet. Sending to '.$order->recipient().'.']);
