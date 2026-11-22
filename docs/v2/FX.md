@@ -9,6 +9,14 @@ ever. `config/fx.php` lists the only currencies the system accepts (ISO 4217); a
     php artisan fx:rate KES/UGX 28.6500
     php artisan fx:rate               # today's rates, customer rates and margins
 
+**KES/USD comes from the Central Bank of Kenya, automatically** (owner, 22 Nov 2026). `php artisan fx:cbk` reads
+CBK's daily indicative mean rate from the "Daily KES Exchange Rates" panel on centralbank.go.ke ("US DOLLAR 130.00 …
+Posted On: 20-11-2026") and records it as today's KES/USD reference (source `cbk`). The scheduler runs it at 09:30,
+12:00 and 15:00 Nairobi time; a later run the same day records nothing new. It never replaces a rate treasury set
+by hand that day (`fx:cbk --force` does), and a jump past the typo guard is not recorded (logged; treasury checks it
+and uses `fx:cbk --confirm` or `fx:rate`). Weekends and holidays: CBK's last posted rate is recorded for the day.
+The scheduler needs the server's cron line: `* * * * * cd /home/sharet.africa/public_html && sudo -u share6158 php artisan schedule:run`.
+
 Rates are never edited; a correction is a new row the same day (the latest wins). A move of more than 5% from
 yesterday needs `--confirm` (typo guard). No rate for today = no quote: cross-currency payments pause rather
 than use a stale rate. `sharet:golive` warns when a pair is missing.
@@ -20,8 +28,12 @@ in the destination currency) for booking to FX income, and locks for 15 minutes.
 **Published reference rates (display only).** `GET /api/v1/fx/rates` (public, no key, 60 a minute) returns the latest
 reference rate per pair, no margin, for Sharet's own products (Breve, scharge) to *show* converted figures:
 
-    {"base":"KES","date":"2026-11-20","pairs":{"KES/USD":"0.00770000"},"dates":{"KES/USD":"2026-11-20"},
-     "stale":[],"source":"safaricom","margin":"none","use":"display_only"}
+    {"base":"KES","date":"2026-11-22","pairs":{"KES/USD":"0.00769230"},"rates":{"USD":"0.00769230"},
+     "kes_per":{"USD":"130.0001"},"dates":{"KES/USD":"2026-11-22"},"sources":{"KES/USD":"cbk"},
+     "stale":[],"source":"cbk","margin":"none","use":"display_only"}
+
+`rates` (units per KES 1) and `kes_per` (KES per unit) are the same figures keyed by currency, for products that
+want them that way; `pairs` is unchanged, so existing readers keep working.
 
 A pair whose latest rate is not today's is listed in `stale`. Nothing is quoted, held or converted through it: a real
 conversion is always a quote above (margin, 15-minute lock), and none is offered without today's rate.

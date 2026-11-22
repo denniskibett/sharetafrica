@@ -50,3 +50,40 @@ Artisan::command('inspire', function () {
         $this->warn('ID_READER is not "tesseract", so nothing could be read. Install tesseract-ocr and set ID_READER=tesseract.');
     }
 })->purpose('Re-read uploaded ID photos and fill KYC details from them');
+
+// FX: the KES/USD reference from the Central Bank of Kenya, every morning (owner, 22 Nov 2026). CBK posts its indicative
+// rate at the market open; this reads it at 9:30, again at 12:00 and 15:00 in case it was late. A rate treasury set by
+// hand today (fx:rate) is never overwritten. A jump over fx.max_daily_move_pct is not recorded: treasury checks it and
+// confirms with fx:rate --confirm. Weekends and holidays: CBK's last posted rate carries over, recorded for the day.
+\Illuminate\Support\Facades\Artisan::command('fx:cbk {--force : Replace a rate set by hand today} {--confirm : Record it even if it moved more than the daily limit}', function () {
+    $tz = config('fx.timezone');
+    $today = now($tz)->toDateString();
+    $todays = \Illuminate\Support\Facades\DB::table('fx_rates')->where('pair', 'KES/USD')->where('rate_date', $today)->orderByDesc('id')->first();
+    if ($todays && $todays->source !== 'cbk' && ! $this->option('force')) {
+        $this->info("KES/USD for $today was set by hand ({$todays->rate}); leaving it. Use --force to replace it with CBK's.");
+
+        return 0;
+    }
+    try {
+        $cbk = app(\App\Fx\Cbk::class)->latest();
+        $kesPerUsd = $cbk['kes_per']['USD'];
+        $rate = bcdiv('1', $kesPerUsd, \App\Fx\Rates::SCALE);   // KES/USD is dollars per shilling
+        if ($todays && $todays->source === 'cbk' && bccomp((string) $todays->rate, $rate, \App\Fx\Rates::SCALE) === 0) {
+            $this->info("KES/USD for $today is already CBK's (USD 1 = KES $kesPerUsd, posted {$cbk['posted']}).");
+
+            return 0;
+        }
+        app(\App\Fx\Rates::class)->record('KES/USD', $rate, $today, null, (bool) $this->option('confirm'), "CBK mean USD 1 = KES $kesPerUsd, posted {$cbk['posted']}", 'cbk');
+        $this->info("Recorded KES/USD = $rate for $today from CBK (USD 1 = KES $kesPerUsd, posted {$cbk['posted']}).");
+    } catch (\App\Fx\FxException $e) {
+        \Illuminate\Support\Facades\Log::error('fx:cbk could not record today\'s rate', ['reason' => $e->reason, 'message' => $e->getMessage()]);
+        $this->error($e->getMessage());
+
+        return 1;
+    }
+
+    return 0;
+})->purpose("Record today's KES/USD reference rate from the Central Bank of Kenya");
+foreach (['09:30', '12:00', '15:00'] as $at) {
+    \Illuminate\Support\Facades\Schedule::command('fx:cbk')->dailyAt($at)->timezone('Africa/Nairobi')->withoutOverlapping();
+}

@@ -8,7 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
- * GET /api/v1/fx/rates: Sharet's reference rates (Safaricom's M-PESA rate recorded by treasury), no margin.
+ * GET /api/v1/fx/rates: Sharet's reference rates, no margin: KES/USD from the Central Bank of Kenya each morning
+ * (fx:cbk), or set by treasury (fx:rate). Other Sharet products (Breve, scharge, loans) read this.
  * DISPLAY ONLY: Breve, scharge and other Sharet products show converted figures with them. Nothing is quoted, held
  * or converted here; a real conversion is always a quote (Rates::quote) with the margin and a 15-minute lock.
  * Public and read-only (no key needed, rate limited). Each pair is the latest recorded on or before today; a pair
@@ -19,13 +20,15 @@ class FxRatesController extends Controller
     public function __invoke(): JsonResponse
     {
         $today = now(config('fx.timezone'))->toDateString();
-        $pairs = $dates = [];
+        $pairs = $dates = $sources = $rates = [];
         foreach (config('fx.pairs') as $pair) {
             $row = DB::table('fx_rates')->where('pair', $pair)->where('rate_date', '<=', $today)
-                ->orderByDesc('rate_date')->orderByDesc('id')->first(['rate', 'rate_date']);
+                ->orderByDesc('rate_date')->orderByDesc('id')->first(['rate', 'rate_date', 'source']);
             if ($row) {
                 $pairs[$pair] = bcadd((string) $row->rate, '0', Rates::SCALE);
                 $dates[$pair] = substr((string) $row->rate_date, 0, 10);
+                $sources[$pair] = $row->source;
+                $rates[explode('/', $pair)[1]] = $pairs[$pair];
             }
         }
 
@@ -33,9 +36,12 @@ class FxRatesController extends Controller
             'base' => 'KES',
             'date' => $dates ? max($dates) : null,
             'pairs' => $pairs,
+            'rates' => $rates,   // the same, keyed by currency: {"USD": "0.00769230"} (units per KES 1)
+            'kes_per' => array_map(fn ($r) => bcdiv('1', $r, 4), $rates),   // and the other way: {"USD": "130.00"} (KES per unit)
             'dates' => $dates,
+            'sources' => $sources,
             'stale' => array_keys(array_filter($dates, fn ($d) => $d !== $today)),
-            'source' => config('fx.source'),
+            'source' => ($sources['KES/USD'] ?? null) ?: config('fx.source'),
             'margin' => 'none',
             'use' => 'display_only',
         ])->header('Cache-Control', 'public, max-age=300');
