@@ -50,8 +50,9 @@ class MobileController extends Controller
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'identifier' => 'required|string|max:190', 'password' => 'required|string|max:200',
+            'identifier' => 'required|string|max:190', 'password' => 'required_without:pin|nullable|string|max:200', 'pin' => 'required_without:password|nullable|string|max:10',
             'device_id' => 'required|string|min:8|max:100', 'device_name' => 'nullable|string|max:100', 'platform' => 'nullable|in:ios,android',
+            'phone_lock' => 'boolean',   // this phone has a lock (fingerprint, face or passcode): it approves payments from now on
         ]);
         $id = trim($data['identifier']);
         $limiter = 'mobile-login:'.Str::lower($id);
@@ -62,7 +63,19 @@ class MobileController extends Controller
             ? User::where('email', Str::lower($id))->first()
             : User::where('phone', Identity::normalisePhone($id))->first();
 
-        if (! $user || $user->is_business_wallet || ! Hash::check($data['password'], (string) $user->password)) {
+        // Sign in with the Sharet PIN (owner, 22 Nov 2026) or the long password. The PIN locks after 5 wrong tries like
+        // everywhere else; someone with no PIN yet signs in with the password once and sets it.
+        if (filled($data['pin'] ?? null) && empty($data['password'])) {
+            if (! $user || $user->is_business_wallet) {
+                RateLimiter::hit($limiter, 300);
+                throw ValidationException::withMessages(['identifier' => 'No Sharet account has that phone or email.']);
+            }
+            if (! TransactionPin::isSet($user)) {
+                throw ValidationException::withMessages(['pin' => 'You have no Sharet PIN yet. Sign in with your password this once, then set one.']);
+            }
+            RateLimiter::hit($limiter, 300);
+            TransactionPin::check($user, $data['pin']);
+        } elseif (! $user || $user->is_business_wallet || ! Hash::check((string) $data['password'], (string) $user->password)) {
             RateLimiter::hit($limiter, 300);
             throw ValidationException::withMessages(['identifier' => 'That phone or email and password don\'t match.']);
         }
@@ -78,6 +91,7 @@ class MobileController extends Controller
             'user_id' => $user->id, 'device_id' => $data['device_id'], 'name' => $data['device_name'] ?? null, 'platform' => $data['platform'] ?? null,
             'token_hash' => hash('sha256', $token), 'last_used_at' => now(), 'last_ip' => $request->ip(),
             'expires_at' => now()->addDays(AuthenticateDevice::DAYS), 'created_at' => now(), 'updated_at' => now(),
+            'phone_lock' => $request->boolean('phone_lock') && TransactionPin::isSet($user),
         ]);
         Footprint::record($user, $request, 'mobile_sign_in');
 
@@ -116,6 +130,7 @@ class MobileController extends Controller
             'payments_open' => ! Lockdown::ledgerFrozen(),
             // your own account number on Sharet's paybill (once made), and which ways to add money are open
             'quick_pay_limit' => ($q = \App\Support\QuickPay::limit($request)) ? Money::format($q) : null,
+            'phone_lock' => \App\Support\QuickPay::phoneLock($request),
             'frozen' => (bool) $user->frozen_at,
             'account_number' => ($a = \App\Support\AccountNumber::for($user, create: false)) ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : null,
             'add_ways' => array_values(array_filter(['mpesa', filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'account' : null,
@@ -231,6 +246,23 @@ class MobileController extends Controller
 
         return response()->json(['quick_pay_limit' => $cents ? Money::format($cents) : null,
             'message' => $cents ? 'Quick pay on: up to KES '.Money::format($cents).' with your fingerprint on this phone.' : 'Quick pay off: every payment asks for your PIN.']);
+    }
+
+    /** The phone lock approves payments on this phone (on) or every payment asks for the PIN (off): needs the PIN. */
+    public function phoneLock(Request $request): JsonResponse
+    {
+        $data = $request->validate(['on' => 'required|boolean', 'pin' => 'required|string']);
+        \App\Support\QuickPay::setPhoneLock($request, $request->user(), (bool) $data['on']);
+
+        return response()->json(['phone_lock' => (bool) $data['on'], 'message' => $data['on'] ? 'Your phone lock now approves payments on this phone.' : 'Every payment on this phone asks for your Sharet PIN.']);
+    }
+
+    /** Opening the app on a phone with no lock of its own: the Sharet PIN. */
+    public function unlock(Request $request): JsonResponse
+    {
+        TransactionPin::check($request->user(), $request->input('pin'));
+
+        return response()->json(['ok' => true]);
     }
 
     /** Freeze: stops every payment out at once (no PIN needed, for a lost phone or a scam call). */
