@@ -39,7 +39,7 @@ class MobileController extends Controller
     {
         return response()->json([
             'api' => 'v1', 'min_app_version' => config('mobile.min_version', '1.0.0'), 'currency' => config('ledger.currency'),
-            'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen(), 'support' => ['email' => 'support@sharet.africa'],
+            'rates' => HomeRates::line(latest: true), 'usd' => HomeRates::usd(latest: true), 'payments_open' => ! Lockdown::ledgerFrozen(), 'support' => ['email' => 'support@sharet.africa'],
             'test_mode' => config('rails.default') === 'simulator',
             // banks a payment can go to (through the bank's M-PESA paybill): key => name
             'banks' => config('pricing.banks'),
@@ -111,7 +111,9 @@ class MobileController extends Controller
         $user = $request->user();
 
         return response()->json(['user' => $this->person($user), 'wallet' => ['balance' => Money::format($this->orders->walletBalance($user)), 'currency' => config('ledger.currency')],
-            'rates' => HomeRates::line(), 'payments_open' => ! Lockdown::ledgerFrozen(),
+            'rates' => HomeRates::line(latest: true), 'usd' => HomeRates::usd(latest: true),
+            'country' => (fn ($c) => ['code' => $c[0], 'name' => $c[1]])(HomeRates::country($user)),
+            'payments_open' => ! Lockdown::ledgerFrozen(),
             // your own account number on Sharet's paybill (once made), and which ways to add money are open
             'quick_pay_limit' => ($q = \App\Support\QuickPay::limit($request)) ? Money::format($q) : null,
             'frozen' => (bool) $user->frozen_at,

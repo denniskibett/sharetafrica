@@ -1,6 +1,6 @@
 {{-- Customer app top bar, the same on every screen.
      Phones: Sharet logo left; photo and notifications right; "Habari, Juma" with the country and today's rates
-     (KES = USD only: Safaricom's rate less our margin); the header is ink in both themes on the line below.
+     (1 USD = KES, USD being Sharet's main reference: Safaricom's rate less our margin; the last recorded one, dated, if today's isn't in yet); the header is ink in both themes on the line below.
      Wider screens: logo, notifications, greeting and rates in one row; light/dark and the account menu right. --}}
 @php
     $user = auth()->user();
@@ -8,7 +8,7 @@
     $first = \Illuminate\Support\Str::before(trim($user->name), ' ') ?: $user->name;
     $icon = 'flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/15'; // ink header in both themes
     [$cc, $countryName] = \App\Support\HomeRates::country($user);
-    $rates = \App\Support\HomeRates::line();
+    $rates = \App\Support\HomeRates::line(latest: true);
     $flags = ['KE' => 'linear-gradient(#0A0A0C 0 30%,#fff 30% 35%,#B00 35% 65%,#fff 65% 70%,#076B32 70%)', 'UG' => 'linear-gradient(#0A0A0C 0 17%,#FCDC04 17% 33%,#D90000 33% 50%,#0A0A0C 50% 67%,#FCDC04 67% 83%,#D90000 83%)',
               'TZ' => 'linear-gradient(135deg,#1EB53A 0 40%,#FCD116 40% 44%,#0A0A0C 44% 56%,#FCD116 56% 60%,#00A3DD 60%)', 'RW' => 'linear-gradient(#20603D 0 50%,#FAD201 50% 75%,#00A1DE 75%)'];
 @endphp
