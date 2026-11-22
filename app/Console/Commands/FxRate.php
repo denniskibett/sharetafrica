@@ -42,7 +42,8 @@ class FxRate extends Command
                 $rows[] = [$pair, '—', '—', '—', $e->reason];
             }
         }
-        $this->info('Customers buy at the reference + '.($rates->markupBps('buy') / 100).'% and sell at the reference − '.($rates->markupBps('sell') / 100).'%.');
+        $this->info('Dollars: customers buy at the reference + KES '.$rates->fixedKes('USD', 'buy').' and sell at the reference − KES '.$rates->fixedKes('USD', 'sell')
+            .'. Other currencies: + '.($rates->markupBps('buy') / 100).'% / − '.($rates->markupBps('sell') / 100).'%.');
         $this->table(['Pair', 'Reference today', 'Customer buys 1 at (KES)', 'Customer sells 1 for (KES)', 'Source'], $rows);
 
         return self::SUCCESS;
