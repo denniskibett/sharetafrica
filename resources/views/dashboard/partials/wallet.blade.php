@@ -2,7 +2,7 @@
      with a rounded bottom; wider screens show it as an ink card in its half of the row.
      Inside the ink: "Available balance" with an eye that hides the figure (and masks the number), the balance
      (counts up when it changes), then the M-PESA number (it is the Sharet wallet number) and @name as two pills
-     that copy on tap. Below it, on white: Add, Send, Request, Withdraw as outline circles. Needs Alpine `wallet`. --}}
+     that copy on tap. Below it: Add, Send, Request, Withdraw as coloured square tiles, as in the app (in green, send blue, pay violet, out orange). Needs Alpine `wallet`. --}}
 @php
     try {
         $mpesa = $user->phone ? preg_replace('/^254(\d{3})(\d{3})(\d{3})$/', '0$1 $2 $3', \App\Ramp\Destination::phone((string) $user->phone)) : null;
@@ -11,10 +11,10 @@
     }
     $hiddenPhone = $mpesa ? substr($mpesa, 0, 4).' ••• '.substr($mpesa, -3) : null;
     $actions = [
-        ['Add', 'plus', "{ mode: 'receive', from: 'mpesa' }"],
-        ['Send', 'arrow-up-right', "{ mode: 'send' }"],
-        ['Request', 'arrow-down-left', "{ mode: 'receive', from: 'sharet' }"],
-        ['Withdraw', 'arrow-down-tray', "{ mode: 'withdraw' }"],
+        ['Add', 'plus', "{ mode: 'receive', from: 'mpesa' }", 'in'],
+        ['Send', 'arrow-up-right', "{ mode: 'send' }", 'send'],
+        ['Request', 'arrow-down-left', "{ mode: 'receive', from: 'sharet' }", 'pay'],
+        ['Withdraw', 'arrow-down-tray', "{ mode: 'withdraw' }", 'out'],
     ];
     $pill = 'inline-flex items-center gap-2 rounded-full bg-white/[0.08] px-3 py-1.5 text-[13px] text-white/80 transition hover:bg-white/[0.14]';
     // Your own account number on Sharet's paybill (Cloud9 underneath, never named): shown once it exists; made in Add money
@@ -24,7 +24,7 @@
 <div class="flex flex-col gap-5"
      x-data="{ hidden: $persist(false).as('walletHidden'), shown: wallet, copy(text, what) { navigator.clipboard?.writeText(text); sharet.toast(what + ' copied') } }"
      x-init="sharet.count(wallet, v => shown = v); $watch('wallet', w => sharet.count(w, v => shown = v))">
-  <section class="-mx-4 -mt-5 flex flex-col gap-5 rounded-b-[28px] bg-[#0A0A0C] px-4 pb-6 pt-3 text-[#F4F4F0] md:mx-0 md:mt-0 md:min-h-[230px] md:rounded-[24px] md:p-6">
+  <section class="flex flex-col gap-5 rounded-[20px] bg-[#0A0A0C] p-5 text-[#F4F4F0] md:min-h-[230px] md:p-6">
     <div>
       <p class="flex items-center gap-2 text-[13px] text-white/60">
         Available balance
@@ -33,7 +33,7 @@
         </button>
         @if (config('rails.default') === 'simulator')<span class="rounded-full bg-orange-400/15 px-2 py-0.5 text-[11px] font-semibold text-orange-300">Test mode</span>@endif
       </p>
-      <p class="rv-balance mt-1 text-[40px] text-white md:text-[46px]" x-text="hidden ? '••••••' : 'KES ' + shown">KES {{ $wallet }}</p>
+      <p class="rv-balance mt-1 text-[38px] text-[#D4FF3D] md:text-[46px]" x-text="hidden ? '••••••' : 'KES ' + shown">KES {{ $wallet }}</p>
     </div>
     <div class="flex flex-wrap gap-2">
       @if ($mpesa)
@@ -57,9 +57,9 @@
   </section>
 
   <div class="grid grid-cols-4 gap-2 md:px-2">
-    @foreach ($actions as [$label, $icon, $payload])
-      <button type="button" @click="sharet.panel('money', {{ $payload }})" class="flex flex-col items-center gap-2 text-[13px] font-medium text-app-ink">
-        <span class="flex h-[52px] w-[52px] items-center justify-center rounded-full border border-app-ink/15 transition hover:border-app-ink/40 hover:bg-app-tile"><x-dynamic-component :component="'heroicon-o-'.$icon" class="h-5 w-5" /></span>
+    @foreach ($actions as [$label, $icon, $payload, $tone])
+      <button type="button" @click="sharet.panel('money', {{ $payload }})" class="sh-act flex flex-col items-center gap-2 text-[13px] font-medium text-app-ink">
+        <span class="sh-tone-{{ $tone }} flex h-[52px] w-[52px] items-center justify-center rounded-[14px] transition"><x-dynamic-component :component="'heroicon-o-'.$icon" class="h-[22px] w-[22px]" /></span>
         {{ $label }}
       </button>
     @endforeach
