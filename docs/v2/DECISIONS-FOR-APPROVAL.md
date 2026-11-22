@@ -49,6 +49,24 @@ The integration contract is `docs/v2/INTEGRATION.md`; the public explainer is th
 | ✓ | **Money in Cloud9 can't take goes to Sharet's own M-PESA paybill** (you decided, 21 Nov): an M-PESA prompt Cloud9 refuses before accepting is sent from the paybill instead. Not card top-ups (M-PESA has no card); never after a timeout. | Built | `config/rails.php` `collect_fallback` |
 | ☐ | **Two people to switch a rail**, and fallback only when a rail refuses before accepting (never after a timeout). | Built | System › Payment rails |
 
+## 0d. AML screening (you asked, 22 Nov: "before anything hits Cloud9")
+
+Every payment is screened when it is confirmed, before any money moves (an M-PESA prompt, a payout through Cloud9 or the paybill, a Sharet-to-Sharet transfer). A rule either **holds** it for a person (Compliance › AML checks: approve → it carries on; stop → nothing moved; never your own payment; fresh password; logged) or **blocks** it. Figures in `config/aml.php`; please set them.
+
+| ✓ | Rule | Starting figure | Result |
+|---|---|---|---|
+| ☐ | Watch list: a phone, paybill, till, account or Sharet ID staff listed | | Block |
+| ☐ | Payments in an hour (any kind) | more than 10 | Hold |
+| ☐ | Money out in an hour | more than KES 150,000 | Hold |
+| ☐ | Structuring: payments at 90%+ of the per-payment limit | the 3rd in 24 hours | Hold |
+| ☐ | First payment to someone new | KES 20,000+ | Hold |
+| ☐ | Account under 24 hours old paying | KES 10,000+ | Hold |
+| ☐ | Money in and straight out: KES 10,000+ in during the hour, 90% of it out to 3+ people | | Hold |
+| ☐ | 10+ different people paid the wallet in a day, then money out (mule) | | Hold |
+| ☐ | Politically exposed person paying | KES 50,000+ | Hold |
+
+Not screened: paying a verified business or a business's API request skips the new-payee and new-account rules; a verified business's own wallet (payroll, settlements, API payouts) is checked against the watch list only (its limits and two-person approvals apply). Money coming in by account number or card can't be refused when it arrives: it is credited, and anything odd shows on the next payment out.
+
 ## 1. Money rules
 
 | ✓ | Decision | Now | To change |

@@ -85,7 +85,7 @@ final class Payments
     {
         return match ($o->status) {
             'paid' => 'paid',
-            'failed', 'expired', 'cancelled' => 'failed',
+            'failed', 'expired', 'cancelled', 'rejected' => 'failed',
             'refunded' => 'refunded',
             default => 'paying',
         };

@@ -145,6 +145,11 @@ final class PaymentRequests
             $locked = ApiPaymentRequest::whereKey($r->id)->lockForUpdate()->first();
             $this->assertPayable($locked, 'sharet');
             $order = $this->orders->transfer($payer, Handle::for($r->payee), PaymentInput::amount($r->amount), $r->reference ?: 'Payment request', self::refFor($r));
+            if ($order->status !== 'paid') {
+                $locked->update(['ramp_order_id' => $order->id]);   // held by an AML check: paid when Compliance releases it
+
+                return $locked->fresh();
+            }
 
             return $this->markPaid($locked, 'sharet', $order);
         });
@@ -261,7 +266,7 @@ final class PaymentRequests
         }
         $r = ApiPaymentRequest::where('ramp_order_id', $order->id)->first();
         if ($r && $r->status === 'open' && $order->status === 'paid') {
-            $this->markPaid($r, 'mpesa', $order);
+            $this->markPaid($r, $order->destination_type === 'sharet' ? 'sharet' : 'mpesa', $order);
         }
     }
 

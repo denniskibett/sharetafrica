@@ -113,6 +113,7 @@ class DashboardNav
                     ['label' => 'API keys', 'route' => 'api-keys.index', 'icon' => 'key', 'tone' => 'orange', 'can' => 'developer.api_keys'],
                     ['label' => 'Roles & permissions', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'tone' => 'emerald', 'can' => 'admin.roles'],
                     ['label' => 'Scheduled jobs', 'route' => 'admin.scheduler.index', 'icon' => 'clock', 'tone' => 'sky', 'can' => 'admin.system'],
+                    ['label' => 'AML checks', 'route' => 'admin.aml.index', 'icon' => 'shield-exclamation', 'tone' => 'rose', 'can' => 'compliance.view'],
                     ['label' => 'Payment rails', 'route' => 'admin.rails.index', 'icon' => 'arrows-right-left', 'tone' => 'sky', 'can' => 'admin.system',
                         'active' => ['admin.rails.*']],
                     ['label' => 'Pricing', 'route' => 'admin.pricing.index', 'icon' => 'calculator', 'tone' => 'emerald', 'can' => 'admin.system'],
