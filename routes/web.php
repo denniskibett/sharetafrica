@@ -107,6 +107,7 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard shell + its JSON (stat cards, charts, recent activity)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/feedback', \App\Http\Controllers\FeedbackController::class)->middleware('throttle:10,1,feedback')->name('feedback'); // "How was that?" after the first payment
     Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
     Route::get('/dashboard/chart/{name}', [DashboardController::class, 'chart'])->name('dashboard.chart')->where('name', '[a-z]+');
     Route::get('/dashboard/activity', [DashboardController::class, 'activity'])->name('dashboard.activity');

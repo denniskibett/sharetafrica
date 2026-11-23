@@ -35,6 +35,10 @@
     </a>
   @endunless
 
+  @if (\App\Support\Funnel::askFeedback(auth()->user()))
+    @include('dashboard.partials.feedback')
+  @endif
+
   @include('pay.partials.chart')
 
   <section class="order-2 rounded-2xl border border-app-line bg-app-panel p-5">

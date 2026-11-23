@@ -28,6 +28,7 @@ class User extends Authenticatable implements Wallet, Customer
         static::creating(fn (User $user) => $user->sharet_id ??= \App\Support\SharetId::generate());
         // Claim on join: their M-PESA number is now verified, so earlier pay-page payments from it join their history
         static::saved(function (User $user) {
+            \App\Support\Funnel::fromUser($user); // onboarding funnel: first time at each step
             if ($user->wasChanged('kyc_level') || ($user->wasRecentlyCreated && $user->kyc_level && $user->kyc_level !== 'none')) {
                 \App\Api\PaymentRequests::claimFor($user);
             }

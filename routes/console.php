@@ -103,3 +103,36 @@ foreach (['09:30', '12:00', '15:00'] as $at) {
     $this->info($n.' tills closed.');
 })->purpose('Close merchant tills at each shop\'s end of day and settle if switched on');
 \Illuminate\Support\Facades\Schedule::command('merchant:close-day')->everyFiveMinutes()->withoutOverlapping();
+
+// Onboarding funnel from older records (accounts made before funnel_events existed). Safe to run again: each person
+// and step is kept once, and live events are never replaced. Times are approximate (marked backfilled).
+Artisan::command('funnel:backfill', function () {
+    $rows = [];
+    $add = function ($userId, $step, $at) use (&$rows) {
+        if ($userId && $at) {
+            $rows[] = ['user_id' => $userId, 'step' => $step, 'channel' => null, 'backfilled' => true, 'created_at' => $at];
+        }
+    };
+    \Illuminate\Support\Facades\DB::table('users')->whereNull('deleted_at')
+        ->select('id', 'created_at', 'updated_at', 'email_verified_at', 'transaction_pin', 'kyc', 'kyc_level', 'kyc_submitted_at')
+        ->orderBy('id')->chunk(500, function ($users) use ($add) {
+            foreach ($users as $u) {
+                $add($u->id, 'signed_up', $u->created_at);
+                $add($u->id, 'email_verified', $u->email_verified_at);
+                $u->transaction_pin && $add($u->id, 'pin_set', $u->updated_at);
+                $u->kyc && $add($u->id, 'id_submitted', $u->kyc_submitted_at ?? $u->updated_at);
+                in_array($u->kyc_level, ['basic', 'standard'], true) && $add($u->id, 'verified', $u->kyc_submitted_at ?? $u->updated_at);
+            }
+        });
+    \Illuminate\Support\Facades\DB::table('device_tokens')->selectRaw('user_id, min(created_at) as at')->groupBy('user_id')->get()
+        ->each(fn ($r) => $add($r->user_id, 'app_signed_in', $r->at));
+    \Illuminate\Support\Facades\DB::table('ramp_orders')->where('status', 'paid')->whereNotNull('user_id')
+        ->selectRaw("user_id, case when destination_type = 'wallet' then 'first_money_in' else 'first_money_out' end as step, min(updated_at) as at")
+        ->groupBy('user_id', 'step')->get()->each(fn ($r) => $add($r->user_id, $r->step, $r->at));
+
+    $before = \Illuminate\Support\Facades\DB::table('funnel_events')->count();
+    foreach (array_chunk($rows, 500) as $chunk) {
+        \Illuminate\Support\Facades\DB::table('funnel_events')->insertOrIgnore($chunk);
+    }
+    $this->info('Funnel: '.(\Illuminate\Support\Facades\DB::table('funnel_events')->count() - $before).' steps added from older records.');
+})->purpose('Fill the onboarding funnel from existing accounts, app sign-ins and payments');

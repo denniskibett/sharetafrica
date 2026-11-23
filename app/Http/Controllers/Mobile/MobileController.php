@@ -94,6 +94,7 @@ class MobileController extends Controller
             'phone_lock' => $request->boolean('phone_lock') && TransactionPin::isSet($user),
         ]);
         Footprint::record($user, $request, 'mobile_sign_in');
+        \App\Support\Funnel::hit($user, 'app_signed_in', 'app');
 
         return response()->json(['token' => $token, 'user' => $this->person($user)], 201);
     }
@@ -132,6 +133,7 @@ class MobileController extends Controller
             'quick_pay_limit' => ($q = \App\Support\QuickPay::limit($request)) ? Money::format($q) : null,
             'phone_lock' => \App\Support\QuickPay::phoneLock($request),
             'frozen' => (bool) $user->frozen_at,
+            'ask_feedback' => \App\Support\Funnel::askFeedback($user), // show "How was that?" once, after the first payment out
             'unfreeze' => \App\Support\Freeze::state($user),   // null, or pending / rejected with words for the person
             'account_number' => ($a = \App\Support\AccountNumber::for($user, create: false)) ? $a + ['formatted' => \App\Support\AccountNumber::format($a['account'])] : null,
             'add_ways' => array_values(array_filter(['mpesa', filled(\App\Services\Integrations::credentials('cloud9')['api_key'] ?? null) ? 'account' : null,

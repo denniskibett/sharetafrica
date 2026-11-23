@@ -50,6 +50,7 @@ class RampOrder extends Model
             if (! $o->wasRecentlyCreated && ! $o->wasChanged('status')) {
                 return;
             }
+            \App\Support\Funnel::fromOrder($o); // first money in / out, for the onboarding funnel
             \Illuminate\Support\Facades\DB::afterCommit(function () use ($o) {
                 $fresh = $o->fresh();
                 \App\Support\CustomerMessages::order($fresh);

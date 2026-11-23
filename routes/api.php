@@ -110,6 +110,7 @@ Route::prefix('mobile/v1')->name('api.money.mobile.')->controller(\App\Http\Cont
 | changes move nothing; approving a batch and paying an invoice are money routes (Idempotency-Key, ledger freeze).
 */
 Route::prefix('mobile/v1')->name('api.mobile.')->middleware([\App\Http\Middleware\AuthenticateDevice::class, 'throttle:120,1,mobile-device'])->group(function () {
+    Route::post('feedback', \App\Http\Controllers\FeedbackController::class)->middleware('throttle:10,1,feedback')->name('feedback'); // "How was that?" after the first payment
     Route::controller(\App\Http\Controllers\Mobile\BusinessController::class)->prefix('business')->name('business.')->group(function () {
         Route::get('/', 'home')->name('home');
         Route::get('batches', 'batches')->name('batches');
