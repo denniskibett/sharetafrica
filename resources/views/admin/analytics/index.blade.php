@@ -51,6 +51,66 @@
   @endforeach
 </div>
 
+{{-- Onboarding funnel (App\Support\Funnel): people who signed up in this range, website and app together, staff left out --}}
+<div class="mb-6 grid gap-6 xl:grid-cols-3">
+  <section class="{{ $card }} xl:col-span-2" aria-labelledby="funnel-h">
+    <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+      <div>
+        <h2 id="funnel-h" class="font-semibold text-gray-900 dark:text-white">Sign-up to first payment</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ number_format($funnel['signups']) }} people signed up in this range. Each bar: how many reached that step.</p>
+      </div>
+      @if ($funnel['biggest_drop'])
+        <span class="sh-pill rounded-full bg-amber-100 px-3 py-1 text-[11px] uppercase text-amber-800">Biggest drop: {{ $funnel['biggest_drop']['label'] }} · {{ $funnel['biggest_drop']['of_previous'] }}% carry on</span>
+      @endif
+    </div>
+    @if ($funnel['signups'])
+      <ol class="flex flex-col gap-3">
+        @foreach ($funnel['steps'] as $s)
+          <li class="grid grid-cols-[minmax(0,9rem)_1fr_auto] items-center gap-3 text-sm sm:grid-cols-[11rem_1fr_13rem]">
+            <span class="min-w-0"><span class="block truncate font-medium text-gray-900 dark:text-white">{{ $s['label'] }}</span><span class="block truncate text-xs text-gray-500 dark:text-gray-400">{{ $s['hint'] }}</span></span>
+            <span class="relative h-8 overflow-hidden rounded-lg bg-gray-100 dark:bg-white/5" role="img" aria-label="{{ $s['of_signups'] }}% of sign-ups">
+              <span class="absolute inset-y-0 left-0 rounded-lg {{ $s['step'] === 'app_signed_in' ? 'bg-[#2F6BFF]/70' : 'bg-[#D4FF3D]' }}" style="width: {{ max($s['of_signups'], $s['people'] ? 2 : 0) }}%"></span>
+              <span class="tabular-nums absolute inset-y-0 left-3 flex items-center text-[13px] text-[#0A0A0C]">{{ number_format($s['people']) }}</span>
+            </span>
+            <span class="tabular-nums text-right text-xs text-gray-500 dark:text-gray-400">
+              {{ $s['of_signups'] }}% of sign-ups
+              @if ($s['step'] !== 'signed_up')<span class="block">{{ $s['of_previous'] }}% of the step before{{ $s['median'] ? ' · '.$s['median'] : '' }}</span>@endif
+            </span>
+          </li>
+        @endforeach
+      </ol>
+      <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">Times are the median from sign-up. "Used the app" is a side step (blue) and is not counted in the step-before figures. Accounts from before 23 Nov 2026 were filled in from their records, so their times are left out.</p>
+    @else
+      <p class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">No sign-ups in this range yet.</p>
+    @endif
+  </section>
+
+  <section class="{{ $card }}" aria-labelledby="rating-h">
+    <h2 id="rating-h" class="font-semibold text-gray-900 dark:text-white">How was the first payment?</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400">Asked once, after a person's first payment out (1 hard, 5 easy).</p>
+    @if ($ratings['scored'])
+      <p class="mt-4 flex items-baseline gap-2"><span class="stat-num">{{ $ratings['average'] }}</span><span class="text-sm text-gray-500">/ 5 from {{ $ratings['scored'] }} {{ \Illuminate\Support\Str::plural('person', $ratings['scored']) }}</span></p>
+      <div class="mt-3 flex flex-col gap-1.5">
+        @foreach (array_reverse($ratings['spread'], true) as $n => $count)
+          <div class="flex items-center gap-2 text-xs"><span class="tabular-nums w-3">{{ $n }}</span>
+            <span class="h-2 flex-1 overflow-hidden rounded-full bg-gray-100 dark:bg-white/5"><span class="block h-full rounded-full bg-[#0A0A0C] dark:bg-white" style="width: {{ $ratings['scored'] ? round($count / $ratings['scored'] * 100) : 0 }}%"></span></span>
+            <span class="tabular-nums w-6 text-right text-gray-500">{{ $count }}</span></div>
+        @endforeach
+      </div>
+    @else
+      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">No ratings yet{{ $ratings['answers'] ? ' ('.$ratings['answers'].' said "Not now")' : '' }}.</p>
+    @endif
+    @if ($ratings['notes']->isNotEmpty())
+      <h3 class="mb-2 mt-5 text-sm font-semibold text-gray-900 dark:text-white">What people wrote</h3>
+      <ul class="flex flex-col gap-2 text-sm">
+        @foreach ($ratings['notes'] as $note)
+          <li class="rounded-xl bg-gray-50 p-3 dark:bg-white/5"><span class="sh-pill text-[11px] text-gray-500">{{ $note->score ? $note->score.'/5' : 'No score' }} · {{ \Illuminate\Support\Carbon::parse($note->updated_at)->format('j M') }}{{ $note->channel ? ' · '.$note->channel : '' }}</span><span class="mt-1 block text-gray-800 dark:text-gray-200">{{ $note->comment }}</span></li>
+        @endforeach
+      </ul>
+    @endif
+  </section>
+</div>
+
 <x-ui.chart class="mb-6" :url="route('admin.analytics.series')" title="Views per day" subtitle="Page views and visitors on sharet.africa"
             :ranges="[7 => '7 days', 30 => '30 days', 90 => '90 days', 365 => '12 months']" :days="$days" :height="320" />
 

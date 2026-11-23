@@ -58,6 +58,8 @@ class AnalyticsController extends Controller
             'clicks' => DB::table('page_clicks')->where('created_at', '>=', $from)->whereNotNull('target')->where('target', '!=', '')
                 ->selectRaw('target, path, count(*) as clicks')->groupBy('target', 'path')->orderByDesc('clicks')->limit(10)->get(),
             'duration' => fn ($ms) => $ms ? $this->duration((int) $ms) : '—',
+            'funnel' => \App\Support\Funnel::report($days),        // sign-up to first payment, website and app
+            'ratings' => \App\Support\Funnel::ratings($days),       // "How was that?" after the first payment
         ]);
     }
 
